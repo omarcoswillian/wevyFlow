@@ -1,65 +1,247 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+import { useState, useCallback } from "react";
+import { Platform } from "./lib/types";
+import { useHistory } from "./lib/history";
+import { useProjects, Project, ProjectPage } from "./lib/projects";
+import { HomeView, GenerateData } from "./components/HomeView";
+import { WorkspaceView } from "./components/WorkspaceView";
+import { ResourcesPage } from "./components/pages/ResourcesPage";
+import { ProjectsPage } from "./components/pages/ProjectsPage";
+import { ProjectDetailPage } from "./components/pages/ProjectDetailPage";
+
+// Views the app can show
+type AppView = "home" | "resources" | "projects-all" | "projects-starred" | "projects-mine" | "projects-shared" | "project-detail" | "workspace";
+
+export default function App() {
+  const [view, setView] = useState<AppView>("home");
+  const [generatedCode, setGeneratedCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRefining, setIsRefining] = useState(false);
+  const [error, setError] = useState("");
+  const [currentPlatform, setCurrentPlatform] = useState<Platform>("html");
+  const [currentPrompt, setCurrentPrompt] = useState("");
+  const [activeProject, setActiveProject] = useState<Project | null>(null);
+  const [activePageId, setActivePageId] = useState<string | null>(null);
+
+  const { addEntry } = useHistory();
+  const {
+    projects, createProject, addPageToProject, updatePageCode,
+    toggleStar, deleteProject, deletePageFromProject,
+  } = useProjects();
+
+  const streamFromAPI = useCallback(
+    async (url: string, body: object): Promise<string> => {
+      setError("");
+      setGeneratedCode("");
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(120000),
+      });
+      if (!res.ok) {
+        let msg = "Erro ao processar";
+        try { const data = await res.json(); msg = data.error || msg; } catch {}
+        throw new Error(msg);
+      }
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error("Streaming não suportado");
+      const decoder = new TextDecoder();
+      let fullCode = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        fullCode += decoder.decode(value, { stream: true });
+        setGeneratedCode(fullCode);
+      }
+      return fullCode;
+    },
+    []
+  );
+
+  const handleGenerate = useCallback(
+    async (data: GenerateData) => {
+      if (isLoading) return;
+      setIsLoading(true);
+      setCurrentPlatform(data.platform);
+      setCurrentPrompt(data.prompt);
+      setView("workspace");
+
+      try {
+        const code = await streamFromAPI("/api/generate", data);
+        if (code) {
+          addEntry({ id: crypto.randomUUID(), prompt: data.prompt, platform: data.platform, code, createdAt: Date.now() });
+          // If there's an active project, add page
+          if (activeProject) {
+            addPageToProject(activeProject.id, { name: data.prompt.slice(0, 50), code, platform: data.platform });
+          }
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Erro desconhecido");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isLoading, streamFromAPI, addEntry, activeProject, addPageToProject]
+  );
+
+  const handleRefine = useCallback(
+    async (refinementRequest: string, images?: { name: string; base64: string }[]) => {
+      if (!generatedCode || isRefining) return;
+      setIsRefining(true);
+      try {
+        const code = await streamFromAPI("/api/refine", {
+          originalCode: generatedCode, refinementRequest, platform: currentPlatform, images: images || [],
+        });
+        if (code) {
+          addEntry({ id: crypto.randomUUID(), prompt: `Refinamento: ${refinementRequest}`, platform: currentPlatform, code, createdAt: Date.now() });
+          if (activeProject && activePageId) {
+            updatePageCode(activeProject.id, activePageId, code);
+          }
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Erro desconhecido");
+      } finally {
+        setIsRefining(false);
+      }
+    },
+    [generatedCode, isRefining, currentPlatform, streamFromAPI, addEntry, activeProject, activePageId, updatePageCode]
+  );
+
+  const handleBack = useCallback(() => {
+    setView("home");
+    setGeneratedCode("");
+    setError("");
+    setActivePageId(null);
+  }, []);
+
+  // Navigation handler — passed to sidebar in HomeView
+  const handleNavigate = useCallback((target: AppView) => {
+    setView(target);
+    if (target === "home") {
+      setGeneratedCode("");
+      setError("");
+    }
+  }, []);
+
+  // Open a project detail
+  const handleOpenProject = useCallback((project: Project) => {
+    setActiveProject(project);
+    setView("project-detail");
+  }, []);
+
+  // Open a page from a project in the workspace
+  const handleOpenPage = useCallback((page: ProjectPage) => {
+    setGeneratedCode(page.code);
+    setCurrentPlatform(page.platform);
+    setCurrentPrompt(page.name);
+    setActivePageId(page.id);
+    setView("workspace");
+  }, []);
+
+  // Create new project (modal could be added later, for now use prompt)
+  const handleCreateProject = useCallback(() => {
+    const name = window.prompt("Nome do projeto:");
+    if (!name) return;
+    const client = window.prompt("Nome do cliente:") || "Sem cliente";
+    const project = createProject(name, client);
+    setActiveProject(project);
+    setView("project-detail");
+  }, [createProject]);
+
+  // Create new page inside project → go to home to build
+  const handleCreatePage = useCallback(() => {
+    setView("home");
+  }, []);
+
+  // Template selected from resources
+  const handleTemplateFromResources = useCallback(async (prompt: string) => {
+    // Check if it's a ready-made template (starts with "ready-")
+    if (prompt.startsWith("READY:")) {
+      const templateId = prompt.replace("READY:", "");
+      setCurrentPrompt("Template: " + templateId);
+      setCurrentPlatform("html");
+      setView("workspace");
+      setIsLoading(true);
+      try {
+        const res = await fetch(`/api/template?id=${templateId}`);
+        if (!res.ok) throw new Error("Template nao encontrado");
+        const html = await res.text();
+        setGeneratedCode(html);
+        addEntry({ id: crypto.randomUUID(), prompt: "Template: " + templateId, platform: "html", code: html, createdAt: Date.now() });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Erro");
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    // Normal AI generation
+    handleGenerate({
+      prompt,
+      platform: "html",
+      referenceUrl: "",
+      brandReference: "",
+      expectations: "",
+      primaryColor: "#a78bfa",
+      secondaryColor: "#6366f1",
+      fontChoice: "sora",
+      stylePreset: "dark-premium",
+      images: [],
+    });
+  }, [handleGenerate, addEntry]);
+
+  // Determine which content to render
+  const renderMainContent = () => {
+    switch (view) {
+      case "resources":
+        return <ResourcesPage onSelectTemplate={handleTemplateFromResources} />;
+      case "projects-all":
+        return <ProjectsPage projects={projects} filter="all" onOpenProject={handleOpenProject} onCreateProject={handleCreateProject} onToggleStar={toggleStar} onDeleteProject={deleteProject} />;
+      case "projects-starred":
+        return <ProjectsPage projects={projects} filter="starred" onOpenProject={handleOpenProject} onCreateProject={handleCreateProject} onToggleStar={toggleStar} onDeleteProject={deleteProject} />;
+      case "projects-mine":
+        return <ProjectsPage projects={projects} filter="mine" onOpenProject={handleOpenProject} onCreateProject={handleCreateProject} onToggleStar={toggleStar} onDeleteProject={deleteProject} />;
+      case "projects-shared":
+        return <ProjectsPage projects={projects} filter="shared" onOpenProject={handleOpenProject} onCreateProject={handleCreateProject} onToggleStar={toggleStar} onDeleteProject={deleteProject} />;
+      case "project-detail":
+        if (!activeProject) return null;
+        // Re-fetch project from state to get latest
+        const proj = projects.find((p) => p.id === activeProject.id) || activeProject;
+        return <ProjectDetailPage project={proj} onBack={() => setView("projects-all")} onOpenPage={handleOpenPage} onCreatePage={handleCreatePage} onDeletePage={(pageId) => deletePageFromProject(proj.id, pageId)} />;
+      default:
+        return null;
+    }
+  };
+
+  // Workspace view
+  if (view === "workspace") {
+    return (
+      <div className="h-screen overflow-hidden">
+        <WorkspaceView
+          code={generatedCode} isLoading={isLoading} isRefining={isRefining}
+          platform={currentPlatform} prompt={currentPrompt} error={error}
+          onRefine={handleRefine} onBack={handleBack}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </div>
+    );
+  }
+
+  // Home view (with sidebar) or content pages
+  if (view === "home") {
+    return (
+      <div className="h-screen overflow-hidden">
+        <HomeView onGenerate={handleGenerate} isLoading={isLoading} onNavigate={handleNavigate} />
+      </div>
+    );
+  }
+
+  // Content pages with sidebar-like layout
+  return (
+    <div className="h-screen overflow-hidden">
+      <HomeView onGenerate={handleGenerate} isLoading={isLoading} onNavigate={handleNavigate} contentOverride={renderMainContent()} activeNav={view} />
     </div>
   );
 }

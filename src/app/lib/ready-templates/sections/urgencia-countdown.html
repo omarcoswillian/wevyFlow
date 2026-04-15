@@ -1,0 +1,24 @@
+<style>
+.urgency{background:linear-gradient(90deg,#E04E00,#FF5C00,#E04E00);padding:12px 20px;text-align:center;position:relative;overflow:hidden}
+.urgency::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);animation:shine 3s ease-in-out infinite}
+@keyframes shine{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.urgency-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap}
+.urgency-text{color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em}
+.cd{display:flex;gap:6px}
+.cd-item{background:rgba(0,0,0,0.25);backdrop-filter:blur(8px);border-radius:8px;padding:6px 12px;min-width:48px;text-align:center;border:1px solid rgba(255,255,255,0.1)}
+.cd-num{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:700;color:#fff;line-height:1.2}
+.cd-label{font-size:8px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.12em;margin-top:2px}
+@media(max-width:768px){.urgency-text{font-size:11px}.cd-num{font-size:14px}.cd-item{padding:4px 8px;min-width:40px}}
+</style>
+
+<div class="urgency">
+  <div class="urgency-inner">
+    <span class="urgency-text">[INSERIR: texto urgencia] abre em:</span>
+    <div class="cd">
+      <div class="cd-item"><div class="cd-num">02</div><div class="cd-label">Dias</div></div>
+      <div class="cd-item"><div class="cd-num">14</div><div class="cd-label">Hrs</div></div>
+      <div class="cd-item"><div class="cd-num">42</div><div class="cd-label">Min</div></div>
+      <div class="cd-item"><div class="cd-num">08</div><div class="cd-label">Seg</div></div>
+    </div>
+  </div>
+</div>

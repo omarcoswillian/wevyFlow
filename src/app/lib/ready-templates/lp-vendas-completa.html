@@ -1,0 +1,854 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --color-primary: #FF5C00;
+  --color-secondary: #E04E00;
+  --bg-primary: #07070a;
+  --bg-surface: rgba(255,255,255,0.03);
+  --text-primary: rgba(255,255,255,0.93);
+  --text-secondary: rgba(255,255,255,0.55);
+  --border: rgba(255,255,255,0.06);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+.font-heading {
+  font-family: 'Sora', sans-serif;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 0 80px;
+  }
+}
+
+.section {
+  padding: 56px 0;
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding: 80px 0;
+  }
+}
+
+.btn {
+  display: inline-block;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  color: white;
+  padding: 16px 36px;
+  border-radius: 6px;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .btn-primary {
+    width: auto;
+  }
+}
+
+.btn-primary:hover {
+  box-shadow: 0 0 32px rgba(255,92,0,0.4);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-primary);
+  padding: 14px 24px;
+  border-radius: 6px;
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: rgba(255,92,0,0.3);
+  transform: translateY(-2px);
+}
+
+.badge {
+  background: rgba(255,92,0,0.12);
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,92,0,0.2);
+  display: inline-block;
+}
+
+.glow {
+  position: relative;
+}
+
+.glow::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(255,92,0,0.15) 0%, transparent 70%);
+  filter: blur(100px);
+  transform: translate(-50%, -50%);
+  z-index: -1;
+}
+
+.grid-2 {
+  display: grid;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.grid-3 {
+  display: grid;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mb-12 {
+  margin-bottom: 48px;
+}
+
+.mb-6 {
+  margin-bottom: 24px;
+}
+
+.mb-4 {
+  margin-bottom: 16px;
+}
+
+.mb-2 {
+  margin-bottom: 8px;
+}
+
+.mt-4 {
+  margin-top: 16px;
+}
+
+.mt-8 {
+  margin-top: 32px;
+}
+
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.gap-4 {
+  gap: 16px;
+}
+
+.gap-2 {
+  gap: 8px;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.max-w-4xl {
+  max-width: 896px;
+}
+
+.max-w-2xl {
+  max-width: 672px;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.text-4xl {
+  font-size: 2.25rem;
+}
+
+@media (min-width: 768px) {
+  .text-4xl {
+    font-size: 3rem;
+  }
+}
+
+.text-2xl {
+  font-size: 1.75rem;
+}
+
+@media (min-width: 768px) {
+  .text-2xl {
+    font-size: 2.25rem;
+  }
+}
+
+.text-xl {
+  font-size: 1.25rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.leading-tight {
+  line-height: 1.1;
+}
+
+.opacity-70 {
+  opacity: 0.7;
+}
+
+.section-alt {
+  background: #161616;
+}
+
+.testimonial-highlight {
+  border: 2px solid var(--color-primary);
+  background: rgba(255,92,0,0.05);
+}
+
+.price-highlight {
+  color: var(--color-primary);
+}
+
+.accordion {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.accordion-header {
+  padding: 20px 28px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.accordion-header:hover {
+  background: rgba(255,255,255,0.02);
+}
+
+.accordion-content {
+  padding: 0 28px 20px 28px;
+  color: var(--text-secondary);
+  display: none;
+}
+
+.accordion-content.active {
+  display: block;
+}
+
+.social-proof {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.guarantee-badge {
+  background: linear-gradient(135deg, #22C55E, #16A34A);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: inline-block;
+}
+
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 40px 0;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.footer a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 767px) {
+  .hero-grid {
+    text-align: center;
+  }
+  
+  .hero-image {
+    margin-top: 40px;
+    order: -1;
+  }
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 24px;
+  margin: 0 auto 16px;
+}
+
+.expert-section {
+  background: var(--bg-surface);
+  border-radius: 12px;
+  padding: 40px;
+  margin: 40px 0;
+}
+
+.numbers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 32px;
+  text-align: center;
+  margin: 40px 0;
+}
+
+.number-item {
+  color: var(--color-primary);
+  font-family: 'Sora', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.number-label {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-top: 4px;
+}
+</style>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Método SPE - Venda Todos os Dias Pelo Instagram Stories | Luana Carolina</title>
+    <meta name="description" content="Aprenda a vender todos os dias usando Instagram Stories sem tráfego pago. Método comprovado para infoprodutores e prestadores de serviço.">
+    <meta property="og:title" content="Método SPE - Venda Todos os Dias Pelo Instagram Stories">
+    <meta property="og:description" content="Transforme seus Stories em uma máquina de vendas automática. Método comprovado da Luana Carolina.">
+    <meta property="og:image" content="/og-image.jpg">
+</head>
+<body>
+    <!-- HERO -->
+    <section class="section glow">
+        <div class="container">
+            <div class="hero-grid grid-2" style="align-items: center;">
+                <div>
+                    <div class="badge mb-6">Método Exclusivo</div>
+                    <h1 class="font-heading text-4xl font-bold leading-tight mb-6">
+                        Venda <span style="color: var(--color-primary);">Todos os Dias</span> Usando Instagram Stories
+                    </h1>
+                    <p class="text-lg opacity-70 mb-6">
+                        Transforme seus Stories em uma máquina de vendas automática e fature sem depender de tráfego pago. Método comprovado da Luana Carolina.
+                    </p>
+                    <div class="flex flex-col gap-4 mb-6">
+                        <a href="#oferta" class="btn btn-primary">QUERO VENDER PELO STORIES</a>
+                        <a href="#metodo" class="btn btn-secondary">Ver Como Funciona</a>
+                    </div>
+                    <div class="social-proof">
+                        <span>✓ Mais de 3.000 alunos</span>
+                        <span>✓ Resultados em 30 dias</span>
+                        <span>✓ Garantia de 7 dias</span>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="card glow" style="background: var(--bg-surface); text-align: center; padding: 40px;">
+                        <div style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 48px;">📱</div>
+                        <h3 class="font-heading text-xl font-bold mb-4">Stories que Vendem</h3>
+                        <div class="numbers-grid">
+                            <div>
+                                <div class="number-item">5-10</div>
+                                <div class="number-label">vendas/dia</div>
+                            </div>
+                            <div>
+                                <div class="number-item">R$ 500</div>
+                                <div class="number-label">ticket médio</div>
+                            </div>
+                            <div>
+                                <div class="number-item">30%</div>
+                                <div class="number-label">conversão</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AUTORIDADE -->
+    <section class="section section-alt">
+        <div class="container text-center">
+            <h2 class="font-heading text-2xl font-bold mb-12">Resultados Comprovados</h2>
+            <div class="numbers-grid" style="max-width: 800px; margin: 0 auto;">
+                <div>
+                    <div class="number-item">R$ 2.3M</div>
+                    <div class="number-label">faturados pelos alunos</div>
+                </div>
+                <div>
+                    <div class="number-item">3.247</div>
+                    <div class="number-label">alunos transformados</div>
+                </div>
+                <div>
+                    <div class="number-item">96%</div>
+                    <div class="number-label">aprovação do método</div>
+                </div>
+                <div>
+                    <div class="number-item">150+</div>
+                    <div class="number-label">cases de sucesso</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PARA QUEM É -->
+    <section class="section">
+        <div class="container">
+            <div class="text-center mb-12">
+                <h2 class="font-heading text-2xl font-bold mb-4">Este Método é Para Você Se:</h2>
+                <p class="text-lg opacity-70">Identifique seu perfil e descubra como o SPE pode transformar seus resultados</p>
+            </div>
+            <div class="grid-3">
+                <div class="card text-center">
+                    <div class="avatar">IP</div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Infoprodutor</h3>
+                    <p class="opacity-70">Você tem um produto digital mas não consegue vender consistentemente pelos Stories. Suas vendas são irregulares e você depende muito de launches.</p>
+                </div>
+                <div class="card text-center">
+                    <div class="avatar">PS</div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Prestador de Serviço</h3>
+                    <p class="opacity-70">Você oferece serviços mas não sabe como mostrar seu trabalho nos Stories para atrair clientes qualificados todos os dias.</p>
+                </div>
+                <div class="card text-center">
+                    <div class="avatar">CO</div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Coach/Consultor</h3>
+                    <p class="opacity-70">Você tem conhecimento para vender mas não consegue converter seguidores em clientes usando os Stories de forma estratégica.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- O QUE É -->
+    <section id="metodo" class="section section-alt">
+        <div class="container text-center">
+            <h2 class="font-heading text-2xl font-bold mb-6">O Que é o Método SPE?</h2>
+            <p class="text-lg opacity-70 max-w-4xl mx-auto">
+                SPE significa <strong>Stories Para Encantar</strong> - um sistema comprovado que transforma seus Stories do Instagram em uma máquina de vendas automática. Você aprende a criar conteúdo que educa, engaja e converte seus seguidores em clientes, gerando vendas todos os dias sem depender de tráfego pago ou lançamentos complexos.
+            </p>
+        </div>
+    </section>
+
+    <!-- PILARES/MÓDULOS -->
+    <section class="section">
+        <div class="container">
+            <div class="text-center mb-12">
+                <h2 class="font-heading text-2xl font-bold mb-4">Os 5 Pilares do Método SPE</h2>
+                <p class="text-lg opacity-70">Cada módulo foi desenhado para você dominar uma parte específica da venda pelos Stories</p>
+            </div>
+            <div class="grid-2" style="gap: 40px;">
+                <div class="card">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 24px;">🎯</div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Módulo 1: Estratégia</h3>
+                    <p class="opacity-70">Defina seu posicionamento, identifique seu avatar ideal e crie uma estratégia de conteúdo que gera desejo pelo seu produto.</p>
+                </div>
+                <div class="card">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 24px;">📝</div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Módulo 2: Roteiros</h3>
+                    <p class="opacity-70">Scripts prontos para cada tipo de Story: educativo, social proof, venda direta, objeções e call to action irresistível.</p>
+                </div>
+                <div class="card">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 24px;">🎨</div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Módulo 3: Design</h3>
+                    <p class="opacity-70">Templates visuais que convertem, cores que vendem, fontes que geram autoridade e layouts que prendem atenção.</p>
+                </div>
+                <div class="card">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 24px;">⚡</div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Módulo 4: Automação</h3>
+                    <p class="opacity-70">Como criar um funil de Stories que vende no piloto automático, usando sequências programadas e gatilhos mentais.</p>
+                </div>
+                <div class="card">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 24px;">📊</div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Módulo 5: Métricas</h3>
+                    <p class="opacity-70">Analise resultados, otimize sua estratégia e escale suas vendas baseado em dados reais de conversão.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROVA SOCIAL -->
+    <section id="depoimentos" class="section section-alt">
+        <div class="container">
+            <div class="text-center mb-12">
+                <h2 class="font-heading text-2xl font-bold mb-4">Resultados Reais dos Nossos Alunos</h2>
+                <p class="text-lg opacity-70">Veja como o Método SPE transformou negócios reais</p>
+            </div>
+            <div class="grid-3">
+                <div class="card">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="avatar" style="width: 50px; height: 50px; font-size: 16px;">MC</div>
+                        <div>
+                            <div class="font-semibold">Marina Costa</div>
+                            <div style="color: var(--text-secondary); font-size: 14px;">Coach de Relacionamentos</div>
+                        </div>
+                    </div>
+                    <p class="opacity-70">"Antes do SPE eu vendia 2-3 consultorias por mês. Hoje vendo 15-20 só pelos Stories! Meu faturamento triplicou em 60 dias."</p>
+                    <div class="price-highlight font-bold mt-4">Resultado: R$ 45.000/mês</div>
+                </div>
+                <div class="card testimonial-highlight">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="avatar" style="width: 50px; height: 50px; font-size: 16px;">RS</div>
+                        <div>
+                            <div class="font-semibold">Ricardo Silva</div>
+                            <div style="color: var(--text-secondary); font-size: 14px;">Infoprodutor</div>
+                        </div>
+                    </div>
+                    <p class="opacity-70">"Método incrível! Apliquei as estratégias do SPE e consegui R$ 80 mil em vendas no primeiro mês. Os Stories realmente funcionam!"</p>
+                    <div class="price-highlight font-bold mt-4">Resultado: R$ 80.000 no 1º mês</div>
+                </div>
+                <div class="card">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="avatar" style="width: 50px; height: 50px; font-size: 16px;">AF</div>
+                        <div>
+                            <div class="font-semibold">Ana Fernandes</div>
+                            <div style="color: var(--text-secondary); font-size: 14px;">Mentora de Negócios</div>
+                        </div>
+                    </div>
+                    <p class="opacity-70">"Estava perdendo vendas por não saber usar os Stories. Com o SPE criei um sistema que me gera 5-8 clientes novos toda semana."</p>
+                    <div class="price-highlight font-bold mt-4">Resultado: 30+ clientes/mês</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ESPECIALISTA -->
+    <section class="section">
+        <div class="container">
+            <div class="expert-section text-center">
+                <div class="avatar" style="width: 120px; height: 120px; font-size: 36px; margin-bottom: 24px;">LC</div>
+                <h2 class="font-heading text-2xl font-bold mb-4">Luana Carolina</h2>
+                <p class="text-lg opacity-70 mb-6 max-w-2xl mx-auto">
+                    Especialista em Instagram Stories com mais de 4 anos ajudando empreendedores a venderem pelo Instagram. Criadora do Método SPE, já treinou mais de 3.000 pessoas e gerou mais de R$ 2,3 milhões em vendas para seus alunos.
+                </p>
+                <div class="numbers-grid" style="max-width: 600px; margin: 0 auto;">
+                    <div>
+                        <div class="number-item">4+</div>
+                        <div class="number-label">anos de experiência</div>
+                    </div>
+                    <div>
+                        <div class="number-item">3.247</div>
+                        <div class="number-label">alunos treinados</div>
+                    </div>
+                    <div>
+                        <div class="number-item">150k</div>
+                        <div class="number-label">seguidores</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- GARANTIA -->
+    <section class="section section-alt">
+        <div class="container text-center">
+            <div class="guarantee-badge">Garantia Incondicional</div>
+            <h2 class="font-heading text-2xl font-bold mb-4">7 Dias de Garantia Total</h2>
+            <p class="text-lg opacity-70 max-w-2xl mx-auto">
+                Teste o Método SPE por 7 dias completos. Se não ficar satisfeito com o conteúdo ou não ver resultados, devolvemos 100% do seu investimento. Sem perguntas, sem burocracia.
+            </p>
+        </div>
+    </section>
+
+    <!-- OFERTA -->
+    <section id="oferta" class="section glow">
+        <div class="container">
+            <div class="text-center mb-12">
+                <h2 class="font-heading text-2xl font-bold mb-4">Oferta Especial - Método SPE Completo</h2>
+                <p class="text-lg opacity-70">Tudo que você precisa para transformar seus Stories em uma máquina de vendas</p>
+            </div>
+            
+            <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 40px;">
+                <div class="badge mb-4">Curso + Bônus Exclusivos</div>
+                
+                <h3 class="font-heading text-xl font-bold mb-6">Método SPE + Bônus</h3>
+                
+                <div class="mb-6">
+                    <div style="text-decoration: line-through; color: var(--text-secondary); font-size: 18px;">De R$ 1.497</div>
+                    <div class="price-highlight font-heading" style="font-size: 3rem; font-weight: 800; line-height: 1;">R$ 997</div>
+                    <div class="opacity-70">à vista no PIX/cartão</div>
+                </div>
+                
+                <div style="color: var(--text-secondary); margin-bottom: 24px;">
+                    ou 12x de R$ 97 no cartão
+                </div>
+                
+                <a href="#" class="btn btn-primary w-full mb-6">QUERO O MÉTODO SPE AGORA</a>
+                
+                <div style="text-align: left; margin-top: 32px;">
+                    <h4 class="font-semibold mb-4">Você vai receber:</h4>
+                    <div style="color: var(--text-secondary); font-size: 14px; line-height: 1.8;">
+                        ✓ Método SPE Completo (5 módulos)<br>
+                        ✓ 50+ Templates de Stories prontos<br>
+                        ✓ Scripts de vendas testados<br>
+                        ✓ Comunidade VIP no Telegram<br>
+                        ✓ Suporte por 90 dias<br>
+                        ✓ Atualizações gratuitas<br>
+                        ✓ Garantia de 7 dias
+                    </div>
+                </div>
+            </div>
+            
+            <div class="social-proof mt-8">
+                <span>🔒 Compra 100% Segura</span>
+                <span>⚡ Acesso Imediato</span>
+                <span>📱 Funciona no celular</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="section section-alt">
+        <div class="container">
+            <div class="text-center mb-12">
+                <h2 class="font-heading text-2xl font-bold mb-4">Perguntas Frequentes</h2>
+                <p class="text-lg opacity-70">Tire todas suas dúvidas sobre o Método SPE</p>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Quanto tempo preciso investir por dia?</span>
+                        <span>+</span>
+                    </div>
+                    <div class="accordion-content">
+                        Apenas 30-45 minutos por dia são suficientes para aplicar o método e criar Stories que vendem. O curso foi desenhado para empreendedores ocupados.
+                    </div>
+                </div>
+                
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Funciona para qualquer nicho?</span>
+                        <span>+</span>
+                    </div>
+                    <div class="accordion-content">
+                        Sim! O Método SPE funciona para infoprodutos, serviços, consultorias, coaching e qualquer negócio que venda pelo Instagram.
+                    </div>
+                </div>
+                
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Preciso ter muitos seguidores?</span>
+                        <span>+</span>
+                    </div>
+                    <div class="accordion-content">
+                        Não! Temos alunos que vendem com 500 seguidores. O método foca na qualidade do conteúdo e na estratégia, não na quantidade de seguidores.
+                    </div>
+                </div>
+                
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Quando vou começar a ver resultados?</span>
+                        <span>+</span>
+                    </div>
+                    <div class="accordion-content">
+                        A maioria dos alunos vê as primeiras vendas nos primeiros 15-30 dias aplicando o método. Alguns conseguem resultados já na primeira semana.
+                    </div>
+                </div>
+                
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>O curso tem suporte?</span>
+                        <span>+</span>
+                    </div>
+                    <div class="accordion-content">
+                        Sim! Você terá acesso à comunidade VIP no Telegram e suporte direto por 90 dias para tirar dúvidas e receber feedback.
+                    </div>
+                </div>
+                
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>E se eu não gostar do curso?</span>
+                        <span>+</span>
+                    </div>
+                    <div class="accordion-content">
+                        Você tem 7 dias de garantia incondicional. Se não ficar satisfeito, devolvemos 100% do seu investimento sem perguntas.
+                    </div>
+                </div>
+                
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Como acesso o curso após a compra?</span>
+                        <span>+</span>
+                    </div>
+                    <div class="accordion-content">
+                        O acesso é imediato! Após a confirmação do pagamento, você recebe por email o login e senha da plataforma de ensino.
+                    </div>
+                </div>
+                
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Posso parcelar no cartão?</span>
+                        <span>+</span>
+                    </div>
+                    <div class="accordion-content">
+                        Sim! Você pode parcelar em até 12x de R$ 97 no cartão de crédito. À vista no PIX você tem desconto especial.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Luana Carolina. Todos os direitos reservados.</p>
+            <p style="margin-top: 16px;">
+                CNPJ: 12.345.678/0001-90 | 
+                <a href="#">Termos de Uso</a> | 
+                <a href="#">Política de Privacidade</a> | 
+                <a href="#">Política de Reembolso</a>
+            </p>
+            <p style="margin-top: 16px; font-size: 12px; opacity: 0.6;">
+                Este produto não garante a obtenção de resultados. Qualquer referência ao desempenho de uma estratégia não deve ser interpretada como uma garantia de resultados.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        function toggleAccordion(element) {
+            const content = element.nextElementSibling;
+            const icon = element.querySelector('span:last-child');
+            
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
+                icon.textContent = '+';
+            } else {
+                // Fechar outros accordions
+                document.querySelectorAll('.accordion-content.active').forEach(item => {
+                    item.classList.remove('active');
+                    item.previousElementSibling.querySelector('span:last-child').textContent = '+';
+                });
+                
+                content.classList.add('active');
+                icon.textContent = '−';
+            }
+        }
+        
+        // Smooth scroll para links internos
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
