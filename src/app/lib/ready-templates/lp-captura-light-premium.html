@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[INSERIR: Nome do Produto]</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fafaf9;--bg-white:#fff;--bg-alt:#f2f0ed;
+  --text:#1a1a1a;--text-60:#555;--text-40:#999;--text-light:#bbb;
+  --green:#1a8d5f;--green-light:#e6f5ee;--green-dark:#147a50;
+  --border:#e5e3df;--border-light:#eeedea;
+  --font:'Montserrat',-apple-system,sans-serif;
+  --container:960px;--radius:16px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;}
+body{font-family:var(--font);color:var(--text);background:var(--bg);line-height:1.6;}
+a{text-decoration:none;color:inherit;}
+.container{max-width:var(--container);margin:0 auto;padding:0 28px;}
+
+/* ═══ 1. HERO ═══ */
+.hero{display:grid;grid-template-columns:1fr 1fr;min-height:100vh;overflow:hidden;}
+
+/* Coluna esquerda */
+.hero-content{padding:48px 40px 48px 48px;display:flex;flex-direction:column;justify-content:center;background:var(--bg);}
+.hero-logo{display:flex;align-items:center;gap:8px;margin-bottom:32px;}
+.hero-logo-icon{width:28px;height:28px;border-radius:6px;background:var(--green);display:flex;align-items:center;justify-content:center;}
+.hero-logo-icon svg{width:14px;height:14px;color:#fff;}
+.hero-logo-text{font-size:13px;font-weight:700;color:var(--text);letter-spacing:-0.01em;}
+.hero-logo-text span{font-weight:400;color:var(--text-40);margin-left:4px;}
+
+.hero h1{font-size:clamp(26px,3.5vw,40px);font-weight:800;color:var(--text);letter-spacing:-0.04em;line-height:1.1;margin-bottom:14px;}
+.hero h1 .accent{color:var(--green);}
+.hero .hero-sub{font-size:13px;color:var(--text-60);line-height:1.6;max-width:380px;margin-bottom:24px;}
+.hero .hero-sub strong{color:var(--text);font-weight:600;}
+
+/* Form */
+.hero-form{display:flex;flex-direction:column;gap:8px;max-width:340px;margin-bottom:16px;}
+.form-group{display:flex;flex-direction:column;gap:3px;}
+.form-label{font-size:10px;font-weight:600;color:var(--text-60);text-transform:uppercase;letter-spacing:0.05em;}
+.form-input{padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:12px;color:var(--text);background:var(--bg-white);outline:none;transition:border-color 0.2s;}
+.form-input::placeholder{color:var(--text-light);}
+.form-input:focus{border-color:var(--green);}
+.btn-green{width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:8px;font-family:var(--font);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;cursor:pointer;transition:all 0.2s;margin-top:4px;}
+.btn-green:hover{background:var(--green-dark);box-shadow:0 4px 16px rgba(26,141,95,0.2);}
+.hero-legal{font-size:9px;color:var(--text-light);max-width:340px;line-height:1.5;}
+
+/* Coluna direita — foto */
+.hero-visual{position:relative;background:var(--bg-alt);display:flex;align-items:flex-end;justify-content:center;overflow:hidden;}
+.hero-photo-placeholder{width:100%;height:100%;background:linear-gradient(180deg,var(--bg-alt) 0%,#e8e4df 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:10px;color:var(--text-light);}
+.hero-photo-placeholder svg{width:56px;height:56px;opacity:0.15;}
+
+/* Floating cards */
+.float-card{position:absolute;background:var(--bg-white);border-radius:10px;padding:10px 14px;box-shadow:0 4px 20px rgba(0,0,0,0.06);border:1px solid var(--border-light);z-index:10;opacity:0;animation:float-in 0.6s ease-out forwards;}
+.float-card-1{bottom:25%;left:16px;animation-delay:0.8s;}
+.float-card-2{top:20%;right:16px;animation-delay:1.2s;}
+@keyframes float-in{0%{opacity:0;transform:translateY(10px);}100%{opacity:1;transform:translateY(0);}}
+.fc-row{display:flex;align-items:center;gap:8px;}
+.fc-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.fc-avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green-dark));display:flex;align-items:center;justify-content:center;color:#fff;font-size:8px;font-weight:700;}
+.fc-name{font-size:10px;font-weight:600;color:var(--text);}
+.fc-action{font-size:8px;color:var(--green);font-weight:500;}
+.fc-value{font-size:16px;font-weight:800;color:var(--green);line-height:1;}
+.fc-label{font-size:8px;color:var(--text-40);margin-top:1px;}
+
+/* ═══ 2. PROVA SOCIAL ═══ */
+.sec-proof{padding:40px 0;background:var(--bg-white);border-top:1px solid var(--border-light);border-bottom:1px solid var(--border-light);}
+.proof-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;text-align:center;}
+.proof-item{padding:16px 12px;border-right:1px solid var(--border-light);}
+.proof-item:last-child{border-right:none;}
+.proof-num{font-size:clamp(22px,3vw,32px);font-weight:800;color:var(--text);letter-spacing:-0.03em;line-height:1;}
+.proof-label{font-size:9px;color:var(--text-40);text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;}
+
+/* ═══ 3. BENEFICIOS ═══ */
+.sec-benefits{padding:48px 0;background:var(--bg);}
+.benefits-header{text-align:center;margin-bottom:32px;}
+.benefits-header h2{font-size:clamp(20px,2.5vw,28px);font-weight:800;color:var(--text);letter-spacing:-0.03em;margin-bottom:4px;}
+.benefits-header p{font-size:12px;color:var(--text-40);}
+.benefits-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.benefit-card{background:var(--bg-white);border:1px solid var(--border-light);border-radius:var(--radius);padding:22px 18px;transition:border-color 0.3s,transform 0.3s;}
+.benefit-card:hover{border-color:var(--green);transform:translateY(-2px);}
+.benefit-icon{width:36px;height:36px;border-radius:10px;background:var(--green-light);display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+.benefit-icon svg{width:18px;height:18px;color:var(--green);}
+.benefit-card h3{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:-0.01em;}
+.benefit-card p{font-size:10px;color:var(--text-60);line-height:1.5;}
+
+/* ═══ 4. CTA FINAL ═══ */
+.sec-cta{padding:48px 0;background:var(--bg-white);text-align:center;border-top:1px solid var(--border-light);}
+.cta-box{max-width:420px;margin:0 auto;}
+.cta-box h2{font-size:clamp(20px,2.5vw,28px);font-weight:800;color:var(--text);letter-spacing:-0.03em;margin-bottom:6px;}
+.cta-box p{font-size:12px;color:var(--text-60);margin-bottom:20px;line-height:1.5;}
+.cta-form{display:flex;gap:6px;margin-bottom:12px;}
+.cta-form input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:100px;font-family:var(--font);font-size:12px;color:var(--text);outline:none;background:var(--bg);}
+.cta-form input::placeholder{color:var(--text-light);}
+.btn-green-pill{padding:10px 22px;background:var(--green);color:#fff;border:none;border-radius:100px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.btn-green-pill:hover{background:var(--green-dark);}
+.cta-trust{display:flex;justify-content:center;gap:16px;font-size:9px;color:var(--text-40);}
+.cta-trust span{display:flex;align-items:center;gap:3px;}
+.cta-trust svg{width:10px;height:10px;color:var(--green);}
+
+/* Footer */
+.footer{padding:16px 0;text-align:center;border-top:1px solid var(--border-light);}
+.footer p{font-size:9px;color:var(--text-light);}
+
+.reveal{opacity:0;transform:translateY(14px);transition:opacity 0.6s ease,transform 0.6s ease;}
+.reveal.v{opacity:1;transform:translateY(0);}
+.rd1{transition-delay:.06s}.rd2{transition-delay:.12s}.rd3{transition-delay:.18s}
+
+@media(max-width:768px){
+  .hero{grid-template-columns:1fr;min-height:auto;}
+  .hero-visual{order:-1;height:280px;}
+  .hero-content{padding:32px 24px;}
+  .float-card{display:none;}
+  .proof-grid{grid-template-columns:repeat(2,1fr);}
+  .proof-item{border-bottom:1px solid var(--border-light);}
+  .proof-item:nth-child(2){border-right:none;}
+  .benefits-grid{grid-template-columns:1fr;}
+  .cta-form{flex-direction:column;}
+  .cta-trust{flex-wrap:wrap;justify-content:center;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ 1. HERO ═══ -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-logo reveal">
+      <div class="hero-logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      <div class="hero-logo-text">[INSERIR: Marca] <span>| [INSERIR: Produto]</span></div>
+    </div>
+
+    <h1 class="reveal rd1">[INSERIR: Headline parte 1] <span class="accent">[INSERIR: destaque]</span> [INSERIR: parte 2]</h1>
+    <p class="hero-sub reveal rd2">[INSERIR: Subtitulo — Tenha acesso ao <strong>metodo comprovado</strong> que ja ajudou mais de <strong>X pessoas</strong> a alcançar Y resultado.]</p>
+
+    <form class="hero-form reveal rd3" onsubmit="event.preventDefault();">
+      <div class="form-group"><label class="form-label">Nome *</label><input class="form-input" type="text" placeholder="Seu nome completo" required></div>
+      <div class="form-group"><label class="form-label">Email *</label><input class="form-input" type="email" placeholder="seu@email.com" required></div>
+      <div class="form-group"><label class="form-label">WhatsApp *</label><input class="form-input" type="tel" placeholder="(00) 00000-0000" required></div>
+      <button type="submit" class="btn-green">[INSERIR: CTA — ex: Quero garantir minha vaga]</button>
+    </form>
+    <p class="hero-legal reveal rd3">[INSERIR: Texto legal — Ao se inscrever voce concorda com nossos Termos e Politica de Privacidade.]</p>
+  </div>
+
+  <div class="hero-visual">
+    <div class="hero-photo-placeholder">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Foto do especialista
+    </div>
+    <div class="float-card float-card-1">
+      <div class="fc-value">[INSERIR: R$ X.XXX]</div>
+      <div class="fc-label">[INSERIR: metrica de resultado]</div>
+    </div>
+    <div class="float-card float-card-2">
+      <div class="fc-row">
+        <div class="fc-dot"></div>
+        <div class="fc-avatar">M</div>
+        <div><div class="fc-name">[INSERIR: Nome]</div><div class="fc-action">[INSERIR: acao — ex: Acabou de se inscrever]</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2. PROVA SOCIAL ═══ -->
+<section class="sec-proof">
+  <div class="container">
+    <div class="proof-grid">
+      <div class="proof-item reveal"><div class="proof-num">+[X]</div><div class="proof-label">[INSERIR: Alunos]</div></div>
+      <div class="proof-item reveal rd1"><div class="proof-num">[X]%</div><div class="proof-label">[INSERIR: Satisfacao]</div></div>
+      <div class="proof-item reveal rd2"><div class="proof-num">[X]</div><div class="proof-label">[INSERIR: Avaliacao]</div></div>
+      <div class="proof-item reveal rd3"><div class="proof-num">[X]+</div><div class="proof-label">[INSERIR: Metrica]</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3. BENEFICIOS ═══ -->
+<section class="sec-benefits">
+  <div class="container">
+    <div class="benefits-header reveal">
+      <h2>[INSERIR: Headline beneficios]</h2>
+      <p>[INSERIR: Subtitulo]</p>
+    </div>
+    <div class="benefits-grid">
+      <div class="benefit-card reveal">
+        <div class="benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <h3>[INSERIR: Beneficio 1]</h3>
+        <p>[INSERIR: Descricao do beneficio 1 em 2 linhas]</p>
+      </div>
+      <div class="benefit-card reveal rd1">
+        <div class="benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>[INSERIR: Beneficio 2]</h3>
+        <p>[INSERIR: Descricao]</p>
+      </div>
+      <div class="benefit-card reveal rd2">
+        <div class="benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <h3>[INSERIR: Beneficio 3]</h3>
+        <p>[INSERIR: Descricao]</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4. CTA FINAL ═══ -->
+<section class="sec-cta">
+  <div class="container">
+    <div class="cta-box reveal">
+      <h2>[INSERIR: CTA headline]</h2>
+      <p>[INSERIR: Frase de urgencia ou escassez]</p>
+      <div class="cta-form">
+        <input type="email" placeholder="Seu melhor email">
+        <button class="btn-green-pill">[INSERIR: CTA]</button>
+      </div>
+      <div class="cta-trust">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> 100% seguro</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Garantia 7 dias</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Sem spam</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer"><p>[INSERIR: Razao Social] | CNPJ: [INSERIR: CNPJ] | Todos os direitos reservados</p></footer>
+
+<script>
+var ro=new IntersectionObserver(function(e){e.forEach(function(i){if(i.isIntersecting)i.target.classList.add('v');});},{threshold:0.05,rootMargin:'0px 0px -20px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){ro.observe(el);});
+</script>
+</body>
+</html>

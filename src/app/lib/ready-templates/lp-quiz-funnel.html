@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Descubra Seu Perfil Digital — Quiz Gratuito</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#09090b;--bg-2:#111114;--bg-card:#16161a;--bg-card-hover:#1c1c21;
+  --text:#f5f5f5;--text-70:rgba(245,245,245,0.7);--text-40:rgba(245,245,245,0.4);--text-20:rgba(245,245,245,0.2);
+  --accent:#8b5cf6;--accent-dark:#7c3aed;--accent-glow:rgba(139,92,246,0.2);--accent-glow-strong:rgba(139,92,246,0.35);
+  --green:#22c55e;--green-glow:rgba(34,197,94,0.15);
+  --pink:#ec4899;--pink-glow:rgba(236,72,153,0.15);
+  --orange:#f97316;--orange-glow:rgba(249,115,22,0.15);
+  --blue:#3b82f6;--blue-glow:rgba(59,130,246,0.15);
+  --border:rgba(255,255,255,0.06);--border-hover:rgba(255,255,255,0.12);
+  --font:'Inter',-apple-system,sans-serif;
+  --container:680px;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;}
+body{font-family:var(--font);color:var(--text);background:var(--bg);line-height:1.6;min-height:100vh;overflow-x:hidden;}
+a{text-decoration:none;color:inherit;}
+
+/* ═══ LAYOUT ═══ */
+.quiz-wrapper{min-height:100vh;display:flex;flex-direction:column;position:relative;}
+.quiz-wrapper::before{content:'';position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:600px;background:radial-gradient(ellipse,var(--accent-glow),transparent 70%);pointer-events:none;opacity:0.4;z-index:0;}
+.container{max-width:var(--container);margin:0 auto;padding:0 24px;position:relative;z-index:1;}
+
+/* ═══ HEADER ═══ */
+.quiz-header{padding:20px 0;border-bottom:1px solid var(--border);}
+.quiz-header .container{display:flex;align-items:center;justify-content:space-between;}
+.quiz-logo{font-size:14px;font-weight:800;color:var(--text);letter-spacing:-0.02em;}
+.quiz-logo span{color:var(--accent);}
+.quiz-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;background:var(--accent-glow);border:1px solid rgba(139,92,246,0.15);font-size:10px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;}
+.quiz-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+/* ═══ PROGRESS ═══ */
+.progress-section{padding:24px 0 0;}
+.progress-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.progress-step{font-size:11px;font-weight:600;color:var(--text-40);}
+.progress-step strong{color:var(--accent);}
+.progress-pct{font-size:11px;font-weight:700;color:var(--accent);}
+.progress-bar{width:100%;height:4px;background:rgba(255,255,255,0.06);border-radius:100px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--pink));border-radius:100px;transition:width 0.6s cubic-bezier(0.16,1,0.3,1);}
+
+/* ═══ SCREENS ═══ */
+.screen{display:none;animation:fadeUp 0.5s cubic-bezier(0.16,1,0.3,1);}
+.screen.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+/* ═══ INTRO SCREEN ═══ */
+.intro{padding:64px 0 48px;text-align:center;}
+.intro-icon{width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,var(--accent),var(--pink));margin:0 auto 24px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px var(--accent-glow-strong);}
+.intro-icon svg{width:36px;height:36px;color:#fff;}
+.intro h1{font-size:clamp(26px,4vw,36px);font-weight:800;letter-spacing:-0.04em;line-height:1.15;margin-bottom:12px;}
+.intro h1 em{font-style:normal;background:linear-gradient(135deg,var(--accent),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.intro .subtitle{font-size:15px;color:var(--text-40);max-width:480px;margin:0 auto 32px;line-height:1.6;}
+.intro .subtitle strong{color:var(--text-70);font-weight:600;}
+.btn-start{display:inline-flex;align-items:center;gap:8px;padding:16px 40px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;border:none;border-radius:12px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all 0.3s;letter-spacing:-0.01em;}
+.btn-start:hover{box-shadow:0 8px 32px var(--accent-glow-strong);transform:translateY(-2px);}
+.btn-start svg{width:18px;height:18px;}
+.intro-meta{display:flex;justify-content:center;gap:24px;margin-top:24px;}
+.intro-meta-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-40);}
+.intro-meta-item svg{width:14px;height:14px;color:var(--accent);}
+
+/* ═══ QUESTION SCREEN ═══ */
+.question-section{padding:48px 0;}
+.question-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent);margin-bottom:10px;}
+.question-text{font-size:clamp(20px,3vw,26px);font-weight:800;letter-spacing:-0.03em;line-height:1.2;margin-bottom:28px;}
+.options{display:flex;flex-direction:column;gap:10px;}
+.option{display:flex;align-items:center;gap:14px;padding:18px 20px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;}
+.option::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--accent-glow),transparent);opacity:0;transition:opacity 0.3s;}
+.option:hover{border-color:var(--border-hover);background:var(--bg-card-hover);transform:translateX(4px);}
+.option:hover::before{opacity:1;}
+.option.selected{border-color:var(--accent);background:rgba(139,92,246,0.08);}
+.option.selected::before{opacity:1;}
+.option-letter{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text-40);flex-shrink:0;transition:all 0.25s;position:relative;z-index:1;}
+.option.selected .option-letter{background:var(--accent);border-color:var(--accent);color:#fff;}
+.option-content{flex:1;position:relative;z-index:1;}
+.option-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px;letter-spacing:-0.01em;}
+.option-desc{font-size:11px;color:var(--text-40);line-height:1.4;}
+
+/* ═══ RESULT SCREEN ═══ */
+.result-section{padding:48px 0 64px;}
+.result-card{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:36px;text-align:center;position:relative;overflow:hidden;}
+.result-card::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:300px;height:200px;background:radial-gradient(ellipse,var(--accent-glow-strong),transparent 70%);pointer-events:none;}
+.result-confetti{font-size:36px;margin-bottom:16px;position:relative;z-index:1;}
+.result-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent);margin-bottom:8px;position:relative;z-index:1;}
+.result-profile{font-size:clamp(22px,3.5vw,30px);font-weight:800;letter-spacing:-0.03em;line-height:1.2;margin-bottom:8px;position:relative;z-index:1;}
+.result-desc{font-size:13px;color:var(--text-40);max-width:440px;margin:0 auto 28px;line-height:1.6;position:relative;z-index:1;}
+.result-traits{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:28px;position:relative;z-index:1;}
+.trait{display:flex;align-items:center;gap:8px;padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-sm);text-align:left;}
+.trait-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.trait-icon svg{width:14px;height:14px;}
+.trait-icon.purple{background:var(--accent-glow);color:var(--accent);}
+.trait-icon.green{background:var(--green-glow);color:var(--green);}
+.trait-icon.pink{background:var(--pink-glow);color:var(--pink);}
+.trait-icon.blue{background:var(--blue-glow);color:var(--blue);}
+.trait-text{font-size:11px;font-weight:600;color:var(--text-70);}
+
+/* ═══ CTA / FORM ═══ */
+.cta-section{margin-top:8px;position:relative;z-index:1;}
+.cta-divider{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.cta-divider::before,.cta-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.cta-divider span{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-20);}
+.cta-headline{font-size:16px;font-weight:700;margin-bottom:4px;letter-spacing:-0.02em;}
+.cta-sub{font-size:12px;color:var(--text-40);margin-bottom:16px;}
+.form-row{display:flex;gap:8px;margin-bottom:8px;}
+.form-input{flex:1;padding:12px 16px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;color:var(--text);background:rgba(255,255,255,0.03);outline:none;transition:border-color 0.2s;}
+.form-input::placeholder{color:var(--text-20);}
+.form-input:focus{border-color:var(--accent);}
+.btn-cta{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all 0.3s;letter-spacing:-0.01em;}
+.btn-cta:hover{box-shadow:0 6px 24px var(--accent-glow-strong);transform:translateY(-1px);}
+.form-legal{font-size:9px;color:var(--text-20);text-align:center;margin-top:10px;line-height:1.5;}
+
+/* ═══ SOCIAL PROOF BAR ═══ */
+.proof-bar{padding:20px 0;border-top:1px solid var(--border);margin-top:48px;}
+.proof-bar .container{display:flex;justify-content:center;gap:32px;flex-wrap:wrap;}
+.proof-item{display:flex;align-items:center;gap:8px;}
+.proof-num{font-size:16px;font-weight:800;color:var(--text);letter-spacing:-0.02em;}
+.proof-label{font-size:10px;color:var(--text-40);line-height:1.3;}
+
+/* ═══ FOOTER ═══ */
+.quiz-footer{padding:20px 0;border-top:1px solid var(--border);text-align:center;}
+.quiz-footer p{font-size:10px;color:var(--text-20);}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:640px){
+  .container{padding:0 20px;}
+  .intro{padding:40px 0 32px;}
+  .result-traits{grid-template-columns:1fr;}
+  .form-row{flex-direction:column;}
+  .intro-meta{flex-direction:column;align-items:center;gap:12px;}
+  .proof-bar .container{flex-direction:column;align-items:center;gap:16px;}
+  .option{padding:14px 16px;}
+}
+</style>
+</head>
+<body>
+
+<div class="quiz-wrapper">
+
+<!-- ═══ HEADER ═══ -->
+<header class="quiz-header">
+  <div class="container">
+    <div class="quiz-logo"><span>Quiz</span>Flow</div>
+    <div class="quiz-badge">Gratuito</div>
+  </div>
+</header>
+
+<!-- ═══ PROGRESS BAR ═══ -->
+<div class="progress-section">
+  <div class="container">
+    <div class="progress-info">
+      <span class="progress-step">Pergunta <strong id="currentStep">0</strong> de <strong>5</strong></span>
+      <span class="progress-pct" id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN: INTRO ═══ -->
+<div class="screen active" id="screen-intro">
+  <section class="intro">
+    <div class="container">
+      <div class="intro-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="12" r="10"/><path d="M12 17h.01"/></svg>
+      </div>
+      <h1>Descubra Seu <em>Perfil Digital</em> em 2 Minutos</h1>
+      <p class="subtitle">Responda <strong>5 perguntas rápidas</strong> e descubra qual modelo de negócio digital é ideal para você — com um plano de ação personalizado.</p>
+      <button class="btn-start" onclick="startQuiz()">
+        Começar o Quiz
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </button>
+      <div class="intro-meta">
+        <div class="intro-meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          2 minutos
+        </div>
+        <div class="intro-meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          12.847 pessoas fizeram
+        </div>
+        <div class="intro-meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+          100% gratuito
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ SCREEN: QUESTION 1 ═══ -->
+<div class="screen" id="screen-q1">
+  <section class="question-section">
+    <div class="container">
+      <div class="question-label">Pergunta 01</div>
+      <h2 class="question-text">Qual é o seu principal objetivo no digital hoje?</h2>
+      <div class="options">
+        <div class="option" onclick="selectOption(this, 1, 'creator')">
+          <div class="option-letter">A</div>
+          <div class="option-content">
+            <div class="option-title">Viver da minha paixão e compartilhar conhecimento</div>
+            <div class="option-desc">Quero criar conteúdo, cursos ou mentorias sobre o que domino.</div>
+          </div>
+        </div>
+        <div class="option" onclick="selectOption(this, 1, 'builder')">
+          <div class="option-letter">B</div>
+          <div class="option-content">
+            <div class="option-title">Construir um produto SaaS ou ferramenta digital</div>
+            <div class="option-desc">Tenho uma ideia de software e quero transformar em negócio.</div>
+          </div>
+        </div>
+        <div class="option" onclick="selectOption(this, 1, 'agency')">
+          <div class="option-letter">C</div>
+          <div class="option-content">
+            <div class="option-title">Prestar serviços e escalar com uma agência</div>
+            <div class="option-desc">Quero vender minha expertise como freelancer ou agência.</div>
+          </div>
+        </div>
+        <div class="option" onclick="selectOption(this, 1, 'ecommerce')">
+          <div class="option-letter">D</div>
+          <div class="option-content">
+            <div class="option-title">Vender produtos físicos ou digitais em escala</div>
+            <div class="option-desc">Quero montar uma loja online ou vender infoprodutos como afiliado.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ SCREEN: QUESTION 2 ═══ -->
+<div class="screen" id="screen-q2">
+  <section class="question-section">
+    <div class="container">
+      <div class="question-label">Pergunta 02</div>
+      <h2 class="question-text">Qual habilidade mais te representa?</h2>
+      <div class="options">
+        <div class="option" onclick="selectOption(this, 2, 'creator')">
+          <div class="option-letter">A</div>
+          <div class="option-content">
+            <div class="option-title">Comunicação e ensino</div>
+            <div class="option-desc">Sei explicar coisas complexas de forma simples. Adoro ensinar.</div>
+          </div>
+        </div>
+        <div class="option" onclick="selectOption(this, 2, 'builder')">
+          <div class="option-letter">B</div>
+          <div class="option-content">
+            <div class="option-title">Lógica e resolução de problemas</div>
+            <div class="option-desc">Penso em sistemas, processos e automatizações.</div>
+          </div>
+        </div>
+        <div class="option" onclick="selectOption(this, 2, 'agency')">
+          <div class="option-letter">C</div>
+          <div class="option-content">
+            <div class="option-title">Estratégia e gestão de projetos</div>
+            <div class="option-desc">Sei coordenar equipes e entregar resultados para clientes.</div>
+          </div>
+        </div>
+        <div class="option" onclick="selectOption(this, 2, 'ecommerce')">
+          <div class="option-letter">D</div>
+          <div class="option-content">
+            <div class="option-title">Marketing e vendas</div>
+            <div class="option-desc">Entendo de tráfego, copy e conversão. Sei vender online.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ SCREEN: QUESTION 3 ═══ -->
+<div class="screen" id="screen-q3">
+  <section class="question-section">
+    <div class="container">
+      <div class="question-label">Pergunta 03</div>
+      <h2 class="question-text">Quanto tempo por dia você pode dedicar?</h2>
+      <div class="options">
+        <div class="option" onclick="selectOption(this, 3, 'low')">
+          <div class="option-letter">A</div>
+          <div class="option-content">
+            <div class="option-title">1 a 2 horas por dia</div>
+            <div class="option-desc">Tenho emprego CLT e pouco tempo livre.</div>
+          </div>
+        </div>
+        <div class="option" onclick="selectOption(this, 3, 'medium')">
+          <div class="option-letter">B</div>
+          <div class="option-content">
+            <div class="option-title">3 a 5 horas por dia</div>
+            <div class="option-desc">Posso dedicar meio período ao projeto digital.</div>
+          </div>
+        </div>
+        <div class="option" onclick="selectOption(this, 3, 'high')">
+          <div class="option-letter">C</div>
+          <div class="option-content">
+            <div class="option-title">Tempo integral</div>
+            <div class="option-desc">Estou 100% focado em fazer isso funcionar.</div>
+          </div>
+        </div>
+        <div class="option" onclick="selectOption(this, 3, 'flex')">
+          <div class="option-letter">D</div>
+          <div class="option-content">
+            <div class="option-title">Horários variáveis</div>
+            <div class="option-desc">Minha rotina muda muito, preciso de flexibilidade total.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ SCREEN: QUESTION 4 ═══ -->
+<div class="screen" id="screen-q4">
+  <section class="question-section">
+    <div class="container">
+      <div class="question-label">Pergunta 04</div>
+      <h2 class="question-text">Quanto você está disposto a investir para começar?</h2>
+      <div class="options">
+        <div class="option" onclick="selectOption(this, 4, 'zero')">
+          <div class="option-letter">A</div>
+          <div class="option-content">
+            <div class="option-title">Zero — quero começar sem gastar nada</div>
+            <div class="option-desc">Preciso validar antes de investir dinheiro.</div>
+          </div>
+        </div>
+        <div class="option" onclick="selectOption(this, 4, 'low')">
+          <div class="option-letter">B</div>
+          <div class="option-content">
+            <div class="option-title">Até R$ 500 por mês</div>
+            <div class="option-desc">Posso investir em ferramentas básicas e tráfego inicial.</div>
+          </div>
+        </div>
+        <div class="option" onclick="selectOption(this, 4, 'medium')">
+          <div class="option-letter">C</div>
+          <div class="option-content">
+            <div class="option-title">R$ 500 a R$ 2.000 por mês</div>
+            <div class="option-desc">Tenho capital para ferramentas, equipe e anúncios.</div>
+          </div>
+        </div>
+        <div class="option" onclick="selectOption(this, 4, 'high')">
+          <div class="option-letter">D</div>
+          <div class="option-content">
+            <div class="option-title">Acima de R$ 2.000 por mês</div>
+            <div class="option-desc">Estou pronto para escalar agressivamente desde o início.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ SCREEN: QUESTION 5 ═══ -->
+<div class="screen" id="screen-q5">
+  <section class="question-section">
+    <div class="container">
+      <div class="question-label">Pergunta 05</div>
+      <h2 class="question-text">O que mais te incomoda na sua situação atual?</h2>
+      <div class="options">
+        <div class="option" onclick="selectOption(this, 5, 'freedom')">
+          <div class="option-letter">A</div>
+          <div class="option-content">
+            <div class="option-title">Falta de liberdade e autonomia</div>
+            <div class="option-desc">Quero trabalhar de onde quiser, nos meus horários.</div>
+          </div>
+        </div>
+        <div class="option" onclick="selectOption(this, 5, 'income')">
+          <div class="option-letter">B</div>
+          <div class="option-content">
+            <div class="option-title">Renda limitada e sem perspectiva de crescimento</div>
+            <div class="option-desc">Meu salário não acompanha meu potencial.</div>
+          </div>
+        </div>
+        <div class="option" onclick="selectOption(this, 5, 'purpose')">
+          <div class="option-letter">C</div>
+          <div class="option-content">
+            <div class="option-title">Trabalhar em algo que não faz sentido pra mim</div>
+            <div class="option-desc">Quero impactar pessoas e fazer algo com propósito.</div>
+          </div>
+        </div>
+        <div class="option" onclick="selectOption(this, 5, 'scale')">
+          <div class="option-letter">D</div>
+          <div class="option-content">
+            <div class="option-title">Já tenho um negócio mas não consigo escalar</div>
+            <div class="option-desc">Troco muito tempo por pouco dinheiro.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ SCREEN: LOADING ═══ -->
+<div class="screen" id="screen-loading">
+  <section class="question-section" style="text-align:center;padding:80px 0;">
+    <div class="container">
+      <div style="width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;margin:0 auto 20px;animation:spin 0.8s linear infinite;"></div>
+      <h2 style="font-size:20px;font-weight:700;margin-bottom:8px;letter-spacing:-0.02em;">Analisando suas respostas...</h2>
+      <p style="font-size:13px;color:var(--text-40);">Cruzando dados com mais de 12.000 perfis</p>
+      @keyframes spin{to{transform:rotate(360deg);}}
+    </div>
+  </section>
+</div>
+
+<!-- ═══ SCREEN: RESULT — CRIADOR DIGITAL ═══ -->
+<div class="screen" id="screen-result-creator">
+  <section class="result-section">
+    <div class="container">
+      <div class="result-card">
+        <div class="result-confetti">🎯</div>
+        <div class="result-label">Seu Perfil Digital</div>
+        <h2 class="result-profile">Criador Digital</h2>
+        <p class="result-desc">Você tem o perfil perfeito para transformar conhecimento em produtos digitais. Cursos, mentorias e comunidades são o seu caminho para a liberdade financeira.</p>
+        <div class="result-traits">
+          <div class="trait"><div class="trait-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg></div><div class="trait-text">Criação de conteúdo</div></div>
+          <div class="trait"><div class="trait-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="trait-text">Construção de audiência</div></div>
+          <div class="trait"><div class="trait-icon pink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div><div class="trait-text">Lançamentos digitais</div></div>
+          <div class="trait"><div class="trait-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="trait-text">Mentorias e comunidades</div></div>
+        </div>
+        <div class="cta-section">
+          <div class="cta-divider"><span>Próximo passo</span></div>
+          <h3 class="cta-headline">Receba seu plano de ação personalizado</h3>
+          <p class="cta-sub">Vamos enviar um roteiro completo de como começar como Criador Digital.</p>
+          <div class="form-row"><input type="text" class="form-input" placeholder="Seu nome"></div>
+          <div class="form-row"><input type="email" class="form-input" placeholder="Seu melhor e-mail"></div>
+          <div class="form-row"><input type="tel" class="form-input" placeholder="WhatsApp (opcional)"></div>
+          <button class="btn-cta">Quero Meu Plano de Ação →</button>
+          <p class="form-legal">Seus dados estão seguros. Não enviamos spam.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ SCREEN: RESULT — BUILDER ═══ -->
+<div class="screen" id="screen-result-builder">
+  <section class="result-section">
+    <div class="container">
+      <div class="result-card">
+        <div class="result-confetti">⚡</div>
+        <div class="result-label">Seu Perfil Digital</div>
+        <h2 class="result-profile">Builder de Produtos</h2>
+        <p class="result-desc">Você pensa em sistemas e soluções. Seu caminho é construir ferramentas SaaS, apps ou plataformas que resolvem problemas reais — e geram receita recorrente.</p>
+        <div class="result-traits">
+          <div class="trait"><div class="trait-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div><div class="trait-text">Desenvolvimento técnico</div></div>
+          <div class="trait"><div class="trait-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg></div><div class="trait-text">Receita recorrente (MRR)</div></div>
+          <div class="trait"><div class="trait-icon pink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div><div class="trait-text">Automação e escala</div></div>
+          <div class="trait"><div class="trait-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 10-4 4-4-4"/></svg></div><div class="trait-text">Product-led growth</div></div>
+        </div>
+        <div class="cta-section">
+          <div class="cta-divider"><span>Próximo passo</span></div>
+          <h3 class="cta-headline">Receba seu plano de ação personalizado</h3>
+          <p class="cta-sub">Vamos enviar um roteiro completo de como lançar seu primeiro produto digital.</p>
+          <div class="form-row"><input type="text" class="form-input" placeholder="Seu nome"></div>
+          <div class="form-row"><input type="email" class="form-input" placeholder="Seu melhor e-mail"></div>
+          <div class="form-row"><input type="tel" class="form-input" placeholder="WhatsApp (opcional)"></div>
+          <button class="btn-cta">Quero Meu Plano de Ação →</button>
+          <p class="form-legal">Seus dados estão seguros. Não enviamos spam.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ SCREEN: RESULT — AGENCY ═══ -->
+<div class="screen" id="screen-result-agency">
+  <section class="result-section">
+    <div class="container">
+      <div class="result-card">
+        <div class="result-confetti">🚀</div>
+        <div class="result-label">Seu Perfil Digital</div>
+        <h2 class="result-profile">Estrategista de Serviços</h2>
+        <p class="result-desc">Você sabe coordenar, entregar e escalar. Montar uma agência ou consultoria digital é o caminho mais rápido para você faturar alto com o que já sabe fazer.</p>
+        <div class="result-traits">
+          <div class="trait"><div class="trait-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></div><div class="trait-text">Gestão de clientes</div></div>
+          <div class="trait"><div class="trait-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="trait-text">High ticket recorrente</div></div>
+          <div class="trait"><div class="trait-icon pink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="trait-text">Construção de equipe</div></div>
+          <div class="trait"><div class="trait-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></div><div class="trait-text">Processos e SOPs</div></div>
+        </div>
+        <div class="cta-section">
+          <div class="cta-divider"><span>Próximo passo</span></div>
+          <h3 class="cta-headline">Receba seu plano de ação personalizado</h3>
+          <p class="cta-sub">Vamos enviar um roteiro completo de como montar sua agência digital.</p>
+          <div class="form-row"><input type="text" class="form-input" placeholder="Seu nome"></div>
+          <div class="form-row"><input type="email" class="form-input" placeholder="Seu melhor e-mail"></div>
+          <div class="form-row"><input type="tel" class="form-input" placeholder="WhatsApp (opcional)"></div>
+          <button class="btn-cta">Quero Meu Plano de Ação →</button>
+          <p class="form-legal">Seus dados estão seguros. Não enviamos spam.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ SCREEN: RESULT — E-COMMERCE ═══ -->
+<div class="screen" id="screen-result-ecommerce">
+  <section class="result-section">
+    <div class="container">
+      <div class="result-card">
+        <div class="result-confetti">💰</div>
+        <div class="result-label">Seu Perfil Digital</div>
+        <h2 class="result-profile">Empreendedor de Vendas</h2>
+        <p class="result-desc">Você entende de tráfego e conversão. E-commerce, dropshipping ou vendas como afiliado são modelos perfeitos para quem sabe colocar produto na frente do público certo.</p>
+        <div class="result-traits">
+          <div class="trait"><div class="trait-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg></div><div class="trait-text">E-commerce e lojas</div></div>
+          <div class="trait"><div class="trait-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div><div class="trait-text">Tráfego pago e orgânico</div></div>
+          <div class="trait"><div class="trait-icon pink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div><div class="trait-text">Funis de vendas</div></div>
+          <div class="trait"><div class="trait-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg></div><div class="trait-text">Escala e margem</div></div>
+        </div>
+        <div class="cta-section">
+          <div class="cta-divider"><span>Próximo passo</span></div>
+          <h3 class="cta-headline">Receba seu plano de ação personalizado</h3>
+          <p class="cta-sub">Vamos enviar um roteiro completo de como começar a vender online.</p>
+          <div class="form-row"><input type="text" class="form-input" placeholder="Seu nome"></div>
+          <div class="form-row"><input type="email" class="form-input" placeholder="Seu melhor e-mail"></div>
+          <div class="form-row"><input type="tel" class="form-input" placeholder="WhatsApp (opcional)"></div>
+          <button class="btn-cta">Quero Meu Plano de Ação →</button>
+          <p class="form-legal">Seus dados estão seguros. Não enviamos spam.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ SOCIAL PROOF ═══ -->
+<div class="proof-bar">
+  <div class="container">
+    <div class="proof-item">
+      <div class="proof-num">12.847</div>
+      <div class="proof-label">Pessoas já<br>fizeram o quiz</div>
+    </div>
+    <div class="proof-item">
+      <div class="proof-num">94%</div>
+      <div class="proof-label">Se identificaram<br>com o resultado</div>
+    </div>
+    <div class="proof-item">
+      <div class="proof-num">4.9</div>
+      <div class="proof-label">Avaliação<br>média</div>
+    </div>
+    <div class="proof-item">
+      <div class="proof-num">3.200+</div>
+      <div class="proof-label">Já começaram<br>a faturar</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="quiz-footer">
+  <p>[INSERIR: Nome da Empresa] &copy; 2026 — Todos os direitos reservados</p>
+</footer>
+
+</div>
+
+<style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+
+<script>
+// Quiz state
+const answers = {};
+let currentQuestion = 0;
+const totalQuestions = 5;
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateProgress(step) {
+  currentQuestion = step;
+  const pct = Math.round((step / totalQuestions) * 100);
+  document.getElementById('currentStep').textContent = step;
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function startQuiz() {
+  updateProgress(1);
+  showScreen('screen-q1');
+}
+
+function selectOption(el, questionNum, value) {
+  // Visual feedback
+  el.closest('.options').querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+
+  // Save answer
+  answers[questionNum] = value;
+
+  // Next after delay
+  setTimeout(() => {
+    if (questionNum < totalQuestions) {
+      updateProgress(questionNum + 1);
+      showScreen('screen-q' + (questionNum + 1));
+    } else {
+      // Show loading then result
+      updateProgress(totalQuestions);
+      document.getElementById('progressPct').textContent = '100%';
+      document.getElementById('progressFill').style.width = '100%';
+      showScreen('screen-loading');
+      setTimeout(() => {
+        const profile = calculateProfile();
+        showScreen('screen-result-' + profile);
+      }, 2200);
+    }
+  }, 400);
+}
+
+function calculateProfile() {
+  // Count profile votes from answers
+  const counts = { creator: 0, builder: 0, agency: 0, ecommerce: 0 };
+
+  // Q1 and Q2 directly map to profiles
+  if (answers[1]) counts[answers[1]]++;
+  if (answers[2]) counts[answers[2]]++;
+
+  // Q5 pain points hint at profiles
+  const painMap = { freedom: 'creator', income: 'ecommerce', purpose: 'creator', scale: 'agency' };
+  if (answers[5] && painMap[answers[5]]) counts[painMap[answers[5]]]++;
+
+  // Find highest
+  let max = 0, result = 'creator';
+  for (const [key, val] of Object.entries(counts)) {
+    if (val > max) { max = val; result = key; }
+  }
+  return result;
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,353 @@
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   HERO D — SaaS Minimal (AssetWise)
+   Centralizado + dashboard mockup
+   ═══════════════════════════════════════ */
+:root {
+  --bg: #f5f5f0;
+  --text: #111;
+  --text-sub: #777;
+  --border: #e5e5e5;
+  --font: 'Inter', -apple-system, sans-serif;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: var(--font); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; }
+
+.hero-saas {
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 80px;
+}
+
+/* Dot pattern sutil */
+.hero-saas::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, #bbb 0.6px, transparent 0.6px);
+  background-size: 20px 20px;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+/* Header simples */
+.hs-header {
+  padding: 20px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+}
+
+.hs-logo {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hs-logo svg { width: 22px; height: 22px; }
+
+.hs-signin {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-sub);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.hs-signin:hover { color: var(--text); }
+
+/* Hero text centralizado */
+.hs-center {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 80px 24px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.hs-h1 {
+  font-size: clamp(32px, 4.5vw, 56px);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 20px;
+  letter-spacing: -0.03em;
+}
+
+.hs-h1 em {
+  font-style: italic;
+  font-weight: 500;
+}
+
+.hs-sub {
+  font-size: 16px;
+  color: var(--text-sub);
+  line-height: 1.6;
+  max-width: 520px;
+  margin: 0 auto 32px;
+}
+
+.hs-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: var(--text);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.hs-btn:hover {
+  background: #333;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+/* Dashboard mockup */
+.hs-dashboard {
+  max-width: 900px;
+  margin: 60px auto 0;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02), 0 8px 24px rgba(0,0,0,0.06), 0 24px 48px rgba(0,0,0,0.04);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.hs-dash-bar {
+  padding: 12px 20px;
+  background: #fafafa;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hs-dash-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+.hs-dash-bar-left strong { color: var(--text); font-weight: 600; }
+
+.hs-dash-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hs-dash-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e0e0e0;
+}
+
+.hs-dash-bell {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #eee;
+}
+
+/* Stats grid */
+.hs-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.hs-stat {
+  background: #fff;
+  padding: 20px 24px;
+}
+
+.hs-stat-label {
+  font-size: 11px;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.hs-stat-val {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.hs-stat-sub {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-top: 2px;
+}
+
+/* Chart bars */
+.hs-chart {
+  padding: 24px;
+}
+
+.hs-chart-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+
+.hs-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.hs-bar-label {
+  font-size: 12px;
+  color: var(--text-sub);
+  width: 70px;
+  flex-shrink: 0;
+}
+
+.hs-bar-track {
+  flex: 1;
+  height: 10px;
+  background: #f0f0f0;
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.hs-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+  transition: width 1s ease-out;
+}
+
+.hs-bar-pct {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  width: 36px;
+  text-align: right;
+}
+
+/* Reveal */
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.rd1 { transition-delay: 0.1s; }
+.rd2 { transition-delay: 0.2s; }
+.rd3 { transition-delay: 0.4s; }
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .hs-center { padding: 60px 20px 0; }
+  .hs-h1 { font-size: 28px; }
+  .hs-stats { grid-template-columns: repeat(2, 1fr); }
+  .hs-dashboard { margin: 40px 16px 0; border-radius: 12px; }
+  .hs-header { padding: 16px 20px; }
+}
+</style>
+
+<!-- ═══ HERO D — SAAS MINIMAL ═══ -->
+<section class="hero-saas">
+  <!-- Header -->
+  <header class="hs-header">
+    <div class="hs-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      AssetWise
+    </div>
+    <a href="#" class="hs-signin">Sign in</a>
+  </header>
+
+  <!-- Hero centralizado -->
+  <div class="hs-center">
+    <h1 class="hs-h1 reveal">The only asset tracker<br><em>built for your team</em></h1>
+    <p class="hs-sub reveal rd1">A simple, reliable way to log, assign, and monitor all company equipment, with depreciation tracking and AI-powered insights.</p>
+    <div class="reveal rd2">
+      <a href="#" class="hs-btn">Get started <span>→</span></a>
+    </div>
+  </div>
+
+  <!-- Dashboard mockup -->
+  <div class="hs-dashboard reveal rd3">
+    <div class="hs-dash-bar">
+      <div class="hs-dash-bar-left"><strong>AssetWise</strong> / Dashboard</div>
+      <div class="hs-dash-bar-right">
+        <div class="hs-dash-bell"></div>
+        <div class="hs-dash-avatar"></div>
+      </div>
+    </div>
+    <div class="hs-stats">
+      <div class="hs-stat">
+        <div class="hs-stat-label">Total assets</div>
+        <div class="hs-stat-val">47</div>
+        <div class="hs-stat-sub">8 categories</div>
+      </div>
+      <div class="hs-stat">
+        <div class="hs-stat-label">Total value</div>
+        <div class="hs-stat-val">$284,500</div>
+        <div class="hs-stat-sub">+12% this quarter</div>
+      </div>
+      <div class="hs-stat">
+        <div class="hs-stat-label">Total depreciation</div>
+        <div class="hs-stat-val">$71,125</div>
+        <div class="hs-stat-sub">25% of total</div>
+      </div>
+      <div class="hs-stat">
+        <div class="hs-stat-label">Needs attention</div>
+        <div class="hs-stat-val">5</div>
+        <div class="hs-stat-sub">2 critical</div>
+      </div>
+    </div>
+    <div class="hs-chart">
+      <div class="hs-chart-title">Condition Breakdown</div>
+      <div class="hs-bar-row">
+        <span class="hs-bar-label">Excellent</span>
+        <div class="hs-bar-track"><div class="hs-bar-fill" style="width:60%;background:#22c55e;"></div></div>
+        <span class="hs-bar-pct">60%</span>
+      </div>
+      <div class="hs-bar-row">
+        <span class="hs-bar-label">Good</span>
+        <div class="hs-bar-track"><div class="hs-bar-fill" style="width:25%;background:#3b82f6;"></div></div>
+        <span class="hs-bar-pct">25%</span>
+      </div>
+      <div class="hs-bar-row">
+        <span class="hs-bar-label">Fair</span>
+        <div class="hs-bar-track"><div class="hs-bar-fill" style="width:10%;background:#f59e0b;"></div></div>
+        <span class="hs-bar-pct">10%</span>
+      </div>
+      <div class="hs-bar-row">
+        <span class="hs-bar-label">Poor</span>
+        <div class="hs-bar-track"><div class="hs-bar-fill" style="width:5%;background:#ef4444;"></div></div>
+        <span class="hs-bar-pct">5%</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+var ro = new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){ro.observe(el);});
+</script>

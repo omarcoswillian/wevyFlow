@@ -1,0 +1,339 @@
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   HERO A — Luana Carolina / Execução Digital
+   Light + foto recortada + form inline + cards flutuantes
+   ═══════════════════════════════════════ */
+:root {
+  --gold: #C8A832;
+  --gold-light: #e6d06a;
+  --green-dark: #05811a;
+  --green-light: #08d23e;
+  --text-dark: #1a1a1a;
+  --text-body: #666;
+  --text-muted: #999;
+  --bg: #f9f9f9;
+  --font-head: 'Poppins', sans-serif;
+  --font-body: 'Montserrat', sans-serif;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: var(--font-body); color: var(--text-dark); background: #fff; -webkit-font-smoothing: antialiased; }
+
+.hero-luana {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 55% 45%;
+  background: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+/* — Dot pattern background sutil — */
+.hero-luana::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, #ccc 0.8px, transparent 0.8px);
+  background-size: 24px 24px;
+  opacity: 0.25;
+  z-index: 0;
+}
+
+/* — Coluna esquerda — */
+.hl-content {
+  position: relative;
+  z-index: 2;
+  padding: 60px 40px 60px 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hl-logo {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 36px;
+}
+
+.hl-logo-name {
+  font-family: var(--font-head);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.hl-logo-sub {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
+
+.hl-h1 {
+  font-family: var(--font-head);
+  font-size: clamp(30px, 3.8vw, 44px);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-dark);
+  margin-bottom: 16px;
+}
+
+.hl-h1 .accent {
+  color: var(--gold);
+  font-style: italic;
+}
+
+.hl-sub {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-body);
+  line-height: 1.65;
+  max-width: 480px;
+  margin-bottom: 28px;
+}
+
+/* — Form inline — */
+.hl-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+  margin-bottom: 16px;
+}
+
+.hl-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dark);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.hl-input::placeholder { color: #aaa; }
+.hl-input:focus { border-color: var(--gold); }
+
+.hl-btn {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #fff;
+  cursor: pointer;
+  background-image: linear-gradient(45deg, var(--green-dark), var(--green-light), var(--green-dark), var(--green-light));
+  background-size: 400% 200%;
+  animation: brilho 3.4s infinite linear;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.hl-btn:hover {
+  box-shadow: 0 0 20px rgba(8, 210, 62, 0.4);
+  transform: scale(1.02);
+}
+
+@keyframes brilho {
+  0% { background-position: 0 0; }
+  100% { background-position: 100% 0; }
+}
+
+.hl-legal {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  max-width: 400px;
+}
+
+.hl-legal strong { font-weight: 600; color: #777; }
+
+/* — Coluna direita (foto) — */
+.hl-visual {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hl-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  background: linear-gradient(180deg, #f0f0f0 0%, #e0e0e0 60%, #d0d0d0 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.hl-photo-placeholder svg { opacity: 0.15; }
+.hl-photo-placeholder span { font-size: 13px; color: #aaa; font-weight: 500; }
+
+/* Substituir placeholder por:
+   <img src="foto.png" alt="Especialista" style="width:100%;height:100%;object-fit:cover;object-position:top center;"> */
+
+/* — Cards flutuantes — */
+.hl-float {
+  position: absolute;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 12px 16px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.10);
+  border: 1px solid rgba(0,0,0,0.05);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  animation: float-slide 0.6s ease-out forwards;
+}
+
+.hl-float-1 {
+  right: 60px;
+  top: 38%;
+  animation-delay: 1s;
+}
+
+.hl-float-2 {
+  right: 40px;
+  top: 50%;
+  animation-delay: 1.6s;
+}
+
+@keyframes float-slide {
+  0% { opacity: 0; transform: translateX(30px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.hl-float-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e8f9ee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hl-float-icon svg { width: 18px; height: 18px; }
+
+.hl-float-info { display: flex; flex-direction: column; }
+
+.hl-float-title {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.hl-float-sub {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--green-dark);
+  font-weight: 500;
+}
+
+/* — Reveal — */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.rd1 { transition-delay: 0.1s; }
+.rd2 { transition-delay: 0.2s; }
+.rd3 { transition-delay: 0.3s; }
+
+/* — Responsivo — */
+@media (max-width: 768px) {
+  .hero-luana { grid-template-columns: 1fr; }
+  .hl-visual { order: -1; height: 300px; }
+  .hl-photo-placeholder { min-height: 300px; }
+  .hl-float { display: none; }
+  .hl-content { padding: 32px 24px; }
+  .hl-h1 { font-size: 26px; }
+  .hl-form, .hl-btn { max-width: 100%; }
+}
+</style>
+
+<!-- ═══ HERO A — LUANA CAROLINA ═══ -->
+<section class="hero-luana">
+  <!-- Coluna esquerda -->
+  <div class="hl-content">
+    <div class="hl-logo reveal">
+      <span class="hl-logo-name">EXECUCAO DIGITAL</span>
+      <span class="hl-logo-sub">Com Luana Carolina</span>
+    </div>
+
+    <h1 class="hl-h1 reveal rd1">
+      Como criar um infoproduto <span class="accent">irresistivel</span> e escalar suas <span class="accent">vendas</span> no digital
+    </h1>
+
+    <p class="hl-sub reveal rd2">
+      Voce so precisa replicar o meu metodo para transformar o que ja sabe em um produto digital tao desejado que as pessoas vao querer comprar antes mesmo de lancar (ainda que voce nunca tenha vendido nada)
+    </p>
+
+    <form class="hl-form reveal rd3" onsubmit="event.preventDefault();">
+      <input class="hl-input" type="text" placeholder="Seu nome:" required>
+      <input class="hl-input" type="tel" placeholder="Seu whatsApp:" required>
+      <input class="hl-input" type="email" placeholder="Seu e-mail:" required>
+      <button class="hl-btn" type="submit">QUERO GARANTIR O MEU LUGAR</button>
+    </form>
+
+    <p class="hl-legal reveal rd3">
+      Ao clicar no botao, voce concordara com nossos Termos de Uso e a Politica de <strong>PRIVACIDADE</strong>, incluindo o uso de cookies e o envio de comunicacoes.
+    </p>
+  </div>
+
+  <!-- Coluna direita -->
+  <div class="hl-visual">
+    <!-- Placeholder — substituir por <img> com foto recortada PNG sem fundo -->
+    <div class="hl-photo-placeholder">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Foto recortada do especialista (PNG)</span>
+    </div>
+
+    <!-- Cards flutuantes -->
+    <div class="hl-float hl-float-1">
+      <div class="hl-float-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#05811a" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <div class="hl-float-info">
+        <span class="hl-float-title">Venda aprovada!</span>
+        <span class="hl-float-sub">Sua comissao: R$197</span>
+      </div>
+    </div>
+
+    <div class="hl-float hl-float-2">
+      <div class="hl-float-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#05811a" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <div class="hl-float-info">
+        <span class="hl-float-title">Venda aprovada!</span>
+        <span class="hl-float-sub">Sua comissao: R$497</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+var ro = new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){ro.observe(el);});
+</script>

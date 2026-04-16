@@ -39,6 +39,24 @@ const TEMPLATE_VISUALS: Record<string, { gradient: string; mockupType: "hero-pho
   "section-features": { gradient: "from-sky-500 via-blue-500 to-indigo-600", mockupType: "cards" },
   "section-cta": { gradient: "from-gray-950 via-gray-900 to-gray-950", mockupType: "minimal" },
   "section-faq": { gradient: "from-white via-gray-50 to-white", mockupType: "minimal" },
+  // Arsenal de Heroes
+  "ready-captura-infoprodutor": { gradient: "from-gray-950 via-emerald-950/20 to-gray-950", mockupType: "form", ready: true },
+  "ready-hero-captura-luana": { gradient: "from-stone-100 via-white to-stone-200", mockupType: "hero-photo", ready: true },
+  "ready-hero-captura-conversao": { gradient: "from-emerald-50 via-white to-emerald-100", mockupType: "form", ready: true },
+  "ready-hero-captura-cinematic": { gradient: "from-gray-950 via-gray-900 to-gray-800", mockupType: "hero-photo", ready: true },
+  "ready-hero-vendas-saas": { gradient: "from-stone-200 via-stone-100 to-stone-50", mockupType: "saas", ready: true },
+  "ready-hero-vendas-bege": { gradient: "from-amber-100 via-orange-50 to-amber-50", mockupType: "hero-photo", ready: true },
+  "ready-hero-vendas-portfolio": { gradient: "from-gray-950 via-gray-900 to-amber-950/20", mockupType: "portfolio", ready: true },
+  "ready-lp-vendas-spe": { gradient: "from-white via-emerald-50 to-white", mockupType: "saas", ready: true },
+  "ready-ecommerce-apple": { gradient: "from-gray-100 via-white to-gray-50", mockupType: "cards", ready: true },
+  "ready-store-apple": { gradient: "from-gray-50 via-white to-gray-100", mockupType: "saas", ready: true },
+  "ready-lp-workshop": { gradient: "from-white via-blue-50 to-white", mockupType: "form", ready: true },
+  "ready-saas-harmonic": { gradient: "from-gray-950 via-emerald-950/20 to-gray-900", mockupType: "saas", ready: true },
+  "ready-saas-agency": { gradient: "from-gray-900 via-orange-950/20 to-gray-950", mockupType: "hero-photo", ready: true },
+  "ready-captura-comunidade": { gradient: "from-violet-950 via-gray-950 to-violet-950", mockupType: "hero-photo", ready: true },
+  "ready-blog-premium": { gradient: "from-white via-gray-50 to-white", mockupType: "blog", ready: true },
+  "ready-captura-light": { gradient: "from-stone-100 via-white to-stone-50", mockupType: "hero-photo", ready: true },
+  "ready-captura-dark": { gradient: "from-gray-950 via-amber-950/10 to-gray-950", mockupType: "hero-photo", ready: true },
 };
 
 function MockupOverlay({ type }: { type: string }) {

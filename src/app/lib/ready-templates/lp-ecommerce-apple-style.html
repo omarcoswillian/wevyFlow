@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[INSERIR: Nome da Loja] — Acessorios</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   E-COMMERCE — Estilo Apple Store Accessories
+   Ultra-minimal, grid de categorias/produtos
+   WavyFlow Arsenal
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  --bg: #ffffff;
+  --bg-section: #f5f5f7;
+  --bg-card: #fafafa;
+  --bg-img: #f2f2f2;
+  --text: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-muted: #86868b;
+  --blue: #0071e3;
+  --blue-hover: #0077ed;
+  --border: #d2d2d7;
+  --border-light: #e8e8ed;
+  --font: 'Montserrat', -apple-system, 'Helvetica Neue', sans-serif;
+  --container: 1200px;
+  --nav-height: 48px;
+  --radius: 18px;
+  --radius-sm: 12px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body { font-family: var(--font); color: var(--text); background: var(--bg); line-height: 1.5; }
+a { text-decoration: none; color: inherit; }
+img { max-width: 100%; display: block; }
+
+/* ── NAV BAR ── */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.nav-inner {
+  max-width: var(--container);
+  margin: 0 auto;
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-logo svg { width: 20px; height: 20px; opacity: 0.85; }
+
+.nav-logo-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+  letter-spacing: -0.01em;
+}
+
+.nav-links a:hover { color: var(--text); }
+
+.nav-icons {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav-icons svg {
+  width: 17px;
+  height: 17px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.nav-icons svg:hover { color: var(--text); }
+
+/* ── SUBNAV ── */
+.subnav {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.subnav-inner {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+}
+
+.subnav-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.subnav-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-section);
+  border-radius: 100px;
+  padding: 3px;
+}
+
+.subnav-tab {
+  padding: 6px 16px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all 0.2s;
+}
+
+.subnav-tab.active {
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.subnav-tab:hover:not(.active) { color: var(--text); }
+
+/* ── LAYOUT ── */
+.page-layout {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 40px;
+}
+
+/* ── SIDEBAR FILTROS ── */
+.sidebar {
+  position: sticky;
+  top: calc(var(--nav-height) + 52px + 24px);
+  align-self: start;
+}
+
+.filter-group {
+  margin-bottom: 32px;
+}
+
+.filter-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+
+.filter-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font);
+}
+
+.filter-item:hover { background: var(--bg-section); color: var(--text); }
+.filter-item.active { background: var(--bg-section); color: var(--text); font-weight: 600; }
+
+.filter-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-img);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.filter-icon svg { width: 14px; height: 14px; color: var(--text-muted); }
+
+/* ── PRODUCT GRID ── */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* ── PRODUCT CARD ── */
+.product-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid transparent;
+}
+
+.product-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04), 0 16px 40px rgba(0,0,0,0.06);
+  border-color: var(--border-light);
+}
+
+.product-card-img {
+  width: 100%;
+  aspect-ratio: 1;
+  background: var(--bg-img);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  position: relative;
+}
+
+/* Placeholder de produto em cinza claro */
+.product-placeholder {
+  width: 70%;
+  height: 70%;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(145deg, #e8e8e8, #dcdcdc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-placeholder svg { width: 40px; height: 40px; color: #c0c0c0; }
+
+.product-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.product-badge-new { background: #ff6b2c; color: #fff; }
+.product-badge-sale { background: #bf4800; color: #fff; }
+
+.product-card-info {
+  padding: 16px 18px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card-brand {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.product-card-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.35;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.product-card-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-bottom: 12px;
+  flex: 1;
+}
+
+.product-card-colors {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.product-card-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.product-card-price-old {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-decoration: line-through;
+  font-weight: 400;
+  margin-left: 6px;
+}
+
+.product-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blue);
+  margin-top: 8px;
+  transition: color 0.2s;
+}
+
+.product-card-link:hover { color: var(--blue-hover); }
+.product-card-link svg { width: 12px; height: 12px; }
+
+/* ── CATEGORY CARD (variante maior) ── */
+.category-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  grid-column: span 1;
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.category-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04), 0 16px 40px rgba(0,0,0,0.06);
+}
+
+.category-card.featured { grid-column: span 2; }
+
+.category-card-img {
+  width: 100%;
+  aspect-ratio: 16/10;
+  background: var(--bg-img);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.category-card.featured .category-card-img { aspect-ratio: 2/1; }
+
+.category-card-info {
+  padding: 20px 22px 24px;
+}
+
+.category-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+
+.category-card-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.category-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+  transition: color 0.2s;
+}
+
+.category-card-link:hover { color: var(--blue-hover); }
+
+/* ── FOOTER ── */
+.footer {
+  background: var(--bg-section);
+  border-top: 1px solid var(--border-light);
+  padding: 48px 24px 32px;
+}
+
+.footer-inner {
+  max-width: var(--container);
+  margin: 0 auto;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.footer-col-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+
+.footer-col ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.footer-col ul a {
+  font-size: 11px;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+
+.footer-col ul a:hover { color: var(--text); }
+
+.footer-bottom {
+  border-top: 1px solid var(--border-light);
+  padding-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer-bottom p {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.footer-bottom a { color: var(--blue); }
+
+/* ── REVEAL ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.v { opacity: 1; transform: translateY(0); }
+.rd1 { transition-delay: 0.05s; }
+.rd2 { transition-delay: 0.1s; }
+.rd3 { transition-delay: 0.15s; }
+.rd4 { transition-delay: 0.2s; }
+.rd5 { transition-delay: 0.25s; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .product-grid { grid-template-columns: repeat(2, 1fr); }
+  .category-card.featured { grid-column: span 2; }
+  .footer-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .page-layout { grid-template-columns: 1fr; gap: 24px; }
+  .sidebar { position: static; display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; }
+  .filter-group { margin-bottom: 0; min-width: max-content; }
+  .filter-group-title { display: none; }
+  .filter-list { flex-direction: row; gap: 4px; }
+  .filter-item { padding: 6px 14px; white-space: nowrap; border: 1px solid var(--border-light); border-radius: 100px; font-size: 12px; }
+  .filter-icon { display: none; }
+  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .category-card.featured { grid-column: span 1; }
+  .footer-grid { grid-template-columns: repeat(2, 1fr); }
+  .subnav-title { font-size: 17px; }
+  .subnav-tabs { display: none; }
+}
+
+@media (max-width: 480px) {
+  .product-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ NAV BAR ══════════════ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+      <span class="nav-logo-text">[INSERIR: Marca]</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#">Loja</a></li>
+      <li><a href="#">Produtos</a></li>
+      <li><a href="#">Novidades</a></li>
+      <li><a href="#">Acessorios</a></li>
+      <li><a href="#">Suporte</a></li>
+    </ul>
+    <div class="nav-icons">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════ SUBNAV ══════════════ -->
+<div class="subnav">
+  <div class="subnav-inner">
+    <h1 class="subnav-title">Acessorios</h1>
+    <div class="subnav-tabs">
+      <button class="subnav-tab active">Buscar por produto</button>
+      <button class="subnav-tab">Buscar por categoria</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PAGE LAYOUT ══════════════ -->
+<div class="page-layout">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="filter-group">
+      <div class="filter-group-title">Produto</div>
+      <div class="filter-list">
+        <button class="filter-item active">
+          <div class="filter-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+          Todos
+        </button>
+        <button class="filter-item">
+          <div class="filter-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+          Computadores
+        </button>
+        <button class="filter-item">
+          <div class="filter-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></div>
+          Tablets
+        </button>
+        <button class="filter-item">
+          <div class="filter-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></div>
+          Smartphones
+        </button>
+        <button class="filter-item">
+          <div class="filter-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+          Relogios
+        </button>
+        <button class="filter-item">
+          <div class="filter-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg></div>
+          Audio
+        </button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-group-title">Categoria</div>
+      <div class="filter-list">
+        <button class="filter-item">Capas e protecao</button>
+        <button class="filter-item">Recarga</button>
+        <button class="filter-item">Armazenamento</button>
+        <button class="filter-item">Teclados e mouses</button>
+        <button class="filter-item">Fones de ouvido</button>
+        <button class="filter-item">Escritorio</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── CONTENT GRID ── -->
+  <div>
+    <!-- Categorias em destaque -->
+    <div class="product-grid" style="margin-bottom:24px;">
+      <div class="category-card featured reveal">
+        <div class="category-card-img">
+          <div class="product-placeholder" style="width:50%;height:60%;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="5" y="2" width="14" height="20" rx="2"/></svg>
+          </div>
+        </div>
+        <div class="category-card-info">
+          <div class="category-card-title">Acessorios em destaque para Smartphone</div>
+          <div class="category-card-sub">Capas, carregadores, peliculas e mais.</div>
+          <a href="#" class="category-card-link">Comprar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+      <div class="category-card reveal rd1">
+        <div class="category-card-img">
+          <div class="product-placeholder" style="width:45%;height:55%;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+        </div>
+        <div class="category-card-info">
+          <div class="category-card-title">Pulseiras</div>
+          <div class="category-card-sub">Novas cores e estilos.</div>
+          <a href="#" class="category-card-link">Comprar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid de produtos -->
+    <div class="product-grid">
+      <!-- Produto 1 -->
+      <div class="product-card reveal">
+        <div class="product-card-img">
+          <span class="product-badge product-badge-new">Novo</span>
+          <div class="product-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="5" y="2" width="14" height="20" rx="3"/></svg>
+          </div>
+        </div>
+        <div class="product-card-info">
+          <div class="product-card-brand">[Marca]</div>
+          <div class="product-card-name">Capa de Silicone com MagSafe</div>
+          <div class="product-card-desc">Protecao premium com alinhamento magnetico perfeito.</div>
+          <div class="product-card-colors">
+            <div class="color-dot" style="background:#1d1d1f;"></div>
+            <div class="color-dot" style="background:#f5f5f7;"></div>
+            <div class="color-dot" style="background:#5b7083;"></div>
+            <div class="color-dot" style="background:#bf4f51;"></div>
+          </div>
+          <div class="product-card-price">R$ 399,00</div>
+          <a href="#" class="product-card-link">Comprar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+
+      <!-- Produto 2 -->
+      <div class="product-card reveal rd1">
+        <div class="product-card-img">
+          <div class="product-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M5 12.55a11 11 0 0114.08 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><circle cx="12" cy="20" r="1"/></svg>
+          </div>
+        </div>
+        <div class="product-card-info">
+          <div class="product-card-brand">[Marca]</div>
+          <div class="product-card-name">Carregador MagSafe</div>
+          <div class="product-card-desc">Recarga sem fio rapida e eficiente com alinhamento automatico.</div>
+          <div class="product-card-price">R$ 329,00</div>
+          <a href="#" class="product-card-link">Comprar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+
+      <!-- Produto 3 -->
+      <div class="product-card reveal rd2">
+        <div class="product-card-img">
+          <span class="product-badge product-badge-sale">-20%</span>
+          <div class="product-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg>
+          </div>
+        </div>
+        <div class="product-card-info">
+          <div class="product-card-brand">[Marca]</div>
+          <div class="product-card-name">Fones de Ouvido Sem Fio Pro</div>
+          <div class="product-card-desc">Cancelamento ativo de ruido e audio espacial.</div>
+          <div class="product-card-colors">
+            <div class="color-dot" style="background:#1d1d1f;"></div>
+            <div class="color-dot" style="background:#f5f5f7;"></div>
+          </div>
+          <div class="product-card-price">R$ 2.099,00 <span class="product-card-price-old">R$ 2.599,00</span></div>
+          <a href="#" class="product-card-link">Comprar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+
+      <!-- Produto 4 -->
+      <div class="product-card reveal rd3">
+        <div class="product-card-img">
+          <div class="product-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+        </div>
+        <div class="product-card-info">
+          <div class="product-card-brand">[Marca]</div>
+          <div class="product-card-name">Teclado Magic Keyboard</div>
+          <div class="product-card-desc">Design fino, teclas silenciosas e sensor biometrico integrado.</div>
+          <div class="product-card-colors">
+            <div class="color-dot" style="background:#f5f5f7;"></div>
+            <div class="color-dot" style="background:#1d1d1f;"></div>
+          </div>
+          <div class="product-card-price">R$ 1.499,00</div>
+          <a href="#" class="product-card-link">Comprar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+
+      <!-- Produto 5 -->
+      <div class="product-card reveal rd4">
+        <div class="product-card-img">
+          <span class="product-badge product-badge-new">Novo</span>
+          <div class="product-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+          </div>
+        </div>
+        <div class="product-card-info">
+          <div class="product-card-brand">[Marca]</div>
+          <div class="product-card-name">Rastreador Bluetooth</div>
+          <div class="product-card-desc">Encontre suas chaves, carteira ou mochila com precisao.</div>
+          <div class="product-card-price">R$ 249,00</div>
+          <a href="#" class="product-card-link">Comprar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+
+      <!-- Produto 6 -->
+      <div class="product-card reveal rd5">
+        <div class="product-card-img">
+          <div class="product-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+        </div>
+        <div class="product-card-info">
+          <div class="product-card-brand">[Marca]</div>
+          <div class="product-card-name">Pulseira Esportiva</div>
+          <div class="product-card-desc">Material resistente a agua, confortavel para uso diario e treinos.</div>
+          <div class="product-card-colors">
+            <div class="color-dot" style="background:#1d1d1f;"></div>
+            <div class="color-dot" style="background:#3b6d4e;"></div>
+            <div class="color-dot" style="background:#5b7083;"></div>
+            <div class="color-dot" style="background:#e3c565;"></div>
+            <div class="color-dot" style="background:#bf4f51;"></div>
+          </div>
+          <div class="product-card-price">R$ 349,00</div>
+          <a href="#" class="product-card-link">Comprar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="footer-col-title">Comprar e conhecer</div>
+        <ul>
+          <li><a href="#">Loja</a></li>
+          <li><a href="#">Acessorios</a></li>
+          <li><a href="#">Ofertas especiais</a></li>
+          <li><a href="#">Financiamento</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Servicos</div>
+        <ul>
+          <li><a href="#">Garantia</a></li>
+          <li><a href="#">Suporte tecnico</a></li>
+          <li><a href="#">Reparo</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Conta</div>
+        <ul>
+          <li><a href="#">Gerenciar conta</a></li>
+          <li><a href="#">Meus pedidos</a></li>
+          <li><a href="#">Lista de desejos</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Empresa</div>
+        <ul>
+          <li><a href="#">Sobre nos</a></li>
+          <li><a href="#">Carreiras</a></li>
+          <li><a href="#">Imprensa</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Legal</div>
+        <ul>
+          <li><a href="#">Privacidade</a></li>
+          <li><a href="#">Termos de uso</a></li>
+          <li><a href="#">Cookies</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>2026 &copy; [INSERIR: Marca]. Todos os direitos reservados.</p>
+      <p><a href="#">Brasil</a></p>
+    </div>
+  </div>
+</footer>
+
+<script>
+var ro = new IntersectionObserver(function(e){e.forEach(function(i){if(i.isIntersecting)i.target.classList.add('v');});},{threshold:0.05,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){ro.observe(el);});
+
+// Subnav tabs
+document.querySelectorAll('.subnav-tab').forEach(function(t){
+  t.addEventListener('click',function(){
+    document.querySelectorAll('.subnav-tab').forEach(function(b){b.classList.remove('active');});
+    t.classList.add('active');
+  });
+});
+
+// Filter items
+document.querySelectorAll('.filter-item').forEach(function(f){
+  f.addEventListener('click',function(){
+    f.closest('.filter-list').querySelectorAll('.filter-item').forEach(function(b){b.classList.remove('active');});
+    f.classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>

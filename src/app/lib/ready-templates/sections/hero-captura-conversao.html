@@ -1,0 +1,391 @@
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   HERO B — Conversao Extrema / Tiago Tessmann
+   Light + form com labels + foto com mockups
+   ═══════════════════════════════════════ */
+:root {
+  --green: #0D8B4A;
+  --green-dark: #0a6e3a;
+  --green-glow: rgba(13,139,74,0.15);
+  --text-dark: #1a1a1a;
+  --text-body: #555;
+  --text-label: #333;
+  --border: #ddd;
+  --red: #CC0000;
+  --font: 'Montserrat', sans-serif;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: var(--font); color: var(--text-dark); background: #fff; -webkit-font-smoothing: antialiased; }
+
+.hero-conv {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 50% 50%;
+  background: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Glow verde sutil na direita */
+.hero-conv::after {
+  content: '';
+  position: absolute;
+  right: -10%;
+  top: 10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(13,139,74,0.07) 0%, transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* — Coluna esquerda — */
+.hc-content {
+  position: relative;
+  z-index: 2;
+  padding: 60px 40px 60px 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hc-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.hc-logo-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hc-logo-icon svg { width: 20px; height: 20px; }
+
+.hc-logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.hc-logo-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--green);
+}
+
+.hc-logo-sub {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green);
+}
+
+.hc-h1 {
+  font-size: clamp(26px, 3.2vw, 36px);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--green);
+  margin-bottom: 14px;
+}
+
+.hc-sub {
+  font-size: 14px;
+  color: var(--text-body);
+  line-height: 1.6;
+  margin-bottom: 28px;
+  max-width: 460px;
+}
+
+.hc-sub strong { font-weight: 600; color: var(--text-dark); }
+.hc-sub u { text-decoration-color: var(--green); text-underline-offset: 3px; }
+
+/* — Form com labels — */
+.hc-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 420px;
+}
+
+.hc-form-group { display: flex; flex-direction: column; }
+
+.hc-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-label);
+  margin-bottom: 6px;
+}
+
+.hc-label .req { color: var(--red); margin-left: 2px; }
+
+.hc-input,
+.hc-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 15px;
+  color: var(--text-dark);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.hc-input::placeholder { color: #aaa; }
+.hc-input:focus, .hc-select:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px var(--green-glow);
+}
+
+.hc-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='7' viewBox='0 0 12 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+.hc-btn {
+  width: 100%;
+  padding: 16px 24px;
+  border: none;
+  border-radius: 100px;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #fff;
+  cursor: pointer;
+  background-image: linear-gradient(45deg, var(--green-dark), var(--green), var(--green-dark), var(--green));
+  background-size: 400% 200%;
+  animation: brilho 3.4s infinite linear;
+  transition: box-shadow 0.3s, transform 0.3s;
+  margin-top: 4px;
+}
+
+.hc-btn:hover {
+  box-shadow: 0 0 20px rgba(13,139,74,0.4);
+  transform: scale(1.02);
+}
+
+@keyframes brilho {
+  0% { background-position: 0 0; }
+  100% { background-position: 100% 0; }
+}
+
+/* — Coluna direita (foto + mockups) — */
+.hc-visual {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hc-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  background: linear-gradient(180deg, #f5f5f5 0%, #eee 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.hc-photo-placeholder svg { opacity: 0.12; }
+.hc-photo-placeholder span { font-size: 13px; color: #bbb; font-weight: 500; }
+
+/* Mockups flutuantes */
+.hc-mockup {
+  position: absolute;
+  background: #1a1a1a;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+  overflow: hidden;
+  z-index: 10;
+  border: 1px solid rgba(255,255,255,0.08);
+  opacity: 0;
+  animation: mockup-in 0.7s ease-out forwards;
+}
+
+.hc-mockup-1 {
+  top: 15%;
+  right: 10%;
+  width: 200px;
+  animation-delay: 0.8s;
+  transform: rotate(-3deg);
+}
+
+.hc-mockup-2 {
+  bottom: 18%;
+  right: 5%;
+  width: 180px;
+  animation-delay: 1.3s;
+  transform: rotate(2deg);
+}
+
+@keyframes mockup-in {
+  0% { opacity: 0; transform: translateY(20px) rotate(0deg); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Conteudo simulado dentro do mockup */
+.hc-mockup-header {
+  padding: 8px 10px;
+  background: #222;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hc-mockup-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+.hc-mockup-body { padding: 12px; }
+
+.hc-mockup-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.hc-mockup-face {
+  width: 32px;
+  height: 24px;
+  border-radius: 4px;
+}
+
+.hc-mockup-bar {
+  height: 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+/* Reveal */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.rd1 { transition-delay: 0.1s; }
+.rd2 { transition-delay: 0.2s; }
+.rd3 { transition-delay: 0.3s; }
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .hero-conv { grid-template-columns: 1fr; }
+  .hc-visual { order: -1; height: 280px; }
+  .hc-photo-placeholder { min-height: 280px; }
+  .hc-mockup { display: none; }
+  .hc-content { padding: 32px 24px; }
+  .hc-h1 { font-size: 24px; }
+  .hc-form { max-width: 100%; }
+}
+</style>
+
+<!-- ═══ HERO B — CONVERSAO EXTREMA ═══ -->
+<section class="hero-conv">
+  <!-- Coluna esquerda -->
+  <div class="hc-content">
+    <div class="hc-logo reveal">
+      <div class="hc-logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <div class="hc-logo-text">
+        <span class="hc-logo-name">Mentoria</span>
+        <span class="hc-logo-sub">Conversao Extrema 2.0</span>
+      </div>
+    </div>
+
+    <h1 class="hc-h1 reveal rd1">
+      Garanta R$ 2.000 de Desconto + Bonus Exclusivos na Proxima Turma da Mentoria Conversao Extrema
+    </h1>
+
+    <p class="hc-sub reveal rd2">
+      Faca sua pre-inscricao gratuita, assista a <strong><u>live no dia 15 de abril as 19h</u></strong> e garanta sua vaga com essa condicao especial.
+    </p>
+
+    <form class="hc-form reveal rd3" onsubmit="event.preventDefault();">
+      <div class="hc-form-group">
+        <label class="hc-label">E-mail <span class="req">*</span></label>
+        <input class="hc-input" type="email" placeholder="Seu melhor e-mail" required>
+      </div>
+      <div class="hc-form-group">
+        <label class="hc-label">Qual e a sua media de faturamento mensal? <span class="req">*</span></label>
+        <select class="hc-select" required>
+          <option value="" disabled selected>Selecione</option>
+          <option>Ate R$ 5.000</option>
+          <option>R$ 5.000 a R$ 20.000</option>
+          <option>R$ 20.000 a R$ 50.000</option>
+          <option>Acima de R$ 50.000</option>
+        </select>
+      </div>
+      <div class="hc-form-group">
+        <label class="hc-label">WhatsApp com DDD <span class="req">*</span></label>
+        <input class="hc-input" type="tel" placeholder="Ex: 11 99000-0000" required>
+      </div>
+      <button class="hc-btn" type="submit">FAZER PRE-INSCRICAO</button>
+    </form>
+  </div>
+
+  <!-- Coluna direita -->
+  <div class="hc-visual">
+    <div class="hc-photo-placeholder">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Foto do mentor (sorrindo)</span>
+    </div>
+
+    <!-- Mockup 1 — Video call -->
+    <div class="hc-mockup hc-mockup-1">
+      <div class="hc-mockup-header">
+        <div class="hc-mockup-dot" style="background:#ff5f57;"></div>
+        <div class="hc-mockup-dot" style="background:#febc2e;"></div>
+        <div class="hc-mockup-dot" style="background:#28c840;"></div>
+      </div>
+      <div class="hc-mockup-body">
+        <div class="hc-mockup-row">
+          <div class="hc-mockup-face" style="background:#2563eb;"></div>
+          <div class="hc-mockup-face" style="background:#7c3aed;"></div>
+          <div class="hc-mockup-face" style="background:#0D8B4A;"></div>
+        </div>
+        <div class="hc-mockup-row">
+          <div class="hc-mockup-face" style="background:#dc2626;"></div>
+          <div class="hc-mockup-face" style="background:#ea580c;"></div>
+          <div class="hc-mockup-face" style="background:#0891b2;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mockup 2 — Dashboard -->
+    <div class="hc-mockup hc-mockup-2">
+      <div class="hc-mockup-header">
+        <div class="hc-mockup-dot" style="background:#ff5f57;"></div>
+        <div class="hc-mockup-dot" style="background:#febc2e;"></div>
+        <div class="hc-mockup-dot" style="background:#28c840;"></div>
+      </div>
+      <div class="hc-mockup-body">
+        <div class="hc-mockup-bar" style="background:#0D8B4A;width:80%;"></div>
+        <div class="hc-mockup-bar" style="background:#2563eb;width:60%;"></div>
+        <div class="hc-mockup-bar" style="background:#7c3aed;width:45%;"></div>
+        <div class="hc-mockup-bar" style="background:#ea580c;width:30%;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+var ro = new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){ro.observe(el);});
+</script>

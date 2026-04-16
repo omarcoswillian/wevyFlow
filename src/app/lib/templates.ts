@@ -12,62 +12,13 @@ export const TEMPLATE_CATEGORIES = [
 export const TEMPLATES: TemplateItem[] = [
   // ━━━ PÁGINA DE VENDAS ━━━
   {
-    id: "vendas-lancamento",
-    label: "Lançamento Digital",
-    description: "Página completa de lançamento com hero, prova social, features, depoimentos, preços, FAQ e CTA",
+    id: "ready-lp-vendas-spe",
+    label: "LP Vendas Completa 13 Secoes (Pronto)",
+    description: "Pagina de vendas completa com 13 secoes: Hero, Depoimentos dark, Traits, Metodo, Para Quem, 6 Etapas, Bonus, Pricing, Garantia, Criador, FAQ, CTA Final. Estilo clean light com green accent.",
     category: "vendas",
-    tags: ["completa", "lançamento", "curso"],
-    prompt: `Crie uma landing page de VENDAS completa para um curso/produto digital. Estilo premium, fundo claro (#fafafa alternando com branco). Fonte Sora para headlines, Inter para body. Cor de acento verde (#10b981).
-
-ESTRUTURA OBRIGATÓRIA (nesta ordem):
-1. HEADER: Logo "MétodoX" à esquerda, nav (Módulos, Depoimentos, Preços, FAQ), botão "Começar Agora" verde à direita. Sticky com blur.
-2. HERO: Duas colunas 55/45. Esquerda: badge "🔥 Turma 12 aberta", headline "Domine [habilidade] e escale seus resultados" em 48px bold, parágrafo 18px cinza, dois botões (verde primário + outline), stats row ("+5.000 alunos • 4.9/5 avaliação • 97% aprovação"). Direita: mockup de dashboard com cards de métricas e gráfico de barras simulado.
-3. LOGOS: Faixa "Visto em" com 6 logos de veículos (Exame, Forbes, Estadão — use texto estilizado cinza).
-4. FEATURES: "O que você vai aprender" + grid 3x2 de 6 cards com ícone (use divs com background colorido), título bold, descrição 2 linhas.
-5. DEPOIMENTOS: 3 cards com foto avatar circular (div gradiente), nome, cargo, texto em itálico, 5 estrelas douradas. Card central em destaque elevado.
-6. PREÇOS: 3 planos — Básico R$97, Profissional R$197 (DESTAQUE preto com badge "Mais Escolhido"), VIP R$497. Lista de features com checks. CTA em cada card.
-7. FAQ: Layout 2 colunas — esquerda "Perguntas Frequentes" + link suporte, direita 6 perguntas estilo accordion aberto.
-8. CTA FINAL: Fundo escuro #111, headline branca "Comece sua transformação hoje", timer estático, botão verde enorme, garantia 7 dias.
-9. FOOTER: Fundo #111, grid 4 colunas (logo+desc, links produto, links empresa, newsletter input), copyright.
-
-Scroll reveal em todos os elementos. Hover effects em cards e botões. Mobile-first responsivo.`,
+    tags: ["pronto", "completa", "13 secoes", "curso", "infoproduto", "light"],
+    prompt: "READY:ready-lp-vendas-spe",
   },
-  {
-    id: "vendas-produto-fisico",
-    label: "Produto / E-commerce",
-    description: "Página de produto com hero full, galeria, benefícios, reviews e compra",
-    category: "vendas",
-    tags: ["produto", "ecommerce", "físico"],
-    prompt: `Crie uma landing page de PRODUTO (pode ser físico ou digital) com design premium clean.
-
-1. HEADER: Logo à esquerda, nav centro, botão "Comprar" à direita. Fundo branco.
-2. HERO: Full width. Headline enorme "O produto que vai mudar seu dia a dia" centralizada, subtítulo, botão CTA preto. Abaixo: card grande de produto com gradiente suave como "foto" e badge de preço.
-3. FEATURES VISUAIS: 4 blocos alternados (imagem esquerda/direita) com headline, texto e ícones de benefício.
-4. NÚMEROS: Row de 4 stats grandes (+10.000 vendidos, 4.9 estrelas, 30 dias garantia, Frete grátis).
-5. REVIEWS: Grid 2x2 de depoimentos com estrelas e avatares.
-6. OFERTA: Card centralizado com preço antigo riscado, preço novo grande, parcelas, CTA, selos de segurança.
-7. FOOTER minimalista.
-
-Estilo: fundo branco/creme (#f9f8f6), tipografia preta, acento em cor quente. Espaçamento enorme.`,
-  },
-  {
-    id: "vendas-webinar",
-    label: "Webinar / Evento",
-    description: "Inscrição para webinar ao vivo com countdown, bio do palestrante e formulário",
-    category: "vendas",
-    tags: ["webinar", "evento", "ao vivo"],
-    prompt: `Crie uma landing page para INSCRIÇÃO em webinar/evento ao vivo. Fundo escuro premium.
-
-1. HEADER: Logo branco, badge "AO VIVO" vermelho pulsante.
-2. HERO: Headline branca "Webinar Gratuito: [tema]", data/hora em destaque, foto/avatar do palestrante com nome e título, 4 bullets do que será abordado.
-3. FORMULÁRIO: Card glassmorphism com campos (Nome, Email, WhatsApp), botão "Reservar Minha Vaga", contador "237 vagas restantes" (estático).
-4. SOBRE O PALESTRANTE: Duas colunas com bio, conquistas em números.
-5. PROGRAMAÇÃO: Timeline vertical com 4 tópicos do webinar.
-6. CTA FINAL: Countdown estático + botão.
-
-Cor de acento azul (#3b82f6). Glow sutil atrás do formulário.`,
-  },
-
   {
     id: "ready-lp-vendas",
     label: "LP Vendas Completa (Pronto)",
@@ -77,7 +28,80 @@ Cor de acento azul (#3b82f6). Glow sutil atrás do formulário.`,
     prompt: "READY:ready-lp-vendas",
   },
 
+  {
+    id: "ready-ecommerce-apple",
+    label: "E-commerce Apple Style (Pronto)",
+    description: "Pagina de loja estilo Apple Store. Nav bar com blur, sidebar de filtros, grid de produtos com cards, badges, cores, precos. Ultra-minimal, fundo branco. Responsivo.",
+    category: "vendas",
+    tags: ["pronto", "ecommerce", "loja", "apple", "minimal", "produtos", "grid"],
+    prompt: "READY:ready-ecommerce-apple",
+  },
+  {
+    id: "ready-store-apple",
+    label: "Store Page — Estilo Apple (Pronto)",
+    description: "Pagina de loja principal estilo Apple Store BR. Hero grande, quick links, cards de produto full-width e side-by-side, diferencial, trade-in, ajuda, footer completo. Ultra-minimal.",
+    category: "vendas",
+    tags: ["pronto", "store", "loja", "apple", "cards", "produtos", "minimal", "premium"],
+    prompt: "READY:ready-store-apple",
+  },
+  {
+    id: "ready-lp-workshop",
+    label: "LP Workshop / Imersao (Pronto)",
+    description: "Pagina de vendas completa para workshop/imersao online. 16 secoes: Hero, marquee, depoimentos, problema, solucao, para quem, beneficios, conteudo com VIP, cronograma, pricing 2 cards (Start+VIP), instrutores, garantia, contato WhatsApp, FAQ accordion, CTA final. Estilo clean white.",
+    category: "vendas",
+    tags: ["pronto", "workshop", "imersao", "evento", "white", "clean", "pricing", "faq"],
+    prompt: "READY:ready-lp-workshop",
+  },
+  {
+    id: "ready-saas-harmonic",
+    label: "SaaS Page — Estilo Harmonic (Pronto)",
+    description: "Pagina SaaS completa: hero dark com bricks decorativos e dashboard mockup, logo cloud, solutions grid 4col, features alternadas dark, quote, discover 3col, developer section com code block, testimonials, case studies, CTA, footer dark. Estilo dark/light alternado.",
+    category: "saas",
+    tags: ["pronto", "saas", "dark", "api", "code", "developer", "startup", "harmonic"],
+    prompt: "READY:ready-saas-harmonic",
+  },
+  {
+    id: "ready-saas-agency",
+    label: "Agency / Automacao AI (Pronto)",
+    description: "Pagina de agencia de automacao/IA: hero dark com foto bg, logo cloud, missao split, processo com tabs e workflow diagram, testimonial dark com foto, case studies, use cases grid com categorias, footer dark com marca grande. CTA laranja.",
+    category: "saas",
+    tags: ["pronto", "agency", "automacao", "ai", "dark", "process", "cases", "workflow"],
+    prompt: "READY:ready-saas-agency",
+  },
+
   // ━━━ CAPTURA DE LEADS ━━━
+  {
+    id: "ready-captura-comunidade",
+    label: "Captura Comunidade / Clube (Pronto)",
+    description: "Pagina de captura para comunidade/clube. Hero dark com foto do especialista e glow roxo, formulario integrado, secao de pilares split, CTA com circulos de avatares. Estilo Fe e Razao.",
+    category: "captura",
+    tags: ["pronto", "comunidade", "clube", "dark", "purple", "formulario", "pilares"],
+    prompt: "READY:ready-captura-comunidade",
+  },
+  {
+    id: "ready-captura-light",
+    label: "Captura Premium Light (Pronto)",
+    description: "Pagina de captura light premium. Hero split com foto e cards flutuantes, formulario com labels, prova social em 4 stats, 3 beneficios com icones, CTA final com trust badges. Fundo claro elegante, accent verde.",
+    category: "captura",
+    tags: ["pronto", "captura", "light", "premium", "foto", "formulario", "stats", "beneficios"],
+    prompt: "READY:ready-captura-light",
+  },
+  {
+    id: "ready-captura-dark",
+    label: "Captura Premium Dark (Pronto)",
+    description: "Pagina de captura dark premium. Hero split com foto, glow dourado, 3 cards flutuantes, formulario com labels, prova social dourada, 3 beneficios, CTA final. Fundo escuro, accent dourado.",
+    category: "captura",
+    tags: ["pronto", "captura", "dark", "premium", "gold", "foto", "formulario", "glow"],
+    prompt: "READY:ready-captura-dark",
+  },
+  {
+    id: "ready-captura-infoprodutor",
+    label: "Captura Infoprodutor (Pronto)",
+    description: "Template pronto estilo Luana Carolina. Dark com formulario completo (nome, email, whatsapp, data, genero), CTA verde animado, stats, depoimentos. Carrega instantaneamente.",
+    category: "captura",
+    tags: ["pronto", "infoprodutor", "dark", "formulario completo", "lançamento", "green cta"],
+    prompt: "READY:ready-captura-infoprodutor",
+  },
   {
     id: "ready-captura-premium",
     label: "Captura Premium (Pronto)",
@@ -203,6 +227,15 @@ Tipografia Sora. Mínimo de elementos. Máximo de impacto.`,
 - Design gamificado mas profissional.`,
   },
 
+  {
+    id: "ready-quiz-funnel",
+    label: "Quiz Funnel — Perfil Digital (Pronto)",
+    description: "Funil de quiz completo com 5 perguntas interativas, barra de progresso animada, 4 resultados personalizados (Criador, Builder, Agencia, E-commerce), formulario de captura no resultado, prova social. Dark premium com accent roxo. JS funcional.",
+    category: "captura",
+    tags: ["pronto", "quiz", "funnel", "interativo", "gamificacao", "captura", "dark", "roxo", "js"],
+    prompt: "READY:ready-quiz-funnel",
+  },
+
   // ━━━ SaaS / PRODUTO ━━━
   {
     id: "saas-dashboard",
@@ -240,6 +273,14 @@ Cores: roxo (#8b5cf6) como acento, fundo escuro, glassmorphism nos cards.`,
   },
 
   // ━━━ BLOG / CONTEÚDO ━━━
+  {
+    id: "ready-blog-premium",
+    label: "Blog Premium — Estilo Apple (Pronto)",
+    description: "Blog completo com hero split, icones de categoria, post destaque grande, grid 4col de recentes, populares 3col, newsletter, topicos em pills, autores, footer. Estilo Apple Store editorial.",
+    category: "blog",
+    tags: ["pronto", "blog", "editorial", "apple", "newsletter", "categorias", "autores"],
+    prompt: "READY:ready-blog-premium",
+  },
   {
     id: "blog-home",
     label: "Blog Homepage",
@@ -310,6 +351,56 @@ Fundo branco, tipografia Sora, preto puro. Sem cores de acento — monocromátic
 6. CONTATO: Email + GitHub + LinkedIn como links grandes.
 
 Fundo #0a0a0f, texto branco/verde terminal (#10b981). Monospace + Sans-serif mix.`,
+  },
+
+  // ━━━ ARSENAL DE HEROES (hand-crafted por referencia) ━━━
+  {
+    id: "ready-hero-captura-luana",
+    label: "Hero Luana Carolina (Pronto)",
+    description: "Hero split light com foto recortada, form inline (nome, whatsapp, email), CTA verde animado, cards flutuantes 'Venda aprovada'. Estilo Execucao Digital.",
+    category: "sections",
+    tags: ["pronto", "hero", "captura", "luana", "light", "form", "cards flutuantes"],
+    prompt: "READY:ready-hero-captura-luana",
+  },
+  {
+    id: "ready-hero-captura-conversao",
+    label: "Hero Conversao Extrema (Pronto)",
+    description: "Hero split light com form com labels e select, CTA verde pill, foto com mockups de tela flutuantes. Estilo Tiago Tessmann.",
+    category: "sections",
+    tags: ["pronto", "hero", "captura", "conversao", "labels", "select", "mockups"],
+    prompt: "READY:ready-hero-captura-conversao",
+  },
+  {
+    id: "ready-hero-captura-cinematic",
+    label: "Hero Cinematic Dark (Pronto)",
+    description: "Hero fullscreen dark com foto e overlay cinematografico, logo editorial serif, CTA verde simples sem form. Estilo Execucao Maxima.",
+    category: "sections",
+    tags: ["pronto", "hero", "captura", "dark", "cinematic", "foto", "premium"],
+    prompt: "READY:ready-hero-captura-cinematic",
+  },
+  {
+    id: "ready-hero-vendas-saas",
+    label: "Hero SaaS Minimal (Pronto)",
+    description: "Hero centralizado com fundo creme, headline gigante, CTA preto pill, mockup de dashboard detalhado com stats e graficos. Estilo AssetWise/Linear.",
+    category: "sections",
+    tags: ["pronto", "hero", "vendas", "saas", "dashboard", "minimal", "creme"],
+    prompt: "READY:ready-hero-vendas-saas",
+  },
+  {
+    id: "ready-hero-vendas-bege",
+    label: "Hero Split Bege (Pronto)",
+    description: "Hero split 50/50 com fundo bege/nude, tag uppercase, headline com acento verde oliva, foto lifestyle. Estilo Rotina para Enriquecer.",
+    category: "sections",
+    tags: ["pronto", "hero", "vendas", "bege", "lifestyle", "wellness"],
+    prompt: "READY:ready-hero-vendas-bege",
+  },
+  {
+    id: "ready-hero-vendas-portfolio",
+    label: "Hero Portfolio Dark (Pronto)",
+    description: "Hero dark com foto PB grande, cards de projetos flutuantes com cores diferentes (roxo, dourado, oliva). Estilo showroom/portfolio pessoal.",
+    category: "sections",
+    tags: ["pronto", "hero", "vendas", "portfolio", "dark", "showroom", "projetos"],
+    prompt: "READY:ready-hero-vendas-portfolio",
   },
 
   // ━━━ SECOES PRONTAS (hand-crafted) ━━━

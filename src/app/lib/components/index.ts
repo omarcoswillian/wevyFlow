@@ -2,12 +2,14 @@ import { HEADERS } from "./headers";
 import { HEROES } from "./heroes";
 import { SECTIONS } from "./sections";
 import { LANCAMENTO } from "./lancamento";
+import { CAPTURA } from "./captura";
 
 export const COMPONENT_LIBRARY: Record<string, string> = {
   ...HEADERS,
   ...HEROES,
   ...SECTIONS,
   ...LANCAMENTO,
+  ...CAPTURA,
 };
 
 export function getComponentCatalog(): string {

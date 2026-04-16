@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[INSERIR: Nome do Produto]</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fff;--bg-dark:#0c0a14;--bg-dark-2:#141220;--bg-card-dark:#1a1828;
+  --text:#111;--text-60:#555;--text-40:#999;
+  --green:#22c55e;--green-dark:#16a34a;
+  --purple:#7c3aed;--purple-glow:rgba(124,58,237,0.15);
+  --grad-orange:linear-gradient(135deg,#f97316,#ec4899);
+  --border-dark:rgba(255,255,255,0.08);
+  --font:'Montserrat',-apple-system,sans-serif;
+  --container:900px;--radius:14px;--radius-sm:10px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;}
+body{font-family:var(--font);color:var(--text);background:var(--bg);line-height:1.6;}
+a{text-decoration:none;color:inherit;}
+.container{max-width:var(--container);margin:0 auto;padding:0 24px;}
+.text-grad{background:var(--grad-orange);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;}
+.section-label-light{color:var(--text-40);}
+.section-label-purple{color:var(--purple);}
+.section-label::before{content:'+ ';}
+.btn-green{display:inline-block;padding:14px 32px;background:var(--green);color:#fff;border:none;border-radius:100px;font-family:var(--font);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;cursor:pointer;transition:all 0.2s;text-decoration:none;text-align:center;}
+.btn-green:hover{background:var(--green-dark);box-shadow:0 4px 20px rgba(34,197,94,0.3);}
+
+/* ═══ 1. VIDEO SECTION ═══ */
+.sec-video{padding:56px 0;text-align:center;background:var(--bg);}
+.sec-video h2{font-size:clamp(18px,2.5vw,26px);font-weight:700;color:var(--text);letter-spacing:-0.03em;line-height:1.2;max-width:480px;margin:0 auto 8px;}
+.sec-video .vid-sub{font-size:12px;color:var(--text-60);max-width:380px;margin:0 auto 24px;line-height:1.5;}
+.vid-placeholder{max-width:320px;margin:0 auto;aspect-ratio:9/16;background:linear-gradient(180deg,#e8e0d4,#d8cfc0);border-radius:16px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.1);}
+.vid-play{width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;}
+.vid-play svg{width:20px;height:20px;color:#fff;margin-left:3px;}
+.vid-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:#fff;font-size:16px;font-weight:800;text-transform:uppercase;text-shadow:0 2px 8px rgba(0,0,0,0.4);letter-spacing:0.02em;line-height:1.2;}
+
+/* ═══ 2. RESULTADOS REAIS ═══ */
+.sec-results{padding:56px 0;background:var(--bg);}
+.results-header{text-align:center;margin-bottom:32px;}
+.results-header h2{font-size:clamp(20px,2.8vw,28px);font-weight:800;color:var(--text);letter-spacing:-0.03em;line-height:1.2;max-width:580px;margin:0 auto 12px;}
+.results-header h2 em{font-style:italic;}
+.results-header h3{font-size:clamp(18px,2.5vw,24px);font-weight:800;color:var(--text);margin-bottom:6px;}
+.results-header p{font-size:12px;color:var(--text-60);max-width:440px;margin:0 auto;}
+.results-header p strong{color:var(--text);font-weight:600;}
+
+/* Cards de story dark */
+.results-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 auto;max-width:640px;}
+.result-card{background:var(--bg-dark);border-radius:16px;overflow:hidden;aspect-ratio:9/16;position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:16px;border:1px solid var(--border-dark);}
+/* Simular conteudo de story dark */
+.result-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;margin:8px 10px 0;display:flex;gap:2px;background:linear-gradient(90deg,var(--green) 50%,rgba(255,255,255,0.15) 50%);border-radius:2px;z-index:1;}
+.rc-bubbles{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.rc-bubble{background:rgba(255,255,255,0.06);border-radius:12px 12px 12px 4px;padding:8px 10px;font-size:8px;color:rgba(255,255,255,0.5);line-height:1.4;max-width:85%;}
+.rc-bubble-right{align-self:flex-end;border-radius:12px 12px 4px 12px;background:rgba(255,255,255,0.03);}
+.rc-title{font-size:10px;font-weight:700;color:#fff;margin-bottom:4px;}
+.rc-desc{font-size:8px;color:rgba(255,255,255,0.35);}
+
+/* ═══ 3. ALGO EM COMUM ═══ */
+.sec-common{padding:48px 0;background:var(--bg);text-align:center;}
+.sec-common h2{font-size:clamp(20px,2.8vw,28px);font-weight:800;color:var(--text);letter-spacing:-0.03em;margin-bottom:24px;}
+.sec-common h2 .text-grad{font-style:italic;}
+.common-icons{display:flex;justify-content:center;gap:32px;margin-bottom:12px;}
+.common-icon{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-60);}
+.common-icon svg{width:16px;height:16px;color:var(--green);}
+.common-note{font-size:11px;color:var(--text-40);margin-bottom:24px;}
+.common-note strong{color:var(--text);font-weight:600;}
+
+/* ═══ 4. METODO (dark + purple glow) ═══ */
+.sec-method{padding:56px 0;background:var(--bg-dark);position:relative;overflow:hidden;text-align:center;}
+.sec-method::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,var(--purple-glow),transparent 70%);pointer-events:none;}
+.sec-method h2{font-size:clamp(22px,3vw,32px);font-weight:800;color:#fff;letter-spacing:-0.03em;line-height:1.15;margin-bottom:12px;position:relative;z-index:1;}
+.sec-method .method-sub{font-size:12px;color:rgba(255,255,255,0.4);max-width:380px;margin:0 auto 16px;position:relative;z-index:1;}
+/* Fluxo visual: stories comuns → dinheiro */
+.method-flow{display:flex;align-items:center;justify-content:center;gap:12px;margin:20px 0 32px;position:relative;z-index:1;}
+.method-flow-item{padding:10px 18px;border-radius:100px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px;}
+.method-flow-from{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);border:1px solid var(--border-dark);}
+.method-flow-arrow{color:rgba(255,255,255,0.2);font-size:16px;}
+.method-flow-to{background:rgba(124,58,237,0.15);color:var(--purple);border:1px solid rgba(124,58,237,0.2);}
+.method-note{font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:24px;position:relative;z-index:1;}
+.method-note strong{color:rgba(255,255,255,0.6);}
+/* Mockups de stories */
+.method-mockups{display:flex;justify-content:center;gap:12px;position:relative;z-index:1;}
+.method-mockup{width:140px;aspect-ratio:9/16;background:var(--bg-card-dark);border-radius:12px;border:1px solid var(--border-dark);display:flex;align-items:center;justify-content:center;font-size:9px;color:rgba(255,255,255,0.15);}
+
+/* ═══ 5. FUNCIONA PARA VOCE (dark→white) ═══ */
+.sec-profile{padding:56px 0;background:var(--bg-dark);}
+.sec-profile h2{font-size:clamp(22px,3vw,30px);font-weight:800;color:#fff;letter-spacing:-0.03em;text-align:center;margin-bottom:32px;}
+.sec-profile h2 .text-grad{font-style:italic;}
+.profile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.profile-card{background:var(--bg-card-dark);border:1px solid var(--border-dark);border-radius:var(--radius);padding:18px;transition:border-color 0.3s;}
+.profile-card:hover{border-color:rgba(124,58,237,0.3);}
+.profile-card-check{width:20px;height:20px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.profile-card-check svg{width:10px;height:10px;color:#fff;}
+.profile-card h4{font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:-0.01em;}
+.profile-card p{font-size:10px;color:rgba(255,255,255,0.35);line-height:1.45;}
+.profile-note{text-align:center;font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:20px;}
+.profile-note strong{color:rgba(255,255,255,0.6);}
+
+/* ═══ 6. FRASE DE IMPACTO ═══ */
+.sec-impact{padding:56px 24px;background:var(--bg);text-align:center;}
+.sec-impact h2{font-size:clamp(24px,3.5vw,38px);font-weight:800;color:var(--text);letter-spacing:-0.04em;line-height:1.15;max-width:640px;margin:0 auto;}
+
+/* ═══ 7. COMO FUNCIONA (etapas, dark) ═══ */
+.sec-steps{padding:56px 0;background:var(--bg-dark);position:relative;overflow:hidden;}
+.sec-steps::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:500px;height:300px;background:radial-gradient(ellipse,var(--purple-glow),transparent 70%);pointer-events:none;}
+.sec-steps h2{font-size:clamp(22px,3vw,30px);font-weight:800;color:#fff;letter-spacing:-0.03em;text-align:center;margin-bottom:36px;position:relative;z-index:1;}
+.sec-steps h2 .text-grad{font-style:normal;}
+
+.steps-list{display:flex;flex-direction:column;gap:12px;position:relative;z-index:1;}
+.step-card{background:#fff;border-radius:var(--radius);padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center;}
+.step-badge{display:inline-block;padding:3px 10px;border-radius:6px;background:var(--purple);color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;}
+.step-card h3{font-size:16px;font-weight:800;color:var(--text);letter-spacing:-0.02em;margin-bottom:6px;line-height:1.2;}
+.step-card p{font-size:11px;color:var(--text-60);line-height:1.55;margin-bottom:10px;}
+.step-checks{display:flex;flex-direction:column;gap:4px;}
+.step-check{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text-60);}
+.step-check svg{width:14px;height:14px;color:var(--green);flex-shrink:0;}
+.step-mockup{width:100%;aspect-ratio:16/10;background:linear-gradient(145deg,#f0f0f0,#e4e4e4);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:10px;color:#bbb;overflow:hidden;position:relative;}
+/* Mockup label overlay */
+.step-mockup-label{position:absolute;right:12px;bottom:12px;font-size:11px;font-weight:700;color:var(--text);line-height:1.2;text-align:right;max-width:120px;}
+
+.steps-cta{text-align:center;margin-top:28px;position:relative;z-index:1;}
+
+/* ═══ 8. BONUS ═══ */
+.sec-bonus{padding:56px 0;background:var(--bg);position:relative;overflow:hidden;text-align:center;}
+/* Texto grande transparente no fundo */
+.bonus-bg-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(80px,15vw,180px);font-weight:900;color:rgba(0,0,0,0.03);letter-spacing:-0.05em;white-space:nowrap;pointer-events:none;z-index:0;}
+.sec-bonus h2{font-size:clamp(20px,2.8vw,28px);font-weight:800;color:var(--text);letter-spacing:-0.03em;margin-bottom:8px;position:relative;z-index:1;}
+.sec-bonus h2 .text-grad{font-style:italic;}
+.bonus-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:28px;position:relative;z-index:1;text-align:left;}
+.bonus-card{background:var(--bg-dark);border-radius:var(--radius);padding:20px;border:1px solid var(--border-dark);}
+.bonus-value{font-size:10px;font-weight:700;color:var(--green);margin-bottom:8px;}
+.bonus-card h3{font-size:14px;font-weight:700;color:#fff;letter-spacing:-0.01em;margin-bottom:4px;}
+.bonus-card p{font-size:10px;color:rgba(255,255,255,0.35);line-height:1.5;}
+
+/* ═══ 9. FAQ ═══ */
+.sec-faq{padding:56px 0;background:var(--bg);}
+.sec-faq h2{font-size:clamp(22px,3vw,30px);font-weight:800;color:var(--text);text-align:center;letter-spacing:-0.03em;margin-bottom:32px;}
+.faq-list{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:6px;}
+.faq-item{border-radius:var(--radius-sm);overflow:hidden;}
+.faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px;background:var(--bg-dark);border:none;font-family:var(--font);font-size:13px;font-weight:600;color:#fff;text-align:left;cursor:pointer;transition:all 0.2s;border-radius:var(--radius-sm);}
+.faq-q:hover{background:var(--bg-card-dark);}
+.faq-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:rgba(255,255,255,0.3);font-size:16px;transition:transform 0.3s;}
+.faq-item.open .faq-icon{transform:rotate(45deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height 0.35s ease;}
+.faq-item.open .faq-a{max-height:300px;}
+.faq-a-inner{padding:12px 18px;font-size:12px;color:var(--text-60);line-height:1.65;background:var(--bg-dark);border-radius:0 0 var(--radius-sm) var(--radius-sm);color:rgba(255,255,255,0.45);}
+
+/* ═══ CTA FINAL ═══ */
+.sec-cta-final{padding:48px 0;text-align:center;background:var(--bg);}
+
+/* ═══ FOOTER ═══ */
+.footer{padding:20px 24px;text-align:center;border-top:1px solid var(--border-dark);background:var(--bg-dark);}
+.footer p{font-size:10px;color:rgba(255,255,255,0.2);}
+
+.reveal{opacity:0;transform:translateY(14px);transition:opacity 0.6s ease,transform 0.6s ease;}
+.reveal.v{opacity:1;transform:translateY(0);}
+.rd1{transition-delay:.06s}.rd2{transition-delay:.12s}.rd3{transition-delay:.18s}
+
+@media(max-width:768px){
+  .results-cards{grid-template-columns:repeat(2,1fr);}
+  .results-cards .result-card:nth-child(n+3){display:none;}
+  .profile-grid{grid-template-columns:1fr;}
+  .step-card{grid-template-columns:1fr;}.step-mockup{order:-1;}
+  .bonus-grid{grid-template-columns:1fr;}
+  .common-icons{flex-direction:column;align-items:center;gap:8px;}
+  .method-mockups{gap:8px;}.method-mockup{width:100px;}
+  .method-flow{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ 1. VIDEO ═══ -->
+<section class="sec-video">
+  <div class="container">
+    <h2 class="reveal">[INSERIR: Pergunta curiosa sobre o produto — ex: Por que a maioria das contas pequenas ainda nao foi avisada sobre essa brecha?]</h2>
+    <p class="vid-sub reveal rd1">[INSERIR: Subtitulo do video — convite para assistir]</p>
+    <div class="vid-placeholder reveal rd2">
+      <div class="vid-label">Clique para<br>assistir</div>
+      <div class="vid-play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2. RESULTADOS REAIS ═══ -->
+<section class="sec-results">
+  <div class="container">
+    <div class="results-header reveal">
+      <div class="section-label section-label-light">resultados reais</div>
+      <h2>Voce acabou de ver como pessoas comuns estao <em class="text-grad">faturando de 5 a 30 mil reais por mes</em> usando apenas os Stories do Instagram.</h2>
+      <h3>Voce sera o proximo!</h3>
+      <p>[INSERIR: Descricao — O metodo coloca nas suas maos <strong>os mesmos modelos de stories</strong> que ja geraram resultados como esses:]</p>
+    </div>
+    <div class="results-cards">
+      <div class="result-card reveal">
+        <div class="rc-bubbles">
+          <div class="rc-bubble">[INSERIR: texto de conversa/depoimento curto]</div>
+          <div class="rc-bubble rc-bubble-right">[INSERIR: resposta]</div>
+          <div class="rc-bubble">[INSERIR: mais contexto]</div>
+        </div>
+        <div class="rc-title">[INSERIR: Resultado headline]</div>
+        <div class="rc-desc">[INSERIR: descricao curta]</div>
+      </div>
+      <div class="result-card reveal rd1">
+        <div class="rc-bubbles">
+          <div class="rc-bubble">[INSERIR: conversa]</div>
+          <div class="rc-bubble rc-bubble-right">[INSERIR: resposta]</div>
+        </div>
+        <div class="rc-title">[INSERIR: Resultado 2]</div>
+        <div class="rc-desc">[INSERIR: descricao]</div>
+      </div>
+      <div class="result-card reveal rd2">
+        <div class="rc-bubbles">
+          <div class="rc-bubble">[INSERIR: conversa]</div>
+          <div class="rc-bubble">[INSERIR: mais texto]</div>
+        </div>
+        <div class="rc-title">[INSERIR: Resultado 3]</div>
+        <div class="rc-desc">[INSERIR: descricao]</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3. ALGO EM COMUM ═══ -->
+<section class="sec-common">
+  <div class="container">
+    <div class="section-label section-label-light reveal">essas pessoas ja vendem</div>
+    <h2 class="reveal rd1">E elas tem <span class="text-grad">algo em comum:</span></h2>
+    <div class="common-icons reveal rd2">
+      <div class="common-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Nao sao famosas</div>
+      <div class="common-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Nao viralizam</div>
+      <div class="common-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Tem menos de 5 mil seguidores</div>
+    </div>
+    <p class="common-note reveal rd2">Apenas aplicando os <strong>modelos validados de stories.</strong></p>
+    <div class="reveal rd3"><a href="#" class="btn-green">Quero aplicar e ter resultados hoje</a></div>
+  </div>
+</section>
+
+<!-- ═══ 4. O METODO (dark + purple glow) ═══ -->
+<section class="sec-method">
+  <div class="container">
+    <div class="section-label section-label-purple reveal">o metodo</div>
+    <h2 class="reveal rd1">O que e o <span class="text-grad">[INSERIR: Nome do Metodo]</span>?</h2>
+    <p class="method-sub reveal rd2">[INSERIR: O metodo e o unico curso que te mostra como transformar]</p>
+    <div class="method-flow reveal rd2">
+      <div class="method-flow-item method-flow-from"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/></svg> Stories comuns</div>
+      <span class="method-flow-arrow">→</span>
+      <div class="method-flow-item method-flow-to"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Vendas</div>
+    </div>
+    <p class="method-note reveal rd3">Usando <strong>modelos de story validados</strong> que voce so copia, posta e vende</p>
+    <div class="method-mockups reveal rd3">
+      <div class="method-mockup">Modelo story 1</div>
+      <div class="method-mockup">Modelo story 2</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5. FUNCIONA PARA VOCE ═══ -->
+<section class="sec-profile">
+  <div class="container">
+    <div class="section-label section-label-purple reveal" style="text-align:center;">perfil</div>
+    <h2 class="reveal rd1"><span class="text-grad">Funciona</span> para voce se:</h2>
+    <div class="profile-grid">
+      <div class="profile-card reveal">
+        <div class="profile-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <h4>Profissional liberal</h4>
+        <p>[INSERIR: nichos — psicologos, medicos, advogados, nutricionistas, esteticistas, personal trainers, consultores, terapeutas]</p>
+      </div>
+      <div class="profile-card reveal rd1">
+        <div class="profile-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <h4>CLT com renda extra</h4>
+        <p>[INSERIR: vende bolo de pote, doces, marmitas ou qualquer outro produto como renda extra]</p>
+      </div>
+      <div class="profile-card reveal rd2">
+        <div class="profile-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <h4>Vende produtos fisicos</h4>
+        <p>[INSERIR: semijoias, roupas, cosmeticos, alimentos, produtos artesanais]</p>
+      </div>
+      <div class="profile-card reveal">
+        <div class="profile-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <h4>Ja tentou e nao vendeu</h4>
+        <p>[INSERIR: ja tentou usar o Instagram e nunca vendeu nada pelo Instagram]</p>
+      </div>
+      <div class="profile-card reveal rd1">
+        <div class="profile-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <h4>Tem um negocio local</h4>
+        <p>[INSERIR: tem uma loja e enxerga como ferramenta de crescimento real]</p>
+      </div>
+      <div class="profile-card reveal rd2">
+        <div class="profile-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <h4>Nunca criou conteudo</h4>
+        <p>[INSERIR: nao tem experiencia com Instagram e nao sabe por onde comecar]</p>
+      </div>
+    </div>
+    <p class="profile-note reveal">[INSERIR: Nota — funciona independentemente do seu nicho]</p>
+    <div class="reveal" style="text-align:center;"><a href="#" class="btn-green">Quero aplicar os modelos no meu perfil agora</a></div>
+  </div>
+</section>
+
+<!-- ═══ 6. FRASE DE IMPACTO ═══ -->
+<section class="sec-impact">
+  <h2 class="reveal">[INSERIR: Frase de impacto grande — ex: Vender sem ser chato e muito mais facil do que voce imagina.]</h2>
+</section>
+
+<!-- ═══ 7. COMO FUNCIONA (etapas) ═══ -->
+<section class="sec-steps">
+  <div class="container">
+    <div class="section-label section-label-purple reveal" style="text-align:center;">conteudo</div>
+    <h2 class="reveal rd1">Como funciona o <span class="text-grad">[INSERIR: Nome]</span> na pratica?</h2>
+
+    <div class="steps-list">
+      <div class="step-card reveal">
+        <div><div class="step-badge">Etapa 1</div><h3>[INSERIR: Etapa 1 titulo]</h3><p>[INSERIR: descricao da etapa 1]</p>
+          <div class="step-checks"><div class="step-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: beneficio 1]</div><div class="step-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: beneficio 2]</div></div>
+        </div>
+        <div class="step-mockup"><span class="step-mockup-label">[INSERIR: Titulo do mockup]</span></div>
+      </div>
+      <div class="step-card reveal">
+        <div><div class="step-badge">Etapa 2</div><h3>[INSERIR: Etapa 2]</h3><p>[INSERIR: descricao]</p>
+          <div class="step-checks"><div class="step-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: beneficio]</div></div>
+        </div>
+        <div class="step-mockup"></div>
+      </div>
+      <div class="step-card reveal">
+        <div><div class="step-badge">Etapa 3</div><h3>[INSERIR: Etapa 3]</h3><p>[INSERIR: descricao]</p></div>
+        <div class="step-mockup"></div>
+      </div>
+      <div class="step-card reveal">
+        <div><div class="step-badge">Etapa 4</div><h3>[INSERIR: Etapa 4]</h3><p>[INSERIR: descricao]</p></div>
+        <div class="step-mockup"></div>
+      </div>
+      <div class="step-card reveal">
+        <div><div class="step-badge">Etapa 5</div><h3>[INSERIR: Etapa 5]</h3><p>[INSERIR: descricao]</p></div>
+        <div class="step-mockup"></div>
+      </div>
+      <div class="step-card reveal">
+        <div><div class="step-badge">Etapa 6</div><h3>[INSERIR: Etapa 6]</h3><p>[INSERIR: descricao]</p></div>
+        <div class="step-mockup"></div>
+      </div>
+    </div>
+    <div class="steps-cta reveal"><a href="#" class="btn-green">Quero os modelos e comecar hoje</a></div>
+  </div>
+</section>
+
+<!-- ═══ 8. BONUS ═══ -->
+<section class="sec-bonus">
+  <div class="bonus-bg-text">bonus</div>
+  <div class="container">
+    <div class="section-label section-label-light reveal">bonus</div>
+    <h2 class="reveal rd1">Ao entrar agora, voce ainda <span class="text-grad">leva estes bonus:</span></h2>
+    <div class="bonus-grid">
+      <div class="bonus-card reveal">
+        <div class="bonus-value">Valor: R$ [INSERIR]</div>
+        <h3>[INSERIR: Bonus 1 titulo]</h3>
+        <p>[INSERIR: descricao do bonus 1]</p>
+      </div>
+      <div class="bonus-card reveal rd1">
+        <div class="bonus-value">Valor: R$ [INSERIR]</div>
+        <h3>[INSERIR: Bonus 2]</h3>
+        <p>[INSERIR: descricao]</p>
+      </div>
+      <div class="bonus-card reveal rd2">
+        <div class="bonus-value">Valor: R$ [INSERIR]</div>
+        <h3>[INSERIR: Bonus 3]</h3>
+        <p>[INSERIR: descricao]</p>
+      </div>
+      <div class="bonus-card reveal rd3">
+        <div class="bonus-value">Valor: R$ [INSERIR]</div>
+        <h3>[INSERIR: Bonus 4]</h3>
+        <p>[INSERIR: descricao]</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 9. FAQ ═══ -->
+<section class="sec-faq">
+  <div class="container">
+    <div class="section-label section-label-light reveal" style="text-align:center;">FAQ</div>
+    <h2 class="reveal rd1">Duvidas? Temos as respostas</h2>
+    <div class="faq-list">
+      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>[INSERIR: Pergunta 1]?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">[INSERIR: Resposta 1]</div></div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>[INSERIR: Pergunta 2]?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">[INSERIR: Resposta 2]</div></div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>[INSERIR: Pergunta 3]?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">[INSERIR: Resposta 3]</div></div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>[INSERIR: Pergunta 4]?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">[INSERIR: Resposta 4]</div></div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>[INSERIR: Pergunta 5]?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">[INSERIR: Resposta 5]</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA FINAL ═══ -->
+<section class="sec-cta-final">
+  <div class="container reveal"><a href="#" class="btn-green" style="padding:16px 40px;font-size:14px;">[INSERIR: CTA final text]</a></div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer"><p>[INSERIR: Razao Social] | CNPJ: [INSERIR: CNPJ]</p></footer>
+
+<script>
+var ro=new IntersectionObserver(function(e){e.forEach(function(i){if(i.isIntersecting)i.target.classList.add('v');});},{threshold:0.05,rootMargin:'0px 0px -20px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){ro.observe(el);});
+</script>
+</body>
+</html>

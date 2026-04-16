@@ -1,0 +1,256 @@
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   HERO F — Portfolio Dark (Luana Carolina Showroom)
+   Foto PB + cards de projetos flutuantes
+   ═══════════════════════════════════════ */
+:root {
+  --bg: #111;
+  --gold: #fecc5a;
+  --olive: #6b7a3d;
+  --purple: #7c3aed;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Montserrat', sans-serif;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: var(--font-sans); color: #fff; background: var(--bg); -webkit-font-smoothing: antialiased; }
+
+.hero-port {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 42% 58%;
+  background: var(--bg);
+  overflow: hidden;
+  position: relative;
+}
+
+/* — Coluna esquerda (perfil + cards) — */
+.hp-left {
+  padding: 60px 30px 60px 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+
+/* Profile badge */
+.hp-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 40px;
+}
+
+.hp-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), #c8a832);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 18px;
+  color: #111;
+  flex-shrink: 0;
+}
+
+.hp-profile-info { display: flex; flex-direction: column; }
+
+.hp-profile-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hp-profile-tag {
+  font-family: var(--font-serif);
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  font-style: italic;
+}
+
+/* Project cards */
+.hp-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hp-card {
+  border-radius: 12px;
+  padding: 20px 24px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hp-card:hover {
+  transform: translateY(-4px);
+}
+
+.hp-card-1 {
+  background: linear-gradient(135deg, #2d1b69 0%, #1a1040 100%);
+}
+.hp-card-1:hover { box-shadow: 0 8px 30px rgba(124,58,237,0.2); }
+
+.hp-card-2 {
+  background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+  border-color: rgba(254,204,90,0.15);
+}
+.hp-card-2:hover { box-shadow: 0 8px 30px rgba(254,204,90,0.12); }
+
+.hp-card-3 {
+  background: linear-gradient(135deg, #2a2820 0%, #1e1d18 100%);
+  border-color: rgba(107,122,61,0.15);
+}
+.hp-card-3:hover { box-shadow: 0 8px 30px rgba(107,122,61,0.12); }
+
+.hp-card-tag {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.35);
+}
+
+.hp-card-brand {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+}
+
+.hp-card-1 .hp-card-brand { color: var(--purple); }
+.hp-card-2 .hp-card-brand { color: var(--gold); }
+.hp-card-3 .hp-card-brand { color: var(--olive); }
+
+.hp-card-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.4;
+}
+
+.hp-card-title .highlight-gold { color: var(--gold); font-weight: 600; }
+.hp-card-title .highlight-purple { color: var(--purple); font-weight: 600; }
+.hp-card-title .highlight-olive { color: var(--olive); font-weight: 600; }
+
+/* — Coluna direita (foto) — */
+.hp-right {
+  position: relative;
+  overflow: hidden;
+}
+
+.hp-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  background: linear-gradient(180deg, #222 0%, #1a1a1a 50%, #111 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  filter: grayscale(100%);
+}
+
+.hp-photo-placeholder svg { opacity: 0.08; }
+.hp-photo-placeholder span { font-size: 13px; color: #555; font-weight: 500; }
+
+/* Substituir por: <img src="foto.jpg" style="width:100%;height:100%;object-fit:cover;filter:grayscale(100%) contrast(1.1);"> */
+
+/* Glow quente atras da foto */
+.hp-right::after {
+  content: '';
+  position: absolute;
+  bottom: 20%;
+  left: 30%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(200,168,50,0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Reveal */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.rd1 { transition-delay: 0.15s; }
+.rd2 { transition-delay: 0.3s; }
+.rd3 { transition-delay: 0.45s; }
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .hero-port {
+    grid-template-columns: 1fr;
+  }
+  .hp-right {
+    order: -1;
+    height: 350px;
+  }
+  .hp-photo-placeholder { min-height: 350px; }
+  .hp-left {
+    padding: 32px 24px;
+  }
+  .hp-profile { justify-content: center; }
+}
+</style>
+
+<!-- ═══ HERO F — PORTFOLIO DARK ═══ -->
+<section class="hero-port">
+  <!-- Coluna esquerda -->
+  <div class="hp-left">
+    <!-- Profile -->
+    <div class="hp-profile reveal">
+      <div class="hp-avatar">LC</div>
+      <div class="hp-profile-info">
+        <span class="hp-profile-name">LUANA CAROLINA</span>
+        <span class="hp-profile-tag">Bem vindo ao futuro</span>
+      </div>
+    </div>
+
+    <!-- Cards de projetos -->
+    <div class="hp-cards">
+      <div class="hp-card hp-card-1 reveal rd1">
+        <span class="hp-card-tag">Metodo</span>
+        <span class="hp-card-brand">METODO SPE</span>
+        <span class="hp-card-title">O guia pratico para <span class="highlight-purple">aumentar</span> suas vendas pelos stories</span>
+      </div>
+
+      <div class="hp-card hp-card-2 reveal rd2">
+        <span class="hp-card-tag">Lista de espera</span>
+        <span class="hp-card-brand">EXECUCAO DIGITAL</span>
+        <span class="hp-card-title">Como criar um infoproduto <span class="highlight-gold">irresistivel</span> e escalar suas <span class="highlight-gold">vendas</span> no digital</span>
+      </div>
+
+      <div class="hp-card hp-card-3 reveal rd3">
+        <span class="hp-card-tag">Programa</span>
+        <span class="hp-card-brand">ROTINA PARA ENRIQUECER</span>
+        <span class="hp-card-title">Em 10 passos, construa uma rotina funcional que te levara a <span class="highlight-olive">alcancar seus objetivos</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Coluna direita (foto PB) -->
+  <div class="hp-right">
+    <div class="hp-photo-placeholder">
+      <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Foto grande PB do especialista</span>
+    </div>
+  </div>
+</section>
+
+<script>
+var ro = new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){ro.observe(el);});
+</script>

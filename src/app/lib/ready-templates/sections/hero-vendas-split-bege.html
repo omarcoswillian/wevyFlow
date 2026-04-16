@@ -1,0 +1,173 @@
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   HERO E — Rotina para Enriquecer
+   Split 50/50 bege/nude + foto lifestyle
+   ═══════════════════════════════════════ */
+:root {
+  --bg-bege: #f2ede8;
+  --olive: #6b7a3d;
+  --olive-dark: #556230;
+  --text-dark: #1a1a1a;
+  --text-body: #777;
+  --font: 'Montserrat', sans-serif;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: var(--font); color: var(--text-dark); background: var(--bg-bege); -webkit-font-smoothing: antialiased; }
+
+.hero-bege {
+  min-height: 85vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--bg-bege);
+  overflow: hidden;
+}
+
+/* — Coluna esquerda — */
+.hb-content {
+  padding: 80px 40px 80px 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hb-tag {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--olive);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 24px;
+}
+
+.hb-h1 {
+  font-size: clamp(28px, 3.5vw, 42px);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-dark);
+  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+}
+
+.hb-h1 .accent {
+  color: var(--olive);
+}
+
+.hb-sub {
+  font-size: 15px;
+  color: var(--text-body);
+  line-height: 1.6;
+  max-width: 440px;
+  margin-bottom: 32px;
+}
+
+.hb-sub strong {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.hb-btn {
+  display: inline-block;
+  padding: 14px 28px;
+  background: var(--olive);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, box-shadow 0.3s;
+  align-self: flex-start;
+}
+
+.hb-btn:hover {
+  background: var(--olive-dark);
+  box-shadow: 0 4px 16px rgba(107,122,61,0.25);
+}
+
+/* — Coluna direita (foto) — */
+.hb-visual {
+  position: relative;
+  overflow: hidden;
+}
+
+.hb-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  background: linear-gradient(135deg, #e8e0d8 0%, #d4c8bc 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: 24px 0 0 24px;
+}
+
+.hb-photo-placeholder svg { opacity: 0.12; }
+.hb-photo-placeholder span { font-size: 13px; color: #b0a498; font-weight: 500; }
+
+/* Substituir placeholder por:
+   <img src="foto.jpg" alt="Lifestyle" style="width:100%;height:100%;object-fit:cover;border-radius:24px 0 0 24px;"> */
+
+/* Reveal */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.rd1 { transition-delay: 0.1s; }
+.rd2 { transition-delay: 0.2s; }
+.rd3 { transition-delay: 0.3s; }
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .hero-bege {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .hb-visual { order: -1; }
+  .hb-photo-placeholder {
+    min-height: 300px;
+    border-radius: 0;
+  }
+  .hb-content {
+    padding: 32px 24px;
+  }
+  .hb-h1 { font-size: 26px; }
+  .hb-btn { width: 100%; text-align: center; }
+}
+</style>
+
+<!-- ═══ HERO E — SPLIT BEGE ═══ -->
+<section class="hero-bege">
+  <!-- Coluna esquerda -->
+  <div class="hb-content">
+    <div class="hb-tag reveal">ROTINA PARA ENRIQUECER</div>
+
+    <h1 class="hb-h1 reveal rd1">
+      Em 10 passos, construa uma rotina funcional que te levara a <span class="accent">alcancar seus objetivos.</span>
+    </h1>
+
+    <p class="hb-sub reveal rd2">
+      Tenha acesso ao <strong>protocolo secreto</strong> para organizar os seus dias (e a sua mente)
+    </p>
+
+    <div class="reveal rd3">
+      <a href="#" class="hb-btn">Tire seus planos do papel</a>
+    </div>
+  </div>
+
+  <!-- Coluna direita -->
+  <div class="hb-visual">
+    <!-- Substituir por <img> foto lifestyle (pessoa trabalhando, mesa, notebook) -->
+    <div class="hb-photo-placeholder">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+      <span>Foto lifestyle (pessoa trabalhando)</span>
+    </div>
+  </div>
+</section>
+
+<script>
+var ro = new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){ro.observe(el);});
+</script>

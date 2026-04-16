@@ -13,13 +13,11 @@ import {
   Star,
   Users,
   Share2,
-  ChevronDown,
   ExternalLink,
   Zap,
   PanelLeft,
 } from "lucide-react";
-import { Platform, TemplateCategory } from "../lib/types";
-import { TEMPLATES, TEMPLATE_CATEGORIES } from "../lib/templates";
+import { Platform } from "../lib/types";
 
 export interface GenerateData {
   prompt: string;
@@ -66,8 +64,6 @@ const COLOR_PRESETS = [
   { primary: "#10b981", secondary: "#14b8a6" }, { primary: "#f1f5f9", secondary: "#e2e8f0" },
 ];
 
-type BottomTab = "templates" | "recents";
-
 export function HomeView({ onGenerate, isLoading, onNavigate, contentOverride, activeNav }: HomeViewProps) {
   const nav = onNavigate || (() => {});
   const [prompt, setPrompt] = useState("");
@@ -80,14 +76,12 @@ export function HomeView({ onGenerate, isLoading, onNavigate, contentOverride, a
   const [fontChoice, setFontChoice] = useState("sora");
   const [stylePreset, setStylePreset] = useState("dark-premium");
   const [images, setImages] = useState<{ name: string; base64: string }[]>([]);
-  const [activeCategory, setActiveCategory] = useState<TemplateCategory>("vendas");
-  const [bottomTab, setBottomTab] = useState<BottomTab>("templates");
   const [showConfig, setShowConfig] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = () => {
-    if (!prompt.trim() || isLoading) return;
+    if ((!prompt.trim() && images.length === 0) || isLoading) return;
     onGenerate({ prompt, platform, referenceUrl, brandReference, expectations, primaryColor, secondaryColor, fontChoice, stylePreset, images });
   };
 
@@ -107,8 +101,6 @@ export function HomeView({ onGenerate, isLoading, onNavigate, contentOverride, a
     if (fileInputRef.current) fileInputRef.current.value = "";
   }, []);
 
-  const filteredTemplates = TEMPLATES.filter((t) => t.category === activeCategory);
-
   return (
     <div className="flex h-screen bg-[#080809] p-2 gap-2">
       {/* ─── Left Sidebar ─── */}
@@ -120,16 +112,16 @@ export function HomeView({ onGenerate, isLoading, onNavigate, contentOverride, a
         <div className="px-2 pt-3 pb-2">
           {sidebarCollapsed ? (
             <div className="flex flex-col items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 flex items-center justify-center text-white text-[9px] font-bold">W</div>
-              <button onClick={() => setSidebarCollapsed(false)} className="w-8 h-8 rounded-lg flex items-center justify-center text-white/25 hover:text-white/60 hover:bg-white/[0.06] transition-all cursor-pointer" title="Expandir sidebar">
+              <img src="/logoWavyflow.svg" alt="WavyFlow" className="w-8 h-8" />
+              <button onClick={() => setSidebarCollapsed(false)} className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6b6b6b] hover:text-[#9a9a9a] hover:bg-white/[0.06] transition-all cursor-pointer" title="Expandir sidebar">
                 <PanelLeft className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2 px-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 flex items-center justify-center text-white text-[9px] font-bold shrink-0">W</div>
-              <span className="text-sm font-medium text-white/90 flex-1">WavyFlow</span>
-              <button onClick={() => setSidebarCollapsed(true)} className="w-7 h-7 rounded-lg flex items-center justify-center text-white/25 hover:text-white/60 hover:bg-white/[0.06] transition-all cursor-pointer" title="Recolher sidebar">
+            <div className="flex items-center px-2">
+              <img src="/logoWavyflow.svg" alt="WavyFlow" className="w-7 h-7 shrink-0" />
+              <div className="flex-1" />
+              <button onClick={() => setSidebarCollapsed(true)} className="w-7 h-7 rounded-lg flex items-center justify-center text-[#6b6b6b] hover:text-[#9a9a9a] hover:bg-white/[0.06] transition-all cursor-pointer" title="Recolher sidebar">
                 <PanelLeft className="w-4 h-4" />
               </button>
             </div>
@@ -315,53 +307,15 @@ export function HomeView({ onGenerate, isLoading, onNavigate, contentOverride, a
           </div>
         </div>
 
-        {/* ─── Bottom Nav ─── */}
+        {/* ─── Bottom hint ─── */}
         <div className="relative z-10 px-6 pb-5">
-          <div className="max-w-[580px] mx-auto">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-1">
-                {([
-                  { id: "templates" as BottomTab, label: "Templates" },
-                  { id: "recents" as BottomTab, label: "Recentes" },
-                ]).map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setBottomTab(tab.id)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-full text-[11px] font-medium transition-all cursor-pointer",
-                      bottomTab === tab.id ? "bg-white/[0.08] text-white/80" : "text-white/25 hover:text-white/45"
-                    )}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-              <button className="text-[11px] text-white/25 hover:text-white/45 transition-colors cursor-pointer flex items-center gap-1">
-                Ver todos <ArrowRight className="w-3 h-3" />
+          <div className="max-w-[580px] mx-auto text-center">
+            <p className="text-[11px] text-white/20">
+              Ou escolha um template pronto em{" "}
+              <button onClick={() => nav("resources")} className="text-purple-400 hover:text-purple-300 transition-colors cursor-pointer underline underline-offset-2">
+                Resources
               </button>
-            </div>
-
-            {bottomTab === "templates" && (
-              <div>
-                <div className="flex items-center gap-1 mb-2.5">
-                  {TEMPLATE_CATEGORIES.map((cat) => (
-                    <button key={cat.id} onClick={() => setActiveCategory(cat.id)}
-                      className={cn("px-2.5 py-1 rounded-full text-[10px] font-medium transition-all cursor-pointer", activeCategory === cat.id ? "bg-white/[0.07] text-white/70" : "text-white/20 hover:text-white/35")}>{cat.label}</button>
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {filteredTemplates.slice(0, 5).map((t) => (
-                    <button key={t.id} onClick={() => setPrompt(t.prompt)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.05] text-[10px] text-white/25 hover:text-white/50 hover:bg-white/[0.05] transition-all cursor-pointer">
-                      <span>{t.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            {bottomTab === "recents" && (
-              <p className="text-[11px] text-white/15 text-center py-4">Nenhum projeto recente</p>
-            )}
+            </p>
           </div>
         </div>
         </>
@@ -379,7 +333,7 @@ function SidebarItem({ icon, label, active, collapsed, shortcut, onClick }: { ic
       className={cn(
         "flex items-center w-full rounded-xl transition-colors cursor-pointer",
         collapsed ? "justify-center p-2.5" : "gap-2.5 px-2.5 py-2 text-[12px]",
-        active ? "bg-white/[0.06] text-white/80" : "text-white/30 hover:bg-white/[0.04] hover:text-white/50"
+        active ? "bg-white/[0.06] text-[#d1d1d1]" : "text-[#6b6b6b] hover:bg-white/[0.04] hover:text-[#9a9a9a]"
       )}
     >
       {icon}

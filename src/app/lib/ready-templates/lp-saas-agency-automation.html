@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[INSERIR: Nome da Empresa]</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fff;--bg-alt:#f8f8f8;--bg-dark:#141414;--bg-dark-2:#1c1c1e;
+  --text:#1d1d1f;--text-60:#6e6e73;--text-40:#999;
+  --orange:#e85d2a;--orange-hover:#d04f1f;
+  --border:#e5e5e7;--border-dark:rgba(255,255,255,0.08);
+  --font:'Inter',-apple-system,sans-serif;--container:1080px;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;}
+body{font-family:var(--font);color:var(--text);background:var(--bg);line-height:1.6;}
+a{text-decoration:none;color:inherit;}
+.container{max-width:var(--container);margin:0 auto;padding:0 28px;}
+.btn-orange{display:inline-flex;align-items:center;justify-content:center;padding:10px 22px;background:var(--orange);color:#fff;border:none;border-radius:100px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;text-decoration:none;}
+.btn-orange:hover{background:var(--orange-hover);box-shadow:0 4px 16px rgba(232,93,42,0.3);}
+
+/* ── NAV ── */
+.nav{position:fixed;top:0;left:0;width:100%;z-index:100;background:rgba(20,20,20,0.7);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);}
+.nav-inner{max-width:var(--container);margin:0 auto;height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;}
+.nav-logo{font-size:14px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px;}
+.nav-logo-icon{width:28px;height:28px;border-radius:6px;background:var(--orange);display:flex;align-items:center;justify-content:center;}
+.nav-logo-icon svg{width:14px;height:14px;}
+.nav-links{display:flex;gap:24px;list-style:none;}
+.nav-links a{font-size:11px;font-weight:400;color:rgba(255,255,255,0.6);transition:color 0.2s;}
+.nav-links a:hover{color:#fff;}
+
+/* ── HERO (dark with photo bg) ── */
+.hero-agency{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;background:var(--bg-dark);}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(135deg,#2a2a2a 0%,#1a1a1a 40%,#222 100%);z-index:0;}
+.hero-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.55);z-index:1;}
+.hero-content{position:relative;z-index:2;padding:80px 28px 48px;max-width:560px;}
+.hero-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);font-size:11px;color:rgba(255,255,255,0.7);margin-bottom:20px;}
+.hero-badge svg{width:12px;height:12px;color:#f59e0b;}
+.hero-agency h1{font-size:clamp(22px,2.8vw,34px);font-weight:600;color:#fff;letter-spacing:-0.03em;line-height:1.2;margin-bottom:14px;}
+.hero-agency .hero-sub{font-size:13px;color:rgba(255,255,255,0.45);max-width:440px;margin:0 auto 24px;line-height:1.55;}
+
+/* Logo cloud no hero */
+.hero-logos{position:relative;z-index:2;padding:24px 0;border-top:1px solid rgba(255,255,255,0.06);}
+.hero-logos-inner{max-width:var(--container);margin:0 auto;padding:0 28px;display:flex;justify-content:center;gap:28px;align-items:center;opacity:0.25;}
+.hero-logos-inner span{font-size:12px;font-weight:600;color:#fff;white-space:nowrap;letter-spacing:-0.01em;}
+
+/* ── MISSION (split) ── */
+.section-mission{padding:56px 0;background:var(--bg);}
+.mission-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;}
+.mission-img{width:100%;aspect-ratio:4/3;border-radius:var(--radius);background:linear-gradient(145deg,#f0e6d4,#e8d5b8);display:flex;align-items:center;justify-content:center;font-size:11px;color:#bbb;overflow:hidden;position:relative;}
+.mission-text h3{font-size:17px;font-weight:600;color:var(--text);letter-spacing:-0.02em;margin-bottom:20px;line-height:1.3;}
+.mission-qa{margin-bottom:16px;}
+.mission-qa p{font-size:14px;color:var(--text-60);line-height:1.6;margin-bottom:12px;}
+.mission-qa strong{color:var(--text);font-weight:600;}
+
+/* ── PROCESS (tabs) ── */
+.section-process{padding:56px 0;background:var(--bg);}
+.process-header{text-align:center;margin-bottom:40px;}
+.process-badge{display:inline-block;padding:6px 16px;border-radius:100px;border:1px solid var(--border);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-60);margin-bottom:16px;}
+.process-header h2{font-size:clamp(22px,2.8vw,32px);font-weight:700;color:var(--text);letter-spacing:-0.04em;line-height:1.1;}
+
+.process-tabs{display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:40px;}
+.process-tab{flex:1;padding:14px 8px;font-family:var(--font);font-size:13px;font-weight:500;color:var(--text-60);background:var(--bg);border:none;border-right:1px solid var(--border);cursor:pointer;transition:all 0.2s;text-align:center;}
+.process-tab:last-child{border-right:none;}
+.process-tab.active{color:var(--text);font-weight:600;border-bottom:2px solid var(--orange);}
+.process-tab:hover:not(.active){background:var(--bg-alt);}
+
+.process-content{display:grid;grid-template-columns:1fr 1.2fr;gap:48px;align-items:start;}
+.process-text h3{font-size:24px;font-weight:700;color:var(--text);letter-spacing:-0.03em;margin-bottom:12px;}
+.process-text p{font-size:14px;color:var(--text-60);line-height:1.65;margin-bottom:24px;}
+.process-diagram{background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius);padding:32px;min-height:280px;display:flex;align-items:center;justify-content:center;}
+/* Workflow mock */
+.wf-grid{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;align-items:center;}
+.wf-node{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.wf-node-icon{width:48px;height:48px;border-radius:12px;background:#fff;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+.wf-node-icon svg{width:24px;height:24px;color:var(--text-60);}
+.wf-node-label{font-size:9px;color:var(--text-40);text-align:center;max-width:64px;}
+.wf-arrow{font-size:16px;color:var(--border);margin:0 4px;}
+
+/* ── TESTIMONIAL (dark) ── */
+.section-testimonial{padding:56px 0;background:var(--bg-dark);color:#fff;position:relative;overflow:hidden;}
+.section-testimonial::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(40,40,40,0.5),rgba(20,20,20,0.8));z-index:0;}
+.testimonial-inner{position:relative;z-index:1;}
+.testimonial-header{text-align:center;margin-bottom:32px;}
+.testimonial-header h2{font-size:clamp(20px,2.5vw,30px);font-weight:700;color:#fff;letter-spacing:-0.03em;line-height:1.15;}
+
+.testimonial-tabs{display:flex;justify-content:center;gap:32px;margin-bottom:32px;}
+.testimonial-tab{font-size:13px;font-weight:400;color:rgba(255,255,255,0.35);cursor:pointer;padding-bottom:8px;border-bottom:2px solid transparent;transition:all 0.2s;}
+.testimonial-tab.active{color:#fff;border-color:var(--orange);}
+
+.testimonial-card{max-width:700px;margin:0 auto;display:grid;grid-template-columns:280px 1fr;gap:28px;align-items:center;}
+.tc-photo{width:280px;height:320px;border-radius:var(--radius);background:linear-gradient(135deg,#333,#222);display:flex;align-items:center;justify-content:center;font-size:11px;color:#555;overflow:hidden;}
+.tc-content{display:flex;flex-direction:column;gap:16px;}
+.tc-logo{width:100px;height:28px;background:rgba(255,255,255,0.06);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:rgba(255,255,255,0.3);}
+.tc-quote{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.65;font-style:italic;}
+.tc-author-name{font-size:13px;font-weight:600;color:#fff;}
+.tc-author-role{font-size:11px;color:rgba(255,255,255,0.35);}
+.tc-nav{display:flex;justify-content:center;gap:8px;margin-top:24px;}
+.tc-nav button{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:none;color:rgba(255,255,255,0.4);cursor:pointer;font-family:var(--font);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.tc-nav button:hover{border-color:rgba(255,255,255,0.4);color:#fff;}
+
+/* ── CASE STUDIES ── */
+.section-cases{padding:56px 0;background:var(--bg);}
+.cases-header{text-align:center;margin-bottom:40px;}
+.cases-badge{display:inline-block;padding:6px 16px;border-radius:100px;border:1px solid var(--border);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-60);margin-bottom:16px;}
+.cases-header h2{font-size:clamp(20px,2.5vw,30px);font-weight:700;color:var(--text);letter-spacing:-0.04em;}
+.cases-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.case-card{border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:transform 0.3s;position:relative;}
+.case-card:hover{transform:translateY(-4px);}
+.case-card-img{width:100%;aspect-ratio:4/3;background:linear-gradient(145deg,#2a2a2a,#1a1a1a);display:flex;flex-direction:column;justify-content:space-between;padding:20px;position:relative;}
+.case-card-img::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.1),rgba(0,0,0,0.6));z-index:0;}
+.case-card-logo{font-size:18px;font-weight:800;color:#fff;position:relative;z-index:1;letter-spacing:-0.02em;}
+.case-card-badge{display:inline-block;padding:3px 10px;border-radius:100px;background:rgba(255,255,255,0.12);font-size:9px;font-weight:600;color:rgba(255,255,255,0.7);position:relative;z-index:1;align-self:flex-start;}
+.case-card-info{padding:16px 20px;background:var(--bg);}
+.case-card-desc{font-size:13px;color:var(--text);line-height:1.45;margin-bottom:8px;}
+.case-card-link{font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:4px;}
+.case-card-link svg{width:12px;height:12px;}
+
+.cases-cta{text-align:center;margin-top:32px;}
+
+/* ── USE CASES ── */
+.section-usecases{padding:56px 0;background:var(--bg-alt);}
+.uc-header{text-align:center;margin-bottom:16px;}
+.uc-badge{display:inline-block;padding:6px 16px;border-radius:100px;border:1px solid var(--border);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-60);margin-bottom:16px;}
+.uc-header h2{font-size:clamp(20px,2.5vw,30px);font-weight:700;color:var(--text);letter-spacing:-0.04em;margin-bottom:4px;}
+.uc-header p{font-size:14px;color:var(--text-60);}
+.uc-tabs{display:flex;justify-content:center;gap:8px;margin:24px 0 32px;flex-wrap:wrap;}
+.uc-tab{padding:6px 16px;border-radius:100px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--bg);color:var(--text-60);cursor:pointer;font-family:var(--font);transition:all 0.2s;}
+.uc-tab.active{background:var(--text);color:#fff;border-color:var(--text);}
+.uc-tab:hover:not(.active){border-color:#ccc;}
+.uc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.uc-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:border-color 0.3s;}
+.uc-card:hover{border-color:#ccc;}
+.uc-card-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#fde8e0,#fcd5c8);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px;}
+.uc-card h3{font-size:14px;font-weight:600;color:var(--text);letter-spacing:-0.01em;margin-bottom:6px;}
+.uc-card p{font-size:12px;color:var(--text-60);line-height:1.5;margin-bottom:12px;}
+.uc-card-stat{font-size:11px;font-weight:600;color:var(--orange);}
+
+/* ── FOOTER ── */
+.footer{padding:56px 0 0;background:var(--bg-dark);}
+.footer-logo{display:flex;align-items:center;gap:8px;margin-bottom:32px;}
+.footer-logo-icon{width:40px;height:40px;border-radius:10px;background:var(--bg-dark-2);border:1px solid var(--border-dark);display:flex;align-items:center;justify-content:center;}
+.footer-logo-icon svg{width:18px;height:18px;}
+.footer-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1.5fr;gap:28px;margin-bottom:40px;}
+.footer-col-title{font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);margin-bottom:14px;}
+.footer-col ul{list-style:none;}
+.footer-col ul li{margin-bottom:8px;}
+.footer-col ul a{font-size:13px;color:rgba(255,255,255,0.35);transition:color 0.2s;text-decoration:none;}
+.footer-col ul a:hover{color:#fff;}
+.footer-newsletter-title{font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);margin-bottom:14px;}
+.footer-newsletter{display:flex;gap:6px;}
+.footer-input{flex:1;padding:10px 14px;border-radius:8px;border:1px solid var(--border-dark);background:var(--bg-dark-2);color:#fff;font-family:var(--font);font-size:13px;outline:none;}
+.footer-input::placeholder{color:rgba(255,255,255,0.2);}
+.btn-orange-sm{padding:10px 18px;font-size:12px;}
+.footer-bottom{border-top:1px solid var(--border-dark);padding:20px 0;display:flex;justify-content:space-between;align-items:center;}
+.footer-bottom p{font-size:11px;color:rgba(255,255,255,0.2);}
+.footer-bottom a{font-size:11px;color:rgba(255,255,255,0.2);text-decoration:none;margin-left:16px;}
+.footer-bottom a:hover{color:rgba(255,255,255,0.5);}
+/* Grande marca no fundo */
+.footer-brand-bg{padding:40px 0 20px;text-align:center;overflow:hidden;}
+.footer-brand-bg span{font-size:clamp(60px,12vw,140px);font-weight:800;color:rgba(255,255,255,0.03);letter-spacing:-0.05em;white-space:nowrap;}
+
+.reveal{opacity:0;transform:translateY(16px);transition:opacity 0.6s ease,transform 0.6s ease;}
+.reveal.v{opacity:1;transform:translateY(0);}
+.rd1{transition-delay:.06s}.rd2{transition-delay:.12s}.rd3{transition-delay:.18s}
+
+@media(max-width:768px){
+  .nav-links{display:none;}.mission-grid,.process-content,.testimonial-card{grid-template-columns:1fr;}
+  .cases-grid,.uc-grid{grid-template-columns:1fr;}.process-tabs{flex-wrap:wrap;}
+  .tc-photo{width:100%;height:240px;}.footer-grid{grid-template-columns:1fr 1fr;}
+  .hero-logos-inner{gap:20px;flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════ NAV ══════ -->
+<nav class="nav"><div class="nav-inner">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon"><svg viewBox="0 0 24 24" fill="#fff" stroke="none"><rect x="6" y="10" width="12" height="3" rx="1.5"/><rect x="6" y="15" width="8" height="3" rx="1.5"/></svg></div>
+    [INSERIR: marca]
+  </a>
+  <ul class="nav-links"><li><a href="#">Case Studies</a></li><li><a href="#">Resources</a></li><li><a href="#">Blog</a></li><li><a href="#">About us</a></li></ul>
+  <a href="#" class="btn-orange" style="font-size:12px;padding:8px 18px;">Book your consultation</a>
+</div></nav>
+
+<!-- ══════ HERO ══════ -->
+<section class="hero-agency">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-badge reveal"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> 4.8 stars all 10+ reviews</div>
+    <h1 class="reveal rd1">[INSERIR: Headline — ex: More time & revenue through smart automation and AI]</h1>
+    <p class="hero-sub reveal rd2">[INSERIR: Subtitulo — We analyze your processes, discover hidden potential and use modern AI tools to make your company grow faster, smarter and more profitably.]</p>
+    <div class="reveal rd3"><a href="#" class="btn-orange">Book your initial consultation</a></div>
+  </div>
+  <div class="hero-logos"><div class="hero-logos-inner">
+    <span>[Logo 1]</span><span>[Logo 2]</span><span>[Logo 3]</span><span>[Logo 4]</span><span>[Logo 5]</span><span>[Logo 6]</span><span>[Logo 7]</span>
+  </div></div>
+</section>
+
+<!-- ══════ MISSION ══════ -->
+<section class="section-mission">
+  <div class="container">
+    <div class="mission-grid reveal">
+      <div class="mission-img">Imagem artistica / ilustracao</div>
+      <div class="mission-text">
+        <h3>[INSERIR: Headline missao — ex: What we're doing sounds easy. But it isn't.]</h3>
+        <div class="mission-qa">
+          <p>[INSERIR: Pergunta 1]? <strong>[INSERIR: Resposta curta].</strong></p>
+          <p>[INSERIR: Pergunta 2]? <strong>[INSERIR: Resposta curta].</strong></p>
+          <p>[INSERIR: Pergunta 3]? <strong>[INSERIR: Resposta curta].</strong></p>
+          <p><strong>[INSERIR: Frase de impacto sobre a missao real da empresa — o que realmente importa.]</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ PROCESS ══════ -->
+<section class="section-process">
+  <div class="container">
+    <div class="process-header reveal">
+      <div class="process-badge">Our Process</div>
+      <h2>[INSERIR: Headline — All of our projects follow a clearly defined process]</h2>
+    </div>
+    <div class="process-tabs reveal rd1">
+      <button class="process-tab active">1. System Audit</button>
+      <button class="process-tab">2. Design Workflow</button>
+      <button class="process-tab">3. Design & Automation</button>
+      <button class="process-tab">4. Implementation</button>
+      <button class="process-tab">5. Monitoring</button>
+    </div>
+    <div class="process-content reveal rd2">
+      <div class="process-text">
+        <h3>[INSERIR: Titulo da etapa ativa]</h3>
+        <p>[INSERIR: Descricao da etapa — o que acontece, como funciona, o que o cliente recebe]</p>
+        <a href="#" class="btn-orange">Book your initial consultation</a>
+      </div>
+      <div class="process-diagram">
+        <div class="wf-grid">
+          <div class="wf-node"><div class="wf-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><span class="wf-node-label">Gmail Trigger</span></div>
+          <span class="wf-arrow">→</span>
+          <div class="wf-node"><div class="wf-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><span class="wf-node-label">Get Message</span></div>
+          <span class="wf-arrow">→</span>
+          <div class="wf-node"><div class="wf-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div><span class="wf-node-label">AI Model</span></div>
+          <span class="wf-arrow">→</span>
+          <div class="wf-node"><div class="wf-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div><span class="wf-node-label">Switch Rules</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ TESTIMONIAL (dark) ══════ -->
+<section class="section-testimonial">
+  <div class="container testimonial-inner">
+    <div class="testimonial-header reveal"><h2>[INSERIR: Headline — We are shaping the future together with you.]</h2></div>
+    <div class="testimonial-tabs reveal rd1">
+      <span class="testimonial-tab active">[INSERIR: Cliente 1]</span>
+      <span class="testimonial-tab">[INSERIR: Cliente 2]</span>
+      <span class="testimonial-tab">[INSERIR: Cliente 3]</span>
+    </div>
+    <div class="testimonial-card reveal rd2">
+      <div class="tc-photo">Foto do cliente</div>
+      <div class="tc-content">
+        <div class="tc-logo">[Logo empresa]</div>
+        <p class="tc-quote">"[INSERIR: Depoimento completo do cliente — 2-3 frases sobre resultado, parceria e impacto]"</p>
+        <div><div class="tc-author-name">[INSERIR: Nome]</div><div class="tc-author-role">[INSERIR: Cargo]</div></div>
+      </div>
+    </div>
+    <div class="tc-nav reveal rd3"><button><</button><button>></button></div>
+  </div>
+</section>
+
+<!-- ══════ CASE STUDIES ══════ -->
+<section class="section-cases">
+  <div class="container">
+    <div class="cases-header reveal">
+      <div class="cases-badge">Case Studies</div>
+      <h2>[INSERIR: Headline — Our customers' success stories]</h2>
+    </div>
+    <div class="cases-grid">
+      <div class="case-card reveal">
+        <div class="case-card-img">
+          <div class="case-card-badge">[INSERIR: Categoria]</div>
+          <div class="case-card-logo" style="margin-top:auto;">[INSERIR: Logo]</div>
+        </div>
+        <div class="case-card-info">
+          <p class="case-card-desc">[INSERIR: Descricao do case — resultado concreto do cliente]</p>
+          <span class="case-card-link">View Case Study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </div>
+      </div>
+      <div class="case-card reveal rd1">
+        <div class="case-card-img" style="background:linear-gradient(145deg,#333,#222);">
+          <div class="case-card-badge">[INSERIR: Categoria]</div>
+          <div class="case-card-logo" style="margin-top:auto;">[INSERIR: Logo]</div>
+        </div>
+        <div class="case-card-info">
+          <p class="case-card-desc">[INSERIR: Descricao do case 2]</p>
+          <span class="case-card-link">View Case Study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </div>
+      </div>
+      <div class="case-card reveal rd2">
+        <div class="case-card-img" style="background:linear-gradient(145deg,#3a3a3a,#252525);">
+          <div class="case-card-badge">[INSERIR: Categoria]</div>
+          <div class="case-card-logo" style="margin-top:auto;">[INSERIR: Logo]</div>
+        </div>
+        <div class="case-card-info">
+          <p class="case-card-desc">[INSERIR: Descricao do case 3]</p>
+          <span class="case-card-link">View Case Study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </div>
+      </div>
+    </div>
+    <div class="cases-cta reveal"><a href="#" class="btn-orange">Book your initial consultation</a></div>
+  </div>
+</section>
+
+<!-- ══════ USE CASES ══════ -->
+<section class="section-usecases">
+  <div class="container">
+    <div class="uc-header reveal">
+      <div class="uc-badge">Use Cases</div>
+      <h2>[INSERIR: Headline — Automation in practice]</h2>
+      <p>[INSERIR: Subtitulo — examples of projects successfully implemented]</p>
+    </div>
+    <div class="uc-tabs reveal rd1">
+      <button class="uc-tab active">E-Commerce</button>
+      <button class="uc-tab">Others</button>
+      <button class="uc-tab">Consulting</button>
+      <button class="uc-tab">Tech Company</button>
+      <button class="uc-tab">Agency</button>
+    </div>
+    <div class="uc-grid">
+      <div class="uc-card reveal">
+        <div class="uc-card-icon">&#128640;</div>
+        <h3>[INSERIR: Use case 1 titulo]</h3>
+        <p>[INSERIR: Descricao curta do use case 1]</p>
+        <div class="uc-card-stat">[INSERIR: Resultado — ex: +17% less manual effort]</div>
+      </div>
+      <div class="uc-card reveal rd1">
+        <div class="uc-card-icon">&#128202;</div>
+        <h3>[INSERIR: Use case 2 titulo]</h3>
+        <p>[INSERIR: Descricao curta]</p>
+        <div class="uc-card-stat">[INSERIR: Resultado]</div>
+      </div>
+      <div class="uc-card reveal rd2">
+        <div class="uc-card-icon">&#128260;</div>
+        <h3>[INSERIR: Use case 3 titulo]</h3>
+        <p>[INSERIR: Descricao curta]</p>
+        <div class="uc-card-stat">[INSERIR: Resultado]</div>
+      </div>
+      <div class="uc-card reveal">
+        <div class="uc-card-icon">&#128247;</div>
+        <h3>[INSERIR: Use case 4 titulo]</h3>
+        <p>[INSERIR: Descricao curta]</p>
+        <div class="uc-card-stat">[INSERIR: Resultado]</div>
+      </div>
+      <div class="uc-card reveal rd1">
+        <div class="uc-card-icon">&#128196;</div>
+        <h3>[INSERIR: Use case 5 titulo]</h3>
+        <p>[INSERIR: Descricao curta]</p>
+        <div class="uc-card-stat">[INSERIR: Resultado]</div>
+      </div>
+      <div class="uc-card reveal rd2">
+        <div class="uc-card-icon">&#129302;</div>
+        <h3>[INSERIR: Use case 6 titulo]</h3>
+        <p>[INSERIR: Descricao curta]</p>
+        <div class="uc-card-stat">[INSERIR: Resultado]</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ FOOTER ══════ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-logo">
+      <div class="footer-logo-icon"><svg viewBox="0 0 24 24" fill="var(--orange)" stroke="none"><rect x="6" y="10" width="12" height="3" rx="1.5"/><rect x="6" y="15" width="8" height="3" rx="1.5"/></svg></div>
+    </div>
+    <div class="footer-grid">
+      <div class="footer-col"><div class="footer-col-title">Blog</div><ul><li><a href="#">[INSERIR: Link 1]</a></li><li><a href="#">[INSERIR: Link 2]</a></li><li><a href="#">[INSERIR: Link 3]</a></li></ul></div>
+      <div class="footer-col"><div class="footer-col-title">Resources</div><ul><li><a href="#">[INSERIR: Link 1]</a></li><li><a href="#">[INSERIR: Link 2]</a></li><li><a href="#">[INSERIR: Link 3]</a></li></ul></div>
+      <div class="footer-col"><div class="footer-col-title">Company</div><ul><li><a href="#">About us</a></li><li><a href="#">Schedule a meeting</a></li><li><a href="#">Carreer</a></li></ul></div>
+      <div class="footer-col"><div class="footer-col-title">Social</div><ul><li><a href="#">LinkedIn</a></li><li><a href="#">YouTube</a></li><li><a href="#">Instagram</a></li></ul></div>
+      <div class="footer-col">
+        <div class="footer-newsletter-title">Newsletter</div>
+        <div class="footer-newsletter">
+          <input class="footer-input" type="email" placeholder="Your email address">
+          <button class="btn-orange btn-orange-sm">Register</button>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>[INSERIR: Razao social] — [INSERIR: Endereco]</p>
+      <p><a href="#">Privacy Policy</a><a href="#">Legal notice</a></p>
+    </div>
+  </div>
+  <div class="footer-brand-bg"><span>[INSERIR: marca]</span></div>
+</footer>
+
+<script>
+var ro=new IntersectionObserver(function(e){e.forEach(function(i){if(i.isIntersecting)i.target.classList.add('v');});},{threshold:0.05,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){ro.observe(el);});
+// Tabs
+document.querySelectorAll('.process-tab').forEach(function(t){t.addEventListener('click',function(){document.querySelectorAll('.process-tab').forEach(function(b){b.classList.remove('active');});t.classList.add('active');});});
+document.querySelectorAll('.uc-tab').forEach(function(t){t.addEventListener('click',function(){document.querySelectorAll('.uc-tab').forEach(function(b){b.classList.remove('active');});t.classList.add('active');});});
+document.querySelectorAll('.testimonial-tab').forEach(function(t){t.addEventListener('click',function(){document.querySelectorAll('.testimonial-tab').forEach(function(b){b.classList.remove('active');});t.classList.add('active');});});
+</script>
+</body>
+</html>

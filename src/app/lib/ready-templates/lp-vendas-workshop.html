@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[INSERIR: Nome do Workshop]</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   LP VENDAS WORKSHOP — Estilo clean/white
+   16 secoes, pagina completa de evento/imersao
+   WavyFlow Arsenal
+   ═══════════════════════════════════════════════════════ */
+:root {
+  --bg: #ffffff;
+  --bg-alt: #fafafa;
+  --bg-dark: #0f0f0f;
+  --text: #1a1a1a;
+  --text-body: #4a4a4a;
+  --text-muted: #888;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-light: #eff6ff;
+  --green-wa: #25d366;
+  --gold: #d4a017;
+  --gold-light: #fef9e7;
+  --border: #e5e5e5;
+  --font: 'Montserrat', -apple-system, sans-serif;
+  --container: 860px;
+  --container-wide: 1060px;
+  --section-py: clamp(56px, 8vw, 96px);
+  --radius: 16px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; -webkit-font-smoothing:antialiased; }
+body { font-family:var(--font); color:var(--text); background:var(--bg); line-height:1.7; }
+a { color: var(--accent); text-decoration:none; }
+
+.container { max-width:var(--container); margin:0 auto; padding:0 24px; }
+.container-wide { max-width:var(--container-wide); margin:0 auto; padding:0 24px; }
+.section { padding:var(--section-py) 0; }
+
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  font-family:var(--font); font-weight:700; border:none; cursor:pointer;
+  transition:all 0.25s; text-decoration:none;
+}
+.btn-primary {
+  background:var(--accent); color:#fff; padding:16px 36px;
+  border-radius:8px; font-size:15px; letter-spacing:0.02em;
+}
+.btn-primary:hover { background:var(--accent-hover); transform:translateY(-1px); box-shadow:0 4px 20px rgba(37,99,235,0.3); }
+.btn-full { width:100%; }
+.btn-whatsapp { background:var(--green-wa); color:#fff; padding:14px 32px; border-radius:8px; font-size:14px; }
+.btn-whatsapp:hover { background:#20bd5a; }
+
+/* ── 1. HERO ── */
+.hero-ws {
+  text-align:center;
+  padding: 80px 24px 48px;
+}
+
+.hero-badge {
+  display:inline-block;
+  padding:8px 20px;
+  border-radius:100px;
+  background:var(--accent-light);
+  color:var(--accent);
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  margin-bottom:28px;
+}
+
+.hero-ws h1 {
+  font-size:clamp(32px, 5vw, 52px);
+  font-weight:800;
+  line-height:1.1;
+  letter-spacing:-0.04em;
+  color:var(--text);
+  margin-bottom:20px;
+}
+
+.hero-ws .hero-desc {
+  font-size:clamp(16px, 2vw, 19px);
+  color:var(--text-body);
+  max-width:600px;
+  margin:0 auto 12px;
+  line-height:1.6;
+}
+
+.hero-ws .hero-date {
+  font-size:15px;
+  font-weight:600;
+  color:var(--text);
+  margin-bottom:28px;
+}
+
+.hero-ws .hero-date strong { color:var(--accent); }
+
+.hero-sold {
+  font-size:13px;
+  color:var(--text-muted);
+  margin-top:16px;
+}
+
+.hero-sold strong { color:var(--text-body); }
+
+/* ── 2. MARQUEE ── */
+.marquee-wrap {
+  overflow:hidden;
+  background:var(--bg-alt);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:14px 0;
+}
+
+.marquee-track {
+  display:flex;
+  gap:0;
+  animation:marquee 30s linear infinite;
+  width:max-content;
+}
+
+.marquee-item {
+  white-space:nowrap;
+  font-size:13px;
+  font-weight:500;
+  color:var(--text-body);
+  padding:0 16px;
+}
+
+.marquee-sep { color:var(--accent); }
+
+@keyframes marquee {
+  0% { transform:translateX(0); }
+  100% { transform:translateX(-50%); }
+}
+
+/* ── 3. TESTIMONIALS ── */
+.testimonials-ws {
+  padding:var(--section-py) 0;
+  text-align:center;
+}
+
+.testimonials-ws h2 {
+  font-size:clamp(22px, 3vw, 32px);
+  font-weight:800;
+  color:var(--text);
+  letter-spacing:-0.03em;
+  margin-bottom:40px;
+}
+
+.test-grid {
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  gap:8px;
+}
+
+.test-img {
+  width:100%;
+  aspect-ratio:9/16;
+  background:linear-gradient(135deg, #eee, #e0e0e0);
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:10px;
+  color:#bbb;
+}
+
+/* ── 4. PROBLEMA ── */
+.problem-section {
+  padding:var(--section-py) 0;
+  text-align:center;
+}
+
+.problem-section h2 {
+  font-size:clamp(22px, 3vw, 30px);
+  font-weight:700;
+  color:var(--text);
+  letter-spacing:-0.02em;
+  margin-bottom:24px;
+  max-width:600px;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.problem-section p {
+  font-size:16px;
+  color:var(--text-body);
+  max-width:580px;
+  margin:0 auto 16px;
+  line-height:1.7;
+}
+
+.problem-section em {
+  font-style:italic;
+  color:var(--text);
+  font-weight:500;
+}
+
+/* ── 5. SOLUCAO ── */
+.solution-section {
+  padding:var(--section-py) 0;
+}
+
+.solution-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:48px;
+  align-items:center;
+}
+
+.solution-text h2 {
+  font-size:clamp(24px, 3vw, 34px);
+  font-weight:800;
+  color:var(--text);
+  line-height:1.2;
+  letter-spacing:-0.03em;
+  margin-bottom:16px;
+}
+
+.solution-text .question {
+  font-size:18px;
+  font-weight:600;
+  color:var(--text-muted);
+  font-style:italic;
+  margin-bottom:20px;
+}
+
+.solution-list {
+  list-style:none;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.solution-list li {
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  font-size:15px;
+  color:var(--text-body);
+  line-height:1.5;
+}
+
+.solution-list li::before {
+  content:'';
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  background:var(--accent-light);
+  flex-shrink:0;
+  margin-top:2px;
+  background-image:url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='3' stroke-linecap='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:12px;
+}
+
+.solution-img {
+  width:100%;
+  aspect-ratio:4/5;
+  background:linear-gradient(135deg, #f0f0f0, #e4e4e4);
+  border-radius:var(--radius);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  color:#bbb;
+}
+
+/* ── 6. PARA QUEM ── */
+.audience-section {
+  padding:var(--section-py) 0;
+  background:var(--bg-alt);
+}
+
+.audience-section h2 {
+  font-size:clamp(24px, 3vw, 32px);
+  font-weight:800;
+  color:var(--text);
+  letter-spacing:-0.03em;
+  margin-bottom:8px;
+}
+
+.audience-section .audience-intro {
+  font-size:15px;
+  color:var(--text-muted);
+  margin-bottom:32px;
+}
+
+.audience-list {
+  list-style:none;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  margin-bottom:32px;
+}
+
+.audience-list li {
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  font-size:15px;
+  color:var(--text-body);
+  line-height:1.6;
+  padding:16px 20px;
+  background:var(--bg);
+  border-radius:12px;
+  border:1px solid var(--border);
+}
+
+.audience-list li svg { width:20px; height:20px; color:var(--accent); flex-shrink:0; margin-top:2px; }
+
+.audience-cta {
+  text-align:center;
+  margin-top:8px;
+}
+
+.audience-cta p {
+  font-size:16px;
+  font-weight:700;
+  color:var(--text);
+  margin-bottom:20px;
+}
+
+.audience-cta p em { color:var(--accent); font-style:normal; }
+
+/* ── 7. BENEFICIOS ── */
+.benefits-ws {
+  padding:var(--section-py) 0;
+  text-align:center;
+}
+
+.benefits-ws h2 {
+  font-size:clamp(22px, 3vw, 30px);
+  font-weight:800;
+  color:var(--text);
+  letter-spacing:-0.02em;
+  margin-bottom:40px;
+}
+
+.benefits-grid {
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:16px;
+  max-width:700px;
+  margin:0 auto;
+  text-align:left;
+}
+
+.benefit-item {
+  padding:24px;
+  border-radius:12px;
+  background:var(--bg-alt);
+  border:1px solid var(--border);
+  font-size:15px;
+  font-weight:600;
+  color:var(--text);
+  line-height:1.4;
+  transition:border-color 0.3s;
+}
+
+.benefit-item:hover { border-color:var(--accent); }
+
+/* ── 8. CONTEUDO ── */
+.content-ws {
+  padding:var(--section-py) 0;
+  background:var(--bg-alt);
+}
+
+.content-ws h2 {
+  font-size:clamp(22px, 3vw, 30px);
+  font-weight:800;
+  color:var(--text);
+  letter-spacing:-0.02em;
+  margin-bottom:40px;
+  text-align:center;
+}
+
+.module-list {
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  margin-bottom:40px;
+}
+
+.module-card {
+  display:grid;
+  grid-template-columns:56px 1fr;
+  gap:20px;
+  padding:28px;
+  background:var(--bg);
+  border-radius:12px;
+  border:1px solid var(--border);
+}
+
+.module-num {
+  width:56px; height:56px; border-radius:50%;
+  background:var(--accent-light); color:var(--accent);
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px; font-weight:800;
+}
+
+.module-title { font-size:16px; font-weight:700; color:var(--text); margin-bottom:6px; }
+.module-desc { font-size:14px; color:var(--text-body); line-height:1.6; }
+
+.vip-badge {
+  display:inline-block;
+  padding:4px 12px;
+  border-radius:100px;
+  background:var(--gold-light);
+  color:var(--gold);
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  margin-bottom:8px;
+}
+
+/* ── 9. CRONOGRAMA ── */
+.schedule-ws {
+  padding:var(--section-py) 0;
+  text-align:center;
+}
+
+.schedule-ws h2 {
+  font-size:clamp(22px, 3vw, 28px);
+  font-weight:800;
+  color:var(--text);
+  letter-spacing:-0.02em;
+  margin-bottom:8px;
+}
+
+.schedule-ws .schedule-sub {
+  font-size:15px;
+  color:var(--text-muted);
+  margin-bottom:40px;
+}
+
+.schedule-meta {
+  font-size:13px;
+  color:var(--text-muted);
+  margin-bottom:32px;
+}
+
+.schedule-meta strong { color:var(--text); }
+
+.timeline {
+  display:flex;
+  justify-content:center;
+  gap:0;
+  position:relative;
+  max-width:600px;
+  margin:0 auto;
+}
+
+.timeline::before {
+  content:'';
+  position:absolute;
+  top:24px;
+  left:12%;
+  right:12%;
+  height:2px;
+  background:var(--border);
+}
+
+.timeline-item {
+  flex:1;
+  text-align:center;
+  position:relative;
+}
+
+.timeline-dot {
+  width:12px; height:12px; border-radius:50%;
+  background:var(--accent); margin:18px auto 12px;
+  position:relative; z-index:1;
+}
+
+.timeline-time {
+  font-size:18px;
+  font-weight:800;
+  color:var(--text);
+}
+
+.timeline-label {
+  font-size:12px;
+  color:var(--text-muted);
+  margin-top:2px;
+}
+
+/* ── 10. PRICING ── */
+.pricing-ws {
+  padding:var(--section-py) 0;
+  background:var(--bg-alt);
+}
+
+.pricing-ws h2 {
+  font-size:clamp(22px, 3vw, 28px);
+  font-weight:800;
+  color:var(--text);
+  text-align:center;
+  margin-bottom:8px;
+}
+
+.pricing-alert {
+  text-align:center;
+  padding:10px 20px;
+  background:#fef3c7;
+  border:1px solid #f59e0b;
+  border-radius:8px;
+  font-size:13px;
+  font-weight:700;
+  color:#92400e;
+  margin:16px auto 40px;
+  max-width:460px;
+}
+
+.pricing-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+  max-width:760px;
+  margin:0 auto;
+}
+
+.price-card {
+  background:var(--bg);
+  border:2px solid var(--border);
+  border-radius:var(--radius);
+  padding:36px 28px;
+  text-align:center;
+  transition:border-color 0.3s, box-shadow 0.3s;
+}
+
+.price-card:hover {
+  border-color:var(--accent);
+  box-shadow:0 8px 32px rgba(37,99,235,0.08);
+}
+
+.price-card.featured {
+  border-color:var(--gold);
+  position:relative;
+}
+
+.price-card.featured::before {
+  content:'Recomendado';
+  position:absolute;
+  top:-12px;
+  left:50%;
+  transform:translateX(-50%);
+  padding:4px 16px;
+  background:var(--gold);
+  color:#fff;
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  border-radius:100px;
+}
+
+.price-card-title {
+  font-size:20px;
+  font-weight:800;
+  color:var(--text);
+  margin-bottom:20px;
+}
+
+.price-card-list {
+  list-style:none;
+  text-align:left;
+  margin-bottom:28px;
+}
+
+.price-card-list li {
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  font-size:14px;
+  color:var(--text-body);
+  padding:8px 0;
+  border-bottom:1px solid var(--border);
+  line-height:1.4;
+}
+
+.price-card-list li:last-child { border-bottom:none; }
+
+.price-card-list li svg { width:16px; height:16px; color:var(--accent); flex-shrink:0; margin-top:2px; }
+
+.price-installment {
+  font-size:28px;
+  font-weight:800;
+  color:var(--text);
+  letter-spacing:-0.03em;
+}
+
+.price-installment small { font-size:14px; font-weight:500; color:var(--text-muted); }
+
+.price-full {
+  font-size:13px;
+  color:var(--text-muted);
+  margin-bottom:20px;
+}
+
+/* ── 11. INSTRUTORES ── */
+.instructors-ws {
+  padding:var(--section-py) 0;
+  text-align:center;
+}
+
+.instructors-ws .inst-label {
+  font-size:15px;
+  color:var(--text-muted);
+  margin-bottom:8px;
+}
+
+.instructors-ws .inst-greeting {
+  font-size:24px;
+  margin-bottom:4px;
+}
+
+.instructors-ws .inst-name {
+  font-size:clamp(24px, 3vw, 32px);
+  font-weight:800;
+  color:var(--text);
+  letter-spacing:-0.03em;
+  margin-bottom:24px;
+}
+
+.instructors-ws .inst-photo {
+  width:200px;
+  height:200px;
+  border-radius:50%;
+  background:linear-gradient(135deg, #e8e8e8, #d8d8d8);
+  margin:0 auto 28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  color:#bbb;
+}
+
+.inst-bio {
+  max-width:600px;
+  margin:0 auto;
+  text-align:center;
+}
+
+.inst-bio p {
+  font-size:15px;
+  color:var(--text-body);
+  line-height:1.7;
+  margin-bottom:16px;
+}
+
+.inst-bio strong { color:var(--text); }
+
+.inst-stats {
+  display:flex;
+  justify-content:center;
+  gap:40px;
+  margin-top:32px;
+}
+
+.inst-stat-num { font-size:28px; font-weight:800; color:var(--text); letter-spacing:-0.03em; }
+.inst-stat-label { font-size:12px; color:var(--text-muted); }
+
+/* ── 12. GARANTIA ── */
+.guarantee-ws {
+  padding:var(--section-py) 0;
+  background:var(--bg-alt);
+}
+
+.guarantee-box {
+  max-width:600px;
+  margin:0 auto;
+  text-align:center;
+  padding:48px 36px;
+  background:var(--bg);
+  border-radius:var(--radius);
+  border:2px solid var(--border);
+}
+
+.guarantee-box .g-label {
+  font-size:15px;
+  color:var(--text-body);
+  margin-bottom:8px;
+}
+
+.guarantee-box h3 {
+  font-size:28px;
+  font-weight:800;
+  color:var(--text);
+  letter-spacing:-0.03em;
+  margin-bottom:8px;
+}
+
+.guarantee-box .g-title {
+  font-size:12px;
+  font-weight:700;
+  color:var(--text-muted);
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  padding:8px 0 16px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:16px;
+}
+
+.guarantee-box p {
+  font-size:14px;
+  color:var(--text-body);
+  line-height:1.7;
+}
+
+.guarantee-box .g-closing {
+  font-size:15px;
+  font-weight:700;
+  color:var(--text);
+  margin-top:20px;
+  font-style:italic;
+}
+
+/* ── 13. CONTATO ── */
+.contact-ws {
+  padding:var(--section-py) 0;
+  text-align:center;
+}
+
+.contact-ws h2 {
+  font-size:24px;
+  font-weight:800;
+  color:var(--text);
+  margin-bottom:8px;
+}
+
+.contact-ws p {
+  font-size:15px;
+  color:var(--text-body);
+  margin-bottom:8px;
+}
+
+.contact-ws .contact-hours {
+  font-size:13px;
+  color:var(--text-muted);
+  margin-bottom:24px;
+}
+
+.contact-ws .contact-hours strong { color:var(--text-body); }
+
+/* ── 14. FAQ ── */
+.faq-ws {
+  padding:var(--section-py) 0;
+  background:var(--bg-alt);
+}
+
+.faq-ws h2 {
+  font-size:clamp(22px, 3vw, 28px);
+  font-weight:800;
+  color:var(--text);
+  text-align:center;
+  margin-bottom:40px;
+}
+
+.faq-list-ws {
+  max-width:700px;
+  margin:0 auto;
+}
+
+.faq-item-ws { border-bottom:1px solid var(--border); }
+
+.faq-q {
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:20px 0;
+  background:none;
+  border:none;
+  font-family:var(--font);
+  font-size:15px;
+  font-weight:600;
+  color:var(--text);
+  text-align:left;
+  cursor:pointer;
+  transition:color 0.2s;
+}
+
+.faq-q:hover { color:var(--accent); }
+
+.faq-q-icon {
+  width:28px; height:28px; border-radius:50%;
+  background:var(--bg-alt); display:flex; align-items:center;
+  justify-content:center; flex-shrink:0; transition:all 0.3s;
+  border:1px solid var(--border);
+}
+
+.faq-item-ws.open .faq-q-icon {
+  background:var(--accent); border-color:var(--accent);
+  transform:rotate(45deg);
+}
+
+.faq-q-icon svg { width:14px; height:14px; }
+.faq-item-ws.open .faq-q-icon svg { color:#fff; }
+
+.faq-a {
+  max-height:0;
+  overflow:hidden;
+  transition:max-height 0.35s ease, padding 0.35s ease;
+}
+
+.faq-item-ws.open .faq-a {
+  max-height:400px;
+  padding-bottom:20px;
+}
+
+.faq-a p {
+  font-size:14px;
+  color:var(--text-body);
+  line-height:1.7;
+}
+
+.faq-a p strong { color:var(--text); }
+
+/* ── 15. CTA FINAL ── */
+.cta-final-ws {
+  padding:48px 24px;
+  text-align:center;
+}
+
+/* ── 16. FOOTER ── */
+.footer-ws {
+  padding:24px;
+  text-align:center;
+  border-top:1px solid var(--border);
+}
+
+.footer-ws p {
+  font-size:11px;
+  color:var(--text-muted);
+  line-height:1.6;
+}
+
+/* ── REVEAL ── */
+.reveal { opacity:0; transform:translateY(20px); transition:opacity 0.7s ease, transform 0.7s ease; }
+.reveal.v { opacity:1; transform:translateY(0); }
+.rd1{transition-delay:.08s}.rd2{transition-delay:.16s}.rd3{transition-delay:.24s}.rd4{transition-delay:.32s}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .solution-grid{grid-template-columns:1fr;} .solution-img{order:-1;aspect-ratio:16/10;}
+  .test-grid{grid-template-columns:repeat(3,1fr);} .test-grid .test-img:nth-child(n+4){display:none;}
+  .pricing-grid{grid-template-columns:1fr;}
+  .benefits-grid{grid-template-columns:1fr;}
+  .timeline{flex-wrap:wrap;gap:16px;} .timeline::before{display:none;}
+  .inst-stats{flex-wrap:wrap;gap:24px;}
+  .module-card{grid-template-columns:44px 1fr;gap:14px;padding:20px;}
+  .module-num{width:44px;height:44px;font-size:15px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ 1. HERO ══════════════ -->
+<section class="hero-ws">
+  <div class="container">
+    <div class="hero-badge reveal">Lote 01 disponivel por tempo limitado</div>
+    <h1 class="reveal rd1">[INSERIR: Nome do Workshop]</h1>
+    <p class="hero-desc reveal rd2">[INSERIR: Descricao principal — em 2 dias de imersao pratica, acesse a estrategia que fara voce alcançar X resultado]</p>
+    <p class="hero-desc reveal rd2">[INSERIR: Prova social — plano validado por mais de X profissionais que tiveram resultado Y]</p>
+    <p class="hero-date reveal rd3">[INSERIR: Data] <strong>ao vivo no Zoom</strong></p>
+    <div class="reveal rd3">
+      <a href="#preco" class="btn btn-primary">Garantir ingresso</a>
+    </div>
+    <p class="hero-sold reveal rd4"><strong>35%</strong> dos ingressos vendidos a <strong>R$ 47,00</strong></p>
+  </div>
+</section>
+
+<!-- ══════════════ 2. MARQUEE ══════════════ -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item">Ao vivo <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Experiencia pratica <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Aplicacao imediata <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Sem precisar postar todo dia <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Clientes que pagam R$5k+ <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Ao vivo <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Experiencia pratica <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Aplicacao imediata <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Sem precisar postar todo dia <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Clientes que pagam R$5k+ <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Ao vivo <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Experiencia pratica <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Aplicacao imediata <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Sem precisar postar todo dia <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Clientes que pagam R$5k+ <span class="marquee-sep">&#10022;</span></span>
+  </div>
+</div>
+
+<!-- ══════════════ 3. DEPOIMENTOS ══════════════ -->
+<section class="testimonials-ws">
+  <div class="container-wide">
+    <h2 class="reveal">[INSERIR: Headline de prova social — ex: Hoje, eles cobram ate 3x mais pelo proprio servico]</h2>
+    <div class="test-grid reveal rd1">
+      <div class="test-img">Print resultado 1</div>
+      <div class="test-img">Print resultado 2</div>
+      <div class="test-img">Print resultado 3</div>
+      <div class="test-img">Print resultado 4</div>
+      <div class="test-img">Print resultado 5</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 4. PROBLEMA ══════════════ -->
+<section class="problem-section">
+  <div class="container">
+    <h2 class="reveal">[INSERIR: Headline de empatia — ex: Porem, sabemos que a realidade dos profissionais e diferente]</h2>
+    <p class="reveal rd1">[INSERIR: Paragrafo de dor — descreva a situacao real do publico-alvo]</p>
+    <p class="reveal rd2"><em>[INSERIR: Pergunta retorica — ex: E agora? Sera que tudo ate aqui foi em vao?]</em></p>
+    <p class="reveal rd3" style="font-size:13px;color:var(--text-muted);">A verdade e que...</p>
+  </div>
+</section>
+
+<!-- ══════════════ 5. SOLUCAO ══════════════ -->
+<section class="solution-section">
+  <div class="container-wide">
+    <div class="solution-grid">
+      <div class="solution-text">
+        <h2 class="reveal">[INSERIR: Headline de promessa — ex: E possivel SIM alcançar X resultado sem abandonar sua essencia]</h2>
+        <p class="question reveal rd1">"Mas... como?"</p>
+        <ul class="solution-list reveal rd2">
+          <li>[INSERIR: Beneficio 1 — conteudo pratico, 100% focado em implementacao]</li>
+          <li>[INSERIR: Beneficio 2 — objetivo claro do workshop]</li>
+          <li>[INSERIR: Beneficio 3 — sem necessidade de X coisa negativa]</li>
+          <li>[INSERIR: Beneficio 4 — respeita sua integridade]</li>
+          <li>[INSERIR: Beneficio 5 — ferramentas certas para resultado]</li>
+          <li>[INSERIR: Beneficio 6 — elimina problema recorrente]</li>
+        </ul>
+      </div>
+      <div class="reveal rd3">
+        <div class="solution-img">Foto do especialista ou imagem de apoio</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 6. PARA QUEM ══════════════ -->
+<section class="audience-section">
+  <div class="container">
+    <h2 class="reveal">Para quem e este Workshop?</h2>
+    <p class="audience-intro reveal rd1">[INSERIR: Intro — Esta imersao foi feita para voce, profissional...]</p>
+    <ul class="audience-list">
+      <li class="reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: Perfil 1]</li>
+      <li class="reveal rd1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: Perfil 2]</li>
+      <li class="reveal rd2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: Perfil 3]</li>
+      <li class="reveal rd3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: Perfil 4]</li>
+      <li class="reveal rd4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: Perfil 5]</li>
+      <li class="reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: Perfil 6]</li>
+    </ul>
+    <div class="audience-cta reveal">
+      <p>Se voce se identifica com ao menos 1 item acima, o <em>Workshop e para voce!</em></p>
+      <a href="#preco" class="btn btn-primary">Quero participar</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 7. BENEFICIOS ══════════════ -->
+<section class="benefits-ws">
+  <div class="container">
+    <h2 class="reveal">[INSERIR: Headline — Com o Workshop voce vai...]</h2>
+    <div class="benefits-grid">
+      <div class="benefit-item reveal">[INSERIR: Beneficio 1]</div>
+      <div class="benefit-item reveal rd1">[INSERIR: Beneficio 2]</div>
+      <div class="benefit-item reveal rd2">[INSERIR: Beneficio 3]</div>
+      <div class="benefit-item reveal rd3">[INSERIR: Beneficio 4]</div>
+      <div class="benefit-item reveal">[INSERIR: Beneficio 5]</div>
+      <div class="benefit-item reveal rd1">[INSERIR: Beneficio 6]</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 8. CONTEUDO ══════════════ -->
+<section class="content-ws">
+  <div class="container">
+    <h2 class="reveal">[INSERIR: Headline — 2 dias praticos com acesso a...]</h2>
+    <div class="module-list">
+      <div class="module-card reveal">
+        <div class="module-num">1</div>
+        <div>
+          <div class="module-title">[INSERIR: Modulo 1 — Titulo]</div>
+          <div class="module-desc">[INSERIR: Descricao do modulo 1]</div>
+        </div>
+      </div>
+      <div class="module-card reveal rd1">
+        <div class="module-num">2</div>
+        <div>
+          <div class="module-title">[INSERIR: Modulo 2 — Titulo]</div>
+          <div class="module-desc">[INSERIR: Descricao do modulo 2]</div>
+        </div>
+      </div>
+      <div class="module-card reveal rd2">
+        <div class="module-num">3</div>
+        <div>
+          <div class="module-title">[INSERIR: Modulo 3 — Titulo]</div>
+          <div class="module-desc">[INSERIR: Descricao do modulo 3]</div>
+        </div>
+      </div>
+      <div class="module-card reveal rd3">
+        <div class="module-num">4</div>
+        <div>
+          <div class="module-title">[INSERIR: Modulo 4 — Titulo]</div>
+          <div class="module-desc">[INSERIR: Descricao do modulo 4]</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal" style="text-align:center;margin-bottom:32px;">
+      <h3 style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:24px;">E mais...</h3>
+    </div>
+
+    <div class="module-card reveal" style="border-color:var(--gold);border-width:2px;">
+      <div class="module-num" style="background:var(--gold-light);color:var(--gold);">VIP</div>
+      <div>
+        <div class="vip-badge">Disponivel apenas na categoria VIP</div>
+        <div class="module-title">[INSERIR: Bonus VIP 1 — ex: Gravacao do Workshop]</div>
+        <div class="module-desc">[INSERIR: Descricao do bonus VIP 1]</div>
+      </div>
+    </div>
+    <div class="module-card reveal rd1" style="border-color:var(--gold);border-width:2px;margin-top:16px;">
+      <div class="module-num" style="background:var(--gold-light);color:var(--gold);">VIP</div>
+      <div>
+        <div class="vip-badge">Disponivel apenas na categoria VIP</div>
+        <div class="module-title">[INSERIR: Bonus VIP 2 — ex: Sala VIP de tira-duvidas]</div>
+        <div class="module-desc">[INSERIR: Descricao do bonus VIP 2]</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 9. CRONOGRAMA ══════════════ -->
+<section class="schedule-ws">
+  <div class="container">
+    <h2 class="reveal">[INSERIR: Nome do Workshop]</h2>
+    <p class="schedule-meta reveal rd1"><strong>[INSERIR: Data]</strong> | Do conforto da sua casa, 100% online, No Zoom | Ao vivo</p>
+    <p class="schedule-sub reveal rd2">Um cronograma completo, com mais de 7 horas de conteudo pratico</p>
+    <div class="timeline reveal rd3">
+      <div class="timeline-item">
+        <div class="timeline-time">08H30</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-label">Inicio</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">12H00</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-label">Almoco</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">13H30</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-label">Retorno</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">17H30</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-label">Encerramento</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 10. PRICING ══════════════ -->
+<section class="pricing-ws" id="preco">
+  <div class="container">
+    <h2 class="reveal">Recapitulando tudo o que voce ganha</h2>
+    <div class="pricing-alert reveal rd1">Lote 01 disponivel por tempo limitado</div>
+    <div class="pricing-grid">
+      <!-- Card Start -->
+      <div class="price-card reveal">
+        <div class="price-card-title">Ingresso Start</div>
+        <ul class="price-card-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>2 dias completos de imersao</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>+14h de conteudo profundo</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Exercicios praticos</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Diagnostico completo</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Estabeleca seu novo preco</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Plano para atrair clientes</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>E muito mais!</li>
+        </ul>
+        <div class="price-installment">11x <small>de</small> R$ 5,22</div>
+        <div class="price-full">Ou R$ 47 a vista com desconto</div>
+        <a href="#" class="btn btn-primary btn-full">Garantir minha vaga</a>
+      </div>
+
+      <!-- Card VIP -->
+      <div class="price-card featured reveal rd1">
+        <div class="price-card-title">Ingresso VIP</div>
+        <ul class="price-card-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Acesso aos 2 dias de imersao</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Material pratico em PDF</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Exercicios de execucao</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Implementacao mao na massa</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Gravacao do Workshop</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Sala VIP de tira-duvidas</li>
+        </ul>
+        <div class="price-installment">12x <small>de</small> R$ 25,24</div>
+        <div class="price-full">Ou R$ 244 a vista com desconto</div>
+        <a href="#" class="btn btn-primary btn-full">Garantir VIP</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 11. INSTRUTORES ══════════════ -->
+<section class="instructors-ws">
+  <div class="container">
+    <p class="inst-label reveal">Durante o Workshop, voce sera conduzido por</p>
+    <div class="inst-photo reveal rd1">Foto instrutor(es)</div>
+    <p class="inst-greeting reveal rd2">&#128075;</p>
+    <h2 class="inst-name reveal rd2">[INSERIR: Nome do(s) Instrutor(es)]</h2>
+    <div class="inst-bio">
+      <p class="reveal rd3">[INSERIR: Bio — formacao, experiencia, filosofia de trabalho]</p>
+      <p class="reveal rd3"><strong>[INSERIR: Frase de impacto sobre autoridade/metodo]</strong></p>
+      <p class="reveal rd4">[INSERIR: Resultados — faturamento, numero de alunos, etc]</p>
+    </div>
+    <div class="inst-stats reveal rd4">
+      <div><div class="inst-stat-num">[X]M+</div><div class="inst-stat-label">Faturamento</div></div>
+      <div><div class="inst-stat-num">[X]K+</div><div class="inst-stat-label">Profissionais impactados</div></div>
+      <div><div class="inst-stat-num">[X]+</div><div class="inst-stat-label">Anos de experiencia</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 12. GARANTIA ══════════════ -->
+<section class="guarantee-ws">
+  <div class="container">
+    <div class="guarantee-box reveal">
+      <p class="g-label">Portanto, nao se preocupe.</p>
+      <h3>Seu risco e zero!</h3>
+      <p class="g-title">Termo de Garantia</p>
+      <p>[INSERIR: Texto da garantia — Se voce assistir a toda imersao e nao gostar, ou caso ache que o conteudo nao agregou, voce pede seu investimento de volta em ate 7 dias, e devolvemos cada centavo, sem questionamentos.]</p>
+      <p class="g-closing">Nao existe risco. O unico risco e voce ficar de fora.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 13. CONTATO ══════════════ -->
+<section class="contact-ws">
+  <div class="container">
+    <h2 class="reveal">Ficou alguma duvida?</h2>
+    <p class="reveal rd1">Toque no botao abaixo e fale com o nosso time de atendimento.</p>
+    <p class="contact-hours reveal rd2">Atendimento em horario comercial: <strong>de segunda a sexta-feira, das 9 as 18:00</strong></p>
+    <div class="reveal rd3">
+      <a href="#" class="btn btn-whatsapp">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.613.613l4.458-1.495A11.932 11.932 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+        Falar com consultor
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 14. FAQ ══════════════ -->
+<section class="faq-ws">
+  <div class="container">
+    <h2 class="reveal">Perguntas frequentes</h2>
+    <div class="faq-list-ws">
+      <div class="faq-item-ws reveal">
+        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          <span>Quando sera o workshop?</span>
+          <div class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        </button>
+        <div class="faq-a"><p>[INSERIR: Data, horario, plataforma]</p></div>
+      </div>
+      <div class="faq-item-ws reveal">
+        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          <span>Vai ficar gravado?</span>
+          <div class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        </button>
+        <div class="faq-a"><p>[INSERIR: Detalhes sobre gravacao — acesso VIP, replay, etc]</p></div>
+      </div>
+      <div class="faq-item-ws reveal">
+        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          <span>Funciona para qual tipo de profissional?</span>
+          <div class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        </button>
+        <div class="faq-a"><p>[INSERIR: Publico-alvo, areas de atuacao, perfil ideal]</p></div>
+      </div>
+      <div class="faq-item-ws reveal">
+        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          <span>Vou sair do workshop com algo pronto?</span>
+          <div class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        </button>
+        <div class="faq-a"><p>[INSERIR: O que o participante sai com — decisoes claras, estrutura organizada, proximos passos]</p></div>
+      </div>
+      <div class="faq-item-ws reveal">
+        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          <span>Ja fiz outros cursos e nao funcionou. Esse e diferente?</span>
+          <div class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        </button>
+        <div class="faq-a"><p>[INSERIR: Diferencial do metodo, o que faz diferente dos outros]</p></div>
+      </div>
+      <div class="faq-item-ws reveal">
+        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          <span>E se eu nao gostar?</span>
+          <div class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        </button>
+        <div class="faq-a"><p>[INSERIR: Garantia de 7 dias, sem questionamentos]</p></div>
+      </div>
+      <div class="faq-item-ws reveal">
+        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          <span>Por que o valor e tao baixo?</span>
+          <div class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        </button>
+        <div class="faq-a"><p>[INSERIR: Justificativa do preco — valor simbolico, filtro de comprometimento, entrega x apresentacao]</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 15. CTA FINAL ══════════════ -->
+<section class="cta-final-ws">
+  <div class="container" style="text-align:center;">
+    <div class="reveal">
+      <a href="#" class="btn btn-primary" style="padding:16px 40px;font-size:15px;">Comprar Ingresso | Lote 02</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 16. FOOTER ══════════════ -->
+<footer class="footer-ws">
+  <p>[INSERIR: Razao Social] | CNPJ: [INSERIR: CNPJ]<br>Site 100% Seguro | Pagamento processado por [INSERIR: Plataforma]</p>
+</footer>
+
+<!-- ══════════════ SCRIPTS ══════════════ -->
+<script>
+var ro=new IntersectionObserver(function(e){e.forEach(function(i){if(i.isIntersecting)i.target.classList.add('v');});},{threshold:0.06,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){ro.observe(el);});
+</script>
+
+</body>
+</html>

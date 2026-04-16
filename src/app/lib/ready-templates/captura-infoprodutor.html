@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metodo Digital — Inscreva-se</title>
+<meta name="description" content="Aprenda o metodo que gerou mais de 8 digitos em 2024. Vagas limitadas.">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   CAPTURA INFOPRODUTOR — Arsenal WavyFlow v2
+   Benchmark: Conversao Extrema / Luana Carolina
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  --bg-light: #F8F8F8;
+  --bg-dark: #0D0D0D;
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --border: #E0E0E0;
+  --cta-green: #1DB954;
+  --cta-green-dark: #158f3f;
+  --cta-green-glow: rgba(29, 185, 84, 0.5);
+  --urgency-red: #CC0000;
+  --accent-yellow: #FECC5A;
+  --accent-orange: #FF5C00;
+  --font-main: 'Montserrat', -apple-system, sans-serif;
+  --radius-input: 8px;
+  --radius-cta: 100px;
+  --radius-card: 12px;
+  --radius-float: 10px;
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.08);
+  --shadow-float: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  letter-spacing: -0.02em;
+}
+
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: var(--font-main);
+  color: var(--text-primary);
+  background: #fff;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* ────────────────────────────────
+   1. BARRA DE URGENCIA (topo fixo)
+   ──────────────────────────────── */
+.urgency-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 48px;
+  background: var(--urgency-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.urgency-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%);
+  animation: urgency-shimmer 3s infinite linear;
+}
+
+@keyframes urgency-shimmer {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(50%); }
+}
+
+.urgency-text {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+  position: relative;
+  z-index: 1;
+}
+
+.countdown {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  z-index: 1;
+}
+
+.countdown-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0,0,0,0.25);
+  border-radius: 6px;
+  padding: 3px 8px;
+  min-width: 42px;
+}
+
+.countdown-num {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.countdown-label {
+  color: rgba(255,255,255,0.7);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.countdown-sep {
+  color: rgba(255,255,255,0.4);
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 2px;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+/* ────────────────────────────────
+   2. HEADER
+   ──────────────────────────────── */
+.header {
+  margin-top: 48px; /* compensa barra fixa */
+  background: var(--bg-light);
+  padding: 18px 40px;
+  border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.header-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--cta-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.header-logo svg {
+  width: 24px;
+  height: 24px;
+}
+
+.header-brand {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.header-brand-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.header-brand-sub {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* ────────────────────────────────
+   3. HERO SECTION (split 50/50)
+   ──────────────────────────────── */
+.hero {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: calc(100vh - 48px - 80px);
+  overflow: hidden;
+}
+
+/* — Coluna esquerda — */
+.hero-content {
+  padding: 56px 40px 56px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hero-h1 {
+  font-size: clamp(28px, 3.5vw, 42px);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.hero-h1 .accent {
+  color: var(--cta-green);
+}
+
+.hero-sub {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  max-width: 480px;
+  margin-bottom: 32px;
+}
+
+.hero-sub strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* — Form card — */
+.form-card {
+  background: #fff;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 28px;
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.form-card .form-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.form-label .required {
+  color: var(--urgency-red);
+  margin-left: 2px;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-input);
+  font-family: var(--font-main);
+  font-size: 15px;
+  color: var(--text-primary);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input::placeholder {
+  color: #aaa;
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: var(--cta-green);
+  box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.12);
+}
+
+.form-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='7' viewBox='0 0 12 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* — CTA Button — */
+.btn-cta {
+  display: block;
+  width: 100%;
+  padding: 16px 24px;
+  border: none;
+  border-radius: var(--radius-cta);
+  font-family: var(--font-main);
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #fff;
+  cursor: pointer;
+  background-image: linear-gradient(45deg, var(--cta-green-dark), var(--cta-green), var(--cta-green-dark), var(--cta-green));
+  background-size: 400% 200%;
+  animation: brilho 3.4s infinite linear;
+  transition: box-shadow 0.3s, transform 0.3s;
+  position: relative;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.btn-cta:hover {
+  box-shadow: 0 0 24px var(--cta-green-glow);
+  transform: scale(1.02);
+}
+
+.btn-cta::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-cta:hover::after {
+  left: 100%;
+}
+
+@keyframes brilho {
+  0% { background-position: 0 0; }
+  100% { background-position: 100% 0; }
+}
+
+/* — Checkbox termos — */
+.terms-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.terms-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  accent-color: var(--cta-green);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.terms-row label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.terms-row label a {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+/* — Coluna direita (visual) — */
+.hero-visual {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(29,185,84,0.06) 0%, rgba(29,185,84,0.02) 40%, #fff 100%);
+  overflow: hidden;
+}
+
+.hero-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+/* placeholder para quando nao tem foto */
+.hero-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  background: linear-gradient(180deg, rgba(29,185,84,0.08) 0%, rgba(29,185,84,0.03) 60%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.hero-photo-placeholder svg {
+  width: 80px;
+  height: 80px;
+  opacity: 0.12;
+}
+
+.hero-photo-placeholder span {
+  font-size: 13px;
+  color: #bbb;
+  font-weight: 500;
+}
+
+/* — Cards flutuantes — */
+.float-card {
+  position: absolute;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-float);
+  padding: 12px 18px;
+  box-shadow: var(--shadow-float);
+  border: 1px solid rgba(0,0,0,0.06);
+  z-index: 10;
+  animation: float-in 0.6s ease-out both;
+}
+
+.float-card-1 {
+  bottom: 80px;
+  left: 20px;
+  animation-delay: 0.8s;
+}
+
+.float-card-2 {
+  top: 100px;
+  right: 24px;
+  animation-delay: 1.2s;
+}
+
+.float-card-3 {
+  bottom: 180px;
+  right: 20px;
+  animation-delay: 1.6s;
+}
+
+@keyframes float-in {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.float-card .fc-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--cta-green);
+  line-height: 1.1;
+}
+
+.float-card .fc-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.float-card .fc-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.float-card .fc-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cta-green), #0f7a35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.float-card .fc-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.float-card .fc-info-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.float-card .fc-info-action {
+  font-size: 11px;
+  color: var(--cta-green);
+  font-weight: 500;
+}
+
+.float-card .fc-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cta-green);
+  animation: pulse-dot 2s infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
+}
+
+/* — Footer minimo — */
+.footer-legal {
+  text-align: center;
+  padding: 24px 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.footer-legal p {
+  font-size: 12px;
+  color: #999;
+  line-height: 1.6;
+}
+
+.footer-legal a {
+  color: var(--text-secondary);
+  text-decoration: underline;
+}
+
+/* ────────────────────────────────
+   6. PAGINA DE OBRIGADO
+   ──────────────────────────────── */
+.thanks-page {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: var(--bg-dark);
+  overflow-y: auto;
+}
+
+.thanks-page.active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.thanks-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(29,185,84,0.08) 0%, transparent 50%);
+  z-index: 0;
+}
+
+/* pattern sutil no fundo */
+.thanks-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0V0h2v14h4V0h2v14h4V0h2v14h4V0h2v14.5z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.thanks-content {
+  position: relative;
+  z-index: 1;
+  max-width: 560px;
+  width: 100%;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.thanks-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(29,185,84,0.12);
+  border: 1px solid rgba(29,185,84,0.2);
+  border-radius: 100px;
+  padding: 8px 20px;
+  margin-bottom: 32px;
+}
+
+.thanks-badge svg {
+  width: 18px;
+  height: 18px;
+}
+
+.thanks-badge span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cta-green);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.thanks-h1 {
+  font-size: clamp(26px, 4vw, 36px);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.25;
+  margin-bottom: 12px;
+}
+
+.thanks-h1 .accent {
+  color: var(--cta-green);
+}
+
+.thanks-sub {
+  font-size: 15px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.6;
+  margin-bottom: 40px;
+}
+
+/* Barra de progresso */
+.progress-wrap {
+  margin-bottom: 40px;
+}
+
+.progress-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.progress-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.4);
+}
+
+.progress-pct {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cta-green);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background: #333;
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 33%;
+  background: linear-gradient(90deg, var(--cta-green-dark), var(--cta-green));
+  border-radius: 100px;
+  transition: width 1s ease-out;
+}
+
+/* Card central */
+.thanks-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 36px 32px;
+  text-align: center;
+}
+
+.thanks-card .step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--cta-green);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.thanks-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+}
+
+.thanks-card p {
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.65;
+  margin-bottom: 24px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.btn-thanks {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: var(--cta-green);
+  color: #fff;
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.btn-thanks:hover {
+  background: var(--cta-green-dark);
+  box-shadow: 0 0 20px var(--cta-green-glow);
+  transform: scale(1.02);
+}
+
+/* ────────────────────────────────
+   5. RESPONSIVO
+   ──────────────────────────────── */
+@media (max-width: 768px) {
+  .urgency-bar {
+    height: auto;
+    padding: 8px 12px;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .urgency-text {
+    font-size: 11px;
+  }
+
+  .countdown-num {
+    font-size: 14px;
+  }
+
+  .countdown-block {
+    min-width: 34px;
+    padding: 2px 6px;
+  }
+
+  .countdown-label {
+    font-size: 8px;
+  }
+
+  .header {
+    padding: 14px 20px;
+    margin-top: 62px; /* barra maior no mobile */
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .hero-visual {
+    order: -1;
+    height: 280px;
+  }
+
+  .hero-photo-placeholder {
+    min-height: 280px;
+  }
+
+  .float-card {
+    display: none;
+  }
+
+  .hero-content {
+    padding: 32px 20px;
+  }
+
+  .hero-h1 {
+    font-size: 26px;
+  }
+
+  .form-row-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .thanks-card {
+    padding: 28px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 12px 16px;
+  }
+
+  .hero-content {
+    padding: 24px 16px;
+  }
+
+  .form-card {
+    padding: 20px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     1. BARRA DE URGENCIA
+     ══════════════════════════════════════ -->
+<div class="urgency-bar">
+  <span class="urgency-text">A proxima turma do Metodo Digital abre em:</span>
+  <div class="countdown" id="countdown">
+    <div class="countdown-block">
+      <span class="countdown-num" id="cd-days">02</span>
+      <span class="countdown-label">Dias</span>
+    </div>
+    <span class="countdown-sep">&middot;</span>
+    <div class="countdown-block">
+      <span class="countdown-num" id="cd-hours">14</span>
+      <span class="countdown-label">Hrs</span>
+    </div>
+    <span class="countdown-sep">&middot;</span>
+    <div class="countdown-block">
+      <span class="countdown-num" id="cd-mins">42</span>
+      <span class="countdown-label">Min</span>
+    </div>
+    <span class="countdown-sep">&middot;</span>
+    <div class="countdown-block">
+      <span class="countdown-num" id="cd-secs">08</span>
+      <span class="countdown-label">Seg</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     2. HEADER
+     ══════════════════════════════════════ -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+      </svg>
+    </div>
+    <div class="header-brand">
+      <span class="header-brand-name">Metodo Digital</span>
+      <span class="header-brand-sub">Infoprodutos de Alta Conversao</span>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════
+     3. HERO SECTION
+     ══════════════════════════════════════ -->
+<main class="hero" id="hero">
+  <!-- Coluna esquerda -->
+  <div class="hero-content">
+    <h1 class="hero-h1">
+      Como criar um infoproduto <span class="accent">irresistivel</span> e escalar suas vendas no digital
+    </h1>
+    <p class="hero-sub">
+      Tenha acesso ao meu metodo, que me gerou mais de <strong>R$ 12 milhoes em 2024,</strong> para transformar seu conhecimento em um <strong>produto digital lucrativo</strong> mesmo partindo do zero.
+    </p>
+
+    <!-- Form card -->
+    <div class="form-card">
+      <div class="form-title">Garanta sua vaga gratuita</div>
+      <form id="captureForm">
+        <div class="form-group">
+          <label class="form-label">Nome completo <span class="required">*</span></label>
+          <input class="form-input" type="text" placeholder="Digite seu nome" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">E-mail <span class="required">*</span></label>
+          <input class="form-input" type="email" placeholder="seu@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">WhatsApp <span class="required">*</span></label>
+          <input class="form-input" type="tel" placeholder="(11) 99000-0000" required>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Data de nascimento <span class="required">*</span></label>
+            <input class="form-input" type="date" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Genero <span class="required">*</span></label>
+            <select class="form-select" required>
+              <option value="" disabled selected>Selecione</option>
+              <option value="masculino">Masculino</option>
+              <option value="feminino">Feminino</option>
+              <option value="outros">Prefiro nao dizer</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn-cta">Quero garantir minha vaga</button>
+        </div>
+        <div class="terms-row">
+          <input type="checkbox" id="terms" required>
+          <label for="terms">Ao se inscrever, voce concorda com nossos <a href="#">Termos de Uso</a> e <a href="#">Politica de Privacidade</a>.</label>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Coluna direita -->
+  <div class="hero-visual">
+    <!-- Placeholder — substituir por <img class="hero-photo" src="foto.jpg" alt="Especialista"> -->
+    <div class="hero-photo-placeholder">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Foto do especialista</span>
+    </div>
+
+    <!-- Card flutuante 1 — Resultado -->
+    <div class="float-card float-card-1">
+      <div class="fc-value">R$ 8.283</div>
+      <div class="fc-label">Faturamento semanal medio</div>
+    </div>
+
+    <!-- Card flutuante 2 — Prova social -->
+    <div class="float-card float-card-2">
+      <div class="fc-row">
+        <div class="fc-dot"></div>
+        <div class="fc-avatar">MS</div>
+        <div class="fc-info">
+          <span class="fc-info-name">Maria Silva</span>
+          <span class="fc-info-action">Acabou de se inscrever</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card flutuante 3 — Alunos -->
+    <div class="float-card float-card-3">
+      <div class="fc-row">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cta-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <div class="fc-info">
+          <span class="fc-info-name">+5.247 alunos</span>
+          <span class="fc-info-action">em 30 paises</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ══════════════════════════════════════
+     FOOTER LEGAL
+     ══════════════════════════════════════ -->
+<footer class="footer-legal">
+  <p>Ao clicar, voce concorda com os <a href="#">Termos de Uso</a> e <a href="#">Politica de Privacidade</a>.<br>[INSERIR: Razao Social] &mdash; CNPJ: [INSERIR: CNPJ]</p>
+</footer>
+
+<!-- ══════════════════════════════════════
+     6. PAGINA DE OBRIGADO
+     ══════════════════════════════════════ -->
+<div class="thanks-page" id="thanksPage">
+  <div class="thanks-bg"></div>
+  <div class="thanks-content">
+
+    <div class="thanks-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta-green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      <span>Inscricao confirmada</span>
+    </div>
+
+    <h1 class="thanks-h1">
+      Calma, ainda faltam <span class="accent">2 passos</span> importantes...
+    </h1>
+    <p class="thanks-sub">Faca os passos abaixo para garantir sua vaga e receber todos os materiais exclusivos.</p>
+
+    <!-- Progress bar -->
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span class="progress-label">Progresso da sua inscricao</span>
+        <span class="progress-pct">33%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <!-- Step card -->
+    <div class="thanks-card">
+      <div class="step-number">1</div>
+      <h3>Entre no grupo VIP do WhatsApp</h3>
+      <p>No grupo voce recebe o link da aula, materiais de apoio e o contato direto com nossa equipe.</p>
+      <a href="#" class="btn-thanks">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.613.613l4.458-1.495A11.932 11.932 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.317 0-4.478-.678-6.306-1.838l-.44-.268-2.975.997.997-2.975-.268-.44A9.957 9.957 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
+        Entrar no grupo VIP
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCRIPTS
+     ══════════════════════════════════════ -->
+<script>
+// ── Countdown funcional ──
+(function() {
+  // 3 dias a partir de agora
+  var end = new Date().getTime() + (3 * 24 * 60 * 60 * 1000);
+  var saved = localStorage.getItem('wf_countdown_end');
+  if (saved && parseInt(saved) > new Date().getTime()) {
+    end = parseInt(saved);
+  } else {
+    localStorage.setItem('wf_countdown_end', end);
+  }
+
+  function pad(n) { return n < 10 ? '0' + n : n; }
+
+  function tick() {
+    var now = new Date().getTime();
+    var diff = end - now;
+    if (diff <= 0) {
+      document.getElementById('cd-days').textContent = '00';
+      document.getElementById('cd-hours').textContent = '00';
+      document.getElementById('cd-mins').textContent = '00';
+      document.getElementById('cd-secs').textContent = '00';
+      return;
+    }
+    var d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    var h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    var m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    var s = Math.floor((diff % (1000 * 60)) / 1000);
+    document.getElementById('cd-days').textContent = pad(d);
+    document.getElementById('cd-hours').textContent = pad(h);
+    document.getElementById('cd-mins').textContent = pad(m);
+    document.getElementById('cd-secs').textContent = pad(s);
+  }
+
+  tick();
+  setInterval(tick, 1000);
+})();
+
+// ── Form submit → Thank You page ──
+document.getElementById('captureForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  document.getElementById('thanksPage').classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  // Animar barra de progresso
+  setTimeout(function() {
+    document.getElementById('progressFill').style.width = '33%';
+  }, 400);
+});
+
+// ── Mascara WhatsApp ──
+(function() {
+  var telInput = document.querySelector('input[type="tel"]');
+  if (!telInput) return;
+  telInput.addEventListener('input', function(e) {
+    var v = e.target.value.replace(/\D/g, '');
+    if (v.length > 11) v = v.slice(0, 11);
+    if (v.length > 6) {
+      e.target.value = '(' + v.slice(0,2) + ') ' + v.slice(2,7) + '-' + v.slice(7);
+    } else if (v.length > 2) {
+      e.target.value = '(' + v.slice(0,2) + ') ' + v.slice(2);
+    } else if (v.length > 0) {
+      e.target.value = '(' + v;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

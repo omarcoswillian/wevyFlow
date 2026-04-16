@@ -156,7 +156,13 @@ function selectRelevantComponents(prompt: string, hasReference: boolean): string
 
   // Hero
   if (p.includes("captura") || p.includes("lead") || p.includes("formulário") || p.includes("inscri")) {
-    if (p.includes("foto") || p.includes("mentor") || p.includes("escur") || p.includes("dark")) {
+    if (p.includes("infoprodu") || p.includes("luana") || p.includes("execu") || p.includes("conversao extrema") || p.includes("formulario completo") || p.includes("split") || p.includes("cards flutuantes")) {
+      selected.push("urgency-bar-countdown");
+      selected.push("header-captura-clean");
+      selected.push("hero-captura-split");
+      selected.push("float-cards-social-proof");
+      selected.push("footer-legal-minimal");
+    } else if (p.includes("foto") || p.includes("mentor") || p.includes("escur") || p.includes("dark")) {
       selected.push("hero-dark-photo");
     } else {
       selected.push("hero-mentor-form");

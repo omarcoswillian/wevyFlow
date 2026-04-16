@@ -1,0 +1,187 @@
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   HERO C — Execucao Maxima (Cinematic Dark)
+   Fullscreen dark + foto overlay + CTA simples
+   ═══════════════════════════════════════ */
+:root {
+  --green: #1DB954;
+  --green-dark: #158f3f;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Montserrat', sans-serif;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+
+.hero-cine {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Foto de fundo (placeholder gradiente) */
+.hero-cine-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 40%, #1e1e1e 70%, #111 100%);
+  z-index: 0;
+}
+
+/* Substituir por: <img src="foto.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center;"> dentro de .hero-cine-bg */
+
+/* Overlays */
+.hero-cine-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.55) 40%, rgba(0,0,0,0.30) 100%);
+  z-index: 1;
+}
+
+.hero-cine-overlay-v {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.35) 100%);
+  z-index: 2;
+}
+
+/* Conteudo */
+.hero-cine-content {
+  position: relative;
+  z-index: 10;
+  max-width: 700px;
+  padding: 0 40px 0 80px;
+}
+
+/* Logo editorial */
+.hcn-logo {
+  margin-bottom: 40px;
+}
+
+.hcn-logo-text {
+  font-family: var(--font-serif);
+  font-size: clamp(24px, 3vw, 32px);
+  color: #fff;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.hcn-logo-text em {
+  font-style: italic;
+  font-weight: 400;
+}
+
+.hcn-logo-text strong {
+  font-weight: 700;
+  display: block;
+}
+
+.hcn-logo-mark {
+  width: 40px;
+  height: 2px;
+  background: var(--green);
+  margin-top: 10px;
+  border-radius: 2px;
+}
+
+/* Headline */
+.hcn-h1 {
+  font-family: var(--font-sans);
+  font-size: clamp(28px, 3.5vw, 42px);
+  font-weight: 600;
+  line-height: 1.3;
+  color: #fff;
+  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+}
+
+/* Subtitulo */
+.hcn-sub {
+  font-size: 15px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.65;
+  max-width: 540px;
+  margin-bottom: 36px;
+}
+
+/* CTA simples e elegante */
+.hcn-btn {
+  display: inline-block;
+  padding: 16px 36px;
+  background: var(--green);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, box-shadow 0.3s, transform 0.2s;
+}
+
+.hcn-btn:hover {
+  background: #22d362;
+  box-shadow: 0 0 30px rgba(29,185,84,0.3);
+  transform: translateY(-1px);
+}
+
+/* Reveal */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.rd1 { transition-delay: 0.15s; }
+.rd2 { transition-delay: 0.3s; }
+.rd3 { transition-delay: 0.45s; }
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .hero-cine-content {
+    padding: 40px 24px;
+    text-align: center;
+  }
+  .hcn-h1 { font-size: 26px; }
+  .hcn-logo-mark { margin-left: auto; margin-right: auto; }
+  .hcn-btn { width: 100%; text-align: center; }
+}
+</style>
+
+<!-- ═══ HERO C — EXECUCAO MAXIMA (CINEMATIC) ═══ -->
+<section class="hero-cine">
+  <!-- Background (substituir conteudo por <img>) -->
+  <div class="hero-cine-bg"></div>
+  <!-- Overlays -->
+  <div class="hero-cine-overlay"></div>
+  <div class="hero-cine-overlay-v"></div>
+
+  <!-- Conteudo -->
+  <div class="hero-cine-content">
+    <div class="hcn-logo reveal">
+      <div class="hcn-logo-text">
+        <em>Execucao</em>
+        <strong>Maxima</strong>
+      </div>
+      <div class="hcn-logo-mark"></div>
+    </div>
+
+    <h1 class="hcn-h1 reveal rd1">
+      Desbloqueie sua melhor versao em 25 dias ativando o modo execucao maxima e alcance os seus objetivos.
+    </h1>
+
+    <p class="hcn-sub reveal rd2">
+      Melhore o desempenho em todas as areas da vida, atraves do desenvolvimento de uma personalidade focada e constante.
+    </p>
+
+    <div class="reveal rd3">
+      <a href="#form" class="hcn-btn">QUERO ME TORNAR UM EXECUTOR MAXIMO</a>
+    </div>
+  </div>
+</section>
+
+<script>
+var ro = new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){ro.observe(el);});
+</script>

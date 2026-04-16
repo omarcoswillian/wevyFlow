@@ -1,854 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[INSERIR: Nome do Produto]</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-:root {
-  --color-primary: #FF5C00;
-  --color-secondary: #E04E00;
-  --bg-primary: #07070a;
-  --bg-surface: rgba(255,255,255,0.03);
-  --text-primary: rgba(255,255,255,0.93);
-  --text-secondary: rgba(255,255,255,0.55);
-  --border: rgba(255,255,255,0.06);
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Inter', sans-serif;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  line-height: 1.6;
-  overflow-x: hidden;
-}
-
-.font-heading {
-  font-family: 'Sora', sans-serif;
-}
-
-.container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-@media (min-width: 768px) {
-  .container {
-    padding: 0 80px;
-  }
-}
-
-.section {
-  padding: 56px 0;
-}
-
-@media (min-width: 768px) {
-  .section {
-    padding: 80px 0;
-  }
-}
-
-.btn {
-  display: inline-block;
-  text-decoration: none;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  color: white;
-  padding: 16px 36px;
-  border-radius: 6px;
-  min-height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-
-@media (min-width: 768px) {
-  .btn-primary {
-    width: auto;
-  }
-}
-
-.btn-primary:hover {
-  box-shadow: 0 0 32px rgba(255,92,0,0.4);
-  transform: translateY(-2px);
-}
-
-.btn-secondary {
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text-primary);
-  padding: 14px 24px;
-  border-radius: 6px;
-}
-
-.btn-secondary:hover {
-  background: rgba(255,255,255,0.05);
-}
-
-.card {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 28px;
-  transition: all 0.3s ease;
-}
-
-.card:hover {
-  border-color: rgba(255,92,0,0.3);
-  transform: translateY(-2px);
-}
-
-.badge {
-  background: rgba(255,92,0,0.12);
-  color: var(--color-primary);
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  padding: 4px 12px;
-  border-radius: 20px;
-  border: 1px solid rgba(255,92,0,0.2);
-  display: inline-block;
-}
-
-.glow {
-  position: relative;
-}
-
-.glow::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 150px;
-  height: 150px;
-  background: radial-gradient(circle, rgba(255,92,0,0.15) 0%, transparent 70%);
-  filter: blur(100px);
-  transform: translate(-50%, -50%);
-  z-index: -1;
-}
-
-.grid-2 {
-  display: grid;
-  gap: 20px;
-}
-
-@media (min-width: 768px) {
-  .grid-2 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.grid-3 {
-  display: grid;
-  gap: 20px;
-}
-
-@media (min-width: 768px) {
-  .grid-3 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .grid-3 {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.text-center {
-  text-align: center;
-}
-
-.mb-12 {
-  margin-bottom: 48px;
-}
-
-.mb-6 {
-  margin-bottom: 24px;
-}
-
-.mb-4 {
-  margin-bottom: 16px;
-}
-
-.mb-2 {
-  margin-bottom: 8px;
-}
-
-.mt-4 {
-  margin-top: 16px;
-}
-
-.mt-8 {
-  margin-top: 32px;
-}
-
-.flex {
-  display: flex;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.justify-center {
-  justify-content: center;
-}
-
-.gap-4 {
-  gap: 16px;
-}
-
-.gap-2 {
-  gap: 8px;
-}
-
-.w-full {
-  width: 100%;
-}
-
-.max-w-4xl {
-  max-width: 896px;
-}
-
-.max-w-2xl {
-  max-width: 672px;
-}
-
-.mx-auto {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.text-4xl {
-  font-size: 2.25rem;
-}
-
-@media (min-width: 768px) {
-  .text-4xl {
-    font-size: 3rem;
-  }
-}
-
-.text-2xl {
-  font-size: 1.75rem;
-}
-
-@media (min-width: 768px) {
-  .text-2xl {
-    font-size: 2.25rem;
-  }
-}
-
-.text-xl {
-  font-size: 1.25rem;
-}
-
-.text-lg {
-  font-size: 1.125rem;
-}
-
-.font-bold {
-  font-weight: 700;
-}
-
-.font-semibold {
-  font-weight: 600;
-}
-
-.font-medium {
-  font-weight: 500;
-}
-
-.leading-tight {
-  line-height: 1.1;
-}
-
-.opacity-70 {
-  opacity: 0.7;
-}
-
-.section-alt {
-  background: #161616;
-}
-
-.testimonial-highlight {
-  border: 2px solid var(--color-primary);
-  background: rgba(255,92,0,0.05);
-}
-
-.price-highlight {
-  color: var(--color-primary);
-}
-
-.accordion {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 16px;
-}
-
-.accordion-header {
-  padding: 20px 28px;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-  transition: background 0.3s ease;
-}
-
-.accordion-header:hover {
-  background: rgba(255,255,255,0.02);
-}
-
-.accordion-content {
-  padding: 0 28px 20px 28px;
-  color: var(--text-secondary);
-  display: none;
-}
-
-.accordion-content.active {
-  display: block;
-}
-
-.social-proof {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 24px;
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-.guarantee-badge {
-  background: linear-gradient(135deg, #22C55E, #16A34A);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  margin-bottom: 16px;
-  display: inline-block;
-}
-
-.footer {
-  border-top: 1px solid var(--border);
-  padding: 40px 0;
-  text-align: center;
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-.footer a {
-  color: var(--color-primary);
-  text-decoration: none;
-}
-
-.footer a:hover {
-  text-decoration: underline;
-}
-
-@media (max-width: 767px) {
-  .hero-grid {
-    text-align: center;
-  }
-  
-  .hero-image {
-    margin-top: 40px;
-    order: -1;
-  }
-}
-
-.avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
-  font-size: 24px;
-  margin: 0 auto 16px;
-}
-
-.expert-section {
-  background: var(--bg-surface);
-  border-radius: 12px;
-  padding: 40px;
-  margin: 40px 0;
-}
-
-.numbers-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 32px;
-  text-align: center;
-  margin: 40px 0;
-}
-
-.number-item {
-  color: var(--color-primary);
-  font-family: 'Sora', sans-serif;
-  font-size: 2rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.number-label {
-  color: var(--text-secondary);
-  font-size: 14px;
-  margin-top: 4px;
+:root{
+  --bg:#0a0a0f;--bg-2:#111118;--bg-card:#16161e;
+  --text:#f5f5f5;--text-70:rgba(245,245,245,0.7);--text-40:rgba(245,245,245,0.4);--text-20:rgba(245,245,245,0.2);
+  --orange:#ff5c00;--orange-dark:#e04e00;--orange-glow:rgba(255,92,0,0.2);
+  --green:#22c55e;--green-dark:#16a34a;
+  --border:rgba(255,255,255,0.06);
+  --font:'Montserrat',-apple-system,sans-serif;
+  --container:920px;--radius:14px;--radius-sm:8px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;}
+body{font-family:var(--font);color:var(--text);background:var(--bg);line-height:1.6;}
+a{text-decoration:none;color:inherit;}
+.container{max-width:var(--container);margin:0 auto;padding:0 24px;}
+.section{padding:56px 0;}
+.section-alt{padding:56px 0;background:var(--bg-2);}
+.text-orange{color:var(--orange);}
+.section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--orange);margin-bottom:10px;}
+.section-label::before{content:'+ ';}
+.section-title{font-size:clamp(20px,2.8vw,28px);font-weight:800;letter-spacing:-0.03em;line-height:1.15;margin-bottom:10px;}
+.section-sub{font-size:12px;color:var(--text-40);max-width:440px;line-height:1.55;}
+.btn-cta{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 28px;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;border:none;border-radius:6px;font-family:var(--font);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;cursor:pointer;transition:all 0.3s;text-decoration:none;}
+.btn-cta:hover{box-shadow:0 4px 20px var(--orange-glow);transform:translateY(-1px);}
+.btn-sec{display:inline-flex;align-items:center;gap:6px;padding:12px 24px;background:none;color:var(--text-70);border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;text-decoration:none;}
+.btn-sec:hover{border-color:rgba(255,255,255,0.15);color:var(--text);}
+
+/* ═══ HERO ═══ */
+.hero{padding:72px 0 48px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,var(--orange-glow),transparent 70%);pointer-events:none;opacity:0.5;}
+.hero-grid{display:grid;grid-template-columns:1.1fr 0.9fr;gap:36px;align-items:center;position:relative;z-index:1;}
+.hero-badge{display:inline-block;padding:4px 12px;border-radius:100px;background:rgba(255,92,0,0.1);border:1px solid rgba(255,92,0,0.15);font-size:9px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:16px;}
+.hero h1{font-size:clamp(24px,3.2vw,36px);font-weight:800;letter-spacing:-0.04em;line-height:1.1;margin-bottom:12px;}
+.hero h1 em{font-style:italic;color:var(--orange);}
+.hero .hero-desc{font-size:13px;color:var(--text-40);line-height:1.6;max-width:400px;margin-bottom:20px;}
+.hero-buttons{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.hero-stats{display:flex;gap:20px;}
+.hero-stat{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-40);}
+.hero-stat svg{width:12px;height:12px;color:var(--orange);}
+
+/* Hero right — card de resultado */
+.hero-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;text-align:center;}
+.hero-card-icon{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--orange),var(--orange-dark));margin:0 auto 12px;display:flex;align-items:center;justify-content:center;}
+.hero-card-icon svg{width:24px;height:24px;color:#fff;}
+.hero-card-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;}
+.hero-card-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.hcs{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 10px;text-align:center;}
+.hcs-num{font-size:18px;font-weight:800;color:var(--text);}
+.hcs-label{font-size:8px;color:var(--text-40);margin-top:2px;}
+
+/* ═══ RESULTADOS ═══ */
+.results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:28px;}
+.result-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color 0.3s;}
+.result-card:hover{border-color:rgba(255,255,255,0.1);}
+.result-card-img{width:100%;aspect-ratio:4/5;background:linear-gradient(180deg,#1e1e28,#14141c);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text-20);position:relative;}
+.result-card-img::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;margin:6px 8px 0;background:linear-gradient(90deg,var(--orange) 60%,var(--text-20) 60%);border-radius:2px;}
+.result-card-info{padding:12px;}
+.result-card-name{font-size:11px;font-weight:700;margin-bottom:2px;}
+.result-card-desc{font-size:9px;color:var(--text-40);line-height:1.4;}
+
+/* ═══ PARA QUEM ═══ */
+.audience-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:24px;}
+.audience-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:border-color 0.3s;}
+.audience-card:hover{border-color:var(--orange);}
+.audience-card-check{width:18px;height:18px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+.audience-card-check svg{width:9px;height:9px;color:#fff;}
+.audience-card h4{font-size:12px;font-weight:700;margin-bottom:3px;}
+.audience-card p{font-size:9px;color:var(--text-40);line-height:1.4;}
+
+/* ═══ CONTEUDO / PILARES ═══ */
+.pillar-list{display:flex;flex-direction:column;gap:10px;margin-top:24px;}
+.pillar-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:grid;grid-template-columns:40px 1fr;gap:14px;align-items:start;transition:border-color 0.3s;}
+.pillar-card:hover{border-color:rgba(255,92,0,0.2);}
+.pillar-num{width:40px;height:40px;border-radius:50%;background:rgba(255,92,0,0.08);border:1px solid rgba(255,92,0,0.12);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--orange);}
+.pillar-card h3{font-size:14px;font-weight:700;margin-bottom:3px;letter-spacing:-0.01em;}
+.pillar-card p{font-size:11px;color:var(--text-40);line-height:1.5;}
+
+/* ═══ DEPOIMENTOS ═══ */
+.depo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:24px;}
+.depo-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:border-color 0.3s;}
+.depo-card:hover{border-color:rgba(255,255,255,0.1);}
+.depo-stars{color:#f59e0b;font-size:10px;letter-spacing:1px;margin-bottom:10px;}
+.depo-text{font-size:11px;color:var(--text-70);line-height:1.55;font-style:italic;margin-bottom:14px;}
+.depo-author{display:flex;align-items:center;gap:8px;padding-top:12px;border-top:1px solid var(--border);}
+.depo-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;}
+.depo-name{font-size:10px;font-weight:600;}
+.depo-role{font-size:8px;color:var(--text-40);}
+
+/* ═══ ESPECIALISTA ═══ */
+.expert-grid{display:grid;grid-template-columns:200px 1fr;gap:28px;align-items:center;margin-top:24px;}
+.expert-photo{width:200px;height:240px;border-radius:var(--radius);background:linear-gradient(135deg,#222,#1a1a1a);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-20);}
+.expert-name{font-size:18px;font-weight:800;margin-bottom:2px;}
+.expert-title{font-size:11px;color:var(--orange);font-weight:600;margin-bottom:10px;}
+.expert-bio{font-size:11px;color:var(--text-40);line-height:1.6;margin-bottom:16px;}
+.expert-stats{display:flex;gap:20px;}
+.expert-stat-num{font-size:18px;font-weight:800;}
+.expert-stat-label{font-size:9px;color:var(--text-40);}
+
+/* ═══ GARANTIA ═══ */
+.guarantee-box{background:var(--bg-card);border:2px solid var(--green);border-radius:var(--radius);padding:28px;text-align:center;max-width:520px;margin:24px auto 0;}
+.guarantee-icon{width:48px;height:48px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+.guarantee-icon svg{width:22px;height:22px;color:#fff;}
+.guarantee-box h3{font-size:16px;font-weight:800;margin-bottom:6px;}
+.guarantee-box p{font-size:11px;color:var(--text-40);line-height:1.6;}
+
+/* ═══ OFERTA ═══ */
+.offer-box{background:var(--bg-card);border:2px solid var(--orange);border-radius:var(--radius);padding:28px;text-align:center;max-width:480px;margin:24px auto 0;position:relative;}
+.offer-box::before{content:'Oferta especial';position:absolute;top:-10px;left:50%;transform:translateX(-50%);padding:3px 14px;background:var(--orange);color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;border-radius:100px;}
+.offer-old{font-size:14px;color:var(--text-40);text-decoration:line-through;margin-bottom:4px;}
+.offer-price{font-size:clamp(28px,4vw,38px);font-weight:900;letter-spacing:-0.04em;margin-bottom:2px;}
+.offer-installment{font-size:12px;color:var(--text-40);margin-bottom:18px;}
+.offer-list{list-style:none;text-align:left;margin-bottom:20px;display:flex;flex-direction:column;gap:6px;}
+.offer-list li{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-70);}
+.offer-list li svg{width:14px;height:14px;color:var(--green);flex-shrink:0;}
+
+/* ═══ FAQ ═══ */
+.faq-list{display:flex;flex-direction:column;gap:6px;margin-top:24px;max-width:640px;margin-left:auto;margin-right:auto;}
+.faq-item{border-radius:var(--radius-sm);overflow:hidden;}
+.faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:var(--bg-card);border:1px solid var(--border);font-family:var(--font);font-size:12px;font-weight:600;color:var(--text);text-align:left;cursor:pointer;border-radius:var(--radius-sm);transition:border-color 0.2s;}
+.faq-q:hover{border-color:rgba(255,255,255,0.1);}
+.faq-icon{color:var(--text-40);font-size:14px;transition:transform 0.3s;flex-shrink:0;}
+.faq-item.open .faq-icon{transform:rotate(45deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height 0.35s ease;}
+.faq-item.open .faq-a{max-height:300px;}
+.faq-a-inner{padding:10px 16px;font-size:11px;color:var(--text-40);line-height:1.6;}
+
+/* ═══ FOOTER ═══ */
+.footer{border-top:1px solid var(--border);padding:20px 0;text-align:center;}
+.footer p{font-size:9px;color:var(--text-20);}
+
+.reveal{opacity:0;transform:translateY(14px);transition:opacity 0.6s ease,transform 0.6s ease;}
+.reveal.v{opacity:1;transform:translateY(0);}
+.rd1{transition-delay:.06s}.rd2{transition-delay:.12s}.rd3{transition-delay:.18s}
+
+@media(max-width:768px){
+  .hero-grid{grid-template-columns:1fr;}.hero-card{order:-1;}
+  .results-grid,.audience-grid,.depo-grid{grid-template-columns:1fr;}
+  .expert-grid{grid-template-columns:1fr;}.expert-photo{width:100%;height:200px;}
+  .pillar-card{grid-template-columns:32px 1fr;gap:10px;padding:16px;}
+  .pillar-num{width:32px;height:32px;font-size:12px;}
+  .hero-buttons{flex-direction:column;}.hero-stats{flex-wrap:wrap;gap:12px;}
 }
 </style>
-
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Método SPE - Venda Todos os Dias Pelo Instagram Stories | Luana Carolina</title>
-    <meta name="description" content="Aprenda a vender todos os dias usando Instagram Stories sem tráfego pago. Método comprovado para infoprodutores e prestadores de serviço.">
-    <meta property="og:title" content="Método SPE - Venda Todos os Dias Pelo Instagram Stories">
-    <meta property="og:description" content="Transforme seus Stories em uma máquina de vendas automática. Método comprovado da Luana Carolina.">
-    <meta property="og:image" content="/og-image.jpg">
 </head>
 <body>
-    <!-- HERO -->
-    <section class="section glow">
-        <div class="container">
-            <div class="hero-grid grid-2" style="align-items: center;">
-                <div>
-                    <div class="badge mb-6">Método Exclusivo</div>
-                    <h1 class="font-heading text-4xl font-bold leading-tight mb-6">
-                        Venda <span style="color: var(--color-primary);">Todos os Dias</span> Usando Instagram Stories
-                    </h1>
-                    <p class="text-lg opacity-70 mb-6">
-                        Transforme seus Stories em uma máquina de vendas automática e fature sem depender de tráfego pago. Método comprovado da Luana Carolina.
-                    </p>
-                    <div class="flex flex-col gap-4 mb-6">
-                        <a href="#oferta" class="btn btn-primary">QUERO VENDER PELO STORIES</a>
-                        <a href="#metodo" class="btn btn-secondary">Ver Como Funciona</a>
-                    </div>
-                    <div class="social-proof">
-                        <span>✓ Mais de 3.000 alunos</span>
-                        <span>✓ Resultados em 30 dias</span>
-                        <span>✓ Garantia de 7 dias</span>
-                    </div>
-                </div>
-                <div class="hero-image">
-                    <div class="card glow" style="background: var(--bg-surface); text-align: center; padding: 40px;">
-                        <div style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 48px;">📱</div>
-                        <h3 class="font-heading text-xl font-bold mb-4">Stories que Vendem</h3>
-                        <div class="numbers-grid">
-                            <div>
-                                <div class="number-item">5-10</div>
-                                <div class="number-label">vendas/dia</div>
-                            </div>
-                            <div>
-                                <div class="number-item">R$ 500</div>
-                                <div class="number-label">ticket médio</div>
-                            </div>
-                            <div>
-                                <div class="number-item">30%</div>
-                                <div class="number-label">conversão</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- AUTORIDADE -->
-    <section class="section section-alt">
-        <div class="container text-center">
-            <h2 class="font-heading text-2xl font-bold mb-12">Resultados Comprovados</h2>
-            <div class="numbers-grid" style="max-width: 800px; margin: 0 auto;">
-                <div>
-                    <div class="number-item">R$ 2.3M</div>
-                    <div class="number-label">faturados pelos alunos</div>
-                </div>
-                <div>
-                    <div class="number-item">3.247</div>
-                    <div class="number-label">alunos transformados</div>
-                </div>
-                <div>
-                    <div class="number-item">96%</div>
-                    <div class="number-label">aprovação do método</div>
-                </div>
-                <div>
-                    <div class="number-item">150+</div>
-                    <div class="number-label">cases de sucesso</div>
-                </div>
-            </div>
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-badge reveal">[INSERIR: Badge — ex: Metodo Exclusivo]</div>
+        <h1 class="reveal rd1">[INSERIR: Headline parte 1] <em>[INSERIR: palavra destaque]</em> [INSERIR: Headline parte 2]</h1>
+        <p class="hero-desc reveal rd2">[INSERIR: Subtitulo — transforme X em Y sem depender de Z. Metodo comprovado por N pessoas.]</p>
+        <div class="hero-buttons reveal rd2">
+          <a href="#oferta" class="btn-cta">[INSERIR: CTA primario]</a>
+          <a href="#metodo" class="btn-sec">[INSERIR: CTA secundario]</a>
         </div>
-    </section>
-
-    <!-- PARA QUEM É -->
-    <section class="section">
-        <div class="container">
-            <div class="text-center mb-12">
-                <h2 class="font-heading text-2xl font-bold mb-4">Este Método é Para Você Se:</h2>
-                <p class="text-lg opacity-70">Identifique seu perfil e descubra como o SPE pode transformar seus resultados</p>
-            </div>
-            <div class="grid-3">
-                <div class="card text-center">
-                    <div class="avatar">IP</div>
-                    <h3 class="font-heading text-xl font-semibold mb-2">Infoprodutor</h3>
-                    <p class="opacity-70">Você tem um produto digital mas não consegue vender consistentemente pelos Stories. Suas vendas são irregulares e você depende muito de launches.</p>
-                </div>
-                <div class="card text-center">
-                    <div class="avatar">PS</div>
-                    <h3 class="font-heading text-xl font-semibold mb-2">Prestador de Serviço</h3>
-                    <p class="opacity-70">Você oferece serviços mas não sabe como mostrar seu trabalho nos Stories para atrair clientes qualificados todos os dias.</p>
-                </div>
-                <div class="card text-center">
-                    <div class="avatar">CO</div>
-                    <h3 class="font-heading text-xl font-semibold mb-2">Coach/Consultor</h3>
-                    <p class="opacity-70">Você tem conhecimento para vender mas não consegue converter seguidores em clientes usando os Stories de forma estratégica.</p>
-                </div>
-            </div>
+        <div class="hero-stats reveal rd3">
+          <div class="hero-stat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> +[X] alunos</div>
+          <div class="hero-stat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Resultados em [X] dias</div>
+          <div class="hero-stat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Garantia de 7 dias</div>
         </div>
-    </section>
-
-    <!-- O QUE É -->
-    <section id="metodo" class="section section-alt">
-        <div class="container text-center">
-            <h2 class="font-heading text-2xl font-bold mb-6">O Que é o Método SPE?</h2>
-            <p class="text-lg opacity-70 max-w-4xl mx-auto">
-                SPE significa <strong>Stories Para Encantar</strong> - um sistema comprovado que transforma seus Stories do Instagram em uma máquina de vendas automática. Você aprende a criar conteúdo que educa, engaja e converte seus seguidores em clientes, gerando vendas todos os dias sem depender de tráfego pago ou lançamentos complexos.
-            </p>
+      </div>
+      <div class="hero-card reveal rd3">
+        <div class="hero-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/></svg></div>
+        <div class="hero-card-title">[INSERIR: Titulo do card — ex: Stories que Vendem]</div>
+        <div class="hero-card-stats">
+          <div class="hcs"><div class="hcs-num">[X-Y]</div><div class="hcs-label">[INSERIR: metrica 1]</div></div>
+          <div class="hcs"><div class="hcs-num">R$ [X]</div><div class="hcs-label">[INSERIR: metrica 2]</div></div>
+          <div class="hcs" style="grid-column:span 2;"><div class="hcs-num">[X]%</div><div class="hcs-label">[INSERIR: metrica 3]</div></div>
         </div>
-    </section>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- PILARES/MÓDULOS -->
-    <section class="section">
-        <div class="container">
-            <div class="text-center mb-12">
-                <h2 class="font-heading text-2xl font-bold mb-4">Os 5 Pilares do Método SPE</h2>
-                <p class="text-lg opacity-70">Cada módulo foi desenhado para você dominar uma parte específica da venda pelos Stories</p>
-            </div>
-            <div class="grid-2" style="gap: 40px;">
-                <div class="card">
-                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 24px;">🎯</div>
-                    <h3 class="font-heading text-xl font-semibold mb-2">Módulo 1: Estratégia</h3>
-                    <p class="opacity-70">Defina seu posicionamento, identifique seu avatar ideal e crie uma estratégia de conteúdo que gera desejo pelo seu produto.</p>
-                </div>
-                <div class="card">
-                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 24px;">📝</div>
-                    <h3 class="font-heading text-xl font-semibold mb-2">Módulo 2: Roteiros</h3>
-                    <p class="opacity-70">Scripts prontos para cada tipo de Story: educativo, social proof, venda direta, objeções e call to action irresistível.</p>
-                </div>
-                <div class="card">
-                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 24px;">🎨</div>
-                    <h3 class="font-heading text-xl font-semibold mb-2">Módulo 3: Design</h3>
-                    <p class="opacity-70">Templates visuais que convertem, cores que vendem, fontes que geram autoridade e layouts que prendem atenção.</p>
-                </div>
-                <div class="card">
-                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 24px;">⚡</div>
-                    <h3 class="font-heading text-xl font-semibold mb-2">Módulo 4: Automação</h3>
-                    <p class="opacity-70">Como criar um funil de Stories que vende no piloto automático, usando sequências programadas e gatilhos mentais.</p>
-                </div>
-                <div class="card">
-                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 24px;">📊</div>
-                    <h3 class="font-heading text-xl font-semibold mb-2">Módulo 5: Métricas</h3>
-                    <p class="opacity-70">Analise resultados, otimize sua estratégia e escale suas vendas baseado em dados reais de conversão.</p>
-                </div>
-            </div>
+<!-- ═══ RESULTADOS ═══ -->
+<section class="section-alt">
+  <div class="container">
+    <div class="section-label reveal">resultados comprovados</div>
+    <div class="section-title reveal rd1">[INSERIR: Headline resultados — ex: Veja quem ja esta aplicando]</div>
+    <p class="section-sub reveal rd2">[INSERIR: Subtitulo]</p>
+    <div class="results-grid">
+      <div class="result-card reveal"><div class="result-card-img">Print resultado 1</div><div class="result-card-info"><div class="result-card-name">[INSERIR: Nome resultado 1]</div><div class="result-card-desc">[INSERIR: descricao curta]</div></div></div>
+      <div class="result-card reveal rd1"><div class="result-card-img">Print resultado 2</div><div class="result-card-info"><div class="result-card-name">[INSERIR: resultado 2]</div><div class="result-card-desc">[INSERIR: descricao]</div></div></div>
+      <div class="result-card reveal rd2"><div class="result-card-img">Print resultado 3</div><div class="result-card-info"><div class="result-card-name">[INSERIR: resultado 3]</div><div class="result-card-desc">[INSERIR: descricao]</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PARA QUEM ═══ -->
+<section class="section">
+  <div class="container">
+    <div class="section-label reveal">perfil</div>
+    <div class="section-title reveal rd1">[INSERIR: Headline — Para quem e?]</div>
+    <div class="audience-grid">
+      <div class="audience-card reveal"><div class="audience-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div><h4>[INSERIR: Perfil 1]</h4><p>[INSERIR: descricao]</p></div>
+      <div class="audience-card reveal rd1"><div class="audience-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div><h4>[INSERIR: Perfil 2]</h4><p>[INSERIR: descricao]</p></div>
+      <div class="audience-card reveal rd2"><div class="audience-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div><h4>[INSERIR: Perfil 3]</h4><p>[INSERIR: descricao]</p></div>
+      <div class="audience-card reveal"><div class="audience-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div><h4>[INSERIR: Perfil 4]</h4><p>[INSERIR: descricao]</p></div>
+      <div class="audience-card reveal rd1"><div class="audience-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div><h4>[INSERIR: Perfil 5]</h4><p>[INSERIR: descricao]</p></div>
+      <div class="audience-card reveal rd2"><div class="audience-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div><h4>[INSERIR: Perfil 6]</h4><p>[INSERIR: descricao]</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PILARES / CONTEUDO ═══ -->
+<section class="section-alt" id="metodo">
+  <div class="container">
+    <div class="section-label reveal">conteudo</div>
+    <div class="section-title reveal rd1">[INSERIR: Headline — O que voce vai aprender]</div>
+    <div class="pillar-list">
+      <div class="pillar-card reveal"><div class="pillar-num">1</div><div><h3>[INSERIR: Modulo 1]</h3><p>[INSERIR: descricao do modulo 1]</p></div></div>
+      <div class="pillar-card reveal rd1"><div class="pillar-num">2</div><div><h3>[INSERIR: Modulo 2]</h3><p>[INSERIR: descricao]</p></div></div>
+      <div class="pillar-card reveal rd2"><div class="pillar-num">3</div><div><h3>[INSERIR: Modulo 3]</h3><p>[INSERIR: descricao]</p></div></div>
+      <div class="pillar-card reveal"><div class="pillar-num">4</div><div><h3>[INSERIR: Modulo 4]</h3><p>[INSERIR: descricao]</p></div></div>
+      <div class="pillar-card reveal rd1"><div class="pillar-num">5</div><div><h3>[INSERIR: Modulo 5]</h3><p>[INSERIR: descricao]</p></div></div>
+      <div class="pillar-card reveal rd2"><div class="pillar-num">6</div><div><h3>[INSERIR: Modulo 6]</h3><p>[INSERIR: descricao]</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DEPOIMENTOS ═══ -->
+<section class="section" id="depoimentos">
+  <div class="container">
+    <div class="section-label reveal">depoimentos</div>
+    <div class="section-title reveal rd1">[INSERIR: Headline depoimentos]</div>
+    <div class="depo-grid">
+      <div class="depo-card reveal"><div class="depo-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><div class="depo-text">"[INSERIR: Depoimento 1]"</div><div class="depo-author"><div class="depo-avatar" style="background:linear-gradient(135deg,var(--orange),var(--orange-dark));">A</div><div><div class="depo-name">[INSERIR: Nome]</div><div class="depo-role">[INSERIR: Nicho]</div></div></div></div>
+      <div class="depo-card reveal rd1"><div class="depo-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><div class="depo-text">"[INSERIR: Depoimento 2]"</div><div class="depo-author"><div class="depo-avatar" style="background:linear-gradient(135deg,#22c55e,#16a34a);">B</div><div><div class="depo-name">[INSERIR: Nome]</div><div class="depo-role">[INSERIR: Nicho]</div></div></div></div>
+      <div class="depo-card reveal rd2"><div class="depo-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><div class="depo-text">"[INSERIR: Depoimento 3]"</div><div class="depo-author"><div class="depo-avatar" style="background:linear-gradient(135deg,#8b5cf6,#6366f1);">C</div><div><div class="depo-name">[INSERIR: Nome]</div><div class="depo-role">[INSERIR: Nicho]</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ESPECIALISTA ═══ -->
+<section class="section-alt">
+  <div class="container">
+    <div class="section-label reveal">especialista</div>
+    <div class="expert-grid reveal rd1">
+      <div class="expert-photo">Foto do especialista</div>
+      <div>
+        <div class="expert-name">[INSERIR: Nome]</div>
+        <div class="expert-title">[INSERIR: Titulo/Especialidade]</div>
+        <p class="expert-bio">[INSERIR: Bio — 2-3 linhas sobre experiencia, resultados e credenciais]</p>
+        <div class="expert-stats">
+          <div><div class="expert-stat-num">[X]+</div><div class="expert-stat-label">[INSERIR: metrica 1]</div></div>
+          <div><div class="expert-stat-num">[X]+</div><div class="expert-stat-label">[INSERIR: metrica 2]</div></div>
+          <div><div class="expert-stat-num">[X]+</div><div class="expert-stat-label">[INSERIR: metrica 3]</div></div>
         </div>
-    </section>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- PROVA SOCIAL -->
-    <section id="depoimentos" class="section section-alt">
-        <div class="container">
-            <div class="text-center mb-12">
-                <h2 class="font-heading text-2xl font-bold mb-4">Resultados Reais dos Nossos Alunos</h2>
-                <p class="text-lg opacity-70">Veja como o Método SPE transformou negócios reais</p>
-            </div>
-            <div class="grid-3">
-                <div class="card">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="avatar" style="width: 50px; height: 50px; font-size: 16px;">MC</div>
-                        <div>
-                            <div class="font-semibold">Marina Costa</div>
-                            <div style="color: var(--text-secondary); font-size: 14px;">Coach de Relacionamentos</div>
-                        </div>
-                    </div>
-                    <p class="opacity-70">"Antes do SPE eu vendia 2-3 consultorias por mês. Hoje vendo 15-20 só pelos Stories! Meu faturamento triplicou em 60 dias."</p>
-                    <div class="price-highlight font-bold mt-4">Resultado: R$ 45.000/mês</div>
-                </div>
-                <div class="card testimonial-highlight">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="avatar" style="width: 50px; height: 50px; font-size: 16px;">RS</div>
-                        <div>
-                            <div class="font-semibold">Ricardo Silva</div>
-                            <div style="color: var(--text-secondary); font-size: 14px;">Infoprodutor</div>
-                        </div>
-                    </div>
-                    <p class="opacity-70">"Método incrível! Apliquei as estratégias do SPE e consegui R$ 80 mil em vendas no primeiro mês. Os Stories realmente funcionam!"</p>
-                    <div class="price-highlight font-bold mt-4">Resultado: R$ 80.000 no 1º mês</div>
-                </div>
-                <div class="card">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="avatar" style="width: 50px; height: 50px; font-size: 16px;">AF</div>
-                        <div>
-                            <div class="font-semibold">Ana Fernandes</div>
-                            <div style="color: var(--text-secondary); font-size: 14px;">Mentora de Negócios</div>
-                        </div>
-                    </div>
-                    <p class="opacity-70">"Estava perdendo vendas por não saber usar os Stories. Com o SPE criei um sistema que me gera 5-8 clientes novos toda semana."</p>
-                    <div class="price-highlight font-bold mt-4">Resultado: 30+ clientes/mês</div>
-                </div>
-            </div>
-        </div>
-    </section>
+<!-- ═══ GARANTIA ═══ -->
+<section class="section">
+  <div class="container" style="text-align:center;">
+    <div class="section-label reveal" style="text-align:center;">garantia</div>
+    <div class="guarantee-box reveal rd1">
+      <div class="guarantee-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <h3>Garantia incondicional de 7 dias</h3>
+      <p>[INSERIR: Texto da garantia — se voce nao gostar, devolvemos 100% do valor, sem perguntas.]</p>
+    </div>
+  </div>
+</section>
 
-    <!-- ESPECIALISTA -->
-    <section class="section">
-        <div class="container">
-            <div class="expert-section text-center">
-                <div class="avatar" style="width: 120px; height: 120px; font-size: 36px; margin-bottom: 24px;">LC</div>
-                <h2 class="font-heading text-2xl font-bold mb-4">Luana Carolina</h2>
-                <p class="text-lg opacity-70 mb-6 max-w-2xl mx-auto">
-                    Especialista em Instagram Stories com mais de 4 anos ajudando empreendedores a venderem pelo Instagram. Criadora do Método SPE, já treinou mais de 3.000 pessoas e gerou mais de R$ 2,3 milhões em vendas para seus alunos.
-                </p>
-                <div class="numbers-grid" style="max-width: 600px; margin: 0 auto;">
-                    <div>
-                        <div class="number-item">4+</div>
-                        <div class="number-label">anos de experiência</div>
-                    </div>
-                    <div>
-                        <div class="number-item">3.247</div>
-                        <div class="number-label">alunos treinados</div>
-                    </div>
-                    <div>
-                        <div class="number-item">150k</div>
-                        <div class="number-label">seguidores</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+<!-- ═══ OFERTA ═══ -->
+<section class="section-alt" id="oferta">
+  <div class="container" style="text-align:center;">
+    <div class="section-label reveal" style="text-align:center;">valor</div>
+    <div class="section-title reveal rd1" style="text-align:center;">[INSERIR: Headline oferta]</div>
+    <div class="offer-box reveal rd2">
+      <div class="offer-old">De R$ [INSERIR: preco antigo]</div>
+      <div class="offer-price text-orange">R$ [INSERIR: preco]</div>
+      <div class="offer-installment">ou [X]x de R$ [X]</div>
+      <ul class="offer-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: Item incluso 1]</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: Item 2]</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: Item 3]</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: Item 4]</li>
+      </ul>
+      <a href="#" class="btn-cta" style="width:100%;">[INSERIR: CTA compra]</a>
+    </div>
+  </div>
+</section>
 
-    <!-- GARANTIA -->
-    <section class="section section-alt">
-        <div class="container text-center">
-            <div class="guarantee-badge">Garantia Incondicional</div>
-            <h2 class="font-heading text-2xl font-bold mb-4">7 Dias de Garantia Total</h2>
-            <p class="text-lg opacity-70 max-w-2xl mx-auto">
-                Teste o Método SPE por 7 dias completos. Se não ficar satisfeito com o conteúdo ou não ver resultados, devolvemos 100% do seu investimento. Sem perguntas, sem burocracia.
-            </p>
-        </div>
-    </section>
+<!-- ═══ FAQ ═══ -->
+<section class="section" id="faq">
+  <div class="container">
+    <div class="section-label reveal" style="text-align:center;">FAQ</div>
+    <div class="section-title reveal rd1" style="text-align:center;">[INSERIR: Headline FAQ]</div>
+    <div class="faq-list">
+      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>[INSERIR: Pergunta 1]?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">[INSERIR: Resposta 1]</div></div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>[INSERIR: Pergunta 2]?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">[INSERIR: Resposta 2]</div></div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>[INSERIR: Pergunta 3]?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">[INSERIR: Resposta 3]</div></div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>[INSERIR: Pergunta 4]?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">[INSERIR: Resposta 4]</div></div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>[INSERIR: Pergunta 5]?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">[INSERIR: Resposta 5]</div></div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>[INSERIR: Pergunta 6]?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">[INSERIR: Resposta 6]</div></div></div>
+    </div>
+  </div>
+</section>
 
-    <!-- OFERTA -->
-    <section id="oferta" class="section glow">
-        <div class="container">
-            <div class="text-center mb-12">
-                <h2 class="font-heading text-2xl font-bold mb-4">Oferta Especial - Método SPE Completo</h2>
-                <p class="text-lg opacity-70">Tudo que você precisa para transformar seus Stories em uma máquina de vendas</p>
-            </div>
-            
-            <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 40px;">
-                <div class="badge mb-4">Curso + Bônus Exclusivos</div>
-                
-                <h3 class="font-heading text-xl font-bold mb-6">Método SPE + Bônus</h3>
-                
-                <div class="mb-6">
-                    <div style="text-decoration: line-through; color: var(--text-secondary); font-size: 18px;">De R$ 1.497</div>
-                    <div class="price-highlight font-heading" style="font-size: 3rem; font-weight: 800; line-height: 1;">R$ 997</div>
-                    <div class="opacity-70">à vista no PIX/cartão</div>
-                </div>
-                
-                <div style="color: var(--text-secondary); margin-bottom: 24px;">
-                    ou 12x de R$ 97 no cartão
-                </div>
-                
-                <a href="#" class="btn btn-primary w-full mb-6">QUERO O MÉTODO SPE AGORA</a>
-                
-                <div style="text-align: left; margin-top: 32px;">
-                    <h4 class="font-semibold mb-4">Você vai receber:</h4>
-                    <div style="color: var(--text-secondary); font-size: 14px; line-height: 1.8;">
-                        ✓ Método SPE Completo (5 módulos)<br>
-                        ✓ 50+ Templates de Stories prontos<br>
-                        ✓ Scripts de vendas testados<br>
-                        ✓ Comunidade VIP no Telegram<br>
-                        ✓ Suporte por 90 dias<br>
-                        ✓ Atualizações gratuitas<br>
-                        ✓ Garantia de 7 dias
-                    </div>
-                </div>
-            </div>
-            
-            <div class="social-proof mt-8">
-                <span>🔒 Compra 100% Segura</span>
-                <span>⚡ Acesso Imediato</span>
-                <span>📱 Funciona no celular</span>
-            </div>
-        </div>
-    </section>
+<!-- ═══ CTA FINAL ═══ -->
+<section class="section-alt" style="text-align:center;">
+  <div class="container reveal"><a href="#oferta" class="btn-cta" style="padding:14px 36px;font-size:13px;">[INSERIR: CTA final]</a></div>
+</section>
 
-    <!-- FAQ -->
-    <section id="faq" class="section section-alt">
-        <div class="container">
-            <div class="text-center mb-12">
-                <h2 class="font-heading text-2xl font-bold mb-4">Perguntas Frequentes</h2>
-                <p class="text-lg opacity-70">Tire todas suas dúvidas sobre o Método SPE</p>
-            </div>
-            
-            <div class="max-w-4xl mx-auto">
-                <div class="accordion">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>Quanto tempo preciso investir por dia?</span>
-                        <span>+</span>
-                    </div>
-                    <div class="accordion-content">
-                        Apenas 30-45 minutos por dia são suficientes para aplicar o método e criar Stories que vendem. O curso foi desenhado para empreendedores ocupados.
-                    </div>
-                </div>
-                
-                <div class="accordion">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>Funciona para qualquer nicho?</span>
-                        <span>+</span>
-                    </div>
-                    <div class="accordion-content">
-                        Sim! O Método SPE funciona para infoprodutos, serviços, consultorias, coaching e qualquer negócio que venda pelo Instagram.
-                    </div>
-                </div>
-                
-                <div class="accordion">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>Preciso ter muitos seguidores?</span>
-                        <span>+</span>
-                    </div>
-                    <div class="accordion-content">
-                        Não! Temos alunos que vendem com 500 seguidores. O método foca na qualidade do conteúdo e na estratégia, não na quantidade de seguidores.
-                    </div>
-                </div>
-                
-                <div class="accordion">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>Quando vou começar a ver resultados?</span>
-                        <span>+</span>
-                    </div>
-                    <div class="accordion-content">
-                        A maioria dos alunos vê as primeiras vendas nos primeiros 15-30 dias aplicando o método. Alguns conseguem resultados já na primeira semana.
-                    </div>
-                </div>
-                
-                <div class="accordion">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>O curso tem suporte?</span>
-                        <span>+</span>
-                    </div>
-                    <div class="accordion-content">
-                        Sim! Você terá acesso à comunidade VIP no Telegram e suporte direto por 90 dias para tirar dúvidas e receber feedback.
-                    </div>
-                </div>
-                
-                <div class="accordion">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>E se eu não gostar do curso?</span>
-                        <span>+</span>
-                    </div>
-                    <div class="accordion-content">
-                        Você tem 7 dias de garantia incondicional. Se não ficar satisfeito, devolvemos 100% do seu investimento sem perguntas.
-                    </div>
-                </div>
-                
-                <div class="accordion">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>Como acesso o curso após a compra?</span>
-                        <span>+</span>
-                    </div>
-                    <div class="accordion-content">
-                        O acesso é imediato! Após a confirmação do pagamento, você recebe por email o login e senha da plataforma de ensino.
-                    </div>
-                </div>
-                
-                <div class="accordion">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>Posso parcelar no cartão?</span>
-                        <span>+</span>
-                    </div>
-                    <div class="accordion-content">
-                        Sim! Você pode parcelar em até 12x de R$ 97 no cartão de crédito. À vista no PIX você tem desconto especial.
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer"><div class="container"><p>[INSERIR: Razao Social] | CNPJ: [INSERIR: CNPJ] | Todos os direitos reservados</p></div></footer>
 
-    <!-- FOOTER -->
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2024 Luana Carolina. Todos os direitos reservados.</p>
-            <p style="margin-top: 16px;">
-                CNPJ: 12.345.678/0001-90 | 
-                <a href="#">Termos de Uso</a> | 
-                <a href="#">Política de Privacidade</a> | 
-                <a href="#">Política de Reembolso</a>
-            </p>
-            <p style="margin-top: 16px; font-size: 12px; opacity: 0.6;">
-                Este produto não garante a obtenção de resultados. Qualquer referência ao desempenho de uma estratégia não deve ser interpretada como uma garantia de resultados.
-            </p>
-        </div>
-    </footer>
-
-    <script>
-        function toggleAccordion(element) {
-            const content = element.nextElementSibling;
-            const icon = element.querySelector('span:last-child');
-            
-            if (content.classList.contains('active')) {
-                content.classList.remove('active');
-                icon.textContent = '+';
-            } else {
-                // Fechar outros accordions
-                document.querySelectorAll('.accordion-content.active').forEach(item => {
-                    item.classList.remove('active');
-                    item.previousElementSibling.querySelector('span:last-child').textContent = '+';
-                });
-                
-                content.classList.add('active');
-                icon.textContent = '−';
-            }
-        }
-        
-        // Smooth scroll para links internos
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-    </script>
+<script>
+var ro=new IntersectionObserver(function(e){e.forEach(function(i){if(i.isIntersecting)i.target.classList.add('v');});},{threshold:0.05,rootMargin:'0px 0px -20px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){ro.observe(el);});
+</script>
 </body>
 </html>

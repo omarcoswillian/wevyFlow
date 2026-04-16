@@ -69,10 +69,24 @@ export default function App() {
       setView("workspace");
 
       try {
+        // Templates prontos — carrega direto sem IA
+        if (data.prompt.startsWith("READY:")) {
+          const templateId = data.prompt.replace("READY:", "");
+          const res = await fetch(`/api/template?id=${templateId}`);
+          if (!res.ok) throw new Error("Template nao encontrado");
+          const html = await res.text();
+          setGeneratedCode(html);
+          addEntry({ id: crypto.randomUUID(), prompt: "Template: " + templateId, platform: data.platform, code: html, createdAt: Date.now() });
+          if (activeProject) {
+            addPageToProject(activeProject.id, { name: "Template: " + templateId, code: html, platform: data.platform });
+          }
+          return;
+        }
+
+        // Geração com IA (usado apenas para refine e prompts personalizados de templates)
         const code = await streamFromAPI("/api/generate", data);
         if (code) {
           addEntry({ id: crypto.randomUUID(), prompt: data.prompt, platform: data.platform, code, createdAt: Date.now() });
-          // If there's an active project, add page
           if (activeProject) {
             addPageToProject(activeProject.id, { name: data.prompt.slice(0, 50), code, platform: data.platform });
           }
