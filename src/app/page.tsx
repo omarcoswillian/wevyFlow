@@ -1,17 +1,46 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Platform } from "./lib/types";
 import { useHistory } from "./lib/history";
 import { useProjects, Project, ProjectPage } from "./lib/projects";
 import { HomeView, GenerateData } from "./components/HomeView";
 import { WorkspaceView } from "./components/WorkspaceView";
+import { CommandPalette } from "./components/CommandPalette";
 import { ResourcesPage } from "./components/pages/ResourcesPage";
 import { ProjectsPage } from "./components/pages/ProjectsPage";
 import { ProjectDetailPage } from "./components/pages/ProjectDetailPage";
 
 // Views the app can show
 type AppView = "home" | "resources" | "projects-all" | "projects-starred" | "projects-mine" | "projects-shared" | "project-detail" | "workspace";
+
+// Valid hash → view mapping (views that can be restored from URL)
+const HASH_VIEW_MAP: Record<string, AppView> = {
+  "": "home",
+  "home": "home",
+  "resources": "resources",
+  "projects": "projects-all",
+  "projects-all": "projects-all",
+  "projects-starred": "projects-starred",
+  "projects-mine": "projects-mine",
+  "projects-shared": "projects-shared",
+};
+
+// View → hash (for URL updates)
+const VIEW_HASH_MAP: Partial<Record<AppView, string>> = {
+  "home": "",
+  "resources": "resources",
+  "projects-all": "projects",
+  "projects-starred": "projects-starred",
+  "projects-mine": "projects-mine",
+  "projects-shared": "projects-shared",
+};
+
+function getViewFromHash(): AppView {
+  if (typeof window === "undefined") return "home";
+  const hash = window.location.hash.replace("#", "");
+  return HASH_VIEW_MAP[hash] || "home";
+}
 
 export default function App() {
   const [view, setView] = useState<AppView>("home");
@@ -21,14 +50,57 @@ export default function App() {
   const [error, setError] = useState("");
   const [currentPlatform, setCurrentPlatform] = useState<Platform>("html");
   const [currentPrompt, setCurrentPrompt] = useState("");
+  const [currentDesignContext, setCurrentDesignContext] = useState<{ primaryColor?: string; secondaryColor?: string; fontChoice?: string; stylePreset?: string } | null>(null);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [activePageId, setActivePageId] = useState<string | null>(null);
 
+  const [storageToast, setStorageToast] = useState<string | null>(null);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const { addEntry } = useHistory();
   const {
-    projects, createProject, addPageToProject, updatePageCode,
+    projects, saveError, createProject, addPageToProject, updatePageCode,
     toggleStar, deleteProject, deletePageFromProject,
   } = useProjects();
+
+  // Sync view from URL hash on mount
+  useEffect(() => {
+    setView(getViewFromHash());
+  }, []);
+
+  // Listen to browser back/forward (popstate)
+  useEffect(() => {
+    const onPopState = () => {
+      const hashView = getViewFromHash();
+      setView(hashView);
+      if (hashView === "home") {
+        setGeneratedCode("");
+        setError("");
+      }
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  // Show toast on storage errors
+  useEffect(() => {
+    if (saveError) {
+      setStorageToast(saveError);
+      const timer = setTimeout(() => setStorageToast(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [saveError]);
+
+  // Global Cmd+K shortcut for command palette
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   const streamFromAPI = useCallback(
     async (url: string, body: object): Promise<string> => {
@@ -66,6 +138,7 @@ export default function App() {
       setIsLoading(true);
       setCurrentPlatform(data.platform);
       setCurrentPrompt(data.prompt);
+      setCurrentDesignContext({ primaryColor: data.primaryColor, secondaryColor: data.secondaryColor, fontChoice: data.fontChoice, stylePreset: data.stylePreset });
       setView("workspace");
 
       try {
@@ -107,6 +180,7 @@ export default function App() {
       try {
         const code = await streamFromAPI("/api/refine", {
           originalCode: generatedCode, refinementRequest, platform: currentPlatform, images: images || [],
+          designContext: currentDesignContext,
         });
         if (code) {
           addEntry({ id: crypto.randomUUID(), prompt: `Refinamento: ${refinementRequest}`, platform: currentPlatform, code, createdAt: Date.now() });
@@ -120,7 +194,7 @@ export default function App() {
         setIsRefining(false);
       }
     },
-    [generatedCode, isRefining, currentPlatform, streamFromAPI, addEntry, activeProject, activePageId, updatePageCode]
+    [generatedCode, isRefining, currentPlatform, currentDesignContext, streamFromAPI, addEntry, activeProject, activePageId, updatePageCode]
   );
 
   const handleBack = useCallback(() => {
@@ -128,11 +202,17 @@ export default function App() {
     setGeneratedCode("");
     setError("");
     setActivePageId(null);
+    window.history.pushState(null, "", window.location.pathname);
   }, []);
 
   // Navigation handler — passed to sidebar in HomeView
   const handleNavigate = useCallback((target: AppView) => {
     setView(target);
+    // Sync URL hash for bookmarkable navigation + browser back/forward
+    const hash = VIEW_HASH_MAP[target];
+    if (hash !== undefined) {
+      window.history.pushState(null, "", hash ? `#${hash}` : window.location.pathname);
+    }
     if (target === "home") {
       setGeneratedCode("");
       setError("");
@@ -230,10 +310,30 @@ export default function App() {
     }
   };
 
+  const commandPaletteEl = (
+    <CommandPalette
+      open={commandPaletteOpen}
+      onClose={() => setCommandPaletteOpen(false)}
+      projects={projects}
+      onNavigate={handleNavigate}
+      onOpenProject={handleOpenProject}
+      onCreateProject={handleCreateProject}
+      onSelectTemplate={handleTemplateFromResources}
+    />
+  );
+
+  const storageToastEl = storageToast ? (
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[200] px-4 py-3 rounded-xl bg-red-500/15 border border-red-500/25 text-red-400 text-[12px] font-medium backdrop-blur-xl shadow-2xl animate-fade-in-delay max-w-md text-center">
+      {storageToast}
+    </div>
+  ) : null;
+
   // Workspace view
   if (view === "workspace") {
     return (
       <div className="h-screen overflow-hidden">
+        {commandPaletteEl}
+        {storageToastEl}
         <WorkspaceView
           code={generatedCode} isLoading={isLoading} isRefining={isRefining}
           platform={currentPlatform} prompt={currentPrompt} error={error}
@@ -247,7 +347,9 @@ export default function App() {
   if (view === "home") {
     return (
       <div className="h-screen overflow-hidden">
-        <HomeView onGenerate={handleGenerate} isLoading={isLoading} onNavigate={handleNavigate} />
+        {commandPaletteEl}
+        {storageToastEl}
+        <HomeView onGenerate={handleGenerate} isLoading={isLoading} onNavigate={handleNavigate} onOpenSearch={() => setCommandPaletteOpen(true)} />
       </div>
     );
   }
@@ -255,7 +357,9 @@ export default function App() {
   // Content pages with sidebar-like layout
   return (
     <div className="h-screen overflow-hidden">
-      <HomeView onGenerate={handleGenerate} isLoading={isLoading} onNavigate={handleNavigate} contentOverride={renderMainContent()} activeNav={view} />
+      {commandPaletteEl}
+      {storageToastEl}
+      <HomeView onGenerate={handleGenerate} isLoading={isLoading} onNavigate={handleNavigate} onOpenSearch={() => setCommandPaletteOpen(true)} contentOverride={renderMainContent()} activeNav={view} />
     </div>
   );
 }

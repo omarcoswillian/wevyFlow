@@ -22,8 +22,14 @@ function loadEntries(): HistoryEntry[] {
 function saveEntries(entries: HistoryEntry[]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-  } catch {
-    // quota exceeded — silently ignore
+  } catch (err) {
+    const isQuota = err instanceof DOMException && (err.code === 22 || err.code === 1014 || err.name === "QuotaExceededError");
+    console.error("[WavyFlow] Erro ao salvar histórico:", isQuota ? "Armazenamento cheio" : err);
+    if (typeof window !== "undefined" && window.dispatchEvent) {
+      window.dispatchEvent(new CustomEvent("wavyflow-storage-error", {
+        detail: { type: isQuota ? "quota" : "unknown", message: isQuota ? "Armazenamento local cheio. Limpe o histórico para liberar espaço." : "Erro ao salvar histórico." },
+      }));
+    }
   }
 }
 

@@ -2,22 +2,31 @@ import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic();
 
-const SYSTEM_PROMPT = `Voce e um engenheiro frontend senior. O usuario ja tem um layout HTML e quer refina-lo.
+// Simple in-memory rate limiter
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_MAX = 30;
+const RATE_LIMIT_WINDOW = 60_000;
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT_MAX) return false;
+  entry.count++;
+  return true;
+}
+
+function buildSystemPrompt(designContext?: { primaryColor?: string; secondaryColor?: string; fontChoice?: string; stylePreset?: string }): string {
+  const base = `Voce e um engenheiro frontend senior. O usuario ja tem um layout HTML e quer refina-lo.
 
 REGRAS:
 1. Retorne APENAS HTML completo. ZERO texto, markdown, crases. Primeiro caractere = <
 2. Retorne o codigo COMPLETO — nao apenas o trecho modificado.
 3. Mantenha o que nao foi pedido para alterar EXATAMENTE como esta.
 4. ZERO emojis. SVG icons apenas.
-
-DESIGN TOKENS:
-- H1: Unbounded, 48px/32px mobile, weight 800
-- Body: DM Sans, 16px, weight 400, line-height 1.7
-- CTA: bg #FF5C00, texto branco uppercase, min-height 52px, radius 6px, hover glow laranja
-- Cores: bg #0C0C0C, surface #161616, card #1E1E1E, texto #F5F5F5, secundario #999
-- Secoes: py 80px desktop, alternando bg #0C0C0C e #161616
-- Cards: bg #1E1E1E, border rgba(255,255,255,0.08), radius 12px, hover translateY(-2px)
-- Contraste minimo 4.5:1. Texto sobre dark SEMPRE #F5F5F5 ou #999 (nunca abaixo)
 
 ANÁLISE DE IMAGENS:
 Se o usuário enviar uma imagem (screenshot, referência, mockup), analise-a VISUALMENTE e:
@@ -26,9 +35,39 @@ Se o usuário enviar uma imagem (screenshot, referência, mockup), analise-a VIS
 - Se for um screenshot de erro ou problema, corrija o que está visualmente errado
 - Se for uma referência, adapte o layout atual para se parecer com a referência`;
 
+  const tokens: string[] = [];
+  if (designContext?.primaryColor && designContext?.secondaryColor) {
+    tokens.push(`- Cor primaria do projeto: ${designContext.primaryColor}, secundaria: ${designContext.secondaryColor}`);
+  }
+  if (designContext?.fontChoice) {
+    tokens.push(`- Fonte do projeto: ${designContext.fontChoice}`);
+  }
+  if (designContext?.stylePreset) {
+    tokens.push(`- Estilo visual: ${designContext.stylePreset}`);
+  }
+
+  if (tokens.length > 0) {
+    return base + `\n\nDESIGN CONTEXT DO PROJETO (respeite ao refinar):\n${tokens.join("\n")}`;
+  }
+
+  return base + `\n\nDESIGN TOKENS PADRAO:
+- H1: Unbounded, 48px/32px mobile, weight 800
+- Body: DM Sans, 16px, weight 400, line-height 1.7
+- CTA: bg #FF5C00, texto branco uppercase, min-height 52px, radius 6px, hover glow laranja
+- Cores: bg #0C0C0C, surface #161616, card #1E1E1E, texto #F5F5F5, secundario #999
+- Secoes: py 80px desktop, alternando bg #0C0C0C e #161616
+- Cards: bg #1E1E1E, border rgba(255,255,255,0.08), radius 12px, hover translateY(-2px)
+- Contraste minimo 4.5:1. Texto sobre dark SEMPRE #F5F5F5 ou #999 (nunca abaixo)`;
+}
+
 export async function POST(request: Request) {
   try {
-    const { originalCode, refinementRequest, platform, images } = await request.json();
+    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    if (!checkRateLimit(ip)) {
+      return Response.json({ error: "Muitas requisicoes. Aguarde um minuto e tente novamente." }, { status: 429 });
+    }
+
+    const { originalCode, refinementRequest, platform, images, designContext } = await request.json();
 
     if (!originalCode || !refinementRequest) {
       return Response.json(
@@ -77,7 +116,7 @@ Retorne o código HTML/CSS COMPLETO com as alterações aplicadas.`,
     const stream = anthropic.messages.stream({
       model: "claude-sonnet-4-20250514",
       max_tokens: 16000,
-      system: SYSTEM_PROMPT,
+      system: buildSystemPrompt(designContext),
       messages: [{ role: "user", content: contentParts }],
     });
 

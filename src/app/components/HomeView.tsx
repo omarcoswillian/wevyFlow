@@ -36,6 +36,7 @@ interface HomeViewProps {
   onGenerate: (data: GenerateData) => void;
   isLoading: boolean;
   onNavigate?: (view: any) => void;
+  onOpenSearch?: () => void;
   contentOverride?: React.ReactNode;
   activeNav?: string;
 }
@@ -53,9 +54,9 @@ const FONT_OPTIONS = [
 ];
 
 const STYLE_PRESETS = [
-  { id: "dark-premium", label: "Dark", icon: "🌑" }, { id: "light-clean", label: "Light", icon: "☀️" },
-  { id: "glassmorphism", label: "Glass", icon: "💎" }, { id: "neon-tech", label: "Neon", icon: "⚡" },
-  { id: "luxury", label: "Luxury", icon: "✨" }, { id: "brutalist", label: "Brutal", icon: "🔲" },
+  { id: "dark-premium", label: "Dark", icon: "◉" }, { id: "light-clean", label: "Light", icon: "○" },
+  { id: "glassmorphism", label: "Glass", icon: "◇" }, { id: "neon-tech", label: "Neon", icon: "▸" },
+  { id: "luxury", label: "Luxury", icon: "★" }, { id: "brutalist", label: "Brutal", icon: "■" },
 ];
 
 const COLOR_PRESETS = [
@@ -64,7 +65,7 @@ const COLOR_PRESETS = [
   { primary: "#10b981", secondary: "#14b8a6" }, { primary: "#f1f5f9", secondary: "#e2e8f0" },
 ];
 
-export function HomeView({ onGenerate, isLoading, onNavigate, contentOverride, activeNav }: HomeViewProps) {
+export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, contentOverride, activeNav }: HomeViewProps) {
   const nav = onNavigate || (() => {});
   const [prompt, setPrompt] = useState("");
   const [platform, setPlatform] = useState<Platform>("html");
@@ -131,7 +132,7 @@ export function HomeView({ onGenerate, isLoading, onNavigate, contentOverride, a
         {/* Nav items */}
         <nav className="flex-1 px-2 space-y-0.5 overflow-hidden">
           <SidebarItem icon={<Home className="w-4 h-4" />} label="Home" active={!activeNav || activeNav === "home"} collapsed={sidebarCollapsed} onClick={() => nav("home")} />
-          <SidebarItem icon={<Search className="w-4 h-4" />} label="Search" collapsed={sidebarCollapsed} shortcut="⌘K" />
+          <SidebarItem icon={<Search className="w-4 h-4" />} label="Search" collapsed={sidebarCollapsed} shortcut="⌘K" onClick={onOpenSearch} />
           <SidebarItem icon={<BookOpen className="w-4 h-4" />} label="Resources" active={activeNav === "resources"} collapsed={sidebarCollapsed} onClick={() => nav("resources")} />
 
           {!sidebarCollapsed && (

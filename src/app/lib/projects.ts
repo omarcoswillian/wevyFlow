@@ -24,6 +24,7 @@ export interface Project {
 }
 
 const STORAGE_KEY = "wavyflow-projects";
+const STORAGE_VERSION_KEY = "wavyflow-projects-version";
 
 function load(): Project[] {
   if (typeof window === "undefined") return [];
@@ -35,16 +36,49 @@ function load(): Project[] {
   }
 }
 
-function save(projects: Project[]) {
+function save(projects: Project[]): boolean {
   try {
+    const version = Date.now().toString();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-  } catch {}
+    localStorage.setItem(STORAGE_VERSION_KEY, version);
+    return true;
+  } catch (err) {
+    const isQuota = err instanceof DOMException && (err.code === 22 || err.code === 1014 || err.name === "QuotaExceededError");
+    console.error("[WavyFlow] Erro ao salvar projetos:", isQuota ? "Armazenamento cheio" : err);
+    if (typeof window !== "undefined" && window.dispatchEvent) {
+      window.dispatchEvent(new CustomEvent("wavyflow-storage-error", {
+        detail: { type: isQuota ? "quota" : "unknown", message: isQuota ? "Armazenamento local cheio. Exclua projetos antigos para liberar espaço." : "Erro ao salvar dados localmente." },
+      }));
+    }
+    return false;
+  }
 }
 
 export function useProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => { setProjects(load()); }, []);
+
+  // Listen for storage changes from other tabs
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        try { setProjects(JSON.parse(e.newValue)); } catch {}
+      }
+    };
+    const handleSaveError = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      setSaveError(detail?.message || "Erro ao salvar");
+      setTimeout(() => setSaveError(null), 5000);
+    };
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("wavyflow-storage-error", handleSaveError);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("wavyflow-storage-error", handleSaveError);
+    };
+  }, []);
 
   const createProject = useCallback((name: string, client: string): Project => {
     const project: Project = {
@@ -134,6 +168,7 @@ export function useProjects() {
 
   return {
     projects,
+    saveError,
     createProject,
     addPageToProject,
     updatePageCode,

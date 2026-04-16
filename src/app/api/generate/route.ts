@@ -221,7 +221,27 @@ function enrichBrandContext(brand: string): string {
   return `Aplique a essência visual da marca "${brand}": paleta, tipografia, sofisticação, tom emocional.`;
 }
 
+function isAllowedUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    if (!["http:", "https:"].includes(parsed.protocol)) return false;
+    const host = parsed.hostname.toLowerCase();
+    // Block internal/private IPs and reserved hosts
+    if (host === "localhost" || host === "127.0.0.1" || host === "[::1]" || host === "0.0.0.0") return false;
+    if (host.endsWith(".local") || host.endsWith(".internal")) return false;
+    if (/^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.)/.test(host)) return false;
+    if (host.startsWith("metadata.") || host.includes("169.254.169.254")) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function fetchReferenceHTML(url: string): Promise<string | null> {
+  if (!isAllowedUrl(url)) {
+    console.warn("[WavyFlow] URL bloqueada por SSRF protection:", url);
+    return null;
+  }
   try {
     const res = await fetch(url, {
       signal: AbortSignal.timeout(6000),
@@ -279,8 +299,38 @@ async function fetchReferenceHTML(url: string): Promise<string | null> {
   }
 }
 
+// Simple in-memory rate limiter (per-process, resets on deploy)
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_MAX = 20; // requests per window
+const RATE_LIMIT_WINDOW = 60_000; // 1 minute
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT_MAX) return false;
+  entry.count++;
+  return true;
+}
+
+// Rough token estimate (~4 chars per token for mixed content)
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4);
+}
+
+const MAX_INPUT_TOKENS = 40000;
+
 export async function POST(request: Request) {
   try {
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    if (!checkRateLimit(ip)) {
+      return Response.json({ error: "Muitas requisicoes. Aguarde um minuto e tente novamente." }, { status: 429 });
+    }
+
     const {
       prompt,
       platform,
@@ -439,6 +489,23 @@ ${templateHtml}
       type: "text",
       text: `${platformInstructions}\n\n${contextBlock}${readyTemplateBlock}${componentBlock}\n\n--- PEDIDO ---\n${prompt}${hasImages ? "\n\nO usuario enviou imagem(ns) acima. Se forem fotos de referencia visual, replique o estilo. Se forem fotos de produto/pessoa, use-as no layout via <img> tag." : ""}${readyTemplateBlock ? "\n\nIMPORTANTE: Use o TEMPLATE BASE PRONTO fornecido acima. Apenas customize os textos para o pedido do usuario. NAO gere do zero." : "\n\nCrie a pagina usando Tailwind CSS. Resultado: pagina COMPLETA e funcional em portugues."}`,
     });
+
+    // Estimate tokens to prevent API failures
+    const textContent = contentParts
+      .filter((p): p is { type: "text"; text: string } => p.type === "text")
+      .map((p) => p.text)
+      .join("");
+    const estimatedTokens = estimateTokens(SYSTEM_PROMPT + textContent);
+    const imageCount = contentParts.filter((p) => p.type === "image").length;
+    // Each image ~1600 tokens (Claude vision estimate)
+    const totalEstimate = estimatedTokens + imageCount * 1600;
+
+    if (totalEstimate > MAX_INPUT_TOKENS) {
+      return Response.json(
+        { error: `Entrada muito grande (~${Math.round(totalEstimate / 1000)}k tokens). Reduza o tamanho da referencia, imagens ou prompt.` },
+        { status: 400 }
+      );
+    }
 
     const stream = anthropic.messages.stream({
       model: "claude-sonnet-4-20250514",

@@ -77,8 +77,10 @@ export function WorkspaceView({
   code, isLoading, isRefining, platform, prompt, error, onRefine, onBack,
 }: WorkspaceViewProps) {
   const [rightTab, setRightTab] = useState<"preview" | "code">("preview");
+  const [userOverrodeTab, setUserOverrodeTab] = useState(false);
   const [viewportSize, setViewportSize] = useState<ViewportSize>("desktop");
   const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [chatImages, setChatImages] = useState<{ name: string; base64: string }[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -127,18 +129,24 @@ export function WorkspaceView({
   const [finalCode, setFinalCode] = useState("");
 
   // When streaming starts, show code tab. When done, switch to preview.
+  // Respects manual tab override by the user during streaming.
   useEffect(() => {
-    if (isStreaming && !finalCode) {
+    if (isStreaming && !finalCode && !userOverrodeTab) {
       setRightTab("code");
     }
-  }, [isStreaming, finalCode]);
+    if (isStreaming) {
+      setUserOverrodeTab(false);
+    }
+  }, [isStreaming, finalCode, userOverrodeTab]);
 
   useEffect(() => {
     if (!isStreaming && code) {
       setFinalCode(code);
-      setRightTab("preview");
+      if (!userOverrodeTab) {
+        setRightTab("preview");
+      }
     }
-  }, [isStreaming, code]);
+  }, [isStreaming, code, userOverrodeTab]);
 
   const previewHtml = finalCode
     ? `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${BASE_CSS}</head><body>${finalCode}${BASE_SCRIPT}${IFRAME_VISUAL_EDIT_SCRIPT}</body></html>`
@@ -225,6 +233,12 @@ export function WorkspaceView({
       setMessages((prev) => [...prev, {
         role: "assistant",
         content: "Foto inserida no template com sucesso! Confira o preview.",
+        timestamp: Date.now(),
+      }]);
+    } else {
+      setMessages((prev) => [...prev, {
+        role: "assistant",
+        content: "Nao foi possivel inserir a foto automaticamente — o template nao tem placeholder compativel. Use o chat para pedir a insercao manualmente (ex: 'coloque esta foto no hero').",
         timestamp: Date.now(),
       }]);
     }
@@ -583,12 +597,12 @@ export function WorkspaceView({
           <div className="flex items-center gap-2">
             {/* Preview / Code toggle */}
             <div className="flex gap-0.5 p-0.5 rounded-lg bg-white/[0.03]">
-              <button onClick={() => setRightTab("preview")}
+              <button onClick={() => { setRightTab("preview"); setUserOverrodeTab(true); }}
                 className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium transition-all cursor-pointer",
                   rightTab === "preview" ? "bg-white/[0.08] text-white" : "text-white/30 hover:text-white/50")}>
                 <Eye className="w-3.5 h-3.5" /> Preview
               </button>
-              <button onClick={() => setRightTab("code")}
+              <button onClick={() => { setRightTab("code"); setUserOverrodeTab(true); }}
                 className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium transition-all cursor-pointer",
                   rightTab === "code" ? "bg-white/[0.08] text-white" : "text-white/30 hover:text-white/50")}>
                 <Code2 className="w-3.5 h-3.5" /> Código
@@ -619,8 +633,25 @@ export function WorkspaceView({
                   {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                   {copied ? "Copiado!" : "Copiar"}
                 </button>
-                <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-white/30 hover:text-white/50 hover:bg-white/[0.05] transition-all cursor-pointer">
-                  <Share2 className="w-3.5 h-3.5" /> Share
+                <button
+                  onClick={() => {
+                    const codeToShare = finalCode || code;
+                    const fullHtml = `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Layout WavyFlow</title>\n</head>\n<body>\n${codeToShare}\n</body>\n</html>`;
+                    if (navigator.share) {
+                      const blob = new Blob([fullHtml], { type: "text/html" });
+                      const file = new File([blob], "wavyflow-layout.html", { type: "text/html" });
+                      navigator.share({ title: "Layout WavyFlow", files: [file] }).catch(() => {});
+                    } else {
+                      navigator.clipboard.writeText(codeToShare);
+                      setShared(true);
+                      setTimeout(() => setShared(false), 2000);
+                    }
+                  }}
+                  className={cn("flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer",
+                    shared ? "bg-emerald-500/15 text-emerald-400" : "text-white/30 hover:text-white/50 hover:bg-white/[0.05]")}
+                >
+                  {shared ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+                  {shared ? "Copiado!" : "Share"}
                 </button>
                 <button onClick={handleDownload}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-purple-500/20 transition-all cursor-pointer">
