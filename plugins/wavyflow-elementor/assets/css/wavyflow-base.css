@@ -1,4 +1,78 @@
-/* WavyFlow Base Design System — Black Boutique */
+/* WavyFlow Base Design System */
+
+/* ─── Reset: override Elementor/theme defaults inside .wfr ─── */
+/* Container must be INVISIBLE — zero everything. Layout original is LAW. */
+.elementor-widget-wf-section,
+.elementor-widget-wf-section > .elementor-widget-container {
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+.elementor-element:has(> .elementor-widget-container > .wfr),
+.elementor-element.elementor-widget-wf-section {
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 0 !important;
+  border: none !important;
+  background: none !important;
+}
+/* Also reset the container parent that Elementor generates */
+.e-con:has(> .elementor-widget-wf-section),
+.e-con:has(> .e-con-inner > .elementor-widget-wf-section) {
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 0 !important;
+  --container-default-padding-top: 0px !important;
+  --container-default-padding-right: 0px !important;
+  --container-default-padding-bottom: 0px !important;
+  --container-default-padding-left: 0px !important;
+  --gap: 0px !important;
+}
+.wfr, .wfr * { box-sizing: border-box; }
+.wfr h1, .wfr h2, .wfr h3, .wfr h4, .wfr h5, .wfr h6 {
+  font-family: 'Figtree', -apple-system, sans-serif !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.1 !important;
+}
+.wfr p { margin: 0 !important; padding: 0 !important; }
+.wfr a { text-decoration: none !important; }
+.wfr img { max-width: 100% !important; height: auto !important; }
+.wfr .hero h1 {
+  font-size: clamp(1.6rem, 3.6vw, 2.8rem) !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.03em !important;
+  color: #f0e8f2 !important;
+}
+.wfr .t-h2, .wfr .split-text h2, .wfr .mentors-text h2, .wfr .faq-head .t-h2 {
+  font-size: clamp(1.8rem, 3.4vw, 2.8rem) !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.035em !important;
+  line-height: 1.04 !important;
+}
+.wfr .manifesto-text {
+  font-size: clamp(1.8rem, 4vw, 3.4rem) !important;
+  font-weight: 400 !important;
+  line-height: 1.08 !important;
+  letter-spacing: -0.035em !important;
+}
+.wfr .step h3 {
+  font-size: clamp(1.4rem, 2vw, 1.7rem) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+}
+.wfr .price-main {
+  font-size: clamp(2.8rem, 5.2vw, 4.2rem) !important;
+  font-weight: 700 !important;
+}
+.wfr .btn {
+  font-family: 'Figtree', sans-serif !important;
+  text-decoration: none !important;
+}
+.wfr .shell { font-family: 'Figtree', -apple-system, sans-serif !important; }
 
 :root {
   --wf-shell-bg: #d4ced6;

@@ -57,7 +57,8 @@
     background: linear-gradient(90deg, var(--mauve), var(--accent));
     z-index: 999;
     width: 0;
-    transition: width 0.1s linear;
+    will-change: width;
+    transform: translateZ(0);
     box-shadow: 0 0 12px var(--mauve-glow);
   }
 
@@ -84,6 +85,8 @@
     inset: 0;
     background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.12) 50%, transparent 100%);
     animation: sweep 5s ease-in-out infinite;
+    will-change: transform;
+    transform: translateZ(0);
   }
 
   @keyframes sweep {
@@ -303,7 +306,7 @@
 
   .manifesto { padding: 160px 0; text-align: center; position: relative; overflow: hidden; }
   .manifesto::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(212, 184, 220, 0.08) 0%, transparent 65%); }
-  .manifesto-star { position: absolute; width: 80px; height: 80px; opacity: 0.35; color: var(--mauve); pointer-events: none; animation: starSpin 40s linear infinite; }
+  .manifesto-star { position: absolute; width: 80px; height: 80px; opacity: 0.35; color: var(--mauve); pointer-events: none; animation: starSpin 40s linear infinite; will-change: transform; transform: translateZ(0); }
   .manifesto-star--tl { top: 48px; left: 56px; }
   .manifesto-star--br { bottom: 48px; right: 56px; animation-direction: reverse; }
   @keyframes starSpin { to { transform: rotate(360deg); } }
@@ -431,8 +434,8 @@
   .smc-cta { padding: 14px 22px; background: linear-gradient(90deg, #1db954, #2edc6f); color: #ffffff; font-weight: 600; font-size: 0.84rem; border-radius: 100px; white-space: nowrap; box-shadow: 0 4px 16px rgba(29, 185, 84, 0.3); }
   @media (max-width: 720px) { .smc { display: flex; } body { padding-bottom: 82px; } }
 
-  .rv { opacity: 0; transform: translateY(24px); transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.2, 0.9, 0.25, 1); }
-  .rv.vis { opacity: 1; transform: none; }
+  .rv { opacity: 0; transform: translateY(24px) translateZ(0); transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.2, 0.9, 0.25, 1); will-change: opacity, transform; }
+  .rv.vis { opacity: 1; transform: translateZ(0); }
   .rv-stagger > * { opacity: 0; transform: translateY(16px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.9, 0.25, 1); }
   .rv-stagger.vis > *:nth-child(1) { opacity: 1; transform: none; transition-delay: 0s; }
   .rv-stagger.vis > *:nth-child(2) { opacity: 1; transform: none; transition-delay: 0.08s; }
@@ -696,24 +699,32 @@
 </div>
 
 <script>
-  // Scroll progress
-  window.addEventListener('scroll', () => {
-    const h = document.documentElement.scrollHeight - window.innerHeight;
-    document.getElementById('scrollProgress').style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0';
-  });
+  // Scroll progress — throttled with rAF
+  var spTick = false;
+  var spEl = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', function() {
+    if (!spTick) {
+      spTick = true;
+      requestAnimationFrame(function() {
+        var h = document.documentElement.scrollHeight - window.innerHeight;
+        if (spEl) spEl.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0';
+        spTick = false;
+      });
+    }
+  }, { passive: true });
 
   // Reveal on scroll
-  const rvObs = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); rvObs.unobserve(e.target); } });
+  var rvObs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('vis'); rvObs.unobserve(e.target); } });
   }, { threshold: 0.1 });
-  document.querySelectorAll('.rv, .rv-stagger').forEach(el => rvObs.observe(el));
+  document.querySelectorAll('.rv, .rv-stagger').forEach(function(el) { rvObs.observe(el); });
 
   // FAQ toggle
-  document.querySelectorAll('.faq-q').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const item = btn.parentElement;
-      const wasOpen = item.classList.contains('open');
-      item.closest('.faq-list').querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  document.querySelectorAll('.faq-q').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var item = btn.parentElement;
+      var wasOpen = item.classList.contains('open');
+      item.closest('.faq-list').querySelectorAll('.faq-item').forEach(function(i) { i.classList.remove('open'); });
       if (!wasOpen) item.classList.add('open');
     });
   });

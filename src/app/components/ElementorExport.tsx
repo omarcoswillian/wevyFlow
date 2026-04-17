@@ -269,7 +269,24 @@ function nativeWidget(widgetType: string, settings: Record<string, any>): any {
 }
 
 function wrapContainer(children: any[]): any {
-  return { id: genId(), elType: "container", isInner: false, settings: { content_width: "full" }, elements: children };
+  return {
+    id: genId(),
+    elType: "container",
+    isInner: false,
+    settings: {
+      content_width: "full",
+      padding: { unit: "px", top: "0", right: "0", bottom: "0", left: "0", isLinked: true },
+      margin: { unit: "px", top: "0", right: "0", bottom: "0", left: "0", isLinked: true },
+      gap: { unit: "px", size: 0 },
+      flex_gap: { unit: "px", size: 0 },
+      border_radius: { unit: "px", top: "0", right: "0", bottom: "0", left: "0", isLinked: true },
+      box_shadow_box_shadow_type: "",
+      background_background: "",
+      border_border: "",
+      overflow: "hidden",
+    },
+    elements: children,
+  };
 }
 
 // Parse urgency bar → wf-urgency-bar widget
@@ -503,24 +520,43 @@ function parseFooter(html: string): any {
   });
 }
 
-// Map section tag → parser
-function sectionToWidget(section: HtmlSection): any {
-  const { tag, html } = section;
-  switch (tag) {
-    case "urgency": return parseUrgency(html);
-    case "hero": return parseHero(html);
-    case "split": return parseSplit(html);
-    case "manifesto": return parseManifesto(html);
-    case "steps": return parseSteps(html);
-    case "testimonials": return parseTestimonials(html);
-    case "bonus": return parseBonus(html);
-    case "pricing": return parsePricing(html);
-    case "mentor": return parseMentor(html);
-    case "faq": return parseFaq(html);
-    case "footer": return parseFooter(html);
-    case "sticky-cta": return nativeWidget("html", { html });
-    default: return nativeWidget("html", { html });
-  }
+// ── Universal WavyFlow Section widget ──
+// Extracts editable fields from HTML, stores originals for str_replace in PHP
+
+function extractEditableFields(html: string, label: string) {
+  // Extract headline (h1 or h2)
+  const h1M = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+  const h2M = html.match(/<h2[^>]*>([\s\S]*?)<\/h2>/i);
+  const headlineRaw = h1M ? h1M[1] : (h2M ? h2M[1] : "");
+  const headline = strip(headlineRaw);
+
+  // Extract first meaningful paragraph (subtitle)
+  const paragraphs = extractAll(html, "p")
+    .map(strip)
+    .filter(p => p.length > 15 && !p.includes("webp") && !p.includes("placeholder") && !p.includes("Foto do"));
+  const subtitle = paragraphs[0] || "";
+  const paragraph2 = paragraphs[1] || "";
+
+  // Extract CTA button
+  const ctaM = html.match(/<a[^>]*href="([^"]*)"[^>]*class="[^"]*btn[^"]*"[^>]*>([\s\S]*?)<\/a>/i);
+  const ctaText = ctaM ? strip(ctaM[2]).replace("→", "").trim() : "";
+  const ctaUrl = ctaM ? ctaM[1] : "";
+
+  return {
+    section_label: label,
+    edit_headline: headline,
+    edit_subtitle: subtitle,
+    edit_paragraph_2: paragraph2,
+    edit_cta_text: ctaText,
+    edit_cta_url: { url: ctaUrl, is_external: "", nofollow: "" },
+    edit_image: { url: "", id: "" },
+    // Store originals for str_replace
+    orig_headline: headline,
+    orig_subtitle: subtitle,
+    orig_paragraph_2: paragraph2,
+    orig_cta_text: ctaText,
+    orig_cta_url: ctaUrl,
+  };
 }
 
 function generateElementorJson(
@@ -529,18 +565,27 @@ function generateElementorJson(
   sharedJs: string,
   title: string,
 ): object {
-  // Each section → Container > HTML Widget (100% fidelity)
-  // First section includes CSS, last includes JS
   const content = sections.map((section, index) => {
     const isFirst = index === 0;
     const isLast = index === sections.length - 1;
+
+    // Build the full HTML for this section
     const parts: string[] = [];
     if (isFirst && sharedCss) parts.push(sharedCss);
-    // Wrap in shell div to preserve border-radius and spacing
     parts.push(`<div class="shell" style="padding:14px;background:#d4ced6;">${section.html}</div>`);
     if (isLast && sharedJs) parts.push(sharedJs);
+    const fullHtml = parts.join("\n\n");
 
-    return wrapContainer([nativeWidget("html", { html: parts.join("\n\n") })]);
+    // Extract editable fields
+    const fields = extractEditableFields(section.html, section.label);
+
+    // Create wf-section widget with original HTML + editable fields
+    const widget = nativeWidget("wf-section", {
+      original_html: fullHtml,
+      ...fields,
+    });
+
+    return wrapContainer([widget]);
   });
 
   return {

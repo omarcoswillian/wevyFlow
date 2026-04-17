@@ -173,13 +173,9 @@ export function WorkspaceView({
     URL.revokeObjectURL(url);
   }, [code]);
 
-  // Copy full HTML (CSS + body + JS) for pasting into Elementor HTML widget
   const handleCopyElementor = useCallback(() => {
-    const codeToExport = finalCode || code;
-    navigator.clipboard.writeText(codeToExport);
-    setElementorCopied(true);
-    setTimeout(() => setElementorCopied(false), 3000);
-  }, [code, finalCode]);
+    setShowElementorExport(true);
+  }, []);
 
   // Visual edit: toggle mode
   const toggleVisualEdit = useCallback(() => {

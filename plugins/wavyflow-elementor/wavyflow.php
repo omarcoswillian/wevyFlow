@@ -42,7 +42,9 @@ function wavyflow_register_widgets($widgets_manager) {
     require_once WAVYFLOW_PATH . 'widgets/mentor-section.php';
     require_once WAVYFLOW_PATH . 'widgets/faq-accordion.php';
     require_once WAVYFLOW_PATH . 'widgets/footer-minimal.php';
+    require_once WAVYFLOW_PATH . 'widgets/wavyflow-section.php';
 
+    $widgets_manager->register(new \WavyFlow\Widgets\WavyFlow_Section());
     $widgets_manager->register(new \WavyFlow\Widgets\Urgency_Bar());
     $widgets_manager->register(new \WavyFlow\Widgets\Hero_VSL());
     $widgets_manager->register(new \WavyFlow\Widgets\Split_Section());
