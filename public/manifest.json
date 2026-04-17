@@ -10,33 +10,15 @@
   "categories": ["productivity", "design", "developer tools"],
   "icons": [
     {
-      "src": "/logoWavyflow.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-192.svg",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-512.svg",
+      "src": "/IconeAtual.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-maskable-192.svg",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/icons/icon-maskable-512.svg",
+      "src": "/IconeAtual-PWA.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "maskable"
     }
   ],

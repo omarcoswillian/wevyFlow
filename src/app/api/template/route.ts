@@ -31,6 +31,7 @@ const TEMPLATE_MAP: Record<string, string> = {
   "ready-captura-light": "lp-captura-light-premium.html",
   "ready-captura-dark": "lp-captura-dark-premium.html",
   "ready-quiz-funnel": "lp-quiz-funnel.html",
+  "ready-vendas-black-boutique": "lp-vendas-black-boutique.html",
 };
 
 export async function GET(request: Request) {

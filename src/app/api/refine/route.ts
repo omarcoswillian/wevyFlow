@@ -76,6 +76,38 @@ export async function POST(request: Request) {
       );
     }
 
+    // Compact the code to fit within token limits
+    let compactCode = originalCode as string;
+
+    // Minify CSS: collapse whitespace, remove comments
+    compactCode = compactCode.replace(/\/\*[\s\S]*?\*\//g, ""); // remove CSS comments
+    compactCode = compactCode.replace(/\s{2,}/g, " "); // collapse multi-spaces
+    compactCode = compactCode.replace(/\n\s*\n/g, "\n"); // collapse blank lines
+
+    // If still too large (>80k chars ~20k tokens), split CSS and body
+    const MAX_CODE_CHARS = 80000;
+    if (compactCode.length > MAX_CODE_CHARS) {
+      // Extract and heavily compress CSS
+      const styleMatch = compactCode.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+      if (styleMatch) {
+        let css = styleMatch[1];
+        // Aggressive CSS minification
+        css = css.replace(/\s*{\s*/g, "{").replace(/\s*}\s*/g, "}").replace(/\s*;\s*/g, ";").replace(/\s*:\s*/g, ":").replace(/\s*,\s*/g, ",");
+        // Remove media queries for reduced-motion (not essential for refine)
+        css = css.replace(/@media\s*\(prefers-reduced-motion[^}]*\{[^}]*\}\s*\}/g, "");
+        compactCode = compactCode.replace(styleMatch[0], `<style>${css}</style>`);
+      }
+
+      // If STILL too large, truncate CSS keeping only first 15k chars of it
+      if (compactCode.length > MAX_CODE_CHARS) {
+        const styleMatch2 = compactCode.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+        if (styleMatch2 && styleMatch2[1].length > 15000) {
+          const truncatedCss = styleMatch2[1].slice(0, 15000) + "\n/* ... CSS truncado para caber no limite ... */";
+          compactCode = compactCode.replace(styleMatch2[0], `<style>${truncatedCss}</style>`);
+        }
+      }
+    }
+
     // Build message content - supports multimodal (text + images)
     const contentParts: Anthropic.MessageCreateParams["messages"][0]["content"] = [];
 
@@ -83,7 +115,6 @@ export async function POST(request: Request) {
     if (images && Array.isArray(images) && images.length > 0) {
       for (const img of images) {
         if (img.base64 && typeof img.base64 === "string") {
-          // Extract media type and data from data URL
           const match = img.base64.match(/^data:(image\/[^;]+);base64,(.+)$/);
           if (match) {
             contentParts.push({
@@ -105,7 +136,7 @@ export async function POST(request: Request) {
       text: `PLATAFORMA: ${platform || "html"}
 
 CÓDIGO ATUAL DO LAYOUT:
-${originalCode}
+${compactCode}
 
 PEDIDO DO USUÁRIO: ${refinementRequest}
 ${images && images.length > 0 ? "\nO usuário enviou imagem(ns) acima como referência visual. Analise e aplique ao layout." : ""}
@@ -113,9 +144,13 @@ ${images && images.length > 0 ? "\nO usuário enviou imagem(ns) acima como refer
 Retorne o código HTML/CSS COMPLETO com as alterações aplicadas.`,
     });
 
+    // Use higher max_tokens for large templates
+    const codeLength = compactCode.length;
+    const maxTokens = codeLength > 40000 ? 32000 : 16000;
+
     const stream = anthropic.messages.stream({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 16000,
+      max_tokens: maxTokens,
       system: buildSystemPrompt(designContext),
       messages: [{ role: "user", content: contentParts }],
     });

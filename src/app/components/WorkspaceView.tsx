@@ -32,6 +32,7 @@ import { Platform, ViewportSize } from "../lib/types";
 import { IFRAME_VISUAL_EDIT_SCRIPT } from "../lib/iframe-inject";
 import { BASE_CSS, BASE_SCRIPT } from "../lib/base-css";
 import { VisualEditor, ElementProps } from "./VisualEditor";
+import { ElementorExport } from "./ElementorExport";
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import xml from "react-syntax-highlighter/dist/esm/languages/hljs/xml";
 import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
@@ -88,6 +89,8 @@ export function WorkspaceView({
   const [isDragging, setIsDragging] = useState(false);
   const [visualEditMode, setVisualEditMode] = useState(false);
   const [selectedElementProps, setSelectedElementProps] = useState<ElementProps | null>(null);
+  const [showElementorExport, setShowElementorExport] = useState(false);
+  const [elementorCopied, setElementorCopied] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatFileRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
@@ -169,6 +172,14 @@ export function WorkspaceView({
     a.click();
     URL.revokeObjectURL(url);
   }, [code]);
+
+  // Copy full HTML (CSS + body + JS) for pasting into Elementor HTML widget
+  const handleCopyElementor = useCallback(() => {
+    const codeToExport = finalCode || code;
+    navigator.clipboard.writeText(codeToExport);
+    setElementorCopied(true);
+    setTimeout(() => setElementorCopied(false), 3000);
+  }, [code, finalCode]);
 
   // Visual edit: toggle mode
   const toggleVisualEdit = useCallback(() => {
@@ -654,8 +665,16 @@ export function WorkspaceView({
                   {shared ? "Copiado!" : "Share"}
                 </button>
                 <button onClick={handleDownload}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-purple-500/20 transition-all cursor-pointer">
-                  <Download className="w-3.5 h-3.5" /> Exportar
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-white/30 hover:text-white/50 hover:bg-white/[0.05] transition-all cursor-pointer">
+                  <Download className="w-3.5 h-3.5" /> HTML
+                </button>
+                <button onClick={handleCopyElementor}
+                  className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer",
+                    elementorCopied
+                      ? "bg-emerald-500/15 text-emerald-400"
+                      : "bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:shadow-lg hover:shadow-orange-500/20")}>
+                  {elementorCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  {elementorCopied ? "Copiado! Cole no Elementor" : "Elementor"}
                 </button>
               </>
             )}
@@ -709,6 +728,14 @@ export function WorkspaceView({
           </div>
         )}
       </div>
+
+      {/* Elementor Export Modal */}
+      {showElementorExport && (
+        <ElementorExport
+          code={finalCode || code}
+          onClose={() => setShowElementorExport(false)}
+        />
+      )}
     </div>
   );
 }

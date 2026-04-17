@@ -12,6 +12,14 @@ export const TEMPLATE_CATEGORIES = [
 export const TEMPLATES: TemplateItem[] = [
   // ━━━ PÁGINA DE VENDAS ━━━
   {
+    id: "ready-vendas-black-boutique",
+    label: "LP Vendas Black Boutique (Pronto)",
+    description: "Pagina de vendas premium estilo editorial com blocos arredondados, hero dark com video VSL, urgencia, manifesto, 3 steps, depoimentos grid, bonus cards, pricing com selos, mentor, FAQ accordion, sticky mobile CTA. Paleta mauve/dark.",
+    category: "vendas",
+    tags: ["pronto", "vendas", "infoproduto", "editorial", "dark", "mauve", "vsl", "premium", "boutique"],
+    prompt: "READY:ready-vendas-black-boutique",
+  },
+  {
     id: "ready-lp-vendas-spe",
     label: "LP Vendas Completa 13 Secoes (Pronto)",
     description: "Pagina de vendas completa com 13 secoes: Hero, Depoimentos dark, Traits, Metodo, Para Quem, 6 Etapas, Bonus, Pricing, Garantia, Criador, FAQ, CTA Final. Estilo clean light com green accent.",

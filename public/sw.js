@@ -1,11 +1,11 @@
-const CACHE_NAME = "wavyflow-v1";
+const CACHE_NAME = "wavyflow-v2";
 
 // Shell files to cache on install
 const SHELL_FILES = [
   "/",
   "/manifest.json",
-  "/icons/icon-192.svg",
-  "/icons/icon-512.svg",
+  "/IconeAtual.png",
+  "/IconeAtual-PWA.png",
 ];
 
 // Install — cache app shell
@@ -22,7 +22,7 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((key) => key !== CACHE_NAME)
+          .filter((key) => key !== "wavyflow-v2")
           .map((key) => caches.delete(key))
       )
     )

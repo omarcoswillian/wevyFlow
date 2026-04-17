@@ -1,0 +1,77 @@
+/* WavyFlow — Elementor Editor Styles */
+/* Highlights widgets in the editor so they're visible and clickable */
+
+/* All WavyFlow widgets get a subtle outline in the editor */
+.elementor-editor-active [class*="wf-block"],
+.elementor-editor-active .wf-hero,
+.elementor-editor-active .wf-urgency,
+.elementor-editor-active .wf-manifesto,
+.elementor-editor-active .wf-foot {
+    outline: 1px dashed rgba(167, 139, 250, 0.3) !important;
+    outline-offset: -1px;
+}
+
+/* On hover, stronger outline */
+.elementor-editor-active [class*="wf-block"]:hover,
+.elementor-editor-active .wf-hero:hover,
+.elementor-editor-active .wf-urgency:hover {
+    outline: 1px solid rgba(167, 139, 250, 0.6) !important;
+}
+
+/* Show widget label in editor */
+.elementor-editor-active .elementor-widget-wf-hero-vsl::before,
+.elementor-editor-active .elementor-widget-wf-split-section::before,
+.elementor-editor-active .elementor-widget-wf-manifesto::before,
+.elementor-editor-active .elementor-widget-wf-steps-grid::before,
+.elementor-editor-active .elementor-widget-wf-testimonials-grid::before,
+.elementor-editor-active .elementor-widget-wf-bonus-grid::before,
+.elementor-editor-active .elementor-widget-wf-pricing-card::before,
+.elementor-editor-active .elementor-widget-wf-mentor-section::before,
+.elementor-editor-active .elementor-widget-wf-faq-accordion::before,
+.elementor-editor-active .elementor-widget-wf-footer-minimal::before,
+.elementor-editor-active .elementor-widget-wf-urgency-bar::before {
+    content: attr(data-widget_type);
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 100;
+    background: rgba(167, 139, 250, 0.9);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.elementor-editor-active .elementor-element:hover > .elementor-widget-container > [class*="wf-"]::after {
+    content: 'WavyFlow';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 100;
+    background: rgba(167, 139, 250, 0.85);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 3px;
+    pointer-events: none;
+}
+
+/* Ensure dark sections have minimum height in editor so they're not collapsed */
+.elementor-editor-active .wf-hero {
+    min-height: 200px !important;
+}
+
+.elementor-editor-active .wf-block {
+    min-height: 100px !important;
+}
+
+.elementor-editor-active .wf-block--dark {
+    min-height: 100px !important;
+}

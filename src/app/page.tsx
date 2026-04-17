@@ -189,7 +189,8 @@ export default function App() {
           }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Erro desconhecido");
+        const msg = err instanceof Error ? err.message : "Erro desconhecido";
+        setError(msg === "Failed to fetch" ? "Erro de conexao com a IA. O template pode ser muito grande — tente um pedido mais simples." : msg);
       } finally {
         setIsRefining(false);
       }
