@@ -1,5 +1,5 @@
 <?php
-namespace WavyFlow\Widgets;
+namespace WevyFlow\Widgets;
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Repeater;
@@ -8,9 +8,9 @@ if (!defined('ABSPATH')) exit;
 
 class Steps_Grid extends Widget_Base {
     public function get_name() { return 'wf-steps-grid'; }
-    public function get_title() { return 'WavyFlow Steps Grid'; }
+    public function get_title() { return 'WevyFlow Steps Grid'; }
     public function get_icon() { return 'eicon-number-field'; }
-    public function get_categories() { return ['wavyflow']; }
+    public function get_categories() { return ['wevyflow']; }
 
     protected function register_controls() {
         $this->start_controls_section('header_section', ['label' => 'Cabecalho']);

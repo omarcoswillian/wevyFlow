@@ -22,14 +22,14 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "WavyFlow — Gerador de Layouts com IA",
+  title: "WevyFlow — Gerador de Layouts com IA",
   description:
     "Descreva o que você precisa e receba código HTML/CSS pronto para colar no Elementor, Webflow ou qualquer plataforma no-code.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "WavyFlow",
+    title: "WevyFlow",
   },
   icons: {
     icon: [

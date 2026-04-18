@@ -591,7 +591,7 @@ function parseFooter(html: string): any {
   });
 }
 
-// ── Universal WavyFlow Section widget ──
+// ── Universal WevyFlow Section widget ──
 // Extracts editable fields from HTML, stores originals for str_replace in PHP
 
 interface VideoField {
@@ -676,7 +676,7 @@ function extractEditableFields(html: string, label: string) {
 // only way to guarantee pixel-perfect fidelity: Elementor never touches the internals,
 // it just drops our <div class="wfr"> inside a full-bleed Section and lets the browser
 // render it. Trade-off: the section-by-section editing in Elementor is gone, but
-// the layout is 100% identical to the WavyFlow preview.
+// the layout is 100% identical to the WevyFlow preview.
 function generateElementorJson(
   _sections: HtmlSection[],
   sharedCss: string,
@@ -786,12 +786,12 @@ export function ElementorExport({ code, fonts, onClose }: ElementorExportProps) 
 
   const handleDownloadJson = useCallback(() => {
     idCounter = 0;
-    const json = generateElementorJson(sections, sharedCss, sharedJs, "WavyFlow Template", bodyHtmlForParser);
+    const json = generateElementorJson(sections, sharedCss, sharedJs, "WevyFlow Template", bodyHtmlForParser);
     const blob = new Blob([JSON.stringify(json)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "wavyflow-elementor-template.json";
+    a.download = "wevyflow-elementor-template.json";
     a.click();
     URL.revokeObjectURL(url);
   }, [sections, sharedCss, sharedJs, bodyHtmlForParser]);
@@ -799,7 +799,7 @@ export function ElementorExport({ code, fonts, onClose }: ElementorExportProps) 
   const [jsonCopied, setJsonCopied] = useState(false);
   const handleCopyJson = useCallback(() => {
     idCounter = 0;
-    const json = generateElementorJson(sections, sharedCss, sharedJs, "WavyFlow Template", bodyHtmlForParser);
+    const json = generateElementorJson(sections, sharedCss, sharedJs, "WevyFlow Template", bodyHtmlForParser);
     navigator.clipboard.writeText(JSON.stringify(json));
     setJsonCopied(true);
     setTimeout(() => setJsonCopied(false), 3000);
@@ -846,7 +846,7 @@ export function ElementorExport({ code, fonts, onClose }: ElementorExportProps) 
             </div>
 
             {/* Section count */}
-            <p className="text-[9px] text-white/15 text-center">{sections.length} secoes · Fidelidade 100% ao layout do WavyFlow</p>
+            <p className="text-[9px] text-white/15 text-center">{sections.length} secoes · Fidelidade 100% ao layout do WevyFlow</p>
 
             {/* Alternative: Copy for WP plugin */}
             <div className="pt-2 border-t border-white/[0.04]">
@@ -858,7 +858,7 @@ export function ElementorExport({ code, fonts, onClose }: ElementorExportProps) 
                     : "text-white/25 hover:text-white/40 hover:bg-white/[0.03]")}
               >
                 {jsonCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                {jsonCopied ? "Copiado! Cole no WP > WavyFlow" : "Ou copiar para plugin WordPress"}
+                {jsonCopied ? "Copiado! Cole no WP > WevyFlow" : "Ou copiar para plugin WordPress"}
               </button>
             </div>
           </div>

@@ -113,14 +113,14 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
         <div className="px-2 pt-3 pb-2">
           {sidebarCollapsed ? (
             <div className="flex flex-col items-center gap-2">
-              <img src="/IconeAtual.png" alt="WavyFlow" className="w-8 h-8" />
+              <img src="/IconeAtual.png" alt="WevyFlow" className="w-8 h-8" />
               <button onClick={() => setSidebarCollapsed(false)} className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6b6b6b] hover:text-[#9a9a9a] hover:bg-white/[0.06] transition-all cursor-pointer" title="Expandir sidebar">
                 <PanelLeft className="w-4 h-4" />
               </button>
             </div>
           ) : (
             <div className="flex items-center px-2">
-              <img src="/IconeAtual.png" alt="WavyFlow" className="w-7 h-7 shrink-0" />
+              <img src="/IconeAtual.png" alt="WevyFlow" className="w-7 h-7 shrink-0" />
               <div className="flex-1" />
               <button onClick={() => setSidebarCollapsed(true)} className="w-7 h-7 rounded-lg flex items-center justify-center text-[#6b6b6b] hover:text-[#9a9a9a] hover:bg-white/[0.06] transition-all cursor-pointer" title="Recolher sidebar">
                 <PanelLeft className="w-4 h-4" />

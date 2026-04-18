@@ -1,4 +1,4 @@
-/* WavyFlow Base — Elementor integration layer.
+/* WevyFlow Base — Elementor integration layer.
  *
  * Philosophy: the template's inline CSS (inside the wf-section widget) is the
  * single source of truth. This file only does two things:
@@ -9,7 +9,7 @@
  * We DO NOT restyle .hero, .t-h2, .manifesto-text, .step, .btn, etc. — those
  * rules live in the template CSS that the export embeds. Letting the plugin
  * override them with !important caused subtle fidelity differences between the
- * WavyFlow preview and the Elementor render. (April 2026)
+ * WevyFlow preview and the Elementor render. (April 2026)
  */
 
 /* ─── 1. Smart reveal: animated entrance + fast safety net ───────────
@@ -60,7 +60,7 @@
  * DOM chain: .e-con (Section) > .elementor-widget.elementor-widget-wf-section
  *            > .elementor-widget-container > .wfr > template HTML.
  * Each layer defaults to flex/padding/margin — we zero all of them so the
- * template HTML lays out exactly as it does in the WavyFlow preview.
+ * template HTML lays out exactly as it does in the WevyFlow preview.
  * Scope: ONLY containers that directly host our widget. */
 .elementor-widget-wf-section,
 .elementor-widget-wf-section > .elementor-widget-container,

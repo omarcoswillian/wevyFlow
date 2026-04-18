@@ -1,4 +1,4 @@
-/* WavyFlow Frontend Scripts — Performance Optimized */
+/* WevyFlow Frontend Scripts — Performance Optimized */
 
 document.addEventListener('DOMContentLoaded', function () {
   // FAQ Accordion

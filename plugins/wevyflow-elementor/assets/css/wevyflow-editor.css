@@ -1,7 +1,7 @@
-/* WavyFlow — Elementor Editor Styles */
+/* WevyFlow — Elementor Editor Styles */
 /* Highlights widgets in the editor so they're visible and clickable */
 
-/* All WavyFlow widgets get a subtle outline in the editor */
+/* All WevyFlow widgets get a subtle outline in the editor */
 .elementor-editor-active [class*="wf-block"],
 .elementor-editor-active .wf-hero,
 .elementor-editor-active .wf-urgency,
@@ -49,7 +49,7 @@
 }
 
 .elementor-editor-active .elementor-element:hover > .elementor-widget-container > [class*="wf-"]::after {
-    content: 'WavyFlow';
+    content: 'WevyFlow';
     position: absolute;
     top: 8px;
     right: 8px;

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { HistoryEntry } from "./types";
 
-const STORAGE_KEY = "wavyflow-history";
+const STORAGE_KEY = "wevyflow-history";
 const MAX_ENTRIES = 20;
 
 function loadEntries(): HistoryEntry[] {
@@ -24,9 +24,9 @@ function saveEntries(entries: HistoryEntry[]) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
   } catch (err) {
     const isQuota = err instanceof DOMException && (err.code === 22 || err.code === 1014 || err.name === "QuotaExceededError");
-    console.error("[WavyFlow] Erro ao salvar histórico:", isQuota ? "Armazenamento cheio" : err);
+    console.error("[WevyFlow] Erro ao salvar histórico:", isQuota ? "Armazenamento cheio" : err);
     if (typeof window !== "undefined" && window.dispatchEvent) {
-      window.dispatchEvent(new CustomEvent("wavyflow-storage-error", {
+      window.dispatchEvent(new CustomEvent("wevyflow-storage-error", {
         detail: { type: isQuota ? "quota" : "unknown", message: isQuota ? "Armazenamento local cheio. Limpe o histórico para liberar espaço." : "Erro ao salvar histórico." },
       }));
     }

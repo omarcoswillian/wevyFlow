@@ -1,5 +1,5 @@
 <?php
-namespace WavyFlow\Widgets;
+namespace WevyFlow\Widgets;
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Group_Control_Typography;
@@ -9,12 +9,12 @@ use Elementor\Group_Control_Box_Shadow;
 
 if (!defined('ABSPATH')) exit;
 
-class WavyFlow_Section extends Widget_Base {
+class WevyFlow_Section extends Widget_Base {
     public function get_name() { return 'wf-section'; }
-    public function get_title() { return 'WavyFlow Section'; }
+    public function get_title() { return 'WevyFlow Section'; }
     public function get_icon() { return 'eicon-code'; }
-    public function get_categories() { return ['wavyflow']; }
-    public function get_keywords() { return ['wavyflow', 'section', 'html', 'template']; }
+    public function get_categories() { return ['wevyflow']; }
+    public function get_keywords() { return ['wevyflow', 'section', 'html', 'template']; }
 
     protected function register_controls() {
         // ─── HTML Original (hidden in normal use, stores the source) ───
@@ -26,13 +26,13 @@ class WavyFlow_Section extends Widget_Base {
             'label' => 'HTML Original',
             'type' => Controls_Manager::TEXTAREA,
             'default' => '',
-            'description' => 'Codigo HTML original da secao. Gerado automaticamente pelo WavyFlow.',
+            'description' => 'Codigo HTML original da secao. Gerado automaticamente pelo WevyFlow.',
             'rows' => 6,
         ]);
         $this->add_control('section_label', [
             'label' => 'Nome da secao',
             'type' => Controls_Manager::TEXT,
-            'default' => 'Secao WavyFlow',
+            'default' => 'Secao WevyFlow',
         ]);
         $this->end_controls_section();
 
@@ -360,7 +360,7 @@ class WavyFlow_Section extends Widget_Base {
         if (empty($html)) {
             if (\Elementor\Plugin::$instance->editor->is_edit_mode()) {
                 echo '<div style="padding:40px;text-align:center;background:#1e1e1e;border-radius:12px;color:#888;font-family:sans-serif;">';
-                echo '<p style="font-size:14px;margin-bottom:8px;">WavyFlow Section</p>';
+                echo '<p style="font-size:14px;margin-bottom:8px;">WevyFlow Section</p>';
                 echo '<p style="font-size:11px;color:#555;">Cole o HTML da secao no campo "Codigo Fonte"</p>';
                 echo '</div>';
             }

@@ -69,7 +69,7 @@ export function PreviewToolbar({
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Layout WavyFlow</title>
+  <title>Layout WevyFlow</title>
 </head>
 <body>
 ${code}
@@ -79,7 +79,7 @@ ${code}
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "wavyflow-layout.html";
+    a.download = "wevyflow-layout.html";
     a.click();
     URL.revokeObjectURL(url);
   }, [code]);

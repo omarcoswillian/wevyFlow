@@ -63,7 +63,7 @@ REGRAS INVIOLAVEIS:
 1. Retorne APENAS HTML completo. ZERO texto explicativo, markdown, crases. Primeiro caractere = <
 2. Se uma REFERENCIA HTML foi fornecida, replique-a fielmente. Referencia e lei.
 3. ZERO emojis. Nunca. Use SVG icons.
-4. O sistema WavyFlow ja injeta automaticamente o design system Prymo LP com CSS variables. USE as variaveis CSS.
+4. O sistema WevyFlow ja injeta automaticamente o design system Prymo LP com CSS variables. USE as variaveis CSS.
 
 ═══ DESIGN SYSTEM PRYMO LP (use SEMPRE estas variaveis) ═══
 
@@ -239,7 +239,7 @@ function isAllowedUrl(url: string): boolean {
 
 async function fetchReferenceHTML(url: string): Promise<string | null> {
   if (!isAllowedUrl(url)) {
-    console.warn("[WavyFlow] URL bloqueada por SSRF protection:", url);
+    console.warn("[WevyFlow] URL bloqueada por SSRF protection:", url);
     return null;
   }
   try {

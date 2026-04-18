@@ -11,7 +11,7 @@ export interface SavedComponent {
   updatedAt: number;
 }
 
-const STORAGE_KEY = "wavyflow-components";
+const STORAGE_KEY = "wevyflow-components";
 
 function load(): SavedComponent[] {
   if (typeof window === "undefined") return [];
@@ -29,7 +29,7 @@ function save(items: SavedComponent[]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   } catch (err) {
-    console.error("[WavyFlow] Erro ao salvar componente:", err);
+    console.error("[WevyFlow] Erro ao salvar componente:", err);
   }
 }
 

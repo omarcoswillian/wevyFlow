@@ -23,8 +23,8 @@ export interface Project {
   updatedAt: number;
 }
 
-const STORAGE_KEY = "wavyflow-projects";
-const STORAGE_VERSION_KEY = "wavyflow-projects-version";
+const STORAGE_KEY = "wevyflow-projects";
+const STORAGE_VERSION_KEY = "wevyflow-projects-version";
 
 function load(): Project[] {
   if (typeof window === "undefined") return [];
@@ -44,9 +44,9 @@ function save(projects: Project[]): boolean {
     return true;
   } catch (err) {
     const isQuota = err instanceof DOMException && (err.code === 22 || err.code === 1014 || err.name === "QuotaExceededError");
-    console.error("[WavyFlow] Erro ao salvar projetos:", isQuota ? "Armazenamento cheio" : err);
+    console.error("[WevyFlow] Erro ao salvar projetos:", isQuota ? "Armazenamento cheio" : err);
     if (typeof window !== "undefined" && window.dispatchEvent) {
-      window.dispatchEvent(new CustomEvent("wavyflow-storage-error", {
+      window.dispatchEvent(new CustomEvent("wevyflow-storage-error", {
         detail: { type: isQuota ? "quota" : "unknown", message: isQuota ? "Armazenamento local cheio. Exclua projetos antigos para liberar espaço." : "Erro ao salvar dados localmente." },
       }));
     }
@@ -73,10 +73,10 @@ export function useProjects() {
       setTimeout(() => setSaveError(null), 5000);
     };
     window.addEventListener("storage", handleStorage);
-    window.addEventListener("wavyflow-storage-error", handleSaveError);
+    window.addEventListener("wevyflow-storage-error", handleSaveError);
     return () => {
       window.removeEventListener("storage", handleStorage);
-      window.removeEventListener("wavyflow-storage-error", handleSaveError);
+      window.removeEventListener("wevyflow-storage-error", handleSaveError);
     };
   }, []);
 

@@ -1,5 +1,5 @@
 <?php
-namespace WavyFlow\Widgets;
+namespace WevyFlow\Widgets;
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Repeater;
@@ -8,9 +8,9 @@ if (!defined('ABSPATH')) exit;
 
 class Bonus_Grid extends Widget_Base {
     public function get_name() { return 'wf-bonus-grid'; }
-    public function get_title() { return 'WavyFlow Bonus Grid'; }
+    public function get_title() { return 'WevyFlow Bonus Grid'; }
     public function get_icon() { return 'eicon-gift'; }
-    public function get_categories() { return ['wavyflow']; }
+    public function get_categories() { return ['wevyflow']; }
 
     protected function register_controls() {
         $this->start_controls_section('header_section', ['label' => 'Cabecalho']);

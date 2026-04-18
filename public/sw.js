@@ -1,4 +1,4 @@
-const CACHE_NAME = "wavyflow-v2";
+const CACHE_NAME = "wevyflow-v2";
 
 // Shell files to cache on install
 const SHELL_FILES = [
@@ -22,7 +22,7 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((key) => key !== "wavyflow-v2")
+          .filter((key) => key !== "wevyflow-v2")
           .map((key) => caches.delete(key))
       )
     )

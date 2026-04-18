@@ -17,7 +17,7 @@ export function Header({ onToggleHistory, historyCount }: HeaderProps) {
         </div>
         <div>
           <h1 className="text-lg font-bold text-wf-text leading-tight">
-            Wavy<span className="text-wf-primary">Flow</span>
+            Wevy<span className="text-wf-primary">Flow</span>
           </h1>
           <p className="text-[10px] text-wf-text-muted leading-none">
             Gerador de Layouts com IA

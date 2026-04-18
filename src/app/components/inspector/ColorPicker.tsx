@@ -13,7 +13,7 @@ interface ColorPickerProps {
   allowAlpha?: boolean;
 }
 
-const SWATCHES_KEY = "wavyflow-color-swatches";
+const SWATCHES_KEY = "wevyflow-color-swatches";
 
 export function ColorPicker({ value, onChange, align = "right", allowAlpha = true }: ColorPickerProps) {
   const [open, setOpen] = useState(false);

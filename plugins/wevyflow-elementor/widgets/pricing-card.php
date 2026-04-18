@@ -1,5 +1,5 @@
 <?php
-namespace WavyFlow\Widgets;
+namespace WevyFlow\Widgets;
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Repeater;
@@ -8,9 +8,9 @@ if (!defined('ABSPATH')) exit;
 
 class Pricing_Card extends Widget_Base {
     public function get_name() { return 'wf-pricing-card'; }
-    public function get_title() { return 'WavyFlow Pricing Card'; }
+    public function get_title() { return 'WevyFlow Pricing Card'; }
     public function get_icon() { return 'eicon-price-table'; }
-    public function get_categories() { return ['wavyflow']; }
+    public function get_categories() { return ['wevyflow']; }
 
     protected function register_controls() {
         $this->start_controls_section('header_section', ['label' => 'Cabecalho']);

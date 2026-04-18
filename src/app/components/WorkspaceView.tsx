@@ -238,12 +238,12 @@ export function WorkspaceView({
 
   const handleDownload = useCallback(() => {
     const codeToExport = finalCode || code;
-    const fullHtml = `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Layout WavyFlow</title>\n</head>\n<body>\n${codeToExport}\n</body>\n</html>`;
+    const fullHtml = `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Layout WevyFlow</title>\n</head>\n<body>\n${codeToExport}\n</body>\n</html>`;
     const blob = new Blob([fullHtml], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "wavyflow-layout.html";
+    a.download = "wevyflow-layout.html";
     a.click();
     URL.revokeObjectURL(url);
   }, [code]);
@@ -761,7 +761,7 @@ export function WorkspaceView({
                     {msg.role === "user" ? <User className="w-3 h-3 text-white/40" /> : <Bot className="w-3 h-3 text-purple-400" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] text-white/25 mb-1">{msg.role === "user" ? "Você" : "WavyFlow"}</p>
+                    <p className="text-[10px] text-white/25 mb-1">{msg.role === "user" ? "Você" : "WevyFlow"}</p>
                     {msg.images && msg.images.length > 0 && (
                       <div className="flex gap-1.5 mb-2">
                         {msg.images.map((img, j) => (
@@ -780,7 +780,7 @@ export function WorkspaceView({
                     <Bot className="w-3 h-3 text-purple-400" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-[10px] text-white/25 mb-1">WavyFlow</p>
+                    <p className="text-[10px] text-white/25 mb-1">WevyFlow</p>
                     <div className="flex items-center gap-2 text-[12px] text-purple-400">
                       <Loader2 className="w-3 h-3 animate-spin" />
                       {isRefining ? "Aplicando refinamento..." : "Construindo layout..."}
@@ -952,11 +952,11 @@ export function WorkspaceView({
                 <button
                   onClick={() => {
                     const codeToShare = finalCode || code;
-                    const fullHtml = `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Layout WavyFlow</title>\n</head>\n<body>\n${codeToShare}\n</body>\n</html>`;
+                    const fullHtml = `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Layout WevyFlow</title>\n</head>\n<body>\n${codeToShare}\n</body>\n</html>`;
                     if (navigator.share) {
                       const blob = new Blob([fullHtml], { type: "text/html" });
-                      const file = new File([blob], "wavyflow-layout.html", { type: "text/html" });
-                      navigator.share({ title: "Layout WavyFlow", files: [file] }).catch(() => {});
+                      const file = new File([blob], "wevyflow-layout.html", { type: "text/html" });
+                      navigator.share({ title: "Layout WevyFlow", files: [file] }).catch(() => {});
                     } else {
                       navigator.clipboard.writeText(codeToShare);
                       setShared(true);

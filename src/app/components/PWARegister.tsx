@@ -15,12 +15,12 @@ export function PWARegister() {
             installing.onstatechange = () => {
               if (installing.state === "installed" && navigator.serviceWorker.controller) {
                 // New content available — could show a toast here
-                console.log("[WavyFlow] Nova versao disponivel. Recarregue para atualizar.");
+                console.log("[WevyFlow] Nova versao disponivel. Recarregue para atualizar.");
               }
             };
           };
         })
-        .catch((err) => console.warn("[WavyFlow] SW registration failed:", err));
+        .catch((err) => console.warn("[WevyFlow] SW registration failed:", err));
     }
   }, []);
 

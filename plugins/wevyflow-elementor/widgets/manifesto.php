@@ -1,5 +1,5 @@
 <?php
-namespace WavyFlow\Widgets;
+namespace WevyFlow\Widgets;
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 
@@ -7,9 +7,9 @@ if (!defined('ABSPATH')) exit;
 
 class Manifesto extends Widget_Base {
     public function get_name() { return 'wf-manifesto'; }
-    public function get_title() { return 'WavyFlow Manifesto'; }
+    public function get_title() { return 'WevyFlow Manifesto'; }
     public function get_icon() { return 'eicon-blockquote'; }
-    public function get_categories() { return ['wavyflow']; }
+    public function get_categories() { return ['wevyflow']; }
 
     protected function register_controls() {
         $this->start_controls_section('content', ['label' => 'Conteudo']);

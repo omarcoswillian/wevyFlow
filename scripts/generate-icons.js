@@ -10,7 +10,7 @@
 const fs = require("fs");
 const path = require("path");
 
-// Minimal SVG icon for WavyFlow — purple wave "W"
+// Minimal SVG icon for WevyFlow — purple wave "W"
 const createSvg = (size, maskable = false) => {
   const padding = maskable ? size * 0.1 : 0;
   const inner = size - padding * 2;
