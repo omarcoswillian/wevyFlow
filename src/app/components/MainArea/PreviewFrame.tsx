@@ -10,6 +10,7 @@ interface PreviewFrameProps {
 }
 
 const VIEWPORT_WIDTHS: Record<ViewportSize, string> = {
+  ultrawide: "max-w-[2200px]",
   desktop: "max-w-full",
   tablet: "max-w-[768px]",
   mobile: "max-w-[375px]",

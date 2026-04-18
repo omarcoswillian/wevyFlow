@@ -115,7 +115,7 @@
     .urgency { font-size: 0.74rem; padding: 10px 16px; }
   }
 
-  .shell { padding: 14px; background: var(--shell-bg); }
+  .shell { padding: 14px; background: var(--shell-bg); max-width: 1680px; margin: 0 auto; }
 
   .block {
     background: var(--bg);
@@ -232,8 +232,9 @@
   .btn .arrow { transition: transform 0.3s; display: inline-block; }
   .btn:hover .arrow { transform: translateX(4px); }
 
-  .wrap { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 56px; }
-  @media (max-width: 720px) { .wrap { padding: 0 24px; } }
+  /* Unified content container: replaces section.content > div.wrap nesting */
+  .content { width: 100%; max-width: 1240px; margin: 0 auto; padding: 120px 56px; }
+  @media (max-width: 720px) { .content { padding: 80px 24px; } }
 
   .hero { position: relative; padding: 72px 0 88px; overflow: hidden; border-radius: 32px; display: flex; flex-direction: column; align-items: center; text-align: center; }
   .hero-bg { position: absolute; inset: 0; z-index: 0; background: radial-gradient(ellipse 80% 60% at 50% 20%, rgba(212, 184, 220, 0.18) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 30% 90%, rgba(138, 122, 144, 0.14) 0%, transparent 65%), linear-gradient(180deg, #1c0d22 0%, #17091c 100%); }
@@ -273,8 +274,6 @@
   @media (max-width: 860px) { .hero { padding: 48px 0 64px; } .hero-body { padding: 0 24px; } .hero-video { max-width: 300px; margin-bottom: 40px; } }
   @media (max-width: 480px) { .hero-video { max-width: 260px; } }
 
-  section.content { padding: 120px 0; }
-  @media (max-width: 720px) { section.content { padding: 80px 0; } }
   .shead { text-align: center; max-width: 880px; margin: 0 auto 72px; position: relative; }
   .shead .t-label { margin-bottom: 20px; }
   .shead .t-h2 { margin: 0 auto 20px; max-width: 22ch; }
@@ -367,7 +366,8 @@
   .faq-item.open .faq-a { max-height: 480px; }
   @media (max-width: 860px) { .faq-grid { grid-template-columns: 1fr; gap: 40px; } }
 
-  .price-section { padding: 120px 0 140px; position: relative; }
+  .price-section { width: 100%; max-width: 1240px; margin: 0 auto; padding: 120px 56px 140px; position: relative; }
+  @media (max-width: 720px) { .price-section { padding: 80px 24px; } }
   .price-section::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 50% 60%, var(--mauve-glow) 0%, transparent 70%); opacity: 0.15; pointer-events: none; }
   .price-layout { max-width: 680px; margin: 0 auto; position: relative; }
   .price-card { background: #ffffff; border: 1px solid #b5adb9; border-radius: 28px; padding: 48px; position: relative; overflow: hidden; }
@@ -481,8 +481,7 @@
 </section>
 
 <section class="block block--dark">
-  <section class="content">
-    <div class="wrap">
+  <div class="content">
       <div class="split rv">
         <div class="split-media">
           <div class="ph">
@@ -500,8 +499,7 @@
           <p>Quando voce entender isso, vai multiplicar seus ganhos em poucas semanas.</p>
         </div>
       </div>
-    </div>
-  </section>
+  </div>
 </section>
 
 <section class="block block--dark">
@@ -517,8 +515,7 @@
 </section>
 
 <section class="block block--dark">
-  <section class="content">
-    <div class="wrap">
+  <div class="content">
       <div class="shead rv">
         <div class="t-label"><span class="t-num">02</span> O metodo</div>
         <h2 class="t-h2">Tres passos para transformar <em>leitura em renda</em></h2>
@@ -544,13 +541,11 @@
           <p>Use sua autoridade construida para vender produtos, mentorias e servicos. Leitura vira PIX.</p>
         </div>
       </div>
-    </div>
-  </section>
+  </div>
 </section>
 
 <section class="block block--dark">
-  <section class="content">
-    <div class="wrap">
+  <div class="content">
       <div class="shead rv">
         <div class="t-label"><span class="t-num">03</span> Depoimentos</div>
         <h2 class="t-h2">Resultados de quem ja <em>aplica o metodo</em></h2>
@@ -563,13 +558,11 @@
         <div class="tst-img"><div class="ph"><div class="ph-inner"><div class="ph-big">04</div><div class="ph-label">Depoimento</div><div class="ph-sub">depoimento-4.webp</div></div></div></div>
         <div class="tst-img"><div class="ph"><div class="ph-inner"><div class="ph-big">05</div><div class="ph-label">Depoimento</div><div class="ph-sub">depoimento-5.webp</div></div></div></div>
       </div>
-    </div>
-  </section>
+  </div>
 </section>
 
 <section class="block block--dark">
-  <section class="content">
-    <div class="wrap">
+  <div class="content">
       <div class="shead rv">
         <div class="t-label"><span class="t-num">04</span> Bonus exclusivos</div>
         <h2 class="t-h2">Bonus que <em>aceleram</em> seus resultados</h2>
@@ -591,13 +584,11 @@
           <p>Sessoes ao vivo mensais para tirar duvidas e acelerar sua jornada.</p>
         </div>
       </div>
-    </div>
-  </section>
+  </div>
 </section>
 
 <section class="block block--dark" id="checkout">
-  <section class="price-section">
-    <div class="wrap">
+  <div class="price-section">
       <div class="shead rv">
         <div class="t-label">Investimento</div>
         <h2 class="t-h2">Tudo isso por um <em>unico investimento</em></h2>
@@ -624,13 +615,11 @@
           </div>
         </div>
       </div>
-    </div>
-  </section>
+  </div>
 </section>
 
 <section class="block block--dark">
-  <section class="content">
-    <div class="wrap">
+  <div class="content">
       <div class="mentors rv">
         <div class="mentors-media">
           <div class="ph">
@@ -650,13 +639,11 @@
           <div class="mentors-signature">Os Formagios · Criadores do RMX</div>
         </div>
       </div>
-    </div>
-  </section>
+  </div>
 </section>
 
 <section class="block block--dark">
-  <section class="content">
-    <div class="wrap">
+  <div class="content">
       <div class="faq-grid">
         <div class="faq-head rv">
           <div class="t-label">FAQ</div>
@@ -671,8 +658,7 @@
           <div class="faq-item"><button class="faq-q">Como funciona o acesso? <span class="faq-toggle"></span></button><div class="faq-a"><div class="faq-a-inner">Apos a compra, voce recebe acesso imediato a plataforma com todos os modulos, bonus e comunidade.</div></div></div>
         </div>
       </div>
-    </div>
-  </section>
+  </div>
 </section>
 
 <footer class="block">

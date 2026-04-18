@@ -16,7 +16,26 @@ import {
 
 interface ElementorExportProps {
   code: string;
+  fonts?: string[];
   onClose: () => void;
+}
+
+// Strip editor-only attributes that leaked into the HTML (data-wf-id, wf-hidden, etc)
+function cleanEditorArtifacts(html: string): string {
+  return html
+    .replace(/\s+data-wf-id="[^"]*"/gi, "")
+    .replace(/\s+data-wf-name="[^"]*"/gi, "")
+    .replace(/\s+data-wf-hidden="[^"]*"/gi, "")
+    .replace(/\s+data-wf-prev-display="[^"]*"/gi, "");
+}
+
+// Build <link> tags for fonts the user picked through the inspector
+function buildFontsLink(families: string[] | undefined): string {
+  if (!families || families.length === 0) return "";
+  const params = families
+    .map((family) => `family=${encodeURIComponent(family).replace(/%20/g, "+")}:wght@300;400;500;600;700;800;900`)
+    .join("&");
+  return `<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link href="https://fonts.googleapis.com/css2?${params}&display=swap" rel="stylesheet">`;
 }
 
 interface HtmlSection {
@@ -268,13 +287,18 @@ function nativeWidget(widgetType: string, settings: Record<string, any>): any {
   return { id: genId(), elType: "widget", widgetType, isInner: false, settings, elements: [] };
 }
 
-function wrapContainer(children: any[]): any {
+// ── Section containers (multi-widget architecture) ──
+// Full-bleed section: no padding, no max-width. Used for urgency bar, footer, sticky CTA.
+// The HTML of these widgets naturally spans 100% of this Section, and the Section spans 100vw.
+function fullBleedSection(children: any[]): any {
   return {
     id: genId(),
     elType: "container",
     isInner: false,
     settings: {
       content_width: "full",
+      width: { unit: "%", size: 100 },
+      min_height: { unit: "px", size: 0 },
       padding: { unit: "px", top: "0", right: "0", bottom: "0", left: "0", isLinked: true },
       margin: { unit: "px", top: "0", right: "0", bottom: "0", left: "0", isLinked: true },
       gap: { unit: "px", size: 0 },
@@ -283,9 +307,56 @@ function wrapContainer(children: any[]): any {
       box_shadow_box_shadow_type: "",
       background_background: "",
       border_border: "",
-      overflow: "hidden",
+      overflow: "visible",
     },
     elements: children,
+  };
+}
+
+// Shell section: boxed 1680px, 14px padding, bg #d4ced6 — this is the template's outer .shell.
+// Child widgets (the boxed .block sections) drop in as flex children; their native
+// margin-bottom: 14px handles spacing so we keep gap: 0 here.
+function shellSection(children: any[]): any {
+  return {
+    id: genId(),
+    elType: "container",
+    isInner: false,
+    settings: {
+      content_width: "full",
+      width: { unit: "%", size: 100 },
+      padding: { unit: "px", top: "14", right: "14", bottom: "14", left: "14", isLinked: true },
+      margin: { unit: "px", top: "0", right: "0", bottom: "0", left: "0", isLinked: true },
+      gap: { unit: "px", size: 0 },
+      flex_gap: { unit: "px", size: 0 },
+      flex_direction: "column",
+      background_background: "classic",
+      background_color: "#d4ced6",
+      border_radius: { unit: "px", top: "0", right: "0", bottom: "0", left: "0", isLinked: true },
+      box_shadow_box_shadow_type: "",
+      border_border: "",
+      overflow: "visible",
+      // Keep inner content centered with a max width echoing the preview's .shell
+      _css_classes: "wf-shell-wrap",
+    },
+    elements: [{
+      id: genId(),
+      elType: "container",
+      isInner: true,
+      settings: {
+        content_width: "boxed",
+        boxed_width: { unit: "px", size: 1680 },
+        width: { unit: "%", size: 100 },
+        padding: { unit: "px", top: "0", right: "0", bottom: "0", left: "0", isLinked: true },
+        margin: { unit: "px", top: "0", right: "0", bottom: "0", left: "0", isLinked: true },
+        gap: { unit: "px", size: 0 },
+        flex_gap: { unit: "px", size: 0 },
+        flex_direction: "column",
+        background_background: "",
+        border_border: "",
+        box_shadow_box_shadow_type: "",
+      },
+      elements: children,
+    }],
   };
 }
 
@@ -523,6 +594,28 @@ function parseFooter(html: string): any {
 // ── Universal WavyFlow Section widget ──
 // Extracts editable fields from HTML, stores originals for str_replace in PHP
 
+interface VideoField {
+  type: "youtube" | "vturb";
+  id: string;
+  url: string;
+}
+
+// Scan HTML for [data-wf-video="type:id"] markers and return up to 3 editable videos.
+function extractVideos(html: string): VideoField[] {
+  const out: VideoField[] = [];
+  const re = /data-wf-video="(youtube|vturb):([^"]+)"/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html)) !== null && out.length < 3) {
+    const type = m[1] as "youtube" | "vturb";
+    const id = m[2];
+    const url = type === "youtube"
+      ? `https://www.youtube.com/watch?v=${id}`
+      : `https://scripts.converteai.net/${id}/players/${id}/player.js`;
+    out.push({ type, id, url });
+  }
+  return out;
+}
+
 function extractEditableFields(html: string, label: string) {
   // Extract headline (h1 or h2)
   const h1M = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
@@ -542,6 +635,9 @@ function extractEditableFields(html: string, label: string) {
   const ctaText = ctaM ? strip(ctaM[2]).replace("→", "").trim() : "";
   const ctaUrl = ctaM ? ctaM[1] : "";
 
+  // Extract videos (YouTube / VTurb) inserted via the editor
+  const videos = extractVideos(html);
+
   return {
     section_label: label,
     edit_headline: headline,
@@ -550,46 +646,65 @@ function extractEditableFields(html: string, label: string) {
     edit_cta_text: ctaText,
     edit_cta_url: { url: ctaUrl, is_external: "", nofollow: "" },
     edit_image: { url: "", id: "" },
+    // Video slots — editable in Elementor, plugin does str_replace on the original HTML
+    edit_video_1_type: videos[0]?.type || "",
+    edit_video_1_id: videos[0]?.id || "",
+    edit_video_1_url: videos[0]?.url || "",
+    edit_video_2_type: videos[1]?.type || "",
+    edit_video_2_id: videos[1]?.id || "",
+    edit_video_2_url: videos[1]?.url || "",
+    edit_video_3_type: videos[2]?.type || "",
+    edit_video_3_id: videos[2]?.id || "",
+    edit_video_3_url: videos[2]?.url || "",
     // Store originals for str_replace
     orig_headline: headline,
     orig_subtitle: subtitle,
     orig_paragraph_2: paragraph2,
     orig_cta_text: ctaText,
     orig_cta_url: ctaUrl,
+    orig_video_1_type: videos[0]?.type || "",
+    orig_video_1_id: videos[0]?.id || "",
+    orig_video_2_type: videos[1]?.type || "",
+    orig_video_2_id: videos[1]?.id || "",
+    orig_video_3_type: videos[2]?.type || "",
+    orig_video_3_id: videos[2]?.id || "",
   };
 }
 
+// ── Single-widget export ──
+// One wf-section widget holds the entire page (CSS + HTML + JS) inline. That's the
+// only way to guarantee pixel-perfect fidelity: Elementor never touches the internals,
+// it just drops our <div class="wfr"> inside a full-bleed Section and lets the browser
+// render it. Trade-off: the section-by-section editing in Elementor is gone, but
+// the layout is 100% identical to the WavyFlow preview.
 function generateElementorJson(
-  sections: HtmlSection[],
+  _sections: HtmlSection[],
   sharedCss: string,
   sharedJs: string,
   title: string,
+  fullBodyHtml: string,
 ): object {
-  const content = sections.map((section, index) => {
-    const isFirst = index === 0;
-    const isLast = index === sections.length - 1;
+  // Compose: all CSS first (so it's parsed before paint), then body, then JS at the end
+  const inlinedHtml = [
+    sharedCss || "",
+    fullBodyHtml || "",
+    sharedJs || "",
+  ].filter(Boolean).join("\n\n");
 
-    // Build the full HTML for this section
-    const parts: string[] = [];
-    if (isFirst && sharedCss) parts.push(sharedCss);
-    parts.push(`<div class="shell" style="padding:14px;background:#d4ced6;">${section.html}</div>`);
-    if (isLast && sharedJs) parts.push(sharedJs);
-    const fullHtml = parts.join("\n\n");
-
-    // Extract editable fields
-    const fields = extractEditableFields(section.html, section.label);
-
-    // Create wf-section widget with original HTML + editable fields
-    const widget = nativeWidget("wf-section", {
-      original_html: fullHtml,
-      ...fields,
-    });
-
-    return wrapContainer([widget]);
+  const widget = nativeWidget("wf-section", {
+    original_html: inlinedHtml,
+    section_label: "Pagina completa",
+    // Legacy editable fields — empty, keep schema happy
+    edit_headline: "",
+    edit_subtitle: "",
+    edit_paragraph_2: "",
+    edit_cta_text: "",
+    edit_cta_url: { url: "", is_external: "", nofollow: "" },
+    edit_image: { url: "", id: "" },
   });
 
   return {
-    content,
+    content: [fullBleedSection([widget])],
     page_settings: [],
     version: "0.4",
     title,
@@ -597,17 +712,40 @@ function generateElementorJson(
   };
 }
 
-export function ElementorExport({ code, onClose }: ElementorExportProps) {
+export function ElementorExport({ code, fonts, onClose }: ElementorExportProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [copiedAll, setCopiedAll] = useState(false);
   const [mode, setMode] = useState<"html" | "json">("json");
 
-  const fullHtml = code.includes("<!DOCTYPE") || code.includes("<html") ? code : `<!DOCTYPE html><html><head></head><body>${code}</body></html>`;
+  // 1) Strip editor attributes. 2) Inject user-picked Google Fonts before <body>.
+  const cleanedCode = useMemo(() => {
+    const cleaned = cleanEditorArtifacts(code);
+    const fontsLink = buildFontsLink(fonts);
+    if (!fontsLink) return cleaned;
+    if (cleaned.includes("</head>")) {
+      return cleaned.replace("</head>", `${fontsLink}\n</head>`);
+    }
+    // No <head> tag (snippet) — prepend the link so extractStyles picks it up
+    return `${fontsLink}\n${cleaned}`;
+  }, [code, fonts]);
+
+  const fullHtml = cleanedCode.includes("<!DOCTYPE") || cleanedCode.includes("<html") ? cleanedCode : `<!DOCTYPE html><html><head>${buildFontsLink(fonts)}</head><body>${cleanedCode}</body></html>`;
 
   const sharedCss = useMemo(() => extractStyles(fullHtml), [fullHtml]);
   const sharedJs = useMemo(() => extractScripts(fullHtml), [fullHtml]);
   const sections = useMemo(() => splitIntoSections(fullHtml), [fullHtml]);
+
+  // Body HTML stripped of <style>/<script>/<link> — fed to the native parser.
+  const bodyHtmlForParser = useMemo(() => {
+    const m = fullHtml.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+    const body = m ? m[1] : fullHtml;
+    return body
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+      .replace(/<link[^>]*>/gi, "")
+      .trim();
+  }, [fullHtml]);
 
   const buildSectionCode = useCallback((section: HtmlSection, includeCSS: boolean) => {
     const parts: string[] = [];
@@ -648,7 +786,7 @@ export function ElementorExport({ code, onClose }: ElementorExportProps) {
 
   const handleDownloadJson = useCallback(() => {
     idCounter = 0;
-    const json = generateElementorJson(sections, sharedCss, sharedJs, "WavyFlow Template");
+    const json = generateElementorJson(sections, sharedCss, sharedJs, "WavyFlow Template", bodyHtmlForParser);
     const blob = new Blob([JSON.stringify(json)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -656,16 +794,16 @@ export function ElementorExport({ code, onClose }: ElementorExportProps) {
     a.download = "wavyflow-elementor-template.json";
     a.click();
     URL.revokeObjectURL(url);
-  }, [sections, sharedCss, sharedJs]);
+  }, [sections, sharedCss, sharedJs, bodyHtmlForParser]);
 
   const [jsonCopied, setJsonCopied] = useState(false);
   const handleCopyJson = useCallback(() => {
     idCounter = 0;
-    const json = generateElementorJson(sections, sharedCss, sharedJs, "WavyFlow Template");
+    const json = generateElementorJson(sections, sharedCss, sharedJs, "WavyFlow Template", bodyHtmlForParser);
     navigator.clipboard.writeText(JSON.stringify(json));
     setJsonCopied(true);
     setTimeout(() => setJsonCopied(false), 3000);
-  }, [sections, sharedCss, sharedJs]);
+  }, [sections, sharedCss, sharedJs, bodyHtmlForParser]);
 
   return (
     <>

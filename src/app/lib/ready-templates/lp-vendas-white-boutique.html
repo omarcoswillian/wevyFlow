@@ -1,0 +1,2643 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Descubra o único método que transforma suas leituras em PIX, mesmo que você não leia dezenas de livros por ano! | Black Boutique by Os Formagios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --shell-bg: #d4ced6;
+    --bg: #e8e5ea;
+    --bg-2: #efedf1;
+    --surface: #ffffff;
+    --surface-2: #f5f3f6;
+    --border: #d0cbd3;
+    --border-2: #b5adb9;
+
+    --text: #17091c;
+    --text-2: #5d4e63;
+    --text-3: #8a7a90;
+
+    --mauve: #6e4d75;
+    --mauve-2: #4a2a52;
+    --mauve-3: #8a7a90;
+    --mauve-glow: rgba(110, 77, 117, 0.25);
+
+    --accent: #17091c;
+    --accent-hi: #000000;
+
+    --noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E");
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+  body {
+    font-family: 'Figtree', -apple-system, sans-serif;
+    background: var(--shell-bg);
+    color: var(--text);
+    line-height: 1.5;
+    font-weight: 400;
+    font-feature-settings: 'ss01', 'cv11', 'tnum';
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
+  button { font: inherit; cursor: pointer; background: none; border: none; color: inherit; }
+
+  /* Scroll progress */
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--mauve), var(--accent));
+    z-index: 999;
+    width: 0;
+    transition: width 0.1s linear;
+    box-shadow: 0 0 12px var(--mauve-glow);
+  }
+
+  /* ============ URGENCY BAR ============ */
+  .urgency {
+    background: #b8132a;
+    color: #fff;
+    padding: 12px 24px;
+    text-align: center;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .urgency::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.12) 50%, transparent 100%);
+    animation: sweep 5s ease-in-out infinite;
+  }
+
+  @keyframes sweep {
+    0%, 100% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
+  }
+
+  .urgency > * { position: relative; z-index: 1; }
+
+  .urgency strong {
+    font-weight: 700;
+    color: #ffe4e4;
+  }
+
+  .urgency-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+    animation: pulse-dot 1.5s ease-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+    50% { box-shadow: 0 0 0 7px rgba(255, 255, 255, 0); }
+  }
+
+  @media (max-width: 600px) {
+    .urgency { font-size: 0.74rem; padding: 10px 16px; }
+  }
+
+  /* ============ SHELL ============ */
+  .shell {
+    padding: 14px;
+    background: var(--shell-bg);
+  }
+
+  .block {
+    background: var(--bg);
+    border-radius: 32px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 14px;
+  }
+
+  .block:last-of-type { margin-bottom: 0; }
+
+  .block--dark {
+    background: #17091c !important;
+    color: #f0e8f2;
+  }
+
+  /* Overrides completos block--dark */
+  .block--dark .t-label { color: #d4b8dc; }
+  .block--dark .t-label::before { background: #d4b8dc; }
+  .block--dark .t-num { color: #d4b8dc; }
+  .block--dark .t-h2 { color: #f0e8f2; }
+  .block--dark .t-h2 em { color: #d4b8dc; }
+  .block--dark .t-body { color: #b0a1b6; }
+  .block--dark .shead .t-label { color: #d4b8dc; }
+  .block--dark .shead .t-label::before { background: #d4b8dc; }
+  .block--dark .split-text h2 { color: #f0e8f2; }
+  .block--dark .split-text h2 em { color: #d4b8dc; }
+  .block--dark .split-text p { color: #b0a1b6; }
+  .block--dark .split-media {
+    background: #22122a;
+    border-color: #2f1d39;
+  }
+  .block--dark .split-media img { background: #22122a; }
+  .block--dark .plan-media { border-color: #2f1d39; background: #1c0d22; }
+  .block--dark .plan-step { border-color: #2f1d39; }
+  .block--dark .plan-step-label { color: #d4b8dc; }
+  .block--dark .plan-step h3 { color: #f0e8f2; }
+  .block--dark .plan-step p { color: #b0a1b6; }
+  .block--dark .plan-step li { color: #f0e8f2; }
+  .block--dark .plan-step li::before { background: #d4b8dc; }
+  .block--dark .tst-img,
+  .block--dark .gift {
+    background: #22122a;
+    border-color: #2f1d39;
+  }
+  .block--dark .tst-img:hover,
+  .block--dark .gift:hover { border-color: #3d2544; }
+  .block--dark .lifestyle-img {
+    background: #22122a;
+    border-color: #2f1d39;
+  }
+  .block--dark .mentors-media {
+    background: #22122a;
+    border-color: #2f1d39;
+  }
+  .block--dark .mentors-text h2 { color: #f0e8f2; }
+  .block--dark .mentors-text h2 em { color: #d4b8dc; }
+  .block--dark .mentors-text p { color: #b0a1b6; }
+  .block--dark .mentors-numbers { color: #d4b8dc; }
+  .block--dark .mentors-signature { color: #d4b8dc; }
+  .block--dark .faq-head .t-h2 { color: #f0e8f2; }
+  .block--dark .faq-head p { color: #b0a1b6; }
+  .block--dark .faq-list { border-color: #2f1d39; }
+  .block--dark .faq-item { border-color: #2f1d39; }
+  .block--dark .faq-q { color: #f0e8f2; }
+  .block--dark .faq-q:hover { color: #d4b8dc; }
+  .block--dark .faq-toggle { border-color: #3d2544; }
+  .block--dark .faq-q:hover .faq-toggle { border-color: #d4b8dc; }
+  .block--dark .faq-toggle::before,
+  .block--dark .faq-toggle::after { background: #d4b8dc; }
+  .block--dark .faq-a-inner { color: #b0a1b6; }
+  .block--dark .btn-solid {
+    background: linear-gradient(90deg, #1db954 0%, #1ed760 40%, #2edc6f 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 20px rgba(29, 185, 84, 0.3);
+  }
+  .block--dark .btn-solid:hover { background: linear-gradient(90deg, #1aa34a 0%, #1db954 40%, #28c964 100%); box-shadow: 0 12px 40px rgba(29, 185, 84, 0.4); }
+  .block--dark .bonus-card {
+    background: #22122a;
+    border-color: #2f1d39;
+  }
+  .block--dark .bonus-card:hover { border-color: #3d2544; }
+  .block--dark .bonus-num { color: #6e5e74; }
+  .block--dark .bonus-card h3 { color: #f0e8f2; }
+  .block--dark .bonus-card p { color: #b0a1b6; }
+  .block--dark .bonus-value { color: #6e5e74; }
+  .block--dark .story-copy p { color: #b0a1b6; }
+  .block--dark .manifesto-text { color: #f0e8f2; }
+  .block--dark .manifesto-text em { color: #d4b8dc; }
+  .block--dark .manifesto-sign { color: #6e5e74; }
+  .block--dark .manifesto-label { color: #d4b8dc; }
+  .block--dark .manifesto-label::before,
+  .block--dark .manifesto-label::after { background: #6e5e74; }
+  .block--dark .step {
+    background: #22122a;
+    border-color: #2f1d39;
+  }
+  .block--dark .step--hero { background: linear-gradient(160deg, #1c0d22 0%, #1c0d22 100%); }
+  .block--dark .step:hover { background: #22122a; }
+  .block--dark .step--hero:hover { background: linear-gradient(160deg, #22122a 0%, #2f1d39 100%); }
+  .block--dark .step-big-num { color: rgba(212, 184, 220, 0.12); }
+  .block--dark .step h3 { color: #f0e8f2; }
+  .block--dark .step p { color: #b0a1b6; }
+  .block--dark .step-tag { color: #d4b8dc; background: rgba(212, 184, 220, 0.08); }
+
+  @media (max-width: 720px) {
+    .shell { padding: 8px; }
+    .block { border-radius: 22px; margin-bottom: 8px; }
+  }
+
+  /* ============ TYPOGRAPHY ============ */
+  .t-h2 {
+    font-size: clamp(1.8rem, 3.4vw, 2.8rem);
+    font-weight: 500;
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    color: var(--text);
+  }
+
+  .t-h2 em {
+    font-style: normal;
+    color: var(--mauve);
+    font-weight: 400;
+  }
+
+  .t-label {
+    font-size: 0.66rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--mauve-2);
+  }
+
+  .t-label::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--mauve);
+  }
+
+  .t-num {
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    color: var(--mauve);
+    font-variant-numeric: tabular-nums;
+    margin-right: 12px;
+  }
+
+  .t-body {
+    font-size: 0.98rem;
+    color: var(--text-2);
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  .logo {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+
+  /* Section divider decorativo */
+  .divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 0;
+    margin: 0 auto;
+    max-width: 400px;
+  }
+
+  .divider::before,
+  .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-2), transparent);
+  }
+
+  .divider-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--mauve);
+    box-shadow: 0 0 14px var(--mauve-glow);
+  }
+
+  .block--dark .divider::before,
+  .block--dark .divider::after {
+    background: linear-gradient(90deg, transparent, #3d2544, transparent);
+  }
+
+  .block--dark .divider-dot {
+    background: #6e4d75;
+    box-shadow: 0 0 14px rgba(110, 77, 117, 0.3);
+  }
+
+  /* ============ PLACEHOLDERS (pontos de imagem) ============ */
+  .ph {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background:
+      radial-gradient(ellipse at 30% 30%, rgba(110, 77, 117, 0.15) 0%, transparent 55%),
+      radial-gradient(ellipse at 75% 70%, rgba(138, 122, 144, 0.1) 0%, transparent 60%),
+      linear-gradient(140deg, #ffffff 0%, #efedf1 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .ph::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--noise);
+    mix-blend-mode: overlay;
+    opacity: 0.05;
+    pointer-events: none;
+  }
+
+  .ph-inner {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .ph-icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: rgba(110, 77, 117, 0.08);
+    border: 1px solid rgba(110, 77, 117, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6e4d75;
+  }
+
+  .ph-icon svg { width: 18px; height: 18px; }
+
+  .ph-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #6e4d75;
+    margin-bottom: 4px;
+  }
+
+  .ph-sub {
+    font-size: 0.66rem;
+    color: #8a7a90;
+    letter-spacing: 0.02em;
+    font-weight: 400;
+  }
+
+  .ph-big {
+    font-family: 'Figtree', sans-serif;
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-weight: 700;
+    color: rgba(110, 77, 117, 0.12);
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    margin-bottom: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Placeholders inside dark blocks — inverter pra tema escuro */
+  .block--dark .ph {
+    background:
+      radial-gradient(ellipse at 30% 30%, rgba(212, 184, 220, 0.2) 0%, transparent 55%),
+      radial-gradient(ellipse at 75% 70%, rgba(138, 122, 144, 0.15) 0%, transparent 60%),
+      linear-gradient(140deg, #22122a 0%, #17091c 60%, #1c0d22 100%);
+  }
+  .block--dark .ph::before { opacity: 0.18; }
+  .block--dark .ph-icon {
+    background: rgba(240, 232, 242, 0.05);
+    border-color: rgba(212, 184, 220, 0.18);
+    color: #d4b8dc;
+  }
+  .block--dark .ph-label { color: #b0a1b6; }
+  .block--dark .ph-sub { color: #6e5e74; }
+  .block--dark .ph-big { color: rgba(212, 184, 220, 0.12); }
+
+  /* ============ BUTTONS ============ */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 32px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: -0.01em;
+    transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.25, 1),
+                background 0.25s,
+                box-shadow 0.3s;
+    white-space: nowrap;
+    position: relative;
+  }
+
+  .btn-solid {
+    background: linear-gradient(90deg, #1db954 0%, #1ed760 40%, #2edc6f 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 20px rgba(29, 185, 84, 0.3);
+  }
+
+  .btn-solid:hover {
+    background: linear-gradient(90deg, #1aa34a 0%, #1db954 40%, #28c964 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(29, 185, 84, 0.4);
+  }
+
+  .btn-xl {
+    padding: 22px 44px;
+    font-size: 1.05rem;
+  }
+
+  .btn .arrow { transition: transform 0.3s; display: inline-block; }
+  .btn:hover .arrow { transform: translateX(4px); }
+
+  /* ============ CONTAINER ============ */
+  .wrap {
+    width: 100%;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 56px;
+  }
+
+  @media (max-width: 720px) {
+    .wrap { padding: 0 24px; }
+  }
+
+  /* ============ HERO ============ */
+  .hero {
+    position: relative;
+    padding: 72px 0 88px;
+    overflow: hidden;
+    border-radius: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 20%, rgba(212, 184, 220, 0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 70% at 30% 90%, rgba(138, 122, 144, 0.14) 0%, transparent 65%),
+      linear-gradient(180deg, #1c0d22 0%, #17091c 100%);
+  }
+
+  .hero-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--noise);
+    mix-blend-mode: overlay;
+    opacity: 0.22;
+    pointer-events: none;
+  }
+
+  /* Ornamentos decorativos nas laterais do hero */
+  .hero-ornament {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    writing-mode: vertical-rl;
+    font-size: 0.58rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: #6e5e74;
+    font-weight: 500;
+    z-index: 2;
+    opacity: 0.6;
+  }
+
+  .hero-ornament--left { left: 40px; }
+  .hero-ornament--right { right: 40px; }
+
+  @media (max-width: 1024px) {
+    .hero-ornament { display: none; }
+  }
+
+  .hero-body {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px 8px 13px;
+    background: rgba(240, 232, 242, 0.06);
+    border: 1px solid rgba(240, 232, 242, 0.15);
+    border-radius: 100px;
+    font-size: 0.64rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #f0e8f2;
+    backdrop-filter: blur(12px);
+    margin-bottom: 32px;
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #d4b8dc;
+    box-shadow: 0 0 0 3px rgba(212, 184, 220, 0.2);
+  }
+
+  .hero h1 {
+    font-size: clamp(1.6rem, 3.6vw, 2.8rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: #f0e8f2;
+    margin-bottom: 24px;
+    max-width: 26ch;
+  }
+
+  .pix-word {
+    display: inline-block;
+    position: relative;
+    color: #d4b8dc;
+    font-weight: 600;
+    font-size: 1.15em;
+    letter-spacing: -0.04em;
+    padding: 0 0.04em;
+    text-shadow: 0 0 40px rgba(212, 184, 220, 0.35);
+  }
+
+  .pix-word::after {
+    content: '';
+    position: absolute;
+    left: -2%;
+    right: -2%;
+    bottom: -0.06em;
+    height: 0.08em;
+    background: linear-gradient(90deg, transparent, #d4b8dc 20%, #d4b8dc 80%, transparent);
+    border-radius: 2px;
+    opacity: 0.8;
+    transform-origin: center;
+    animation: pix-underline 1.4s cubic-bezier(0.2, 0.9, 0.25, 1) 1s forwards;
+    transform: scaleX(0);
+  }
+
+  @keyframes pix-underline {
+    to { transform: scaleX(1); }
+  }
+
+  .hero-sub {
+    font-size: 1rem;
+    color: #b0a1b6;
+    line-height: 1.55;
+    max-width: 58ch;
+    margin-bottom: 48px;
+    font-weight: 400;
+  }
+
+  .hero-video {
+    width: 100%;
+    max-width: 360px;
+    aspect-ratio: 9 / 16;
+    background: #0a040d;
+    border-radius: 20px;
+    border: 1px solid rgba(240, 232, 242, 0.08);
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 48px;
+    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.5);
+  }
+
+  .hero-video::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(212, 184, 220, 0.08) 0%, transparent 65%);
+  }
+
+  .hero-video-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    z-index: 1;
+  }
+
+  .hero-video-play {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #f0e8f2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.25, 1);
+    box-shadow: 0 0 0 0 rgba(240, 232, 242, 0.4);
+    animation: hvplsv 2.8s ease-out infinite;
+  }
+
+  .hero-video-play:hover { transform: scale(1.08); }
+
+  .hero-video-play::before {
+    content: '';
+    border-style: solid;
+    border-width: 10px 0 10px 15px;
+    border-color: transparent transparent transparent #17091c;
+    margin-left: 3px;
+  }
+
+  @keyframes hvplsv {
+    0% { box-shadow: 0 0 0 0 rgba(240, 232, 242, 0.4); }
+    70% { box-shadow: 0 0 0 22px rgba(240, 232, 242, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(240, 232, 242, 0); }
+  }
+
+  .hero-video-note {
+    font-size: 0.56rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #6e5e74;
+    padding: 6px 12px;
+    border: 1px solid rgba(240, 232, 242, 0.1);
+    border-radius: 100px;
+    background: rgba(240, 232, 242, 0.04);
+    backdrop-filter: blur(10px);
+  }
+
+  .hero .btn-solid { background: linear-gradient(90deg, #1db954 0%, #1ed760 40%, #2edc6f 100%); color: #ffffff; box-shadow: 0 4px 20px rgba(29, 185, 84, 0.3); }
+  .hero .btn-solid:hover { background: linear-gradient(90deg, #1aa34a 0%, #1db954 40%, #28c964 100%); }
+
+  .hero-badge, .hero h1, .hero-sub, .hero-video, .hero .btn-solid {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: hr 1s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+  }
+
+  .hero-badge { animation-delay: 0.1s; }
+  .hero h1 { animation-delay: 0.25s; }
+  .hero-sub { animation-delay: 0.5s; }
+  .hero-video { animation-delay: 0.7s; }
+  .hero .btn-solid { animation-delay: 0.9s; }
+
+  @keyframes hr {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 860px) {
+    .hero { padding: 48px 0 64px; }
+    .hero-body { padding: 0 24px; }
+    .hero-video { max-width: 300px; margin-bottom: 40px; }
+  }
+
+  @media (max-width: 480px) {
+    .hero-video { max-width: 260px; }
+  }
+
+  /* ============ SECTION BASE ============ */
+  section.content { padding: 120px 0; }
+  @media (max-width: 720px) { section.content { padding: 80px 0; } }
+
+  .shead {
+    text-align: center;
+    max-width: 880px;
+    margin: 0 auto 72px;
+    position: relative;
+  }
+
+  .shead .t-label { margin-bottom: 20px; }
+  .shead .t-h2 { margin: 0 auto 20px; max-width: 22ch; }
+  .shead .t-body { margin: 0 auto; max-width: 58ch; }
+
+  /* ============ SPLIT ============ */
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .split.reverse .split-media { order: 2; }
+
+  .split-media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .split-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: var(--bg-2);
+  }
+
+  .split-media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--noise);
+    mix-blend-mode: overlay;
+    opacity: 0.08;
+    pointer-events: none;
+  }
+
+  .split-text .t-label { margin-bottom: 20px; }
+
+  .split-text h2 {
+    font-size: clamp(1.4rem, 2.4vw, 2rem);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: var(--text);
+    margin-bottom: 24px;
+    max-width: 20ch;
+  }
+
+  .split-text h2 em {
+    font-style: normal;
+    color: var(--mauve);
+    font-weight: 400;
+  }
+
+  .split-text p {
+    font-size: 0.98rem;
+    color: var(--text-2);
+    line-height: 1.65;
+    max-width: 52ch;
+  }
+
+  .split-text p + p { margin-top: 16px; }
+
+  @media (max-width: 960px) {
+    .split { grid-template-columns: 1fr; gap: 40px; }
+    .split.reverse .split-media { order: 0; }
+  }
+
+  /* ============ 3 STEPS com quebra de grid (REMIXE é hero) ============ */
+  .steps-hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.3fr;
+    gap: 14px;
+  }
+
+  .step {
+    position: relative;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 36px 44px;
+    min-height: 340px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: background 0.4s, border-color 0.3s, transform 0.4s cubic-bezier(0.2, 0.9, 0.25, 1);
+  }
+
+  .step:hover {
+    background: var(--surface);
+    border-color: var(--border-2);
+    transform: translateY(-4px);
+  }
+
+  .step--hero {
+    background: linear-gradient(160deg, #1c0d22 0%, #2a1733 100%);
+    min-height: 400px;
+  }
+
+  .step--hero:hover {
+    background: linear-gradient(160deg, #22122a 0%, #2f1d39 100%);
+  }
+
+  .step-big-num {
+    position: absolute;
+    top: 50%;
+    right: -0.15em;
+    transform: translateY(-50%);
+    font-size: clamp(10rem, 18vw, 16rem);
+    font-weight: 700;
+    color: rgba(212, 184, 220, 0.06);
+    line-height: 0.8;
+    letter-spacing: -0.08em;
+    pointer-events: none;
+    z-index: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .step-tag {
+    position: relative;
+    z-index: 1;
+    font-size: 0.58rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--mauve);
+    padding: 6px 12px;
+    background: rgba(212, 184, 220, 0.08);
+    border-radius: 100px;
+    align-self: flex-start;
+    margin-bottom: auto;
+  }
+
+  .step h3 {
+    position: relative;
+    z-index: 1;
+    font-size: clamp(1.4rem, 2vw, 1.7rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--text);
+    margin: 56px 0 16px;
+    text-transform: uppercase;
+  }
+
+  .step--hero h3 {
+    font-size: clamp(1.8rem, 2.6vw, 2.2rem);
+    color: var(--mauve);
+  }
+
+  .step p {
+    position: relative;
+    z-index: 1;
+    font-size: 0.96rem;
+    color: var(--text-2);
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  @media (max-width: 960px) {
+    .steps-hero-grid { grid-template-columns: 1fr; }
+    .step { min-height: auto; padding: 36px 28px; }
+    .step h3 { margin-top: 40px; }
+  }
+
+  /* ============ MANIFESTO ============ */
+  .manifesto {
+    padding: 160px 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .manifesto::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(212, 184, 220, 0.08) 0%, transparent 65%);
+  }
+
+  /* Ornamentos SVG decorativos nos cantos */
+  .manifesto-star {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    opacity: 0.35;
+    color: var(--mauve);
+    pointer-events: none;
+    animation: starSpin 40s linear infinite;
+  }
+
+  .manifesto-star--tl { top: 48px; left: 56px; }
+  .manifesto-star--br { bottom: 48px; right: 56px; animation-direction: reverse; }
+
+  @keyframes starSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  .block--dark .manifesto-star { color: #d4b8dc; opacity: 0.28; }
+
+  @media (max-width: 720px) {
+    .manifesto-star { width: 56px; height: 56px; }
+    .manifesto-star--tl { top: 24px; left: 24px; }
+    .manifesto-star--br { bottom: 24px; right: 24px; }
+  }
+
+  .manifesto-inner {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 56px;
+  }
+
+  .manifesto-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 0.62rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--mauve-2);
+    font-weight: 600;
+    margin-bottom: 48px;
+  }
+
+  .manifesto-label::before,
+  .manifesto-label::after {
+    content: '';
+    width: 40px;
+    height: 1px;
+    background: var(--mauve-3);
+  }
+
+  .manifesto-text {
+    font-size: clamp(1.8rem, 4vw, 3.4rem);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+    color: var(--text);
+    max-width: 22ch;
+    margin: 0 auto;
+  }
+
+  .manifesto-text em {
+    font-style: italic;
+    color: var(--mauve);
+    font-weight: 500;
+  }
+
+  .manifesto-sign {
+    margin-top: 56px;
+    font-size: 0.68rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    font-weight: 600;
+  }
+
+  @media (max-width: 720px) {
+    .manifesto { padding: 96px 0; }
+    .manifesto-inner { padding: 0 24px; }
+    .manifesto-label { margin-bottom: 32px; }
+    .manifesto-label::before, .manifesto-label::after { width: 24px; }
+    .manifesto-sign { margin-top: 40px; }
+  }
+
+  /* ============ PLAN STEPS ============ */
+  .plan-media {
+    margin-bottom: 72px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    position: relative;
+    background: var(--bg-2);
+  }
+
+  .plan-media img {
+    width: 100%;
+    display: block;
+  }
+
+  .plan-media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--noise);
+    mix-blend-mode: overlay;
+    opacity: 0.05;
+    pointer-events: none;
+  }
+
+  .plan-steps {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 56px;
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .plan-step {
+    padding: 32px 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .plan-step:last-child { border-bottom: none; }
+
+  .plan-step-label {
+    display: inline-block;
+    font-size: 0.62rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--mauve-2);
+    font-weight: 700;
+    margin-bottom: 14px;
+    padding: 4px 10px;
+    background: rgba(212, 184, 220, 0.08);
+    border-radius: 100px;
+  }
+
+  .block--dark .plan-step-label {
+    background: rgba(110, 77, 117, 0.1);
+  }
+
+  .plan-step h3 {
+    font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+
+  .plan-step p {
+    font-size: 1rem;
+    color: var(--text-2);
+    line-height: 1.65;
+    margin-bottom: 20px;
+    max-width: 62ch;
+  }
+
+  .plan-step ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .plan-step li {
+    font-size: 0.96rem;
+    color: var(--text);
+    padding: 10px 0 10px 28px;
+    position: relative;
+    line-height: 1.55;
+  }
+
+  .plan-step li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 18px;
+    width: 14px;
+    height: 1px;
+    background: var(--mauve);
+  }
+
+  /* ============ TESTIMONIALS com hierarquia (1 grande + 5 pequenas) ============ */
+  .tst-hero-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas:
+      'p0 p1 p2'
+      'p0 p3 p4';
+    gap: 14px;
+    aspect-ratio: 16 / 9;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .tst-img {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    /* `grid-area` is animated via View Transitions / FLIP; CSS just smooths the visual */
+    transition: border-color 0.3s;
+    position: relative;
+  }
+
+  .tst-img[data-pos="0"] { grid-area: p0; }
+  .tst-img[data-pos="1"] { grid-area: p1; }
+  .tst-img[data-pos="2"] { grid-area: p2; }
+  .tst-img[data-pos="3"] { grid-area: p3; }
+  .tst-img[data-pos="4"] { grid-area: p4; }
+
+  .tst-img:hover {
+    border-color: var(--border-2);
+  }
+
+  .tst-img::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(10, 4, 13, 0.5) 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .tst-img:hover::after { opacity: 1; }
+
+  .tst-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (max-width: 860px) {
+    .tst-hero-grid {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto;
+      grid-template-areas:
+        'p0 p0'
+        'p1 p2'
+        'p3 p4';
+      aspect-ratio: auto;
+    }
+    .tst-img { aspect-ratio: 1 / 1; }
+    .tst-img[data-pos="0"] { aspect-ratio: 16 / 9; }
+  }
+
+  @media (max-width: 520px) {
+    .tst-hero-grid {
+      grid-template-columns: 1fr;
+      grid-template-areas: 'p0' 'p1' 'p2' 'p3' 'p4';
+    }
+  }
+
+  /* ============ BONUS cards com valores ============ */
+  .bonus-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .bonus-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 28px 28px;
+    position: relative;
+    transition: border-color 0.3s, transform 0.4s cubic-bezier(0.2, 0.9, 0.25, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+  }
+
+  .bonus-card:hover {
+    border-color: var(--border-2);
+    transform: translateY(-4px);
+  }
+
+  .bonus-card::after {
+    content: '';
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 14px;
+    height: 14px;
+    border-top: 1px solid var(--mauve);
+    border-right: 1px solid var(--mauve);
+    opacity: 0.5;
+    transition: opacity 0.3s, width 0.3s, height 0.3s;
+  }
+
+  .bonus-card:hover::after {
+    opacity: 1;
+    width: 20px;
+    height: 20px;
+  }
+
+  .block--dark .bonus-card::after {
+    border-color: #6e4d75;
+  }
+
+  .bonus-card::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -30%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, var(--mauve-glow) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s;
+    pointer-events: none;
+  }
+
+  .bonus-card:hover::before { opacity: 1; }
+
+  .bonus-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .bonus-num {
+    font-size: 0.58rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--mauve);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bonus-value {
+    font-size: 0.88rem;
+    color: var(--text-3);
+    text-decoration: line-through;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bonus-card h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: var(--text);
+  }
+
+  .bonus-card p {
+    font-size: 0.88rem;
+    color: var(--text-2);
+    line-height: 1.55;
+    margin-top: auto;
+  }
+
+  @media (max-width: 860px) {
+    .bonus-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 520px) {
+    .bonus-grid { grid-template-columns: 1fr; }
+    .bonus-card { aspect-ratio: auto; }
+  }
+
+  /* ============ LIFESTYLE (marquee infinito) ============ */
+  .lifestyle-marquee {
+    margin-top: 48px;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+  }
+
+  .lifestyle-track {
+    display: flex;
+    gap: 16px;
+    width: max-content;
+    animation: lifestyle-scroll 35s linear infinite;
+  }
+
+  .lifestyle-marquee:hover .lifestyle-track { animation-play-state: paused; }
+
+  @keyframes lifestyle-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  .lifestyle-img {
+    flex: 0 0 240px;
+    aspect-ratio: 3 / 4;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .lifestyle-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (max-width: 960px) {
+    .lifestyle-img { flex-basis: 180px; }
+    .lifestyle-track { animation-duration: 25s; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lifestyle-track { animation: none; }
+  }
+
+  @media (max-width: 600px) {
+    .lifestyle-grid { grid-template-columns: repeat(2, 1fr); }
+    .lifestyle-img:nth-child(n+3) { display: none; }
+  }
+
+  /* ============ PRICE BOX ELEVADA ============ */
+  .price-section {
+    padding: 120px 0 140px;
+    position: relative;
+  }
+
+  .price-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 60%, var(--mauve-glow) 0%, transparent 70%);
+    opacity: 0.15;
+    pointer-events: none;
+  }
+
+  .price-layout {
+    max-width: 680px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* mockup removido — só card centralizado */
+
+  .price-mockup {
+    aspect-ratio: 3 / 4;
+    border-radius: 24px;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    position: relative;
+    box-shadow:
+      0 30px 80px -20px rgba(0, 0, 0, 0.5),
+      0 0 60px -10px var(--mauve-glow);
+  }
+
+  .price-mockup img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: var(--bg-2);
+  }
+
+  .price-mockup::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--noise);
+    mix-blend-mode: overlay;
+    opacity: 0.1;
+    pointer-events: none;
+  }
+
+  .price-card {
+    background: #ffffff;
+    border: 1px solid #b5adb9;
+    border-radius: 28px;
+    padding: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Corner markers editoriais */
+  .price-card::after {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    width: 18px;
+    height: 18px;
+    border-top: 1.5px solid #6e4d75;
+    border-left: 1.5px solid #6e4d75;
+    opacity: 0.6;
+  }
+
+  .price-corner-br {
+    position: absolute;
+    bottom: 18px;
+    right: 18px;
+    width: 18px;
+    height: 18px;
+    border-bottom: 1.5px solid #6e4d75;
+    border-right: 1.5px solid #6e4d75;
+    opacity: 0.6;
+    z-index: 2;
+  }
+
+  .price-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -30%;
+    width: 80%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(110, 77, 117, 0.2) 0%, transparent 60%);
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  .price-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(212, 184, 220, 0.12);
+    border: 1px solid rgba(212, 184, 220, 0.2);
+    border-radius: 100px;
+    font-size: 0.58rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #6e4d75;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .price-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #6e4d75;
+    animation: pulse-dot 1.8s ease-out infinite;
+  }
+
+  .price-title {
+    font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    color: #17091c;
+    margin-bottom: 28px;
+    max-width: 22ch;
+    position: relative;
+  }
+
+  .price-list {
+    list-style: none;
+    position: relative;
+    margin-bottom: 32px;
+  }
+
+  .price-list li {
+    padding: 12px 0;
+    font-size: 0.9rem;
+    color: #17091c;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    line-height: 1.35;
+    border-bottom: 1px dashed #d0cbd3;
+  }
+
+  .price-list li:last-child { border-bottom: none; }
+
+  .price-list-num {
+    font-size: 0.56rem;
+    letter-spacing: 0.2em;
+    color: #6e4d75;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    min-width: 28px;
+    padding: 3px 6px;
+    background: rgba(212, 184, 220, 0.1);
+    border-radius: 4px;
+    text-align: center;
+  }
+
+  .block--dark .price-list-num {
+    background: rgba(110, 77, 117, 0.1);
+    color: #6e4d75;
+  }
+
+  .block--dark .price-card {
+    background: #ffffff !important;
+    border-color: #d0cbd3;
+    color: #17091c;
+  }
+  .block--dark .price-card::after { border-color: #6e4d75; }
+  .block--dark .price-corner-br { border-color: #6e4d75; }
+  .block--dark .price-badge {
+    background: rgba(110, 77, 117, 0.08);
+    border-color: rgba(110, 77, 117, 0.2);
+    color: #6e4d75;
+  }
+  .block--dark .price-badge::before { background: #6e4d75; }
+  .block--dark .price-title { color: #17091c; }
+  .block--dark .price-list li { color: #17091c; border-color: #d0cbd3; }
+  .block--dark .price-list-value { color: #8a7a90; }
+  .block--dark .price-total-line { color: #5d4e63; }
+  .block--dark .price-total-line .strike { color: #8a7a90; }
+  .block--dark .price-main { color: #6e4d75; text-shadow: 0 0 40px rgba(110, 77, 117, 0.2); }
+  .block--dark .price-alt { color: #5d4e63; }
+  .block--dark .price-alt strong { color: #17091c; }
+  .block--dark .seals { border-color: #d0cbd3; }
+  .block--dark .seal + .seal::before { background: #d0cbd3; }
+  .block--dark .seal-icon { background: #f5f3f6; border-color: #d0cbd3; color: #6e4d75; }
+  .block--dark .seal-label { color: #5d4e63; }
+
+  .price-list-text { flex: 1; }
+  .price-list-text strong { font-weight: 600; }
+
+  .price-list-value {
+    font-size: 0.78rem;
+    color: #8a7a90;
+    text-decoration: line-through;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .price-total-line {
+    font-size: 0.84rem;
+    color: #5d4e63;
+    margin-bottom: 6px;
+    position: relative;
+  }
+
+  .price-total-line .strike {
+    text-decoration: line-through;
+    color: #8a7a90;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .price-main {
+    font-size: clamp(2.8rem, 5.2vw, 4.2rem);
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    color: #6e4d75;
+    line-height: 0.95;
+    margin: 8px 0 4px;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 40px rgba(110, 77, 117, 0.2);
+    position: relative;
+  }
+
+  .price-alt {
+    font-size: 0.92rem;
+    color: #5d4e63;
+    margin-bottom: 32px;
+    position: relative;
+  }
+
+  .price-alt strong { color: #17091c; font-weight: 600; }
+
+  .price-cta {
+    width: 100%;
+    justify-content: center;
+    padding: 20px 32px;
+    font-size: 1rem;
+    position: relative;
+  }
+
+  .seals {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-top: 32px;
+    padding-top: 28px;
+    border-top: 1px solid #d0cbd3;
+    position: relative;
+  }
+
+  .seal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    flex: 1;
+    padding: 0 4px;
+    position: relative;
+  }
+
+  .seal + .seal::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 32px;
+    background: #d0cbd3;
+  }
+
+  .seal-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f5f3f6;
+    border: 1px solid #b5adb9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6e4d75;
+  }
+
+  .block--dark .seal-icon {
+    background: #22122a;
+    border-color: #3d2544;
+    color: #6e4d75;
+  }
+
+  .seal-icon svg { width: 14px; height: 14px; }
+
+  .seal-label {
+    font-size: 0.66rem;
+    color: #5d4e63;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    line-height: 1.2;
+  }
+
+  .block--dark .seal-label { color: #b0a1b6; }
+
+  @media (max-width: 960px) {
+    .price-card { padding: 36px 28px; }
+  }
+
+  @media (max-width: 600px) {
+    .price-list li { flex-wrap: wrap; }
+    .price-list-value { width: 100%; padding-left: 42px; }
+    .seals { flex-wrap: wrap; gap: 16px; }
+    .seal + .seal::before { display: none; }
+    .seal { flex-basis: calc(50% - 8px); }
+  }
+
+  /* ============ MENTORS ============ */
+  .mentors {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .mentors-media {
+    aspect-ratio: 5 / 6;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    position: relative;
+    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.4);
+  }
+
+  .mentors-media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--noise);
+    mix-blend-mode: overlay;
+    opacity: 0.08;
+    pointer-events: none;
+  }
+
+  .mentors-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .mentors-text .t-label { margin-bottom: 20px; }
+
+  .mentors-text h2 {
+    font-size: clamp(2rem, 3.4vw, 2.8rem);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  .mentors-text h2 em {
+    font-style: normal;
+    color: var(--mauve);
+    font-weight: 500;
+  }
+
+  .mentors-numbers {
+    font-size: 0.88rem;
+    color: var(--mauve-2);
+    margin-bottom: 28px;
+    letter-spacing: -0.005em;
+    padding: 12px 16px;
+    background: rgba(212, 184, 220, 0.06);
+    border-left: 2px solid var(--mauve);
+    border-radius: 4px;
+  }
+
+  .block--dark .mentors-numbers {
+    background: rgba(110, 77, 117, 0.06);
+    border-left-color: #6e4d75;
+    color: #6e4d75;
+  }
+
+  .mentors-text p {
+    font-size: 0.98rem;
+    color: var(--text-2);
+    line-height: 1.65;
+    margin-bottom: 18px;
+  }
+
+  .mentors-signature {
+    margin-top: 28px;
+    font-size: 0.82rem;
+    color: var(--mauve-2);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .block--dark .mentors-signature { border-top-color: #2f1d39; }
+
+  @media (max-width: 860px) {
+    .mentors { grid-template-columns: 1fr; gap: 40px; }
+  }
+
+  /* ============ STORY COPY ============ */
+  .story-copy {
+    max-width: 820px;
+    margin: 0 auto 56px;
+    text-align: center;
+  }
+
+  .story-copy p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text-2);
+    margin-bottom: 18px;
+  }
+
+  .story-copy p:last-child { margin-bottom: 0; }
+
+  /* ============ FAQ ============ */
+  .faq-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .faq-head .t-label { margin-bottom: 20px; }
+  .faq-head .t-h2 { margin-bottom: 24px; max-width: 12ch; }
+
+  .faq-head p {
+    font-size: 0.95rem;
+    color: var(--text-2);
+    line-height: 1.6;
+    max-width: 32ch;
+  }
+
+  .faq-list {
+    border-top: 1px solid var(--border);
+  }
+
+  .faq-item {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.3s;
+  }
+
+  .faq-item:hover { background: rgba(212, 184, 220, 0.02); }
+
+  .block--dark .faq-item:hover { background: rgba(212, 184, 220, 0.02); }
+
+  .faq-q {
+    width: 100%;
+    padding: 28px 0;
+    text-align: left;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: -0.012em;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    transition: color 0.25s;
+  }
+
+  .faq-q:hover { color: var(--mauve); }
+
+  .faq-toggle {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    position: relative;
+    border: 1px solid var(--border-2);
+    border-radius: 50%;
+    transition: border-color 0.3s, transform 0.4s cubic-bezier(0.2, 0.9, 0.25, 1);
+  }
+
+  .faq-q:hover .faq-toggle {
+    border-color: var(--mauve);
+    transform: rotate(90deg);
+  }
+
+  .faq-item.open .faq-q:hover .faq-toggle { transform: rotate(0); }
+
+  .faq-toggle::before,
+  .faq-toggle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background: var(--mauve);
+    transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.25, 1);
+  }
+
+  .faq-toggle::before {
+    width: 12px;
+    height: 1px;
+    transform: translate(-50%, -50%);
+  }
+
+  .faq-toggle::after {
+    width: 1px;
+    height: 12px;
+    transform: translate(-50%, -50%);
+  }
+
+  .faq-item.open .faq-toggle::after { transform: translate(-50%, -50%) rotate(90deg); }
+
+  .faq-a {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.2, 0.9, 0.25, 1);
+  }
+
+  .faq-a-inner {
+    padding: 0 0 28px;
+    font-size: 0.96rem;
+    color: var(--text-2);
+    line-height: 1.7;
+    max-width: 62ch;
+  }
+
+  .faq-item.open .faq-a { max-height: 480px; }
+
+  @media (max-width: 860px) {
+    .faq-grid { grid-template-columns: 1fr; gap: 40px; }
+  }
+
+  /* ============ FOOTER ============ */
+  .foot {
+    padding: 28px 40px;
+    background: var(--bg);
+    border-radius: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .foot-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 0.76rem;
+    color: var(--text-3);
+  }
+
+  .foot-left .logo { font-size: 0.86rem; }
+
+  .foot-legal { display: flex; gap: 20px; font-size: 0.76rem; }
+
+  .foot-legal a { color: var(--text-3); transition: color 0.2s; }
+  .foot-legal a:hover { color: var(--text-2); }
+
+  @media (max-width: 720px) {
+    .foot { padding: 24px; flex-direction: column; text-align: center; }
+    .foot-left { flex-direction: column; gap: 8px; }
+  }
+
+  /* ============ STICKY MOBILE ============ */
+  .smc {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(10, 4, 13, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid #2f1d39;
+    padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0));
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+
+  .smc-left { display: flex; flex-direction: column; line-height: 1.2; }
+  .smc-label { font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; color: #6e5e74; font-weight: 600; }
+  .smc-val { font-size: 1.08rem; color: #f0e8f2; font-weight: 600; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+
+  .smc-cta {
+    padding: 14px 22px;
+    background: linear-gradient(90deg, #1db954, #2edc6f);
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.84rem;
+    border-radius: 100px;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(29, 185, 84, 0.3);
+  }
+
+  @media (max-width: 720px) {
+    .smc { display: flex; }
+    body { padding-bottom: 82px; }
+  }
+
+  /* ============ REVEAL ============ */
+  .rv {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.2, 0.9, 0.25, 1);
+  }
+  .rv.vis { opacity: 1; transform: none; }
+
+  .rv-stagger > * {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.9, 0.25, 1);
+  }
+  .rv-stagger.vis > *:nth-child(1) { opacity: 1; transform: none; transition-delay: 0s; }
+  .rv-stagger.vis > *:nth-child(2) { opacity: 1; transform: none; transition-delay: 0.08s; }
+  .rv-stagger.vis > *:nth-child(3) { opacity: 1; transform: none; transition-delay: 0.16s; }
+  .rv-stagger.vis > *:nth-child(4) { opacity: 1; transform: none; transition-delay: 0.24s; }
+  .rv-stagger.vis > *:nth-child(5) { opacity: 1; transform: none; transition-delay: 0.32s; }
+  .rv-stagger.vis > *:nth-child(6) { opacity: 1; transform: none; transition-delay: 0.4s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rv, .rv-stagger > * { opacity: 1; transform: none; }
+    .hero-badge, .hero h1, .hero-sub, .hero-video, .hero .btn-solid { opacity: 1; transform: none; animation: none; }
+    .hero-video-play, .urgency-dot, .urgency::before, .pix-word::after { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- ============ URGENCY BAR ============ -->
+<div class="urgency">
+  <span class="urgency-dot"></span>
+  <span><strong>O preço vai aumentar R$ 200,00</strong> nesta segunda-feira — inscreva-se agora e economize.</span>
+</div>
+
+<div class="shell">
+
+<!-- ============ HERO ============ -->
+<section class="block">
+  <header class="hero">
+    <div class="hero-bg"></div>
+
+    <div class="hero-body">
+      <div class="hero-badge">
+        Vagas limitadas · Última turma do ano
+      </div>
+
+      <h1>Descubra o único método que transforma suas leituras em <span class="pix-word">PIX</span>, mesmo que você não leia dezenas de livros por ano</h1>
+
+      <p class="hero-sub">Do que adianta acumular pilhas de livros, investir tempo em leituras e cursos, se você não consegue aplicar o que aprendeu para ganhar mais? Assista ao vídeo abaixo e descubra como transformar suas leituras em PIX.</p>
+
+      <div class="hero-video">
+        <div class="hero-video-placeholder">
+          <div class="hero-video-play"></div>
+          <div class="hero-video-note">Placeholder · VTurb 9:16</div>
+        </div>
+      </div>
+
+      <a href="#checkout" class="btn btn-solid btn-xl">
+        Quero entrar no RMX
+        <span class="arrow">→</span>
+      </a>
+    </div>
+  </header>
+</section>
+
+<!-- ============ OPORTUNIDADE ============ -->
+<section class="block block--dark">
+  <section class="content">
+    <div class="wrap">
+      <div class="split rv">
+        <div class="split-media">
+          <div class="ph">
+            <div class="ph-inner">
+              <div class="ph-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              </div>
+              <div class="ph-label">Imagem · Leitura → PIX</div>
+              <div class="ph-sub">rmx-pix.webp</div>
+            </div>
+          </div>
+        </div>
+        <div class="split-text">
+          <div class="t-label"><span class="t-num">01</span> A oportunidade</div>
+          <h2>Uma simples leitura pode se transformar em uma <em>nova fonte de renda</em> — se você souber o que fazer.</h2>
+          <p>Você passa horas lendo e ainda não percebeu: está a poucas páginas de construir uma nova fonte de renda. As suas leituras são uma mina de ouro.</p>
+          <p>Quando você entender isso, vai multiplicar seus ganhos em poucas semanas. Tudo o que falta é um caminho passo-a-passo para extrair as ideias das suas leituras e transformá-las em conhecimento para os outros — e em renda consistente para você.</p>
+          <p>Passamos os últimos anos lapidando essa metodologia e triplicamos nossos ganhos usando apenas o que aprendemos com os livros.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ============ 3 PASSOS (REMIXE é hero) ============ -->
+<section class="block">
+  <section class="content">
+    <div class="wrap">
+      <div class="shead rv">
+        <div class="t-label"><span class="t-num">02</span> Como funciona</div>
+        <h2 class="t-h2">Gere renda com seu conhecimento em <em>3 passos simples.</em></h2>
+        <p class="t-body">Você só precisa de um método rápido e fácil para monetizar todo o conhecimento que já acumulou lendo.</p>
+      </div>
+
+      <div class="steps-hero-grid rv-stagger">
+        <div class="step">
+          <span class="step-big-num">01</span>
+          <span class="step-tag">Passo 01</span>
+          <h3>Organize</h3>
+          <p>Nossa estrutura organiza todo o seu conhecimento para você nunca mais perder ou esquecer nenhuma ideia importante.</p>
+        </div>
+        <div class="step">
+          <span class="step-big-num">02</span>
+          <span class="step-tag">Passo 02</span>
+          <h3>Extraia</h3>
+          <p>O sistema RMX extrai automaticamente as melhores ideias e conceitos das suas leituras — em minutos, não em meses.</p>
+        </div>
+        <div class="step step--hero">
+          <span class="step-big-num">03</span>
+          <span class="step-tag">O clímax</span>
+          <h3>Remixe</h3>
+          <p>O RMX combina essas ideias criando produtos, conteúdos, aulas e palestras para você em minutos. Isso é o que muda tudo: sua leitura vira renda.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ============ SISTEMA (split reverse) ============ -->
+<section class="block block--dark">
+  <section class="content">
+    <div class="wrap">
+      <div class="split reverse rv">
+        <div class="split-media">
+          <div class="ph">
+            <div class="ph-inner">
+              <div class="ph-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6M4.22 4.22l4.24 4.24m7.08 7.08l4.24 4.24M1 12h6m10 0h6M4.22 19.78l4.24-4.24m7.08-7.08l4.24-4.24"/></svg>
+              </div>
+              <div class="ph-label">Imagem · Sistema RMX</div>
+              <div class="ph-sub">elx-possibilites.webp</div>
+            </div>
+          </div>
+        </div>
+        <div class="split-text">
+          <div class="t-label"><span class="t-num">03</span> O sistema</div>
+          <h2>Um sistema que cria <em>produtos, aulas e palestras</em> em minutos.</h2>
+          <p>Ao entrar no Método RMX você ganha acesso ao nosso sistema para acelerar seus resultados. Um sistema revolucionário que cria produtos digitais, aulas, palestras e conteúdos completos em minutos.</p>
+          <p>Sem precisar saber marketing digital, tecnologia ou programação. Basta extrair as ideias dos livros, colocar no RMX e ver a mágica acontecer na sua frente.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ============ TESTIMONIALS 1 (1 herói + 5 suportes) ============ -->
+<section class="block">
+  <section class="content">
+    <div class="wrap">
+      <div class="shead rv">
+        <div class="t-label"><span class="t-num">04</span> Prova social</div>
+        <h2 class="t-h2">Resultados de alguns dos nossos <em>mais de 25 mil alunos.</em></h2>
+        <p class="t-body">O RMX é para quem já lê, estuda ou acumula conhecimento — mas nunca conseguiu transformar isso em renda ou resultados práticos.</p>
+      </div>
+
+      <div class="tst-hero-grid tst-rotate rv-stagger" data-rotate="3000">
+        <div class="tst-img" data-pos="0">
+          <div class="ph">
+            <div class="ph-inner">
+              <div class="ph-big">01</div>
+              <div class="ph-label">Depoimento</div>
+              <div class="ph-sub">testemonials/01.webp</div>
+            </div>
+          </div>
+        </div>
+        <div class="tst-img" data-pos="1">
+          <div class="ph"><div class="ph-inner"><div class="ph-big">02</div><div class="ph-label">Depoimento</div></div></div>
+        </div>
+        <div class="tst-img" data-pos="2">
+          <div class="ph"><div class="ph-inner"><div class="ph-big">03</div><div class="ph-label">Depoimento</div></div></div>
+        </div>
+        <div class="tst-img" data-pos="3">
+          <div class="ph"><div class="ph-inner"><div class="ph-big">04</div><div class="ph-label">Depoimento</div></div></div>
+        </div>
+        <div class="tst-img" data-pos="4">
+          <div class="ph"><div class="ph-inner"><div class="ph-big">05</div><div class="ph-label">Depoimento</div></div></div>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 56px;" class="rv">
+        <a href="#checkout" class="btn btn-solid">
+          Garantir minha última chance
+          <span class="arrow">→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ============ PLANO DETALHADO ============ -->
+<section class="block block--dark">
+  <section class="content">
+    <div class="wrap">
+      <div class="shead rv">
+        <div class="t-label"><span class="t-num">05</span> O plano</div>
+        <h2 class="t-h2">Um plano <em>comprovadamente eficiente</em>, simples e validado para qualquer pessoa.</h2>
+      </div>
+
+      <div class="plan-media rv">
+        <div class="ph" style="aspect-ratio: 16/7;">
+          <div class="ph-inner">
+            <div class="ph-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div class="ph-label">Imagem · Conteúdo do curso</div>
+            <div class="ph-sub">content.webp</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="plan-steps rv-stagger">
+        <div class="plan-step">
+          <span class="plan-step-label">Passo 01</span>
+          <h3>Descubra o que você já sabe que vale dinheiro</h3>
+          <p>Chega de anotações soltas e ideias desconectadas. O RMX analisa tudo o que você já sabe e identifica com precisão o que tem maior potencial de valor. Sem chute, sem trava, sem precisar decidir sozinho.</p>
+          <ul>
+            <li>Encontre o ponto mais vendável do seu conhecimento — sem adivinhação</li>
+            <li>Tenha um sistema para organizar e acessar qualquer ideia com clareza</li>
+          </ul>
+        </div>
+
+        <div class="plan-step">
+          <span class="plan-step-label">Passo 02</span>
+          <h3>Extraia ideias lucrativas</h3>
+          <p>Imagine terminar um livro e jogar seus destaques num sistema. Em segundos ele mostra como aplicar essas ideias, quais vale a pena usar e como enriquecê-las. É isso que você tem em instantes dentro do Método RMX.</p>
+          <ul>
+            <li>Encontre ideias de alto valor nos livros que lê, em segundos</li>
+            <li>Descubra como aplicar as leituras para gerar resultados reais</li>
+          </ul>
+        </div>
+
+        <div class="plan-step">
+          <span class="plan-step-label">Passo 03</span>
+          <h3>Remixe e venda todo dia</h3>
+          <p>Agora imagine esse mesmo sistema construindo produtos, palestras, lives, anúncios e aulas completas para você em poucos minutos. Algo que demoraria meses e custaria milhares — entregue em instantes.</p>
+          <ul>
+            <li>Crie conteúdos completos sem horas na tela em branco</li>
+            <li>Estruture cursos e mentorias a partir do que você já sabe</li>
+            <li>Tenha sempre o que publicar, sem depender de inspiração</li>
+            <li>Saiba finalmente o que fazer com o conhecimento que acumulou</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ============ BÔNUS (grid 3×2 tratado individualmente) ============ -->
+<section class="block">
+  <section class="content">
+    <div class="wrap">
+      <div class="shead rv">
+        <div class="t-label"><span class="t-num">06</span> Os presentes</div>
+        <h2 class="t-h2">E para garantir seus resultados, você ainda <em>recebe estes presentes.</em></h2>
+      </div>
+
+      <div class="bonus-grid rv-stagger">
+        <div class="bonus-card">
+          <div class="bonus-card-head">
+            <span class="bonus-num">Bônus 01</span>
+            <span class="bonus-value">R$ 97</span>
+          </div>
+          <h3>RMX Studio</h3>
+          <p>Um mês grátis do nosso estúdio de conteúdo, onde você organiza tudo o que lê e transforma em material pronto para vender.</p>
+        </div>
+
+        <div class="bonus-card">
+          <div class="bonus-card-head">
+            <span class="bonus-num">Bônus 02</span>
+            <span class="bonus-value">R$ 197</span>
+          </div>
+          <h3>RMX Unique</h3>
+          <p>Três livros selecionados da nossa biblioteca pessoal, curados pelos conceitos que mais moveram nosso próprio método.</p>
+        </div>
+
+        <div class="bonus-card">
+          <div class="bonus-card-head">
+            <span class="bonus-num">Bônus 03</span>
+            <span class="bonus-value">R$ 197</span>
+          </div>
+          <h3>O segredo por trás dos R$ 5.000</h3>
+          <p>A estrutura exata que usamos para gerar nossas primeiras vendas recorrentes — passo a passo, sem firula.</p>
+        </div>
+
+        <div class="bonus-card">
+          <div class="bonus-card-head">
+            <span class="bonus-num">Bônus 04</span>
+            <span class="bonus-value">R$ 147</span>
+          </div>
+          <h3>Ganhos extras com Amazon</h3>
+          <p>Como usar o que você já leu e já sabe para gerar renda recorrente através da Amazon — sem estoque, sem complicação.</p>
+        </div>
+
+        <div class="bonus-card">
+          <div class="bonus-card-head">
+            <span class="bonus-num">Bônus 05</span>
+            <span class="bonus-value">R$ 197</span>
+          </div>
+          <h3>Da dívida ao milhão</h3>
+          <p>Como saímos de R$ 200 mil em dívidas para 8 milhões em 2 anos. O caminho completo, sem pular etapas.</p>
+        </div>
+
+        <div class="bonus-card">
+          <div class="bonus-card-head">
+            <span class="bonus-num">Bônus 06</span>
+            <span class="bonus-value">R$ 297</span>
+          </div>
+          <h3>Estratégias de vendas validadas</h3>
+          <p>As mesmas estratégias que aplicamos nos nossos lançamentos para converter audiência em clientes fiéis.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ============ MANIFESTO ============ -->
+<section class="block block--dark">
+  <div class="manifesto">
+    <svg class="manifesto-star manifesto-star--tl" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.6">
+      <circle cx="50" cy="50" r="4" fill="currentColor"/>
+      <g stroke-linecap="round">
+        <line x1="50" y1="10" x2="50" y2="30"/>
+        <line x1="50" y1="70" x2="50" y2="90"/>
+        <line x1="10" y1="50" x2="30" y2="50"/>
+        <line x1="70" y1="50" x2="90" y2="50"/>
+        <line x1="22" y1="22" x2="36" y2="36"/>
+        <line x1="64" y1="64" x2="78" y2="78"/>
+        <line x1="78" y1="22" x2="64" y2="36"/>
+        <line x1="36" y1="64" x2="22" y2="78"/>
+      </g>
+      <circle cx="50" cy="50" r="22" opacity="0.3"/>
+      <circle cx="50" cy="50" r="38" opacity="0.15"/>
+    </svg>
+    <svg class="manifesto-star manifesto-star--br" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.6">
+      <circle cx="50" cy="50" r="4" fill="currentColor"/>
+      <g stroke-linecap="round">
+        <line x1="50" y1="10" x2="50" y2="30"/>
+        <line x1="50" y1="70" x2="50" y2="90"/>
+        <line x1="10" y1="50" x2="30" y2="50"/>
+        <line x1="70" y1="50" x2="90" y2="50"/>
+        <line x1="22" y1="22" x2="36" y2="36"/>
+        <line x1="64" y1="64" x2="78" y2="78"/>
+        <line x1="78" y1="22" x2="64" y2="36"/>
+        <line x1="36" y1="64" x2="22" y2="78"/>
+      </g>
+      <circle cx="50" cy="50" r="22" opacity="0.3"/>
+      <circle cx="50" cy="50" r="38" opacity="0.15"/>
+    </svg>
+    <div class="manifesto-inner rv">
+      <div class="manifesto-label">O manifesto RMX</div>
+      <p class="manifesto-text">Não é sobre ler mais. É sobre <em>usar melhor</em> o que você já leu.</p>
+      <div class="manifesto-sign">— Os Formagios</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HISTÓRIA + LIFESTYLE ============ -->
+<section class="block">
+  <section class="content">
+    <div class="wrap">
+      <div class="shead rv">
+        <div class="t-label"><span class="t-num">07</span> A história</div>
+        <h2 class="t-h2">Esse foi o método secreto que criamos e aplicamos <em>em nossa vida.</em></h2>
+      </div>
+
+      <div class="story-copy rv">
+        <p>O RMX revolucionou a nossa própria vida. Com a metodologia que criamos, conseguimos extrair ideias poderosas dos livros que lemos, compartilhá-las com as pessoas — e sermos muito bem pagos por isso.</p>
+        <p>Em 2020, estávamos devendo mais de R$ 200 mil ao banco. Depois de aplicar esse método, em apenas 1 ano faturamos nosso primeiro milhão.</p>
+        <p>Hoje já são quase 10 milhões faturados, produtos digitais vendidos todos os dias, workshops com sold out e duas edições do nosso evento presencial com mais de 600 pessoas. Voltamos a viajar, realizar sonhos e morar fora do Brasil.</p>
+      </div>
+
+      <div class="lifestyle-marquee rv">
+        <div class="lifestyle-track">
+          <div class="lifestyle-img"><div class="ph"><div class="ph-inner"><div class="ph-label">Foto 01</div><div class="ph-sub">formagios01.webp</div></div></div></div>
+          <div class="lifestyle-img"><div class="ph"><div class="ph-inner"><div class="ph-label">Foto 02</div><div class="ph-sub">formagios02.webp</div></div></div></div>
+          <div class="lifestyle-img"><div class="ph"><div class="ph-inner"><div class="ph-label">Foto 03</div><div class="ph-sub">formagios03.webp</div></div></div></div>
+          <div class="lifestyle-img"><div class="ph"><div class="ph-inner"><div class="ph-label">Foto 04</div><div class="ph-sub">formagios04.webp</div></div></div></div>
+          <div class="lifestyle-img"><div class="ph"><div class="ph-inner"><div class="ph-label">Foto 05</div><div class="ph-sub">formagios05.webp</div></div></div></div>
+          <div class="lifestyle-img" aria-hidden="true"><div class="ph"><div class="ph-inner"><div class="ph-label">Foto 01</div><div class="ph-sub">formagios01.webp</div></div></div></div>
+          <div class="lifestyle-img" aria-hidden="true"><div class="ph"><div class="ph-inner"><div class="ph-label">Foto 02</div><div class="ph-sub">formagios02.webp</div></div></div></div>
+          <div class="lifestyle-img" aria-hidden="true"><div class="ph"><div class="ph-inner"><div class="ph-label">Foto 03</div><div class="ph-sub">formagios03.webp</div></div></div></div>
+          <div class="lifestyle-img" aria-hidden="true"><div class="ph"><div class="ph-inner"><div class="ph-label">Foto 04</div><div class="ph-sub">formagios04.webp</div></div></div></div>
+          <div class="lifestyle-img" aria-hidden="true"><div class="ph"><div class="ph-inner"><div class="ph-label">Foto 05</div><div class="ph-sub">formagios05.webp</div></div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ============ PRICE ELEVADA ============ -->
+<section class="block block--dark" id="checkout">
+  <section class="price-section">
+    <div class="wrap">
+      <div class="shead rv">
+        <div class="t-label"><span class="t-num">08</span> Sua inscrição</div>
+        <h2 class="t-h2">Veja tudo o que você vai ganhar ao se inscrever <em>no Método RMX agora.</em></h2>
+      </div>
+
+      <div class="price-layout rv">
+        <div class="price-card">
+          <span class="price-corner-br"></span>
+          <span class="price-badge">Oferta única</span>
+          <h3 class="price-title">Tudo incluído na edição 5.0 do Método RMX</h3>
+
+          <ul class="price-list">
+            <li>
+              <span class="price-list-num">M</span>
+              <span class="price-list-text"><strong>Método RMX©</strong> — o método completo, quinta versão</span>
+              <span class="price-list-value">R$ 997</span>
+            </li>
+            <li>
+              <span class="price-list-num">B1</span>
+              <span class="price-list-text"><strong>RMX Studio</strong> — 1 mês grátis</span>
+              <span class="price-list-value">R$ 97</span>
+            </li>
+            <li>
+              <span class="price-list-num">B2</span>
+              <span class="price-list-text"><strong>RMX Unique</strong> — 3 livros da biblioteca</span>
+              <span class="price-list-value">R$ 197</span>
+            </li>
+            <li>
+              <span class="price-list-num">B3</span>
+              <span class="price-list-text"><strong>O segredo por trás dos R$ 5.000</strong></span>
+              <span class="price-list-value">R$ 197</span>
+            </li>
+            <li>
+              <span class="price-list-num">B4</span>
+              <span class="price-list-text"><strong>Ganhos extras com Amazon</strong></span>
+              <span class="price-list-value">R$ 147</span>
+            </li>
+            <li>
+              <span class="price-list-num">B5</span>
+              <span class="price-list-text"><strong>Da dívida ao milhão</strong></span>
+              <span class="price-list-value">R$ 197</span>
+            </li>
+            <li>
+              <span class="price-list-num">B6</span>
+              <span class="price-list-text"><strong>Estratégias de vendas validadas</strong></span>
+              <span class="price-list-value">R$ 297</span>
+            </li>
+          </ul>
+
+          <div class="price-total-line">De <span class="strike">R$ 21.832</span> por apenas</div>
+          <div class="price-main">12× R$ 30,72</div>
+          <div class="price-alt">ou <strong>R$ 297 à vista</strong></div>
+
+          <a href="https://pay.kiwify.com.br/8JSqzAk" class="btn btn-solid price-cta">
+            Entrar no RMX agora
+            <span class="arrow">→</span>
+          </a>
+
+          <div class="seals">
+            <div class="seal">
+              <div class="seal-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <span class="seal-label">1 Ano<br>de Acesso</span>
+            </div>
+            <div class="seal">
+              <div class="seal-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z"/></svg>
+              </div>
+              <span class="seal-label">7 Dias<br>de Garantia</span>
+            </div>
+            <div class="seal">
+              <div class="seal-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </div>
+              <span class="seal-label">Acesso<br>Imediato</span>
+            </div>
+            <div class="seal">
+              <div class="seal-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+              <span class="seal-label">Compra<br>Segura</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ============ TESTIMONIALS 2 ============ -->
+<section class="block">
+  <section class="content">
+    <div class="wrap">
+      <div class="shead rv">
+        <div class="t-label"><span class="t-num">09</span> Mais prova social</div>
+        <h2 class="t-h2">São mais de 25 mil alunos em 3 anos. <em>Alguns dos milhares de resultados.</em></h2>
+      </div>
+
+      <div class="tst-hero-grid rv-stagger">
+        <div class="tst-img tst-img--hero">
+          <div class="ph">
+            <div class="ph-inner">
+              <div class="ph-big">07</div>
+              <div class="ph-label">Depoimento destaque</div>
+              <div class="ph-sub">testemonials/07.webp</div>
+            </div>
+          </div>
+        </div>
+        <div class="tst-img"><div class="ph"><div class="ph-inner"><div class="ph-big">08</div><div class="ph-label">Depoimento</div></div></div></div>
+        <div class="tst-img"><div class="ph"><div class="ph-inner"><div class="ph-big">09</div><div class="ph-label">Depoimento</div></div></div></div>
+        <div class="tst-img"><div class="ph"><div class="ph-inner"><div class="ph-big">14</div><div class="ph-label">Depoimento</div></div></div></div>
+        <div class="tst-img"><div class="ph"><div class="ph-inner"><div class="ph-big">15</div><div class="ph-label">Depoimento</div></div></div></div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ============ MENTORES ============ -->
+<section class="block">
+  <section class="content">
+    <div class="wrap">
+      <div class="mentors rv">
+        <div class="mentors-media">
+          <div class="ph">
+            <div class="ph-inner">
+              <div class="ph-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div class="ph-label">Foto do casal</div>
+              <div class="ph-sub">osformagios-white.webp</div>
+            </div>
+          </div>
+        </div>
+        <div class="mentors-text">
+          <div class="t-label"><span class="t-num">10</span> Os mentores</div>
+          <h2>Alê & Ka, <em>seus mentores</em> nessa jornada.</h2>
+          <div class="mentors-numbers">+7 dígitos em 2 anos · +80 mil alunos · +11 anos de casamento · +50 cidades viajadas</div>
+          <p>Formados em publicidade, neurociência e artes, somos especialistas em construir soluções que tornem a vida das pessoas melhor através do conhecimento.</p>
+          <p>Há poucos anos estávamos endividados e sem perspectivas. Descobrimos o poder de transformar conhecimento em renda através do digital — e vivemos isso há 14 anos. Queremos que outras pessoas vivam também.</p>
+          <div class="mentors-signature">Alê & Ka Formagio · Os Formagios</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="block block--dark" id="faq">
+  <section class="content">
+    <div class="wrap">
+      <div class="faq-grid">
+        <div class="faq-head rv">
+          <div class="t-label"><span class="t-num">11</span> Perguntas frequentes</div>
+          <h2 class="t-h2">FAQ</h2>
+          <p>As perguntas que mais recebemos. Se sua dúvida não estiver aqui, é só falar com nosso time.</p>
+        </div>
+
+        <div class="faq-list rv">
+          <div class="faq-item">
+            <button class="faq-q">Quantas horas tem o curso?<span class="faq-toggle"></span></button>
+            <div class="faq-a"><div class="faq-a-inner">Mais rápido do que maratonar uma série. São cerca de 6 horas para dominar a base — num fim de semana você consome todo o Método RMX, aplica e começa a ver resultados em pouco tempo.</div></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q">Por quanto tempo terei acesso ao curso?<span class="faq-toggle"></span></button>
+            <div class="faq-a"><div class="faq-a-inner">Você tem acesso por 1 ano a partir da data da compra. Durante esses 12 meses, todas as atualizações do conteúdo estão incluídas sem custo adicional.</div></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q">Posso parcelar?<span class="faq-toggle"></span></button>
+            <div class="faq-a"><div class="faq-a-inner">Sim. A plataforma de pagamento oferece várias opções: até 12x no cartão, Pix + cartão, 2 cartões, saldo Hotmart — o que for melhor para o seu bolso.</div></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q">E se eu não gostar e quiser meu dinheiro de volta?<span class="faq-toggle"></span></button>
+            <div class="faq-a"><div class="faq-a-inner">Tudo bem. Você tem 7 dias para se decidir e solicitar o cancelamento diretamente na plataforma. Qualquer dúvida, é só entrar em contato pelo e-mail de suporte.</div></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q">Preciso ter experiência prévia em marketing digital, criação de produto ou tecnologia?<span class="faq-toggle"></span></button>
+            <div class="faq-a"><div class="faq-a-inner">Não. O RMX foi projetado para funcionar tanto para iniciantes quanto para pessoas experientes. Ensinamos do zero, passo a passo. Temos orgulho de ter alunos com mais de 65 anos que criaram seus primeiros infoprodutos usando nosso sistema.</div></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q">Depois de 1 ano, eu perco todo o material que produzi?<span class="faq-toggle"></span></button>
+            <div class="faq-a"><div class="faq-a-inner">Não. Todo o material que você produziu é 100% seu e permanece na sua máquina. O que termina é apenas o acesso ao conteúdo gravado e às atualizações.</div></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q">O Método RMX é Inteligência Artificial?<span class="faq-toggle"></span></button>
+            <div class="faq-a"><div class="faq-a-inner">Sim. Criamos e lapidamos um passo a passo preciso para que o sistema de IA identifique e extraia o melhor do seu conhecimento, e crie algo novo, único, exclusivo e personalizado.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 72px;" class="rv">
+        <a href="#checkout" class="btn btn-solid btn-xl">
+          Garantir minha vaga agora
+          <span class="arrow">→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="foot">
+  <div class="foot-left">
+    <div class="logo">Black Boutique</div>
+    <span>© 2020–2026 Black Boutique LTDA · CNPJ: 45.517.105/0001-50</span>
+  </div>
+  <div class="foot-legal">
+    <a href="#">Política de Privacidade</a>
+    <a href="#">Avisos Legais</a>
+  </div>
+</footer>
+
+</div><!-- /shell -->
+
+<!-- Sticky mobile -->
+<div class="smc">
+  <div class="smc-left">
+    <span class="smc-label">12× de</span>
+    <span class="smc-val">R$ 30,72</span>
+  </div>
+  <a href="#checkout" class="smc-cta">Quero entrar →</a>
+</div>
+
+<script>
+  // Scroll progress
+  const progress = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const scrolled = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+    progress.style.width = scrolled + '%';
+  }, { passive: true });
+
+  // Reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('vis');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.14, rootMargin: '0px 0px -60px 0px' });
+
+  document.querySelectorAll('.rv, .rv-stagger').forEach(el => io.observe(el));
+
+  // FAQ
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.parentElement;
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+
+  // Testimonials grid: rotate positions every Ns. Uses FLIP for smooth motion
+  // (measure → reorder → animate from old → new). Pauses while user hovers.
+  document.querySelectorAll('.tst-rotate').forEach(grid => {
+    const items = Array.from(grid.querySelectorAll('.tst-img'));
+    if (items.length < 2) return;
+    const step = parseInt(grid.dataset.rotate || '3000', 10);
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+    let offset = 0;
+    let paused = false;
+    grid.addEventListener('mouseenter', () => { paused = true; });
+    grid.addEventListener('mouseleave', () => { paused = false; });
+    setInterval(() => {
+      if (paused || document.hidden) return;
+      const before = items.map(el => el.getBoundingClientRect());
+      offset = (offset + 1) % items.length;
+      items.forEach((el, i) => {
+        el.dataset.pos = String((i - offset + items.length) % items.length);
+      });
+      // FLIP — invert the position change, then play the transition to identity
+      requestAnimationFrame(() => {
+        const after = items.map(el => el.getBoundingClientRect());
+        items.forEach((el, i) => {
+          const dx = before[i].left - after[i].left;
+          const dy = before[i].top - after[i].top;
+          const sx = before[i].width / after[i].width;
+          const sy = before[i].height / after[i].height;
+          el.style.transition = 'none';
+          el.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+          el.style.transformOrigin = 'top left';
+          requestAnimationFrame(() => {
+            el.style.transition = 'transform 0.7s cubic-bezier(0.65, 0, 0.35, 1)';
+            el.style.transform = '';
+          });
+        });
+      });
+    }, step);
+  });
+</script>
+
+</body>
+</html>

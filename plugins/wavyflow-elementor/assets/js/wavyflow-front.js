@@ -23,13 +23,26 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  // Reveal on scroll — throttled with rAF
+  // Reveal on scroll — supports .wf-rv, .rv, .rv-stagger AND .reveal (template class).
+  // Adds every "visible" class variant used across templates so CSS targeting any of them works.
   var rvObs = new IntersectionObserver(function (entries) {
     entries.forEach(function (e) {
-      if (e.isIntersecting) { e.target.classList.add('wf-vis'); e.target.classList.add('vis'); rvObs.unobserve(e.target); }
+      if (e.isIntersecting) {
+        e.target.classList.add('wf-vis');
+        e.target.classList.add('vis');
+        e.target.classList.add('is-visible');
+        rvObs.unobserve(e.target);
+      }
     });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.wf-rv, .rv, .rv-stagger').forEach(function (el) { rvObs.observe(el); });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.wf-rv, .rv, .rv-stagger, .reveal').forEach(function (el) { rvObs.observe(el); });
+
+  // Safety net: if the observer never fires (edge browsers), reveal everything after 1.5s.
+  setTimeout(function () {
+    document.querySelectorAll('.wf-rv:not(.wf-vis), .rv:not(.vis), .rv-stagger:not(.vis), .reveal:not(.is-visible)').forEach(function (el) {
+      el.classList.add('wf-vis'); el.classList.add('vis'); el.classList.add('is-visible');
+    });
+  }, 1500);
 
   // Scroll progress — throttled with rAF
   var spTick = false;

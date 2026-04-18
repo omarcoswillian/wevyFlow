@@ -20,6 +20,14 @@ export const TEMPLATES: TemplateItem[] = [
     prompt: "READY:ready-vendas-black-boutique",
   },
   {
+    id: "ready-vendas-white-boutique",
+    label: "LP Vendas White Boutique (Pronto)",
+    description: "Versao light da boutique editorial: blocos claros e escuros intercalados, hero dark com video VSL, urgencia, oportunidade, manifesto com estrelas, plan steps, depoimentos com hierarquia, bonus cards com corner markers, pricing white com selos, mentor, FAQ, sticky mobile CTA. Paleta mauve sobre fundo claro.",
+    category: "vendas",
+    tags: ["pronto", "vendas", "infoproduto", "editorial", "light", "white", "mauve", "vsl", "premium", "boutique"],
+    prompt: "READY:ready-vendas-white-boutique",
+  },
+  {
     id: "ready-lp-vendas-spe",
     label: "LP Vendas Completa 13 Secoes (Pronto)",
     description: "Pagina de vendas completa com 13 secoes: Hero, Depoimentos dark, Traits, Metodo, Para Quem, 6 Etapas, Bonus, Pricing, Garantia, Criador, FAQ, CTA Final. Estilo clean light com green accent.",

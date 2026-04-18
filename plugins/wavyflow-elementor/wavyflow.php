@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WavyFlow for Elementor
  * Description: Templates de landing page de alta conversao para Elementor. Widgets nativos editaveis com design premium.
- * Version: 1.0.0
+ * Version: 1.4.5
  * Author: WavyFlow
  * Author URI: https://wavyflow.com
  * Text Domain: wavyflow
@@ -12,7 +12,7 @@
 
 if (!defined('ABSPATH')) exit;
 
-define('WAVYFLOW_VERSION', '1.0.0');
+define('WAVYFLOW_VERSION', '1.4.5');
 define('WAVYFLOW_PATH', plugin_dir_path(__FILE__));
 define('WAVYFLOW_URL', plugin_dir_url(__FILE__));
 
