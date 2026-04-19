@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Type, Palette, Space, MousePointer, AlignLeft, AlignCenter, AlignRight, AlignJustify, Underline, Strikethrough, Italic, LayoutGrid, MoveHorizontal, MoveVertical, ArrowDownNarrowWide, Copy, Trash2, ArrowUp, ArrowDown, Link2, FileText, LogIn, Mail, Phone, Anchor, Package } from "lucide-react";
+import { ArrowLeft, Type, Palette, Space, MousePointer, AlignLeft, AlignCenter, AlignRight, AlignJustify, Underline, Strikethrough, Italic, LayoutGrid, MoveHorizontal, MoveVertical, ArrowDownNarrowWide, Copy, Trash2, ArrowUp, ArrowDown, Link2, FileText, LogIn, Mail, Phone, Anchor, Package, PlayCircle } from "lucide-react";
 import { GOOGLE_FONTS, findFont, cssFontStack } from "@/app/lib/editor/google-fonts";
 import { NumberInput } from "./inspector/NumberInput";
 import { ColorPicker } from "./inspector/ColorPicker";
@@ -145,6 +145,15 @@ function normalizeLineHeight(raw: string, fontSize: string): string {
   return raw;
 }
 
+// Tags whose internal interactivity (play, click, scroll) gets blocked by the editor's
+// click-capture in edit mode. The inspector surfaces a hint + exit-edit button for these.
+const INTERACTIVE_TAGS = new Set([
+  "vturb-smartplayer",
+  "iframe",
+  "video",
+  "audio",
+]);
+
 export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange, onTextChange, onAttrChange, onFontLoad, onDuplicate, onDelete, onMove, onSaveComponent, onBack }: VisualEditorProps) {
   const badge = VIEWPORT_BADGE[viewport] || VIEWPORT_BADGE.desktop;
   if (!elementProps) {
@@ -206,6 +215,28 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
           </div>
         </div>
       </div>
+
+      {/* Interactive-element hint: clicks in edit mode are captured by the editor for selection,
+          so play/pause/iframe controls don't fire. Surface a one-click way to exit edit mode. */}
+      {INTERACTIVE_TAGS.has(elementProps.tagName) && (
+        <div className="mx-4 mt-3 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/25 flex items-start gap-2">
+          <PlayCircle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] text-amber-300 font-medium leading-snug">
+              Modo edição ativo
+            </p>
+            <p className="text-[10px] text-amber-200/70 leading-snug mt-0.5">
+              Clicks no preview selecionam elementos. Para dar play / interagir com o vídeo, saia do modo edição.
+            </p>
+            <button
+              onClick={onBack}
+              className="mt-1.5 px-2 py-1 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-[10px] font-semibold cursor-pointer"
+            >
+              Sair do modo edição
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="px-4 py-3 space-y-5">
         {/* Text */}

@@ -1,7 +1,13 @@
 // Script to inject into the preview iframe for visual editing
 export const IFRAME_VISUAL_EDIT_SCRIPT = `
-<script>
+<script id="__wf_edit_script">
 (function() {
+  // Idempotent guard: if a previous serialization left a copy of this script
+  // in finalCode, multiple copies will execute on iframe load. Without this guard,
+  // each copy attaches its own drop/message listeners, causing N inserts per drop.
+  if (window.__wfEditScriptLoaded) return;
+  window.__wfEditScriptLoaded = true;
+
   let selectedEl = null;
   let hoverEl = null;
   let editMode = false;
@@ -32,6 +38,59 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
   dropBox.id = '__wf_drop_box';
   dropBox.style.cssText = 'position:fixed;pointer-events:none;z-index:99998;border:2px dashed #a855f7;border-radius:4px;background:rgba(168,85,247,0.08);display:none;';
   document.body.appendChild(dropBox);
+
+  // Floating "configure VSL" gear button — appears on hover over [data-wf-vsl-block]
+  const vslGear = document.createElement('button');
+  vslGear.id = '__wf_vsl_gear';
+  vslGear.type = 'button';
+  vslGear.title = 'Configurar VSL VTurb';
+  // pointer-events:none on children so the click target is always the button itself.
+  // Without this, clicking the inner <span> bypasses our __wf detection in capture phase.
+  vslGear.innerHTML = '<svg style="pointer-events:none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span style="margin-left:6px;pointer-events:none">Configurar</span>';
+  vslGear.style.cssText = 'position:fixed;z-index:99999;display:none;align-items:center;justify-content:center;background:#a855f7;color:#fff;border:0;border-radius:8px;padding:6px 10px;font-family:system-ui,-apple-system,sans-serif;font-size:11px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(168,85,247,0.35);pointer-events:auto;transition:transform .12s ease, box-shadow .12s ease;';
+  vslGear.onmouseenter = function() { vslGear.style.transform = 'scale(1.05)'; vslGear.style.boxShadow = '0 6px 18px rgba(168,85,247,0.55)'; };
+  vslGear.onmouseleave = function() { vslGear.style.transform = ''; vslGear.style.boxShadow = '0 4px 12px rgba(168,85,247,0.35)'; };
+  document.body.appendChild(vslGear);
+
+  // Currently-hovered VSL wrapper (drives gear positioning)
+  let currentVslWrapper = null;
+  // Wrapper ID associated with the gear button (captured at click time)
+  let gearTargetId = null;
+
+  function positionGear(wrapper) {
+    // Display first so offsetWidth is measurable, then position.
+    vslGear.style.display = 'inline-flex';
+    const r = wrapper.getBoundingClientRect();
+    vslGear.style.top = Math.max(8, r.top + 8) + 'px';
+    vslGear.style.left = Math.max(8, r.right - vslGear.offsetWidth - 8) + 'px';
+  }
+
+  // Newly inserted elements with .reveal would stay opacity:0 because the
+  // IntersectionObserver in BASE_SCRIPT only observes elements present at load.
+  // Mark them visible immediately so the user sees what they just added.
+  function unhideRevealedSubtree(root) {
+    if (!root || root.nodeType !== 1) return;
+    if (root.classList && root.classList.contains('reveal')) root.classList.add('is-visible');
+    root.querySelectorAll && root.querySelectorAll('.reveal').forEach(function(n){ n.classList.add('is-visible'); });
+  }
+
+  function hideGear() {
+    vslGear.style.display = 'none';
+    currentVslWrapper = null;
+  }
+
+  vslGear.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!currentVslWrapper) return;
+    gearTargetId = ensureId(currentVslWrapper);
+    const cfg = currentVslWrapper.getAttribute('data-wf-vsl-config');
+    window.parent.postMessage({
+      type: 'wf-open-vsl-config',
+      id: gearTargetId,
+      config: cfg || null,
+    }, '*');
+  });
 
   // Label for selected element
   const selectLabel = document.createElement('div');
@@ -262,6 +321,15 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
   function serializeBody() {
     const clone = document.body.cloneNode(true);
     clone.querySelectorAll('[id^="__wf"]').forEach(n => n.remove());
+    // Defensive cleanup: strip any leftover BASE_SCRIPT / EDIT_SCRIPT copies
+    // that may have accumulated in finalCode before the id-based dedupe was added.
+    // Detection uses signatures unique to those scripts so we never touch user code.
+    clone.querySelectorAll('script').forEach(function(s){
+      const t = s.textContent || '';
+      const isEditScript = t.indexOf('__wf_hover') !== -1 || t.indexOf('__wf_select') !== -1;
+      const isBaseScript = t.indexOf("querySelectorAll('.reveal')") !== -1 && t.indexOf('IntersectionObserver') !== -1;
+      if (isEditScript || isBaseScript) s.parentNode && s.parentNode.removeChild(s);
+    });
     return clone.innerHTML;
   }
 
@@ -477,10 +545,19 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
     if (e.data.type === 'wf-insert-html' && typeof e.data.html === 'string') {
       const container = document.createElement('div');
       container.innerHTML = e.data.html.trim();
-      const newEl = container.firstElementChild;
+      // Snapshot all top-level inserted nodes BEFORE moving them around.
+      const inserted = Array.prototype.slice.call(container.children);
+      // Anchor element = first non-script/style/link/meta, falling back to first child.
+      // Used for selection + positioning. Avoids selecting an invisible <style> or <link>.
+      const NON_VISIBLE = { SCRIPT:1, STYLE:1, LINK:1, META:1 };
+      let newEl = null;
+      for (let i = 0; i < inserted.length; i++) {
+        if (!NON_VISIBLE[inserted[i].tagName]) { newEl = inserted[i]; break; }
+      }
+      if (!newEl) newEl = inserted[0];
       if (!newEl) return;
 
-      // Decide where to insert
+      // Decide where to insert the anchor
       const CONTAINER_TAGS = ['DIV','SECTION','MAIN','HEADER','FOOTER','ARTICLE','ASIDE','NAV','UL','OL','FIGURE'];
       let target = selectedEl;
       if (target && CONTAINER_TAGS.indexOf(target.tagName) !== -1) {
@@ -491,16 +568,28 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
         document.body.appendChild(newEl);
       }
 
-      // Also append any sibling nodes (e.g. HTML with script + div)
-      let sibling = container.firstElementChild;
-      while (sibling) {
-        const next = sibling.nextElementSibling;
-        if (sibling !== newEl) newEl.parentNode && newEl.parentNode.appendChild(sibling);
-        sibling = next;
+      // <style>/<link>/<meta> belong in <head> so they apply globally;
+      // siblings (extra elements + scripts) follow the anchor.
+      const HEAD_TAGS = { STYLE:1, LINK:1, META:1 };
+      for (let i = 0; i < inserted.length; i++) {
+        const node = inserted[i];
+        if (node === newEl) continue;
+        if (HEAD_TAGS[node.tagName]) {
+          // Dedupe by id when present — avoids piling up identical <style>/<link> on re-insert
+          if (node.id && document.getElementById(node.id)) { node.parentNode && node.parentNode.removeChild(node); continue; }
+          document.head.appendChild(node);
+        } else {
+          newEl.parentNode && newEl.parentNode.appendChild(node);
+        }
       }
 
       // Revive injected script elements so they actually execute (VTurb, pixels, etc.)
-      reviveScripts(newEl);
+      // Must cover BOTH children-of-anchor and sibling top-level scripts.
+      for (let i = 0; i < inserted.length; i++) {
+        if (inserted[i].parentNode) reviveScripts(inserted[i]);
+      }
+      // Make .reveal elements visible immediately (IntersectionObserver doesn't see new elements)
+      for (let i = 0; i < inserted.length; i++) unhideRevealedSubtree(inserted[i]);
 
       // Select the new element
       selectedEl = newEl;
@@ -511,6 +600,73 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
 
       postCodeUpdated();
       window.parent.postMessage({ type: 'wf-element-selected', id: ensureId(newEl), props: getComputedProps(newEl) }, '*');
+    }
+    if (e.data.type === 'wf-update-vsl' && typeof e.data.id === 'string' && typeof e.data.html === 'string') {
+      console.log('[VSL] wf-update-vsl received', { id: e.data.id, htmlLen: e.data.html.length });
+      // Try lookup by data-wf-id first, then fall back to "any VSL block" if exactly one exists.
+      // The fallback covers the case where the id mapping drifted across script reloads.
+      let wrapper = document.querySelector('[data-wf-id="' + e.data.id + '"]');
+      if (!wrapper) {
+        const allBlocks = document.querySelectorAll('[data-wf-vsl-block]');
+        if (allBlocks.length === 1) {
+          wrapper = allBlocks[0];
+          console.warn('[VSL] wrapper id "' + e.data.id + '" not found — falling back to the only VSL block on the page');
+        } else {
+          console.error('[VSL] wrapper not found for id', e.data.id, 'and', allBlocks.length, 'VSL blocks exist — cannot disambiguate');
+          window.parent.postMessage({ type: 'wf-vsl-update-result', ok: false, reason: 'wrapper-not-found', id: e.data.id }, '*');
+          return;
+        }
+      }
+      console.log('[VSL] wrapper found, replacing innerHTML', wrapper);
+
+      // Cleanup: remove any converteai.net <script> previously injected into <head>
+      // by a prior config of THIS or any other VSL block. Safe because the smartplayer
+      // component re-registers itself when the new <vturb-smartplayer> is parsed.
+      document.querySelectorAll('head script[src*="converteai.net"]').forEach(function(s){ s.parentNode && s.parentNode.removeChild(s); });
+
+      // Remove the old <vturb-smartplayer> instance from the DOM so the player library
+      // re-initializes against the fresh tag (otherwise old state can leak across re-configs).
+      const oldPlayers = wrapper.querySelectorAll('vturb-smartplayer');
+      oldPlayers.forEach(function(p){ p.parentNode && p.parentNode.removeChild(p); });
+
+      // Wipe wrapper contents and apply the new inner HTML
+      wrapper.innerHTML = e.data.html;
+
+      // Persist config + state on the wrapper itself (round-trips via export/import)
+      if (typeof e.data.config === 'string') wrapper.setAttribute('data-wf-vsl-config', e.data.config);
+
+      // Strip the placeholder visual styles ONLY on first config (empty → configured).
+      // Re-config preserves whatever the author later set via the inspector.
+      const wasEmpty = wrapper.getAttribute('data-wf-vsl-state') === 'empty';
+      if (wasEmpty) wrapper.removeAttribute('style');
+      wrapper.setAttribute('data-wf-vsl-state', 'configured');
+
+      // Move <style>/<link> children to <head> (deduped by id) so they apply globally.
+      // The reveal <script> stays inside the wrapper (uses document.currentScript scope).
+      const HEAD_TAGS = { STYLE:1, LINK:1, META:1 };
+      const wrapperChildren = Array.prototype.slice.call(wrapper.children);
+      for (let i = 0; i < wrapperChildren.length; i++) {
+        const child = wrapperChildren[i];
+        if (HEAD_TAGS[child.tagName]) {
+          if (child.id && document.getElementById(child.id)) { child.parentNode && child.parentNode.removeChild(child); continue; }
+          // Use querySelector for style[data-wf-vsl-block-style] dedupe (no id, but unique attr)
+          if (child.tagName === 'STYLE' && child.hasAttribute('data-wf-vsl-block-style') && document.querySelector('head style[data-wf-vsl-block-style]')) {
+            child.parentNode && child.parentNode.removeChild(child);
+            continue;
+          }
+          document.head.appendChild(child);
+        }
+      }
+
+      // Revive scripts so the player + reveal script actually execute
+      reviveScripts(wrapper);
+      unhideRevealedSubtree(wrapper);
+
+      postCodeUpdated();
+      // Re-position the selection overlay since the wrapper's layout likely changed
+      if (selectedEl === wrapper) positionOverlay(selectOverlay, wrapper);
+      console.log('[VSL] update complete, wrapper now contains', wrapper.children.length, 'children');
+      window.parent.postMessage({ type: 'wf-vsl-update-result', ok: true, id: e.data.id }, '*');
     }
     if (e.data.type === 'wf-load-font' && e.data.url) {
       const id = '__wf_font_' + (e.data.family || '').replace(/[^a-z0-9]/gi, '_');
@@ -539,25 +695,52 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
   document.addEventListener('mousemove', function(e) {
     if (!editMode) return;
     const el = e.target;
-    if (el === hoverOverlay || el === selectOverlay || el.id?.startsWith('__wf')) return;
+    // Skip events when hovering ANY editor-internal element or its descendants
+    // (e.g. SVG/span inside the gear button) — keep the gear visible.
+    if (el.closest && el.closest('[id^="__wf"]')) return;
     if (el !== hoverEl) {
       hoverEl = el;
       positionOverlay(hoverOverlay, el);
     }
+    // VSL gear: show when hovering inside a VSL block, hide otherwise
+    const vsl = el.closest && el.closest('[data-wf-vsl-block]');
+    if (vsl !== currentVslWrapper) {
+      currentVslWrapper = vsl;
+      if (vsl) positionGear(vsl); else hideGear();
+    } else if (vsl) {
+      // Re-position in case the wrapper was scrolled or resized
+      positionGear(vsl);
+    }
   }, true);
+
+  // Hide gear when mouse leaves the document entirely
+  document.addEventListener('mouseleave', function() { hideGear(); });
 
   document.addEventListener('click', function(e) {
     if (!editMode) return;
+    let el = e.target;
+    // Click landed on an editor-internal element (gear, overlay, drop indicator)
+    // or any descendant — let the native click handler (e.g. gear button) run.
+    if (el.closest && el.closest('[id^="__wf"]')) return;
     e.preventDefault();
     e.stopPropagation();
-    const el = e.target;
-    if (el.id?.startsWith('__wf')) return;
+    // VSL blocks: snap selection to the wrapper, not the inner svg/strong/span.
+    // Also signals the parent to open the lateral config panel.
+    const vslWrapper = el.closest && el.closest('[data-wf-vsl-block]');
+    if (vslWrapper) el = vslWrapper;
     selectedEl = el;
     const id = ensureId(el);
     positionOverlay(selectOverlay, el);
     selectLabel.textContent = getElementTag(el);
     hoverOverlay.style.display = 'none';
     window.parent.postMessage({ type: 'wf-element-selected', id, props: getComputedProps(el) }, '*');
+    if (vslWrapper) {
+      window.parent.postMessage({
+        type: 'wf-open-vsl-config',
+        id,
+        config: vslWrapper.getAttribute('data-wf-vsl-config') || null,
+      }, '*');
+    }
   }, true);
 
   // Restore per-breakpoint rules from the JSON sidecar (if the doc was edited before).
@@ -627,7 +810,13 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
 
     const container = document.createElement('div');
     container.innerHTML = dragHtml.trim();
-    const newEl = container.firstElementChild;
+    const inserted = Array.prototype.slice.call(container.children);
+    const NON_VISIBLE = { SCRIPT:1, STYLE:1, LINK:1, META:1 };
+    let newEl = null;
+    for (let i = 0; i < inserted.length; i++) {
+      if (!NON_VISIBLE[inserted[i].tagName]) { newEl = inserted[i]; break; }
+    }
+    if (!newEl) newEl = inserted[0];
     if (!newEl) return;
 
     if (dropPosition === 'inside') {
@@ -638,12 +827,22 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
       dropTarget.parentElement && dropTarget.parentElement.insertBefore(newEl, dropTarget.nextSibling);
     }
 
-    // Append any remaining siblings from the container
-    while (container.firstElementChild) {
-      newEl.parentNode && newEl.parentNode.insertBefore(container.firstElementChild, newEl.nextSibling);
+    const HEAD_TAGS = { STYLE:1, LINK:1, META:1 };
+    for (let i = 0; i < inserted.length; i++) {
+      const node = inserted[i];
+      if (node === newEl) continue;
+      if (HEAD_TAGS[node.tagName]) {
+        if (node.id && document.getElementById(node.id)) { node.parentNode && node.parentNode.removeChild(node); continue; }
+        document.head.appendChild(node);
+      } else {
+        newEl.parentNode && newEl.parentNode.insertBefore(node, newEl.nextSibling);
+      }
     }
 
-    reviveScripts(newEl);
+    for (let i = 0; i < inserted.length; i++) {
+      if (inserted[i].parentNode) reviveScripts(inserted[i]);
+    }
+    for (let i = 0; i < inserted.length; i++) unhideRevealedSubtree(inserted[i]);
 
     selectedEl = newEl;
     ensureId(newEl);

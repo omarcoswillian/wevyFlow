@@ -50,6 +50,9 @@ import { LayersPanel, TreeNode } from "./LayersPanel";
 import { LibraryPanel } from "./LibraryPanel";
 import { useComponents } from "../lib/editor/useComponents";
 import { ElementorExport } from "./ElementorExport";
+import { VSLConfigPanel } from "./VSLConfigPanel";
+import { VSLConfig, deserializeConfig, serializeConfig, buildVSLInnerHtml } from "../lib/vsl";
+import { stripEditorScripts } from "../lib/strip-editor-scripts";
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import xml from "react-syntax-highlighter/dist/esm/languages/hljs/xml";
 import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
@@ -118,6 +121,7 @@ export function WorkspaceView({
   const [loadedFonts, setLoadedFonts] = useState<string[]>([]);
   const [showElementorExport, setShowElementorExport] = useState(false);
   const [elementorCopied, setElementorCopied] = useState(false);
+  const [vslDialog, setVslDialog] = useState<{ id: string; config: VSLConfig | null } | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatFileRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
@@ -174,7 +178,16 @@ export function WorkspaceView({
       localStorage.setItem(draftKey, finalCode);
       setSaved(true);
       setTimeout(() => setSaved(false), 1800);
-    } catch { /* quota / disabled storage — silent */ }
+    } catch (err) {
+      const isQuota = err instanceof DOMException && (err.code === 22 || err.code === 1014 || err.name === "QuotaExceededError");
+      // Surface the failure so the user knows the draft did NOT persist.
+      // Silent failure here is what made saves "look fine" then disappear after refresh.
+      window.dispatchEvent(new CustomEvent("wevyflow-storage-error", {
+        detail: { type: isQuota ? "quota" : "unknown", message: isQuota
+          ? "Armazenamento local cheio. O draft NÃO foi salvo. Clique em Liberar espaço."
+          : "Erro ao salvar draft." },
+      }));
+    }
   }, [draftKey, finalCode]);
 
   // When streaming starts, show code tab. When done, switch to preview.
@@ -211,7 +224,11 @@ export function WorkspaceView({
   const buildPreviewHtml = useCallback((body: string) => {
     const fontsUrl = googleFontUrl(loadedFonts);
     const fontsLink = fontsUrl ? `<link rel="stylesheet" href="${fontsUrl}">` : "";
-    return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${BASE_CSS}${fontsLink}</head><body>${body}${BASE_SCRIPT}${IFRAME_VISUAL_EDIT_SCRIPT}</body></html>`;
+    // Strip any editor scripts already embedded in body (legacy from earlier
+    // serializations). Without this, multiple IIFEs run with their own
+    // idCounter/dragHtml state — colliding ids, duplicated drops, broken updates.
+    const cleanBody = stripEditorScripts(body);
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${BASE_CSS}${fontsLink}</head><body>${cleanBody}${BASE_SCRIPT}${IFRAME_VISUAL_EDIT_SCRIPT}</body></html>`;
   }, [loadedFonts]);
 
   // Iframe srcDoc is kept separate from finalCode so that edits originating
@@ -231,13 +248,13 @@ export function WorkspaceView({
   }, [finalCode, buildPreviewHtml]);
 
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(finalCode || code);
+    navigator.clipboard.writeText(stripEditorScripts(finalCode || code));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }, [code]);
 
   const handleDownload = useCallback(() => {
-    const codeToExport = finalCode || code;
+    const codeToExport = stripEditorScripts(finalCode || code);
     const fullHtml = `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Layout WevyFlow</title>\n</head>\n<body>\n${codeToExport}\n</body>\n</html>`;
     const blob = new Blob([fullHtml], { type: "text/html" });
     const url = URL.createObjectURL(blob);
@@ -288,6 +305,23 @@ export function WorkspaceView({
       if (e.data.type === "wf-selected-html" && typeof e.data.html === "string" && pendingComponentName.current) {
         addComponent(pendingComponentName.current, e.data.html, e.data.tagName || "div");
         pendingComponentName.current = null;
+      }
+      if (e.data.type === "wf-vsl-update-result") {
+        console.log("[VSL] update result from iframe", e.data);
+        if (!e.data.ok) {
+          window.alert(`VSL não foi atualizado: ${e.data.reason || "erro desconhecido"}\n(detalhes no console)`);
+        }
+      }
+      if (e.data.type === "wf-open-vsl-config" && typeof e.data.id === "string") {
+        // Auto-enable edit mode so the iframe accepts the subsequent wf-update-vsl
+        if (!visualEditMode) {
+          iframeRef.current?.contentWindow?.postMessage({ type: "wf-enable-edit" }, "*");
+          setVisualEditMode(true);
+        }
+        // Make sure the left panel is visible — the config UI lives there
+        setLeftCollapsed(false);
+        const cfg = typeof e.data.config === "string" ? deserializeConfig(e.data.config) : null;
+        setVslDialog({ id: e.data.id, config: cfg });
       }
       if (e.data.type === "wf-ready") {
         if (Array.isArray(e.data.tree)) setTree(e.data.tree);
@@ -358,6 +392,26 @@ export function WorkspaceView({
   const handleLayerRename = useCallback((id: string, name: string) => {
     iframeRef.current?.contentWindow?.postMessage({ type: "wf-rename-by-id", id, name }, "*");
   }, []);
+
+  const handleVSLSave = useCallback((config: VSLConfig) => {
+    if (!vslDialog) {
+      console.error("[VSL] handleVSLSave called with no active dialog");
+      return;
+    }
+    const html = buildVSLInnerHtml(config);
+    console.log("[VSL] saving", { id: vslDialog.id, htmlLen: html.length, hasIframe: !!iframeRef.current?.contentWindow });
+    if (!iframeRef.current?.contentWindow) {
+      console.error("[VSL] iframe contentWindow not available");
+      return;
+    }
+    iframeRef.current.contentWindow.postMessage({
+      type: "wf-update-vsl",
+      id: vslDialog.id,
+      html,
+      config: serializeConfig(config),
+    }, "*");
+    setVslDialog(null);
+  }, [vslDialog]);
 
   const handleDragHtml = useCallback((html: string | null) => {
     if (html === null) {
@@ -679,7 +733,16 @@ export function WorkspaceView({
         </div>
 
         {/* Content */}
-        {visualEditMode ? (
+        {vslDialog ? (
+          // VSL config takes over the left panel until the user closes it.
+          // Re-mounted per element via `key` so internal state resets cleanly.
+          <VSLConfigPanel
+            key={vslDialog.id}
+            initialConfig={vslDialog.config}
+            onClose={() => setVslDialog(null)}
+            onSave={handleVSLSave}
+          />
+        ) : visualEditMode ? (
           <VisualEditor
             elementProps={selectedElementProps}
             viewport={viewportSize}
@@ -1051,6 +1114,7 @@ export function WorkspaceView({
           onClose={() => setShowElementorExport(false)}
         />
       )}
+
     </div>
   );
 }

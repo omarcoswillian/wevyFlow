@@ -4,15 +4,16 @@ import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import {
-  Type, Image as ImageIcon, MousePointer2, Square, Video, Code2, Heading1, Heading2, Heading3, Pilcrow, List, PlayCircle, Film,
+  Type, Image as ImageIcon, MousePointer2, Square, Code2, Heading1, Heading2, Heading3, Pilcrow, List, PlayCircle, Film,
 } from "lucide-react";
+import { buildPlaceholderHtml } from "../lib/vsl";
 
 interface InsertPanelProps {
   onInsert: (html: string) => void;
   onDragHtml: (html: string | null) => void;
 }
 
-type SubFormId = null | "image-url" | "youtube" | "vturb" | "html";
+type SubFormId = null | "image-url" | "youtube" | "html";
 
 export function InsertPanel({ onInsert, onDragHtml }: InsertPanelProps) {
   const [subForm, setSubForm] = useState<SubFormId>(null);
@@ -84,7 +85,13 @@ export function InsertPanel({ onInsert, onDragHtml }: InsertPanelProps) {
           />
           <InsertCard icon={<ImageIcon className="w-4 h-4" />} label="Imagem (URL)" onClick={() => setSubForm("image-url")} />
           <InsertCard icon={<Film className="w-4 h-4" />} label="YouTube" onClick={() => setSubForm("youtube")} />
-          <InsertCard icon={<PlayCircle className="w-4 h-4" />} label="VTurb" onClick={() => setSubForm("vturb")} />
+          <InsertCard
+            icon={<PlayCircle className="w-4 h-4" />}
+            label="VSL VTurb"
+            html={buildPlaceholderHtml()}
+            onInsert={onInsert}
+            onDragHtml={onDragHtml}
+          />
         </div>
 
         {subForm === "image-url" && (
@@ -113,9 +120,6 @@ export function InsertPanel({ onInsert, onDragHtml }: InsertPanelProps) {
           />
         )}
 
-        {subForm === "vturb" && (
-          <VTurbForm onCancel={() => setSubForm(null)} onSubmit={(html) => { onInsert(html); setSubForm(null); }} />
-        )}
       </section>
 
       {/* Interação */}
@@ -152,7 +156,11 @@ export function InsertPanel({ onInsert, onDragHtml }: InsertPanelProps) {
         </div>
 
         {subForm === "html" && (
-          <HtmlForm onCancel={() => setSubForm(null)} onSubmit={(html) => { onInsert(html); setSubForm(null); }} />
+          <HtmlForm
+            onCancel={() => setSubForm(null)}
+            onSubmit={(html) => { onInsert(html); setSubForm(null); }}
+            onDragHtml={onDragHtml}
+          />
         )}
       </section>
     </div>
@@ -230,54 +238,17 @@ function MiniForm({ label, placeholder, onCancel, onSubmit }: { label: string; p
   );
 }
 
-function VTurbForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit: (html: string) => void }) {
-  const [raw, setRaw] = useState("");
-
-  const build = () => {
-    const clean = raw.trim();
-    if (!clean) return;
-    // Accept: full snippet, just ID, or a URL
-    if (clean.startsWith("<")) {
-      onSubmit(clean);
-      return;
-    }
-    const idMatch = clean.match(/[a-f0-9]{24,}/i);
-    const id = idMatch ? idMatch[0] : clean;
-    onSubmit(
-      `<div class="reveal" data-wf-video="vturb:${id}" id="vid_${id}" style="position:relative;width:100%;padding-top:56.25%">` +
-      `<img id="thumb_${id}" src="https://images.converteai.net/${id}/players/${id}/thumbnail.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block" alt="thumbnail">` +
-      `</div>` +
-      `<script type="text/javascript">var s=document.createElement("script");s.src="https://scripts.converteai.net/${id}/players/${id}/player.js";s.async=true;document.head.appendChild(s);</script>`
-    );
-  };
-
-  return (
-    <div className="mt-2 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-2">
-      <span className="text-[10px] text-white/40">VTurb player (cole o ID, URL ou o snippet completo)</span>
-      <textarea
-        autoFocus
-        value={raw}
-        onChange={(e) => setRaw(e.target.value)}
-        onKeyDown={(e) => { if (e.key === "Escape") onCancel(); }}
-        placeholder="ID do player (ex: 6720bfe...) ou snippet completo"
-        className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-purple-500/30 h-24 resize-none font-mono"
-      />
-      <div className="flex gap-1.5">
-        <button onClick={onCancel} className="flex-1 py-1.5 rounded-lg text-[10px] text-white/50 bg-white/[0.03] hover:bg-white/[0.06] cursor-pointer">Cancelar</button>
-        <button
-          onClick={build}
-          disabled={!raw.trim()}
-          className={cn("flex-1 py-1.5 rounded-lg text-[10px] cursor-pointer transition-all",
-            raw.trim() ? "bg-purple-500 text-white hover:bg-purple-400" : "bg-white/[0.03] text-white/20")}>
-          Inserir VTurb
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function HtmlForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit: (html: string) => void }) {
+function HtmlForm({
+  onCancel,
+  onSubmit,
+  onDragHtml,
+}: {
+  onCancel: () => void;
+  onSubmit: (html: string) => void;
+  onDragHtml?: (html: string | null) => void;
+}) {
   const [html, setHtml] = useState("");
+  const ready = !!html.trim();
   return (
     <div className="mt-2 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-2">
       <span className="text-[10px] text-white/40">HTML customizado (aceita &lt;script&gt;, &lt;iframe&gt;, pixels, chat, etc.)</span>
@@ -289,14 +260,35 @@ function HtmlForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit: (htm
         placeholder='<script src="..."></script>'
         className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-purple-500/30 h-32 resize-none font-mono"
       />
+      {/* Drag-to-place handle: a separate full-width strip the user can grab.
+          Avoids two-modes-on-one-button confusion (click-to-insert vs drag) and
+          works regardless of where the textarea focus is. */}
+      {ready && (
+        <div
+          draggable
+          onDragStart={(e) => {
+            const payload = html.trim();
+            if (e.dataTransfer) {
+              e.dataTransfer.effectAllowed = "copy";
+              e.dataTransfer.setData("text/html", payload);
+            }
+            onDragHtml?.(payload);
+          }}
+          onDragEnd={() => onDragHtml?.(null)}
+          className="px-2 py-2 rounded-lg bg-purple-500/15 border border-dashed border-purple-500/40 text-[10px] text-purple-200 text-center cursor-grab active:cursor-grabbing select-none"
+          title="Arraste para posicionar"
+        >
+          ⇕ Arraste daqui para posicionar no preview
+        </div>
+      )}
       <div className="flex gap-1.5">
         <button onClick={onCancel} className="flex-1 py-1.5 rounded-lg text-[10px] text-white/50 bg-white/[0.03] hover:bg-white/[0.06] cursor-pointer">Cancelar</button>
         <button
-          onClick={() => html.trim() && onSubmit(html.trim())}
-          disabled={!html.trim()}
-          className={cn("flex-1 py-1.5 rounded-lg text-[10px] cursor-pointer transition-all",
-            html.trim() ? "bg-purple-500 text-white hover:bg-purple-400" : "bg-white/[0.03] text-white/20")}>
-          Inserir HTML
+          onClick={() => ready && onSubmit(html.trim())}
+          disabled={!ready}
+          className={cn("flex-1 py-1.5 rounded-lg text-[10px] transition-all cursor-pointer",
+            ready ? "bg-purple-500 text-white hover:bg-purple-400" : "bg-white/[0.03] text-white/20 cursor-not-allowed")}>
+          Inserir após seleção
         </button>
       </div>
     </div>

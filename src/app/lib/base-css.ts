@@ -31,8 +31,9 @@ p{font-size:var(--text-body);line-height:1.7;color:var(--text-secondary)}
 </style>`;
 
 export const BASE_SCRIPT = `
-<script>
+<script id="__wf_base_script">
 (function(){
+  if(window.__wfBaseScriptLoaded)return;window.__wfBaseScriptLoaded=true;
   const o=new IntersectionObserver(e=>{e.forEach(e=>{e.isIntersecting&&(e.target.classList.add('is-visible'),o.unobserve(e.target))})},{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
   document.querySelectorAll('.reveal').forEach(e=>o.observe(e));
 })();

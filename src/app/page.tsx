@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Platform } from "./lib/types";
 import { useHistory } from "./lib/history";
 import { useProjects, Project, ProjectPage } from "./lib/projects";
+import { compactStorage, aggressiveCleanup, formatBytes } from "./lib/storage-compact";
 import { HomeView, GenerateData } from "./components/HomeView";
 import { WorkspaceView } from "./components/WorkspaceView";
 import { CommandPalette } from "./components/CommandPalette";
@@ -85,10 +86,48 @@ export default function App() {
   useEffect(() => {
     if (saveError) {
       setStorageToast(saveError);
-      const timer = setTimeout(() => setStorageToast(null), 5000);
+      const timer = setTimeout(() => setStorageToast(null), 8000);
       return () => clearTimeout(timer);
     }
   }, [saveError]);
+
+  // Silent auto-compaction on app load — strips legacy duplicated editor scripts
+  // from drafts/projects/history that piled up before the id-based dedup landed.
+  // Only shows a toast if it actually freed meaningful space (>50 KB).
+  useEffect(() => {
+    const result = compactStorage();
+    const saved = result.bytesBefore - result.bytesAfter;
+    if (saved > 50 * 1024) {
+      setStorageToast(`Espaço liberado: ${formatBytes(saved)} (${result.keysShrunk} entradas otimizadas)`);
+      setTimeout(() => setStorageToast(null), 5000);
+    }
+  }, []);
+
+  const handleManualCompact = useCallback(() => {
+    const compact = compactStorage();
+    const compacted = compact.bytesBefore - compact.bytesAfter;
+    // If compaction didn't free a meaningful chunk, run the aggressive path
+    // (wipe history + old drafts). Confirm with the user first.
+    if (compacted < 100 * 1024) {
+      const ok = window.confirm(
+        "A limpeza leve liberou pouco espaço. Quer apagar o histórico de gerações e drafts antigos?\n\n" +
+        "Seus projetos, componentes salvos e o draft atual ficam intactos."
+      );
+      if (!ok) {
+        setStorageToast(`${formatBytes(compacted)} liberados.`);
+        setTimeout(() => setStorageToast(null), 4000);
+        return;
+      }
+      const aggressive = aggressiveCleanup(null);
+      setStorageToast(
+        `${formatBytes(compacted + aggressive.bytesFreed)} liberados (${aggressive.itemsRemoved} itens removidos).`
+      );
+      setTimeout(() => setStorageToast(null), 5000);
+      return;
+    }
+    setStorageToast(`${formatBytes(compacted)} liberados em ${compact.keysShrunk} entradas.`);
+    setTimeout(() => setStorageToast(null), 5000);
+  }, []);
 
   // Global Cmd+K shortcut for command palette
   useEffect(() => {
@@ -323,9 +362,22 @@ export default function App() {
     />
   );
 
+  const storageToastIsError = storageToast?.toLowerCase().includes("cheio") || storageToast?.toLowerCase().includes("erro");
   const storageToastEl = storageToast ? (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[200] px-4 py-3 rounded-xl bg-red-500/15 border border-red-500/25 text-red-400 text-[12px] font-medium backdrop-blur-xl shadow-2xl animate-fade-in-delay max-w-md text-center">
-      {storageToast}
+    <div className={`fixed bottom-4 left-1/2 -translate-x-1/2 z-[200] px-4 py-3 rounded-xl border text-[12px] font-medium backdrop-blur-xl shadow-2xl animate-fade-in-delay max-w-md text-center flex items-center gap-3 ${
+      storageToastIsError
+        ? "bg-red-500/15 border-red-500/25 text-red-400"
+        : "bg-emerald-500/15 border-emerald-500/25 text-emerald-400"
+    }`}>
+      <span>{storageToast}</span>
+      {storageToastIsError && (
+        <button
+          onClick={handleManualCompact}
+          className="px-2.5 py-1 rounded-md bg-red-500/20 hover:bg-red-500/30 text-red-300 text-[11px] font-semibold cursor-pointer whitespace-nowrap"
+        >
+          Liberar espaço
+        </button>
+      )}
     </div>
   ) : null;
 
