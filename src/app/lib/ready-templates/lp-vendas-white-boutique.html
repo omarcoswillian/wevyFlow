@@ -1785,6 +1785,11 @@
     border-top: 1px solid var(--border);
   }
 
+  /* FAQ via <details>/<summary> nativo — funciona sem JS, em qualquer ambiente.
+     Box-sizing/overflow-wrap travados pra não estourar viewport mobile dentro do Elementor. */
+  .faq-list, .faq-item, .faq-q, .faq-a, .faq-a-inner { max-width: 100%; box-sizing: border-box; }
+  .faq-q, .faq-a-inner { word-break: break-word; overflow-wrap: anywhere; }
+
   .faq-item {
     border-bottom: 1px solid var(--border);
     transition: background 0.3s;
@@ -1795,9 +1800,7 @@
   .block--dark .faq-item:hover { background: rgba(212, 184, 220, 0.02); }
 
   .faq-q {
-    width: 100%;
-    padding: 28px 0;
-    text-align: left;
+    padding: 22px 0;
     font-size: 1rem;
     font-weight: 500;
     letter-spacing: -0.012em;
@@ -1805,9 +1808,14 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
+    gap: 16px;
+    cursor: pointer;
     transition: color 0.25s;
+    list-style: none;
   }
+
+  .faq-q::-webkit-details-marker { display: none; }
+  .faq-q::marker { content: ''; }
 
   .faq-q:hover { color: var(--mauve); }
 
@@ -1826,7 +1834,7 @@
     transform: rotate(90deg);
   }
 
-  .faq-item.open .faq-q:hover .faq-toggle { transform: rotate(0); }
+  .faq-item[open] .faq-q:hover .faq-toggle { transform: rotate(0); }
 
   .faq-toggle::before,
   .faq-toggle::after {
@@ -1850,7 +1858,7 @@
     transform: translate(-50%, -50%);
   }
 
-  .faq-item.open .faq-toggle::after { transform: translate(-50%, -50%) rotate(90deg); }
+  .faq-item[open] .faq-toggle::after { transform: translate(-50%, -50%) rotate(90deg); }
 
   .faq-a {
     max-height: 0;
@@ -1866,7 +1874,7 @@
     max-width: 62ch;
   }
 
-  .faq-item.open .faq-a { max-height: 480px; }
+  .faq-item[open] .faq-a { max-height: 480px; }
 
   @media (max-width: 860px) {
     .faq-grid { grid-template-columns: 1fr; gap: 40px; }
@@ -2444,8 +2452,8 @@
         <h2 class="t-h2">São mais de 25 mil alunos em 3 anos. <em>Alguns dos milhares de resultados.</em></h2>
       </div>
 
-      <div class="tst-hero-grid rv-stagger">
-        <div class="tst-img tst-img--hero">
+      <div class="tst-hero-grid tst-rotate rv-stagger" data-rotate="3000">
+        <div class="tst-img tst-img--hero" data-pos="0">
           <div class="ph">
             <div class="ph-inner">
               <div class="ph-big">07</div>
@@ -2454,10 +2462,10 @@
             </div>
           </div>
         </div>
-        <div class="tst-img"><div class="ph"><div class="ph-inner"><div class="ph-big">08</div><div class="ph-label">Depoimento</div></div></div></div>
-        <div class="tst-img"><div class="ph"><div class="ph-inner"><div class="ph-big">09</div><div class="ph-label">Depoimento</div></div></div></div>
-        <div class="tst-img"><div class="ph"><div class="ph-inner"><div class="ph-big">14</div><div class="ph-label">Depoimento</div></div></div></div>
-        <div class="tst-img"><div class="ph"><div class="ph-inner"><div class="ph-big">15</div><div class="ph-label">Depoimento</div></div></div></div>
+        <div class="tst-img" data-pos="1"><div class="ph"><div class="ph-inner"><div class="ph-big">08</div><div class="ph-label">Depoimento</div></div></div></div>
+        <div class="tst-img" data-pos="2"><div class="ph"><div class="ph-inner"><div class="ph-big">09</div><div class="ph-label">Depoimento</div></div></div></div>
+        <div class="tst-img" data-pos="3"><div class="ph"><div class="ph-inner"><div class="ph-big">14</div><div class="ph-label">Depoimento</div></div></div></div>
+        <div class="tst-img" data-pos="4"><div class="ph"><div class="ph-inner"><div class="ph-big">15</div><div class="ph-label">Depoimento</div></div></div></div>
       </div>
     </div>
   </section>
@@ -2504,34 +2512,34 @@
         </div>
 
         <div class="faq-list rv">
-          <div class="faq-item">
-            <button class="faq-q">Quantas horas tem o curso?<span class="faq-toggle"></span></button>
+          <details class="faq-item">
+            <summary class="faq-q">Quantas horas tem o curso?<span class="faq-toggle"></span></summary>
             <div class="faq-a"><div class="faq-a-inner">Mais rápido do que maratonar uma série. São cerca de 6 horas para dominar a base — num fim de semana você consome todo o Método RMX, aplica e começa a ver resultados em pouco tempo.</div></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q">Por quanto tempo terei acesso ao curso?<span class="faq-toggle"></span></button>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-q">Por quanto tempo terei acesso ao curso?<span class="faq-toggle"></span></summary>
             <div class="faq-a"><div class="faq-a-inner">Você tem acesso por 1 ano a partir da data da compra. Durante esses 12 meses, todas as atualizações do conteúdo estão incluídas sem custo adicional.</div></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q">Posso parcelar?<span class="faq-toggle"></span></button>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-q">Posso parcelar?<span class="faq-toggle"></span></summary>
             <div class="faq-a"><div class="faq-a-inner">Sim. A plataforma de pagamento oferece várias opções: até 12x no cartão, Pix + cartão, 2 cartões, saldo Hotmart — o que for melhor para o seu bolso.</div></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q">E se eu não gostar e quiser meu dinheiro de volta?<span class="faq-toggle"></span></button>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-q">E se eu não gostar e quiser meu dinheiro de volta?<span class="faq-toggle"></span></summary>
             <div class="faq-a"><div class="faq-a-inner">Tudo bem. Você tem 7 dias para se decidir e solicitar o cancelamento diretamente na plataforma. Qualquer dúvida, é só entrar em contato pelo e-mail de suporte.</div></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q">Preciso ter experiência prévia em marketing digital, criação de produto ou tecnologia?<span class="faq-toggle"></span></button>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-q">Preciso ter experiência prévia em marketing digital, criação de produto ou tecnologia?<span class="faq-toggle"></span></summary>
             <div class="faq-a"><div class="faq-a-inner">Não. O RMX foi projetado para funcionar tanto para iniciantes quanto para pessoas experientes. Ensinamos do zero, passo a passo. Temos orgulho de ter alunos com mais de 65 anos que criaram seus primeiros infoprodutos usando nosso sistema.</div></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q">Depois de 1 ano, eu perco todo o material que produzi?<span class="faq-toggle"></span></button>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-q">Depois de 1 ano, eu perco todo o material que produzi?<span class="faq-toggle"></span></summary>
             <div class="faq-a"><div class="faq-a-inner">Não. Todo o material que você produziu é 100% seu e permanece na sua máquina. O que termina é apenas o acesso ao conteúdo gravado e às atualizações.</div></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q">O Método RMX é Inteligência Artificial?<span class="faq-toggle"></span></button>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-q">O Método RMX é Inteligência Artificial?<span class="faq-toggle"></span></summary>
             <div class="faq-a"><div class="faq-a-inner">Sim. Criamos e lapidamos um passo a passo preciso para que o sistema de IA identifique e extraia o melhor do seu conhecimento, e crie algo novo, único, exclusivo e personalizado.</div></div>
-          </div>
+          </details>
         </div>
       </div>
 
@@ -2589,15 +2597,7 @@
 
   document.querySelectorAll('.rv, .rv-stagger').forEach(el => io.observe(el));
 
-  // FAQ
-  document.querySelectorAll('.faq-q').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const item = btn.parentElement;
-      const isOpen = item.classList.contains('open');
-      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-      if (!isOpen) item.classList.add('open');
-    });
-  });
+  // FAQ agora usa <details>/<summary> nativo — sem JS. Bloco abaixo intencionalmente vazio.
 
   // Testimonials grid: rotate positions every Ns. Uses FLIP for smooth motion
   // (measure → reorder → animate from old → new). Pauses while user hovers.

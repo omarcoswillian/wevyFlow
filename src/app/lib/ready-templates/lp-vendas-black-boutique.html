@@ -350,20 +350,25 @@
   .faq-head .t-h2 { margin-bottom: 24px; max-width: 12ch; }
   .faq-head p { font-size: 0.95rem; color: var(--text-2); line-height: 1.6; max-width: 32ch; }
   .faq-list { border-top: 1px solid var(--border); }
+  /* FAQ via <details>/<summary> nativo — funciona sem JS, sem timing, em qualquer ambiente.
+     Box-sizing/overflow-wrap travados pra não estourar viewport mobile dentro do Elementor. */
+  .faq-list, .faq-item, .faq-q, .faq-a, .faq-a-inner { max-width: 100%; box-sizing: border-box; }
+  .faq-q, .faq-a-inner { word-break: break-word; overflow-wrap: anywhere; }
   .faq-item { border-bottom: 1px solid var(--border); transition: background 0.3s; }
   .faq-item:hover { background: rgba(212, 184, 220, 0.02); }
-  .faq-q { width: 100%; padding: 28px 0; text-align: left; font-size: 1rem; font-weight: 500; letter-spacing: -0.012em; color: var(--text); display: flex; align-items: center; justify-content: space-between; gap: 24px; transition: color 0.25s; }
+  .faq-q { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 0; font-size: 1rem; font-weight: 500; letter-spacing: -0.012em; color: var(--text); cursor: pointer; transition: color 0.25s; list-style: none; }
+  .faq-q::-webkit-details-marker { display: none; }
+  .faq-q::marker { display: none; content: ''; }
   .faq-q:hover { color: var(--mauve); }
   .faq-toggle { width: 28px; height: 28px; flex-shrink: 0; position: relative; border: 1px solid var(--border-2); border-radius: 50%; transition: border-color 0.3s, transform 0.4s cubic-bezier(0.2, 0.9, 0.25, 1); }
   .faq-q:hover .faq-toggle { border-color: var(--mauve); transform: rotate(90deg); }
-  .faq-item.open .faq-q:hover .faq-toggle { transform: rotate(0); }
+  .faq-item[open] .faq-q:hover .faq-toggle { transform: rotate(0); }
   .faq-toggle::before, .faq-toggle::after { content: ''; position: absolute; top: 50%; left: 50%; background: var(--mauve); transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.25, 1); }
   .faq-toggle::before { width: 12px; height: 1px; transform: translate(-50%, -50%); }
   .faq-toggle::after { width: 1px; height: 12px; transform: translate(-50%, -50%); }
-  .faq-item.open .faq-toggle::after { transform: translate(-50%, -50%) rotate(90deg); }
-  .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.2, 0.9, 0.25, 1); }
-  .faq-a-inner { padding: 0 0 28px; font-size: 0.96rem; color: var(--text-2); line-height: 1.7; max-width: 62ch; }
-  .faq-item.open .faq-a { max-height: 480px; }
+  .faq-item[open] .faq-toggle::after { transform: translate(-50%, -50%) rotate(90deg); }
+  .faq-a { overflow: hidden; }
+  .faq-a-inner { padding: 0 0 22px; font-size: 0.96rem; color: var(--text-2); line-height: 1.7; max-width: 62ch; }
   @media (max-width: 860px) { .faq-grid { grid-template-columns: 1fr; gap: 40px; } }
 
   .price-section { width: 100%; max-width: 1240px; margin: 0 auto; padding: 120px 56px 140px; position: relative; }
@@ -651,11 +656,11 @@
           <p>Tire suas duvidas antes de se inscrever.</p>
         </div>
         <div class="faq-list rv">
-          <div class="faq-item"><button class="faq-q">Preciso ler muitos livros por mes? <span class="faq-toggle"></span></button><div class="faq-a"><div class="faq-a-inner">Nao. O metodo funciona mesmo que voce leia apenas 1 livro por mes. O importante e a qualidade da leitura e a aplicacao do metodo.</div></div></div>
-          <div class="faq-item"><button class="faq-q">Em quanto tempo vejo resultados? <span class="faq-toggle"></span></button><div class="faq-a"><div class="faq-a-inner">Nossos alunos mais aplicados comecam a ver resultados nas primeiras 2-4 semanas. Depende da sua dedicacao e consistencia.</div></div></div>
-          <div class="faq-item"><button class="faq-q">Funciona para qualquer nicho? <span class="faq-toggle"></span></button><div class="faq-a"><div class="faq-a-inner">Sim. O metodo e adaptavel para qualquer area de conhecimento: negocios, desenvolvimento pessoal, saude, financas, tecnologia, etc.</div></div></div>
-          <div class="faq-item"><button class="faq-q">Tem garantia? <span class="faq-toggle"></span></button><div class="faq-a"><div class="faq-a-inner">Sim, garantia incondicional de 7 dias. Se nao gostar, devolvemos 100% do seu investimento sem perguntas.</div></div></div>
-          <div class="faq-item"><button class="faq-q">Como funciona o acesso? <span class="faq-toggle"></span></button><div class="faq-a"><div class="faq-a-inner">Apos a compra, voce recebe acesso imediato a plataforma com todos os modulos, bonus e comunidade.</div></div></div>
+          <details class="faq-item"><summary class="faq-q">Preciso ler muitos livros por mes? <span class="faq-toggle"></span></summary><div class="faq-a"><div class="faq-a-inner">Nao. O metodo funciona mesmo que voce leia apenas 1 livro por mes. O importante e a qualidade da leitura e a aplicacao do metodo.</div></div></details>
+          <details class="faq-item"><summary class="faq-q">Em quanto tempo vejo resultados? <span class="faq-toggle"></span></summary><div class="faq-a"><div class="faq-a-inner">Nossos alunos mais aplicados comecam a ver resultados nas primeiras 2-4 semanas. Depende da sua dedicacao e consistencia.</div></div></details>
+          <details class="faq-item"><summary class="faq-q">Funciona para qualquer nicho? <span class="faq-toggle"></span></summary><div class="faq-a"><div class="faq-a-inner">Sim. O metodo e adaptavel para qualquer area de conhecimento: negocios, desenvolvimento pessoal, saude, financas, tecnologia, etc.</div></div></details>
+          <details class="faq-item"><summary class="faq-q">Tem garantia? <span class="faq-toggle"></span></summary><div class="faq-a"><div class="faq-a-inner">Sim, garantia incondicional de 7 dias. Se nao gostar, devolvemos 100% do seu investimento sem perguntas.</div></div></details>
+          <details class="faq-item"><summary class="faq-q">Como funciona o acesso? <span class="faq-toggle"></span></summary><div class="faq-a"><div class="faq-a-inner">Apos a compra, voce recebe acesso imediato a plataforma com todos os modulos, bonus e comunidade.</div></div></details>
         </div>
       </div>
   </div>
@@ -705,15 +710,7 @@
   }, { threshold: 0.1 });
   document.querySelectorAll('.rv, .rv-stagger').forEach(function(el) { rvObs.observe(el); });
 
-  // FAQ toggle
-  document.querySelectorAll('.faq-q').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var item = btn.parentElement;
-      var wasOpen = item.classList.contains('open');
-      item.closest('.faq-list').querySelectorAll('.faq-item').forEach(function(i) { i.classList.remove('open'); });
-      if (!wasOpen) item.classList.add('open');
-    });
-  });
+  // FAQ agora usa <details>/<summary> nativo — sem JS. Bloco abaixo intencionalmente vazio.
 </script>
 </body>
 </html>
