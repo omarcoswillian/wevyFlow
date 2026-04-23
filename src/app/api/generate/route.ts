@@ -197,11 +197,23 @@ SUA TAREFA: Recriar esta página em HTML/CSS puro, self-contained e limpo.
 REGRAS INVIOLÁVEIS:
 1. Retorne APENAS o HTML completo. ZERO texto explicativo, markdown ou crases.
 2. Replique fielmente: layout, cores exatas, tipografia, espaçamentos, seções, hierarquia visual.
-3. Substitua imagens reais por divs/gradientes com as mesmas proporções e posições.
+3. Substitua imagens reais por divs placeholder com as mesmas proporções — mas NUNCA quebre a estrutura da seção.
 4. Se um briefing de produto foi fornecido, adapte apenas o copy — mantenha toda a estrutura.
 5. Use Google Fonts para as fontes identificadas. CSS em <style> no <head>.
 6. Não inclua JavaScript externo. Interações simples podem usar CSS puro.
-7. Primeiro caractere da resposta = "<"`;
+7. Primeiro caractere da resposta = "<"
+
+REGRA CRÍTICA — HERO COM FOTO DE PESSOA:
+Quando o hero tiver uma foto de pessoa ocupando metade da seção (split layout):
+- A seção DEVE ter min-height: 700px e width: 100%
+- A foto NÃO é um elemento separado flutuando — é um div posicionado (position: absolute ou coluna flex) que ocupa toda a altura da seção no lado direito
+- Use background-color com gradiente ou cor sólida como placeholder para a foto, mantendo as proporções exatas
+- O layout split (conteúdo esquerda / foto direita) deve ser replicado com flexbox ou grid, nunca com elementos soltos
+- Nunca crie um div isolado para a foto fora do contexto da seção
+
+REGRA CRÍTICA — SEÇÕES DE FUNDO COLORIDO/IMAGEM:
+- Seções com background que ocupa largura total devem ter width: 100% e o padding/margin interno correto
+- Nunca use imagens externas reais — use gradientes CSS ou cores sólidas como placeholder com as mesmas dimensões`;
 
 /* ─────────────────────────────────────────────────────────────
    Step 3 — PERSONALIZE: Claude fills copy (streaming)
