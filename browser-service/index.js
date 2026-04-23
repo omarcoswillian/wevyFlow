@@ -70,11 +70,14 @@ app.post("/render", async (req, res) => {
       );
     });
 
-    // Full-page screenshot (JPEG 85% — good quality, smaller payload)
+    // Screenshot capped at 5000px height to avoid massive base64 payloads
+    const pageHeight = await page.evaluate(() =>
+      Math.min(document.documentElement.scrollHeight, 5000)
+    );
     const screenshotBuffer = await page.screenshot({
-      fullPage: true,
+      clip: { x: 0, y: 0, width: 1280, height: pageHeight },
       type: "jpeg",
-      quality: 85,
+      quality: 70,
     });
     const screenshot = `data:image/jpeg;base64,${screenshotBuffer.toString("base64")}`;
 
