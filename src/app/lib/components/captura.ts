@@ -1,5 +1,5 @@
 // Componentes de captura para infoprodutores brasileiros — v2
-// Benchmark: Conversao Extrema (Tiago Tessmann) / Luana Carolina
+// Benchmark: Mentoria Impacto 360 (Rafael Mendes) / Marina Costa
 // Cada componente funciona standalone e compoe uma LP completa
 // Design tokens: Montserrat, #1DB954 green, #CC0000 urgency, #F8F8F8 bg
 
@@ -153,7 +153,7 @@ export const CAPTURA = {
   <style>@keyframes brilho{0%{background-position:0 0}100%{background-position:100% 0}}</style>
 </div>`,
 
-  "btn-cta-green-pulse": `<!-- BOTAO: CTA Verde com gradiente animado (estilo Conversao Extrema) -->
+  "btn-cta-green-pulse": `<!-- BOTAO: CTA Verde com gradiente animado (estilo Mentoria Impacto 360) -->
 <button type="submit" style="display:block;width:100%;max-width:440px;padding:16px 24px;border:none;border-radius:100px;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;text-transform:uppercase;color:#fff;cursor:pointer;background-image:linear-gradient(45deg,#158f3f,#1DB954,#158f3f,#1DB954);background-size:400% 200%;animation:brilho 3.4s infinite linear;transition:box-shadow 0.3s,transform 0.3s;position:relative;overflow:hidden;">
   [[CTA_TEXT]]
 </button>

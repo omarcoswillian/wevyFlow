@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPE · Story para Enriquecer — Realize sua primeira venda hoje</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F4F4F4;
+  --white:#FFFFFF;
+  --pink:#E8176A;
+  --orange:#FF6B1A;
+  --purple:#9B27D0;
+  --green:#22C55E;
+  --red:#D42B0F;
+  --text:#111111;
+  --muted:#666;
+  --border:#E0E0E0;
+  --r:12px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+
+h1,h2,h3,h4{font-family:'Montserrat',sans-serif;line-height:1.15}
+.sec-wrap{max-width:960px;margin:0 auto;padding:0 24px}
+.sec-title{font-weight:900;font-size:clamp(26px,4vw,42px);text-align:center;margin-bottom:40px;color:var(--text)}
+.sec-white{color:#fff}
+
+/* ─── BUTTONS ─── */
+.btn-green{
+  display:block;background:var(--green);color:#fff;
+  font-family:'Montserrat',sans-serif;font-weight:800;
+  font-size:clamp(13px,1.8vw,15px);letter-spacing:.09em;text-transform:uppercase;
+  padding:18px 36px;border-radius:8px;border:none;cursor:pointer;
+  box-shadow:0 8px 28px rgba(34,197,94,.3);
+  transition:transform .15s,box-shadow .2s;text-align:center;
+}
+.btn-green:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(34,197,94,.4)}
+.btn-green.full{width:100%;max-width:600px;margin:0 auto}
+
+/* ─── LOGO ─── */
+.logo-block{display:inline-flex;flex-direction:column;align-items:flex-start;margin-bottom:40px}
+.logo-story{font-family:'Montserrat',sans-serif;font-weight:900;font-size:26px;background:linear-gradient(90deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-para{font-size:10px;letter-spacing:.1em;color:var(--muted);margin-left:2px}
+.logo-enriquecer{font-family:'Montserrat',sans-serif;font-weight:900;font-size:26px;color:var(--text)}
+
+/* ─── HERO ─── */
+.hero{background:var(--white);padding:56px 24px 0;text-align:center;border-bottom:1px solid var(--border)}
+.hero-inner{max-width:760px;margin:0 auto}
+.hero h1{font-weight:900;font-size:clamp(30px,5.5vw,56px);letter-spacing:-.02em;line-height:1.1;margin-bottom:0}
+.hero h1 .pink{color:var(--pink)}
+.hero h1 .orange{color:var(--orange)}
+.hero h1 .purple{color:var(--purple)}
+
+/* ─── VSL ─── */
+.vsl{background:var(--white);padding:0 24px 56px}
+.vsl-inner{max-width:760px;margin:0 auto}
+.vsl-player{background:var(--red);border-radius:var(--r);overflow:hidden;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;box-shadow:0 20px 60px rgba(0,0,0,.14)}
+.vsl-content{text-align:center;color:#fff;padding:32px 24px}
+.vsl-content h3{font-family:'Montserrat',sans-serif;font-weight:700;font-size:clamp(16px,2.5vw,24px);margin-bottom:24px}
+.vsl-btns{display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap}
+.vsl-btn{display:flex;align-items:center;gap:10px;background:none;border:none;color:#fff;font-weight:600;font-size:14px;cursor:pointer}
+.vsl-btn svg{width:36px;height:36px;flex-shrink:0}
+
+/* ─── CTA VERDE ─── */
+.cta-area{background:var(--white);padding:0 24px 60px;text-align:center}
+
+/* ─── BEFORE/AFTER ─── */
+.ba{background:var(--white);padding:80px 24px}
+.ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+.ba-title{font-weight:900;font-size:clamp(20px,3vw,30px);margin-bottom:20px}
+.ba-list{display:flex;flex-direction:column;gap:10px}
+.ba-item{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:12px;font-size:14px}
+.ba-ico{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ba-ico svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2.5}
+
+/* ─── PROOF STATS ─── */
+.stats{background:var(--bg);padding:80px 24px}
+.stats-inner{max-width:960px;margin:0 auto}
+.stats-title{font-weight:900;font-size:clamp(24px,4vw,42px);text-align:center;line-height:1.15;margin-bottom:10px}
+.stats-title .pink{color:var(--pink)}
+.stats-title .orange{color:var(--orange)}
+.stats-sub{text-align:center;color:var(--muted);font-size:15px;margin-bottom:40px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:40px}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.05);transition:transform .2s,box-shadow .2s}
+.stat-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.1)}
+.stat-head{background:#F0F0F0;padding:10px 14px;display:flex;justify-content:space-between;border-bottom:1px solid var(--border)}
+.stat-head svg{width:13px;height:13px;stroke:#aaa;fill:none;stroke-width:1.5}
+.stat-screen{background:#E2E2E2;aspect-ratio:4/5;display:flex;align-items:center;justify-content:center}
+.stat-screen svg{width:32px;height:32px;stroke:#bbb;fill:none;stroke-width:1.5}
+.stat-count{padding:10px 14px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--muted);border-top:1px solid var(--border)}
+.stat-count svg{width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:1.5}
+.stat-label{font-size:12px;color:var(--muted);padding:7px 14px;text-align:center}
+
+/* ─── DEPOIMENTOS ALUNOS ─── */
+.depos-alunos{background:var(--white);padding:80px 24px}
+.depos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
+.depo{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:22px}
+.depo-stars{display:flex;gap:3px;margin-bottom:10px}
+.depo-stars svg{width:14px;height:14px;fill:var(--orange)}
+.depo p{font-size:14px;color:var(--muted);line-height:1.6;font-style:italic;margin-bottom:14px}
+.depo-author{display:flex;align-items:center;gap:10px}
+.depo-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.depo-name{font-weight:700;font-size:14px;color:var(--text)}
+.depo-role{font-size:12px;color:var(--muted)}
+
+/* ─── MÓDULOS ─── */
+.modulos{background:var(--bg);padding:80px 24px}
+.modulos-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:40px}
+.modulo-card{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.modulo-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px}
+.mod-num{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;color:#fff;flex-shrink:0}
+.modulo-head h3{font-family:'Montserrat',sans-serif;font-weight:700;font-size:15px}
+.modulo-body{padding:16px 24px}
+.modulo-body ul{list-style:none;display:flex;flex-direction:column;gap:8px}
+.modulo-body li{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--muted)}
+.modulo-body li::before{content:"→";color:var(--pink);flex-shrink:0;font-weight:700}
+
+/* ─── BÔNUS ─── */
+.bonus{background:var(--white);padding:80px 24px}
+.bonus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
+.bonus-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:22px;text-align:center}
+.bonus-tag{display:inline-block;background:rgba(232,23,106,.1);border:1px solid rgba(232,23,106,.2);border-radius:100px;padding:4px 14px;font-size:11px;font-weight:700;color:var(--pink);letter-spacing:.06em;margin-bottom:10px}
+.bonus-card h4{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;margin-bottom:8px}
+.bonus-card p{font-size:13px;color:var(--muted)}
+
+/* ─── DARK DEPOIMENTOS SCROLL ─── */
+.depos-dark{background:#0F0F14;padding:80px 0;overflow:hidden}
+.dd-inner{max-width:960px;margin:0 auto;padding:0 24px;text-align:center;margin-bottom:48px}
+.dd-inner .sub{color:#888;font-size:13px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.dd-inner h2{font-family:'Montserrat',sans-serif;font-weight:900;font-size:clamp(24px,4vw,42px);color:#fff;line-height:1.15;margin-bottom:12px}
+.dd-inner h2 .pink{color:var(--pink)}
+.dd-inner p{color:#aaa;font-size:15px;max-width:600px;margin:0 auto}
+.dd-scroll{display:grid;grid-template-columns:repeat(4,minmax(270px,1fr));gap:18px;padding:0 24px;overflow-x:auto;scrollbar-width:none}
+.dd-scroll::-webkit-scrollbar{display:none}
+.dd-card{background:#1A1A24;border-top:3px solid;border-radius:14px;padding:24px;text-align:left}
+.dd-card:nth-child(1){border-color:#9B27D0}
+.dd-card:nth-child(2){border-color:#E8176A}
+.dd-card:nth-child(3){border-color:#FF6B1A}
+.dd-card:nth-child(4){border-color:#22C55E}
+.dd-card h3{font-family:'Montserrat',sans-serif;font-weight:800;font-size:17px;color:#fff;margin-bottom:14px;line-height:1.3}
+.dd-msg{background:#22222E;border-radius:10px;padding:14px 16px;font-size:13px;color:#BBBBC8;line-height:1.6}
+.dd-author{display:flex;align-items:center;gap:8px;margin-top:12px}
+.dd-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.dd-name{font-size:12px;color:#888}
+
+/* ─── PERGUNTA ─── */
+.pergunta{background:var(--white);padding:80px 24px;text-align:center}
+.pergunta-inner{max-width:860px;margin:0 auto}
+.pergunta .pre{color:var(--muted);font-size:14px;margin-bottom:10px}
+.pergunta h2{font-weight:900;font-size:clamp(28px,5vw,52px);line-height:1.12;margin-bottom:14px}
+.pergunta h2 .pink{color:var(--pink)}
+.pergunta h2 .orange{color:var(--orange)}
+.pergunta .desc{font-size:15px;color:var(--muted);max-width:600px;margin:0 auto 40px;line-height:1.6}
+.pergunta .desc strong{color:var(--text)}
+.story-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:48px}
+.story-card{background:#0F0F14;border-radius:12px;aspect-ratio:3/4;display:flex;flex-direction:column;justify-content:flex-end;padding:12px}
+.story-reply{background:rgba(0,0,0,.7);border-radius:18px;padding:8px 12px;display:flex;align-items:center;gap:8px}
+.story-av{width:24px;height:24px;border-radius:50%;flex-shrink:0}
+.story-reply span{font-size:12px;color:#fff;font-weight:500}
+
+/* ─── PRICING ─── */
+.pricing{background:var(--bg);padding:80px 24px}
+.pricing-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:40px;max-width:560px;margin:0 auto;box-shadow:0 8px 40px rgba(0,0,0,.08)}
+.pricing-tag{display:inline-block;background:rgba(232,23,106,.1);border:1px solid rgba(232,23,106,.25);border-radius:100px;padding:5px 16px;font-size:12px;font-weight:700;color:var(--pink);margin-bottom:20px}
+.pricing h3{font-family:'Montserrat',sans-serif;font-weight:900;font-size:22px;margin-bottom:20px}
+.pricing-includes{display:flex;flex-direction:column;gap:8px;margin-bottom:28px}
+.pi{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted)}
+.pi-ico{width:20px;height:20px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pi-ico svg{width:10px;height:10px;stroke:#fff;fill:none;stroke-width:2.5}
+.price-old{font-size:15px;color:var(--muted);text-decoration:line-through;margin-bottom:4px}
+.price-main{font-family:'Montserrat',sans-serif;font-weight:900;font-size:clamp(32px,5vw,48px);color:var(--text);margin-bottom:4px}
+.price-main span{font-size:18px;font-weight:600}
+.price-install{font-size:14px;color:var(--muted);margin-bottom:28px}
+
+/* ─── GARANTIA ─── */
+.garantia{background:var(--white);padding:64px 24px;text-align:center}
+.garantia-inner{max-width:600px;margin:0 auto}
+.garantia-badge{width:80px;height:80px;background:linear-gradient(135deg,var(--green),#16A34A);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.garantia-badge svg{width:36px;height:36px;stroke:#fff;fill:none;stroke-width:1.5}
+.garantia h2{font-weight:900;font-size:clamp(22px,3vw,30px);margin-bottom:14px}
+.garantia p{color:var(--muted);font-size:15px;line-height:1.7}
+
+/* ─── MENTOR ─── */
+.mentor{background:var(--bg);padding:80px 24px}
+.mentor-inner{max-width:840px;margin:0 auto;display:grid;grid-template-columns:260px 1fr;gap:48px;align-items:start}
+.mentor-img{background:linear-gradient(135deg,var(--pink),var(--purple));border-radius:20px;aspect-ratio:4/5;display:flex;align-items:center;justify-content:center}
+.mentor-img svg{width:80px;height:80px;stroke:rgba(255,255,255,.3);fill:none;stroke-width:1}
+.mentor-content h2{font-weight:900;font-size:clamp(20px,3vw,28px);margin-bottom:14px}
+.mentor-content p{font-size:15px;color:var(--muted);line-height:1.7;margin-bottom:12px}
+
+/* ─── FAQ ─── */
+.faq{background:var(--white);padding:80px 24px}
+.faq-list{max-width:760px;margin:0 auto;display:flex;flex-direction:column}
+.faq-item{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:18px 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:600;font-size:15px;color:var(--text)}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-icon{width:24px;height:24px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.faq-icon svg{width:10px;height:10px;stroke:var(--muted);fill:none;stroke-width:2;transition:transform .2s}
+details[open] .faq-icon svg{transform:rotate(45deg)}
+.faq-body{padding:0 0 18px;font-size:14px;color:var(--muted);line-height:1.7}
+
+/* ─── FOOTER ─── */
+footer{background:var(--text);padding:28px 24px;text-align:center}
+footer p{font-size:12px;color:#888}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){
+  .ba-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .depos-grid{grid-template-columns:1fr}
+  .modulos-grid{grid-template-columns:1fr}
+  .bonus-grid{grid-template-columns:repeat(2,1fr)}
+  .story-grid{grid-template-columns:repeat(2,1fr)}
+  .mentor-inner{grid-template-columns:1fr}
+  .dd-scroll{grid-template-columns:repeat(2,minmax(260px,1fr))}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .bonus-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="logo-block">
+      <div style="display:flex;align-items:baseline;gap:4px">
+        <span class="logo-story">Story</span>
+        <span class="logo-para">para</span>
+      </div>
+      <span class="logo-enriquecer">Enriquecer</span>
+    </div>
+
+    <h1>
+      Realize sua <span class="pink">primeira venda</span><br>
+      <span class="orange">ainda hoje</span> pelos stories
+    </h1>
+  </div>
+</section>
+
+<!-- ═══ VSL ═══ -->
+<section class="vsl">
+  <div class="vsl-inner">
+    <div class="vsl-player">
+      <div class="vsl-content">
+        <h3>Você já começou a assistir esse vídeo</h3>
+        <div class="vsl-btns">
+          <button class="vsl-btn">
+            <svg viewBox="0 0 44 44" fill="none" stroke="white" stroke-width="2"><circle cx="22" cy="22" r="20"/><polygon points="17,14 33,22 17,30" fill="white" stroke="white"/></svg>
+            Continuar assistindo?
+          </button>
+          <button class="vsl-btn">
+            <svg viewBox="0 0 44 44" fill="none" stroke="white" stroke-width="2"><circle cx="22" cy="22" r="20"/><path d="M28 22a6 6 0 1 0-6 6"/><polyline points="26,18 28,22 32,20"/></svg>
+            Assistir do início?
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="cta-area">
+  <a href="#" class="btn-green full">QUERO VENDER PELOS STORIES</a>
+</section>
+
+<!-- ═══ BEFORE / AFTER ═══ -->
+<section class="ba">
+  <div class="sec-wrap">
+    <div class="ba-grid">
+      <div>
+        <h2 class="ba-title">Se você não aguenta mais...</h2>
+        <div class="ba-list">
+          <div class="ba-item"><div class="ba-ico" style="background:#EF4444"><svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg></div>Não conseguir vender através dos stories...</div>
+          <div class="ba-item"><div class="ba-ico" style="background:#EF4444"><svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg></div>Ficar perdido sem saber o que postar...</div>
+          <div class="ba-item"><div class="ba-ico" style="background:#EF4444"><svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg></div>Perder oportunidades por não ter as técnicas certas...</div>
+          <div class="ba-item"><div class="ba-ico" style="background:#EF4444"><svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg></div>Não ser constante com a criação de conteúdo...</div>
+          <div class="ba-item"><div class="ba-ico" style="background:#EF4444"><svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg></div>Ter pouco engajamento e visualizações nos stories...</div>
+        </div>
+      </div>
+      <div>
+        <h2 class="ba-title">Você será capaz de...</h2>
+        <div class="ba-list">
+          <div class="ba-item"><div class="ba-ico" style="background:var(--green)"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>Vender sem parecer que está vendendo...</div>
+          <div class="ba-item"><div class="ba-ico" style="background:var(--green)"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>Extrair da sua rotina um conteúdo interessante...</div>
+          <div class="ba-item"><div class="ba-ico" style="background:var(--green)"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>Aproveitar ao máximo cada oportunidade...</div>
+          <div class="ba-item"><div class="ba-ico" style="background:var(--green)"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>Ser constante com a criação de conteúdo...</div>
+          <div class="ba-item"><div class="ba-ico" style="background:var(--green)"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>Aumentar o engajamento e as visualizações nos stories...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PRINTS DE RESULTADO ═══ -->
+<section class="stats">
+  <div class="stats-inner">
+    <h2 class="stats-title">Eu revelei as <span class="pink">estratégias</span> que uso nos meus stories</h2>
+    <p class="stats-sub">para ter essas visualizações e vender todos os dias...</p>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-head"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="6"/></svg><svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg></div>
+        <div class="stat-screen"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg></div>
+        <div class="stat-count"><svg viewBox="0 0 14 14"><path d="M1 12s1-4 6-4 6 4 6 4"/><circle cx="7" cy="5" r="2"/></svg>334 mil</div>
+        <div class="stat-label">334 mil views em um dia</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-head"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="6"/></svg><svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg></div>
+        <div class="stat-screen"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg></div>
+        <div class="stat-count"><svg viewBox="0 0 14 14"><path d="M1 12s1-4 6-4 6 4 6 4"/><circle cx="7" cy="5" r="2"/></svg>300 mil</div>
+        <div class="stat-label">300 mil views em um dia</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-head"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="6"/></svg><svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg></div>
+        <div class="stat-screen"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg></div>
+        <div class="stat-count"><svg viewBox="0 0 14 14"><path d="M1 12s1-4 6-4 6 4 6 4"/><circle cx="7" cy="5" r="2"/></svg>138 mil</div>
+        <div class="stat-label">138 mil views em um dia</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-head"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="6"/></svg><svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg></div>
+        <div class="stat-screen"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg></div>
+        <div class="stat-count"><svg viewBox="0 0 14 14"><path d="M1 12s1-4 6-4 6 4 6 4"/><circle cx="7" cy="5" r="2"/></svg>230 mil</div>
+        <div class="stat-label">230 mil views em um dia</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DEPOIMENTOS ALUNOS ═══ -->
+<section class="depos-alunos">
+  <div class="sec-wrap">
+    <h2 class="sec-title">O que os alunos estão conquistando</h2>
+    <div class="depos-grid">
+      <div class="depo">
+        <div class="depo-stars"><svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg><svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg><svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg><svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg><svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg></div>
+        <p>"Em 2 semanas já vi diferença absurda. As pessoas respondendo meus stories sendo que antes quase não tinha resposta, e as visualizações DOBRARAM!!"</p>
+        <div class="depo-author"><div class="depo-av" style="background:linear-gradient(135deg,#E8176A,#9B27D0)">MF</div><div><div class="depo-name">Maria Fernanda</div><div class="depo-role">Coach de vida</div></div></div>
+      </div>
+      <div class="depo">
+        <div class="depo-stars"><svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg><svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg><svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg><svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg><svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg></div>
+        <p>"6 reuniões agendadas em menos de 30 dias. 3 parcerias fechadas. E eu não estou vendendo nada! Apenas postando conteúdo com o método."</p>
+        <div class="depo-author"><div class="depo-av" style="background:linear-gradient(135deg,#FF6B1A,#FBBF24)">JS</div><div><div class="depo-name">Juliana Santos</div><div class="depo-role">Consultora digital</div></div></div>
+      </div>
+      <div class="depo">
+        <div class="depo-stars"><svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg><svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg><svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg><svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg><svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg></div>
+        <p>"Meus stories estavam na casa de 6mil views. Agora estou com 12 mil views diárias e vendendo sem nem parecer que tô vendendo!"</p>
+        <div class="depo-author"><div class="depo-av" style="background:linear-gradient(135deg,#22C55E,#16A34A)">CL</div><div><div class="depo-name">Camila Lima</div><div class="depo-role">Nutricionista</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MÓDULOS ═══ -->
+<section class="modulos">
+  <div class="sec-wrap">
+    <h2 class="sec-title">O que você vai aprender no SPE</h2>
+    <div class="modulos-grid">
+      <div class="modulo-card">
+        <div class="modulo-head"><div class="mod-num" style="background:var(--pink)">01</div><h3>Storyvlogs — A base de tudo</h3></div>
+        <div class="modulo-body"><ul>
+          <li>Como estruturar um story do início ao fim para prender atenção</li>
+          <li>A fórmula dos 3 segundos que ninguém te contou</li>
+          <li>Como criar roteiro sem perder a espontaneidade</li>
+          <li>Bastidores que vendem sem parecer propaganda</li>
+        </ul></div>
+      </div>
+      <div class="modulo-card">
+        <div class="modulo-head"><div class="mod-num" style="background:var(--purple)">02</div><h3>Modelos de Conteúdo</h3></div>
+        <div class="modulo-body"><ul>
+          <li>Os 37 dispositivos de story que geram engajamento</li>
+          <li>Como usar perguntas para criar sequências de venda</li>
+          <li>O modelo de story que gera respostas no direct</li>
+          <li>Como fazer o story de prova social de forma autêntica</li>
+        </ul></div>
+      </div>
+      <div class="modulo-card">
+        <div class="modulo-head"><div class="mod-num" style="background:var(--orange)">03</div><h3>Tríade AEI</h3></div>
+        <div class="modulo-body"><ul>
+          <li>Atenção: como parar o dedo do seguidor na primeira tela</li>
+          <li>Engajamento: como criar stories que pedem resposta</li>
+          <li>Interesse: como construir desejo antes da oferta</li>
+          <li>Como combinar os três elementos em uma sequência</li>
+        </ul></div>
+      </div>
+      <div class="modulo-card">
+        <div class="modulo-head"><div class="mod-num" style="background:var(--green)">04</div><h3>Repertório & Consistência</h3></div>
+        <div class="modulo-body"><ul>
+          <li>Como nunca ficar sem ideia de conteúdo</li>
+          <li>O sistema de repositório de histórias da sua vida</li>
+          <li>Como adaptar qualquer situação do dia a dia em story</li>
+          <li>O calendário de stories que gera vendas todo mês</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ BÔNUS ═══ -->
+<section class="bonus">
+  <div class="sec-wrap">
+    <h2 class="sec-title">Bônus exclusivos inclusos</h2>
+    <div class="bonus-grid">
+      <div class="bonus-card">
+        <span class="bonus-tag">BÔNUS 1</span>
+        <h4>Masterclass de Direct</h4>
+        <p>Como transformar conversas no direct em vendas sem parecer chato ou invasivo</p>
+      </div>
+      <div class="bonus-card">
+        <span class="bonus-tag">BÔNUS 2</span>
+        <h4>Pack de Artes para Stories</h4>
+        <p>Templates editáveis de stories de alta conversão para usar agora mesmo</p>
+      </div>
+      <div class="bonus-card">
+        <span class="bonus-tag">BÔNUS 3</span>
+        <h4>Treinamento de Câmera</h4>
+        <p>Como se sentir confortável na frente da câmera mesmo sendo tímido</p>
+      </div>
+      <div class="bonus-card">
+        <span class="bonus-tag">BÔNUS 4</span>
+        <h4>Comunidade Exclusiva</h4>
+        <p>Grupo fechado com outros alunos para trocar estratégias e se inspirar</p>
+      </div>
+      <div class="bonus-card">
+        <span class="bonus-tag">BÔNUS 5</span>
+        <h4>Biblioteca de Hooks</h4>
+        <p>Mais de 100 ganchos prontos para usar como abertura dos seus stories</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DEPOIMENTOS DARK SCROLL ═══ -->
+<section class="depos-dark">
+  <div class="dd-inner">
+    <p class="sub">NÃO SÃO EXCLUSIVAS DE PERFIS GRANDES E RECONHECIDOS.</p>
+    <h2>E o melhor: <span class="pink">não funciona só pra mim</span></h2>
+    <p>Funcionam para qualquer um que aplica a metodologia — e os resultados dos meus alunos provam isso.</p>
+  </div>
+  <div class="dd-scroll">
+    <div class="dd-card">
+      <h3>Ela dobrou as visualizações em 2 semanas de SPE</h3>
+      <div class="dd-msg">Lu, estou passando aqui só para dizer o quanto o SPE está me ajudando! Pessoas próximas já me falaram que pareço mais natural nos stories. As visualizações DOBRARAM!! Eu nem acreditei, faz apenas 2 semanas.</div>
+      <div class="dd-author"><div class="dd-av">MF</div><div class="dd-name">Maria Fernanda</div></div>
+    </div>
+    <div class="dd-card">
+      <h3>Ele vende mentorias de R$10 mil pelos stories</h3>
+      <div class="dd-msg">SPE é absurdo! Comecei a usar as técnicas para vender pelos stories e isso mudou completamente o cenário. Hoje, vendo mentorias de 10K usando 100% dos stories. As pessoas desconhecem o poder dos stories.</div>
+      <div class="dd-author"><div class="dd-av" style="background:linear-gradient(135deg,#E8176A,#FF6B1A)">RP</div><div class="dd-name">Rafael Pereira</div></div>
+    </div>
+    <div class="dd-card">
+      <h3>Ela vendeu sem precisar ofertar em menos de 30 dias</h3>
+      <div class="dd-msg">Luana, comecei a aplicar o SPE e é o seguinte: 6 reuniões agendadas em menos de 30 dias. 1 pedido de consultoria. 3 parcerias fechadas. Eu não estou vendendo nada, apenas postando conteúdo!</div>
+      <div class="dd-author"><div class="dd-av" style="background:linear-gradient(135deg,#FF6B1A,#FBBF24)">JS</div><div class="dd-name">Juliana Santos</div></div>
+    </div>
+    <div class="dd-card">
+      <h3>Ela conquistou 12 mil views diárias vendendo sem vender</h3>
+      <div class="dd-msg">Nem terminei o curso, menos da metade! Meus stories estavam na casa de 6mil views e agora 12 mil views diárias! Além da interação absurda no direct! E vendendo muito, sem nem parecer que tô vendendo.</div>
+      <div class="dd-author"><div class="dd-av" style="background:linear-gradient(135deg,#22C55E,#16A34A)">CL</div><div class="dd-name">Camila Lima</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PERGUNTA HOOK ═══ -->
+<section class="pergunta">
+  <div class="pergunta-inner">
+    <p class="pre">A pergunta é:</p>
+    <h2>Para qual <span class="pink">bolso esse</span><br><span class="orange">dinheiro</span> está indo?</h2>
+    <p class="desc"><strong>Sim, todo story que você posta</strong> — do look, da caneca, do sushi, dos resultados de algum procedimento — é uma venda que você faz para as marcas e profissionais de quem você compra. Por que esse dinheiro não vai para o seu bolso?</p>
+    <div class="story-grid">
+      <div class="story-card"><div class="story-reply"><div class="story-av" style="background:linear-gradient(135deg,#9B27D0,#E8176A)"></div><span>O look é de onde?</span></div></div>
+      <div class="story-card"><div class="story-reply"><div class="story-av" style="background:linear-gradient(135deg,#FF6B1A,#E8176A)"></div><span>Onde vende essa caneca???</span></div></div>
+      <div class="story-card"><div class="story-reply"><div class="story-av" style="background:linear-gradient(135deg,#22C55E,#16A34A)"></div><span>Coloca onde comprou e se tem cupom</span></div></div>
+      <div class="story-card"><div class="story-reply"><div class="story-av" style="background:linear-gradient(135deg,#60A5FA,#9B27D0)"></div><span>Luuu, onde comprou a luminária?</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PRICING ═══ -->
+<section class="pricing">
+  <div class="sec-wrap" style="text-align:center">
+    <h2 class="sec-title">Comece a vender hoje mesmo</h2>
+    <div class="pricing-card">
+      <div class="pricing-tag">ACESSO COMPLETO</div>
+      <h3>Story para Enriquecer — SPE</h3>
+      <div class="pricing-includes">
+        <div class="pi"><div class="pi-ico"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>4 módulos completos com mais de 40 aulas</div>
+        <div class="pi"><div class="pi-ico"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>Os 37 dispositivos de story de alta conversão</div>
+        <div class="pi"><div class="pi-ico"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>5 bônus exclusivos inclusos</div>
+        <div class="pi"><div class="pi-ico"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>Acesso vitalício + atualizações grátis</div>
+        <div class="pi"><div class="pi-ico"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>Comunidade exclusiva de alunos</div>
+        <div class="pi"><div class="pi-ico"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>Certificado de conclusão</div>
+      </div>
+      <div class="price-old">De R$ 997,00</div>
+      <div class="price-main"><span>R$</span> 697<span>,00</span></div>
+      <div class="price-install">ou 12x de R$ 72,09 no cartão</div>
+      <a href="#" class="btn-green">QUERO VENDER PELOS STORIES</a>
+      <p style="margin-top:14px;font-size:12px;color:var(--muted)">Pagamento 100% seguro · Hotmart</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ GARANTIA ═══ -->
+<section class="garantia">
+  <div class="garantia-inner">
+    <div class="garantia-badge">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+    <h2>Garantia de 7 dias. É risco zero.</h2>
+    <p>Se você entrar no SPE e por qualquer motivo não ficar satisfeita, basta enviar um email em até 7 dias após a compra e devolveremos 100% do seu dinheiro. Sem perguntas, sem burocracia, sem enrolação.</p>
+  </div>
+</section>
+
+<!-- ═══ MENTOR ═══ -->
+<section class="mentor">
+  <div class="mentor-inner">
+    <div class="mentor-img">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <div class="mentor-content">
+      <p style="color:var(--pink);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px">Quem vai te ensinar</p>
+      <h2>Luana Carolinas</h2>
+      <p>Luana Carolinas é referência em vendas orgânicas pelo Instagram stories no mercado digital brasileiro. Com mais de 10 anos de experiência em criação de conteúdo, ela transforma seus stories em sua principal canal de vendas e já formou milhares de alunos que vendem todos os dias pelo Instagram.</p>
+      <p>Seus stories batem regularmente centenas de milhares de visualizações orgânicas — sem investimento em anúncios — e ela ensina exatamente o que faz para replicar esses resultados.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FAQ ═══ -->
+<section class="faq">
+  <div class="sec-wrap" style="max-width:760px">
+    <h2 class="sec-title">Ainda tem dúvidas?</h2>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>O SPE é para quem está começando do zero?<div class="faq-icon"><svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg></div></summary>
+        <div class="faq-body">Sim! O SPE foi desenvolvido para funcionar tanto para quem está começando quanto para quem já tem uma base. O método funciona para qualquer perfil, independente do número de seguidores.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Preciso aparecer todos os dias nos stories?<div class="faq-icon"><svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg></div></summary>
+        <div class="faq-body">Não precisa aparecer todos os dias, mas o SPE te ensina exatamente quando e como aparecer para gerar o máximo de resultados com o mínimo de stories por dia.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Funciona para nichos de saúde, direito, moda?<div class="faq-icon"><svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg></div></summary>
+        <div class="faq-body">Funciona para qualquer nicho! O SPE já gerou resultados para médicos, advogados, nutricionistas, fotógrafos, personal trainers e muito mais.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Em quanto tempo verei resultados?<div class="faq-icon"><svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg></div></summary>
+        <div class="faq-body">Alunos relatam primeiros resultados em 7 a 14 dias de aplicação consistente. Mas resultados variam de acordo com o nicho, engajamento atual e dedicação.</div>
+      </details>
+      <details class="faq-item">
+        <summary>O acesso é vitalício?<div class="faq-icon"><svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg></div></summary>
+        <div class="faq-body">Sim! Você tem acesso vitalício a todo o conteúdo do SPE, incluindo todas as atualizações futuras do curso. Uma vez aluna, sempre aluna.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Quais as formas de pagamento?<div class="faq-icon"><svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg></div></summary>
+        <div class="faq-body">Você pode pagar via cartão de crédito em até 12x, PIX ou boleto. O pagamento é processado pela Hotmart com total segurança.</div>
+      </details>
+    </div>
+    <div style="text-align:center;margin-top:48px">
+      <a href="#" class="btn-green full" style="max-width:560px">QUERO VENDER PELOS STORIES</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <p>© 2026 Story para Enriquecer | CNPJ: 49.690.267/0001-47 | Desenvolvido por Prymo</p>
+</footer>
+
+</body>
+</html>

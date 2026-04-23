@@ -1,5 +1,5 @@
 // Componentes específicos para páginas de lançamento digital brasileiro
-// Estilo: Mentoria Conversão Extrema, Execução Máxima, Luana Carolina
+// Estilo: Mentoria Mentoria Impacto 360, Modo Foco Total, Marina Costa
 
 export const LANCAMENTO = {
   "urgency-bar": `<!-- BARRA DE URGÊNCIA com countdown -->
@@ -31,7 +31,7 @@ export const LANCAMENTO = {
   </div>
 </div>`,
 
-  "hero-mentor-form": `<!-- HERO: Mentor com foto + formulário (estilo Conversão Extrema) -->
+  "hero-mentor-form": `<!-- HERO: Mentor com foto + formulário (estilo Mentoria Impacto 360) -->
 <section class="relative min-h-screen bg-white overflow-hidden">
   <!-- Foto do mentor como background (lado direito) -->
   <div class="absolute right-0 top-0 bottom-0 w-full md:w-[55%]">
@@ -94,7 +94,7 @@ export const LANCAMENTO = {
   </div>
 </section>`,
 
-  "hero-dark-photo": `<!-- HERO: Fundo escuro com foto (estilo Execução Máxima) -->
+  "hero-dark-photo": `<!-- HERO: Fundo escuro com foto (estilo Modo Foco Total) -->
 <section class="relative min-h-screen flex items-center overflow-hidden">
   <!-- Background foto -->
   <div class="absolute inset-0">

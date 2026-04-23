@@ -10,13 +10,13 @@
   "categories": ["productivity", "design", "developer tools"],
   "icons": [
     {
-      "src": "/IconeAtual.png",
+      "src": "/IconeAtual3.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/IconeAtual-PWA.png",
+      "src": "/IconeAtual-PWA1.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

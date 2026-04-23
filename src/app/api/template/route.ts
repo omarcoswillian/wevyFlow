@@ -33,6 +33,10 @@ const TEMPLATE_MAP: Record<string, string> = {
   "ready-quiz-funnel": "lp-quiz-funnel.html",
   "ready-vendas-black-boutique": "lp-vendas-black-boutique.html",
   "ready-vendas-white-boutique": "lp-vendas-white-boutique.html",
+  // Replicas inspiradas em referências reais
+  "ready-stories10x-dark": "lp-vendas-stories10x-dark.html",
+  "ready-spe-light": "lp-vendas-spe-light.html",
+  "ready-novomercado-dark": "lp-vendas-novomercado-dark.html",
 };
 
 export async function GET(request: Request) {

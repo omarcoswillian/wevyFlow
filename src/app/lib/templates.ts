@@ -12,6 +12,30 @@ export const TEMPLATE_CATEGORIES = [
 export const TEMPLATES: TemplateItem[] = [
   // ━━━ PÁGINA DE VENDAS ━━━
   {
+    id: "ready-stories10x-dark",
+    label: "LP Vendas · Stories 10x Dark Pink (Pronto)",
+    description: "Página de vendas dark roxo/pink estilo Stories 10x. Hero com badge + 4 benefícios em grade, player VSL, CTA pink com glow, faixa de bônus horizontal, para quem é em 6 cards, 4 depoimentos de video e CTA final.",
+    category: "vendas",
+    tags: ["pronto", "vendas", "dark", "pink", "vsl", "stories", "instagram", "social media", "rosa", "roxo"],
+    prompt: "READY:ready-stories10x-dark",
+  },
+  {
+    id: "ready-spe-light",
+    label: "LP Vendas SPE · Light Personal Brand (Pronto)",
+    description: "Página de vendas light estilo personal brand para cursos de conteúdo/stories. Headline colorida pink+orange+purple, VSL vermelho, before/after com X e check, galeria de prints de resultado, carrossel dark de depoimentos e seção de hook com mensagens de DM.",
+    category: "vendas",
+    tags: ["pronto", "vendas", "light", "branco", "personal brand", "stories", "before after", "depoimentos", "spe"],
+    prompt: "READY:ready-spe-light",
+  },
+  {
+    id: "ready-novomercado-dark",
+    label: "LP Vendas · Novo Mercado Dark Navy (Pronto)",
+    description: "Página de vendas dark navy estilo plataforma premium. Nav sticky com CTA de borda, hero fullscreen com painéis de UI decorativos, badge de prova social com avatares, headline accent pink, CTA pill arredondado, features em 3 colunas, números e depoimentos.",
+    category: "vendas",
+    tags: ["pronto", "vendas", "dark", "navy", "saas", "plataforma", "premium", "tech", "pink"],
+    prompt: "READY:ready-novomercado-dark",
+  },
+  {
     id: "ready-vendas-black-boutique",
     label: "LP Vendas Black Boutique (Pronto)",
     description: "Pagina de vendas premium estilo editorial com blocos arredondados, hero dark com video VSL, urgencia, manifesto, 3 steps, depoimentos grid, bonus cards, pricing com selos, mentor, FAQ accordion, sticky mobile CTA. Paleta mauve/dark.",
@@ -89,7 +113,7 @@ export const TEMPLATES: TemplateItem[] = [
   {
     id: "ready-captura-comunidade",
     label: "Captura Comunidade / Clube (Pronto)",
-    description: "Pagina de captura para comunidade/clube. Hero dark com foto do especialista e glow roxo, formulario integrado, secao de pilares split, CTA com circulos de avatares. Estilo Fe e Razao.",
+    description: "Pagina de captura para comunidade/clube. Hero dark com foto do especialista e glow roxo, formulario integrado, secao de pilares split, CTA com circulos de avatares. Estilo clube premium.",
     category: "captura",
     tags: ["pronto", "comunidade", "clube", "dark", "purple", "formulario", "pilares"],
     prompt: "READY:ready-captura-comunidade",
@@ -113,9 +137,9 @@ export const TEMPLATES: TemplateItem[] = [
   {
     id: "ready-captura-infoprodutor",
     label: "Captura Infoprodutor (Pronto)",
-    description: "Template pronto estilo Luana Carolina. Dark com formulario completo (nome, email, whatsapp, data, genero), CTA verde animado, stats, depoimentos. Carrega instantaneamente.",
+    description: "Template pronto estilo personal brand premium. Dark com formulario completo (nome, email, whatsapp, data, genero), CTA verde animado, stats, depoimentos. Carrega instantaneamente.",
     category: "captura",
-    tags: ["pronto", "infoprodutor", "dark", "formulario completo", "lançamento", "green cta"],
+    tags: ["pronto", "infoprodutor", "dark", "formulario completo", "lancamento", "green cta"],
     prompt: "READY:ready-captura-infoprodutor",
   },
   {
@@ -129,10 +153,10 @@ export const TEMPLATES: TemplateItem[] = [
   {
     id: "captura-premium-foto",
     label: "Captura Premium com Foto",
-    description: "Página de captura de alto impacto com foto hero full-screen, overlay escuro e formulário. Estilo Luana Carolina / páginas de lançamento premium",
+    description: "Página de captura de alto impacto com foto hero full-screen, overlay escuro e formulário. Estilo páginas de lançamento premium do mercado digital BR.",
     category: "captura",
     tags: ["premium", "foto", "high-ticket", "lançamento"],
-    prompt: `Crie uma página de CAPTURA de leads de ALTO IMPACTO, estilo página premium de lançamento digital brasileiro (como Luana Carolina, Execução Máxima).
+    prompt: `Crie uma página de CAPTURA de leads de ALTO IMPACTO, estilo página premium de lançamento digital brasileiro.
 
 LAYOUT:
 - Full height viewport (min-height: 100vh)
@@ -372,16 +396,16 @@ Fundo #0a0a0f, texto branco/verde terminal (#10b981). Monospace + Sans-serif mix
   // ━━━ ARSENAL DE HEROES (hand-crafted por referencia) ━━━
   {
     id: "ready-hero-captura-luana",
-    label: "Hero Luana Carolina (Pronto)",
-    description: "Hero split light com foto recortada, form inline (nome, whatsapp, email), CTA verde animado, cards flutuantes 'Venda aprovada'. Estilo Execucao Digital.",
+    label: "Hero Personal Brand Light (Pronto)",
+    description: "Hero split light com foto recortada, form inline (nome, whatsapp, email), CTA verde animado, cards flutuantes 'Venda aprovada'. Estilo personal brand premium.",
     category: "sections",
-    tags: ["pronto", "hero", "captura", "luana", "light", "form", "cards flutuantes"],
+    tags: ["pronto", "hero", "captura", "personal", "light", "form", "cards flutuantes"],
     prompt: "READY:ready-hero-captura-luana",
   },
   {
     id: "ready-hero-captura-conversao",
-    label: "Hero Conversao Extrema (Pronto)",
-    description: "Hero split light com form com labels e select, CTA verde pill, foto com mockups de tela flutuantes. Estilo Tiago Tessmann.",
+    label: "Hero Captura Conversao (Pronto)",
+    description: "Hero split light com form com labels e select, CTA verde pill, foto com mockups de tela flutuantes. Estilo mentoria premium.",
     category: "sections",
     tags: ["pronto", "hero", "captura", "conversao", "labels", "select", "mockups"],
     prompt: "READY:ready-hero-captura-conversao",
@@ -389,7 +413,7 @@ Fundo #0a0a0f, texto branco/verde terminal (#10b981). Monospace + Sans-serif mix
   {
     id: "ready-hero-captura-cinematic",
     label: "Hero Cinematic Dark (Pronto)",
-    description: "Hero fullscreen dark com foto e overlay cinematografico, logo editorial serif, CTA verde simples sem form. Estilo Execucao Maxima.",
+    description: "Hero fullscreen dark com foto e overlay cinematografico, logo editorial serif, CTA verde simples sem form. Estilo cinematográfico para lançamento premium.",
     category: "sections",
     tags: ["pronto", "hero", "captura", "dark", "cinematic", "foto", "premium"],
     prompt: "READY:ready-hero-captura-cinematic",
@@ -405,7 +429,7 @@ Fundo #0a0a0f, texto branco/verde terminal (#10b981). Monospace + Sans-serif mix
   {
     id: "ready-hero-vendas-bege",
     label: "Hero Split Bege (Pronto)",
-    description: "Hero split 50/50 com fundo bege/nude, tag uppercase, headline com acento verde oliva, foto lifestyle. Estilo Rotina para Enriquecer.",
+    description: "Hero split 50/50 com fundo bege/nude, tag uppercase, headline com acento verde oliva, foto lifestyle. Estilo wellness/lifestyle warm.",
     category: "sections",
     tags: ["pronto", "hero", "vendas", "bege", "lifestyle", "wellness"],
     prompt: "READY:ready-hero-vendas-bege",

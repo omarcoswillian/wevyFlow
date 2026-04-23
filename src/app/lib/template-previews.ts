@@ -29,7 +29,7 @@ export const TEMPLATE_PREVIEWS: Record<string, string> = {
   "captura-premium-foto": `<style>${S}body{background:linear-gradient(135deg,#0a0a0f 0%,#1a1a2e 50%,#0f1525 100%);padding:0;height:100%;position:relative;overflow:hidden}</style>
 <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,0.8) 0%,rgba(0,0,0,0.2) 100%)"></div>
 <div style="position:relative;z-index:1;padding:12px;height:100%;display:flex;flex-direction:column;justify-content:center">
-  <div style="font-size:4px;color:rgba(255,255,255,0.4);font-style:italic;margin-bottom:6px;letter-spacing:0.1em">Execução Máxima</div>
+  <div style="font-size:4px;color:rgba(255,255,255,0.4);font-style:italic;margin-bottom:6px;letter-spacing:0.1em">Modo Foco Total</div>
   <div style="font-size:9px;font-weight:700;color:#fff;line-height:1.15;margin-bottom:4px;max-width:65%">Desbloqueie sua melhor versão em 25 dias</div>
   <div style="font-size:3.5px;color:rgba(255,255,255,0.45);margin-bottom:6px;max-width:55%;line-height:1.5">Melhore o desempenho em todas as áreas através do desenvolvimento pessoal.</div>
   <div style="max-width:50%">

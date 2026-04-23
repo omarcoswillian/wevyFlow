@@ -33,10 +33,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/IconeAtual.png", type: "image/png" },
+      { url: "/IconeAtual3.png", type: "image/png" },
     ],
     apple: [
-      { url: "/IconeAtual-PWA.png", sizes: "180x180", type: "image/png" },
+      { url: "/IconeAtual-PWA1.png", sizes: "180x180", type: "image/png" },
     ],
   },
 };

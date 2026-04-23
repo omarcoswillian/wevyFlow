@@ -1,6 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-
-const anthropic = new Anthropic();
+import { resolveConfig, iterableToReadable, parseApiError, startStream } from "../../lib/ai-client";
 
 // Simple in-memory rate limiter
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -67,7 +66,8 @@ export async function POST(request: Request) {
       return Response.json({ error: "Muitas requisicoes. Aguarde um minuto e tente novamente." }, { status: 429 });
     }
 
-    const { originalCode, refinementRequest, platform, images, designContext } = await request.json();
+    const { originalCode, refinementRequest, platform, images, designContext, apiKey, aiProvider, aiModel } = await request.json();
+    const aiConfig = resolveConfig(apiKey, aiProvider, aiModel);
 
     if (!originalCode || !refinementRequest) {
       return Response.json(
@@ -144,31 +144,23 @@ ${images && images.length > 0 ? "\nO usuário enviou imagem(ns) acima como refer
 Retorne o código HTML/CSS COMPLETO com as alterações aplicadas.`,
     });
 
-    // Use higher max_tokens for large templates
     const codeLength = compactCode.length;
     const maxTokens = codeLength > 40000 ? 32000 : 16000;
 
-    const stream = anthropic.messages.stream({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: maxTokens,
-      system: buildSystemPrompt(designContext),
-      messages: [{ role: "user", content: contentParts }],
-    });
+    // Build text message from contentParts
+    const textPart = contentParts.find((p) => p.type === "text") as { type: "text"; text: string } | undefined;
+    const userMsg = textPart?.text ?? `PEDIDO: ${refinementRequest}\n\nCÓDIGO:\n${compactCode}`;
 
-    const encoder = new TextEncoder();
-    const readable = new ReadableStream({
-      async start(controller) {
-        for await (const event of stream) {
-          if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
-            controller.enqueue(encoder.encode(event.delta.text));
-          }
-        }
-        controller.close();
-      },
-    });
+    let gen: AsyncIterable<string>;
+    try {
+      gen = await startStream(aiConfig, buildSystemPrompt(designContext), userMsg, maxTokens);
+    } catch (e: unknown) {
+      const { status, message } = parseApiError(e, aiConfig.provider);
+      return Response.json({ error: message }, { status });
+    }
 
-    return new Response(readable, {
-      headers: { "Content-Type": "text/html; charset=utf-8", "Transfer-Encoding": "chunked" },
+    return new Response(iterableToReadable(gen), {
+      headers: { "Content-Type": "text/html; charset=utf-8" },
     });
   } catch (err) {
     console.error("Refine error:", err);

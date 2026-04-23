@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stories 10x · Venda Todos os Dias pelo Instagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0C0B12;
+  --bg2:#13111E;
+  --bg3:#1A1827;
+  --accent:#FF1F74;
+  --accent2:#C8006A;
+  --glow:rgba(255,31,116,0.35);
+  --text:#F0EFF8;
+  --muted:#8A89A0;
+  --border:rgba(255,255,255,0.09);
+  --r:12px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+img{max-width:100%;display:block}
+
+/* ─── TYPOGRAPHY ─── */
+h1,h2,h3,h4{font-family:'Montserrat',sans-serif;line-height:1.15}
+.sec-title{font-weight:900;font-size:clamp(28px,4.5vw,46px);color:#fff;text-align:center;margin-bottom:48px}
+.sec-label{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);text-align:center;margin-bottom:10px}
+.sec-wrap{max-width:960px;margin:0 auto;padding:0 24px}
+
+/* ─── BUTTONS ─── */
+.btn-pink{
+  display:inline-block;background:var(--accent);color:#fff;
+  font-family:'Montserrat',sans-serif;font-weight:800;
+  font-size:clamp(13px,1.8vw,16px);letter-spacing:.1em;text-transform:uppercase;
+  padding:20px 40px;border-radius:8px;border:none;cursor:pointer;
+  box-shadow:0 0 40px var(--glow),0 4px 20px rgba(255,31,116,.3);
+  transition:box-shadow .2s,transform .15s;text-align:center;
+}
+.btn-pink:hover{box-shadow:0 0 64px rgba(255,31,116,.5),0 8px 32px rgba(255,31,116,.4);transform:translateY(-2px)}
+.btn-pink.full{display:block;width:100%;max-width:640px;margin:0 auto}
+
+/* ─── HERO ─── */
+.hero{
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -5%,rgba(110,20,170,0.65) 0%,transparent 68%),
+    radial-gradient(ellipse 50% 40% at 85% 85%,rgba(255,31,116,.12) 0%,transparent 60%),
+    var(--bg);
+  text-align:center;padding:52px 24px 0;
+}
+.hero-inner{max-width:860px;margin:0 auto}
+.logo-wrap{display:inline-flex;align-items:center;gap:8px;margin-bottom:32px}
+.logo-text{font-family:'Montserrat',sans-serif;font-weight:900;font-size:clamp(18px,2.8vw,26px);letter-spacing:.06em;color:var(--accent);text-transform:uppercase}
+.logo-arrow{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:var(--accent);border-radius:50%}
+.logo-arrow svg{width:10px;height:10px;fill:#fff;margin-left:2px}
+.hero-badge{display:inline-block;border:1px solid rgba(255,255,255,.22);border-radius:100px;padding:7px 22px;font-size:13px;color:var(--muted);margin-bottom:24px}
+.hero h1{font-weight:900;font-size:clamp(30px,5.2vw,58px);letter-spacing:-.02em;color:#fff;margin-bottom:18px}
+.hero-sub{font-weight:600;font-size:clamp(14px,1.9vw,18px);color:var(--text);margin-bottom:36px}
+
+/* benefit cards */
+.benefits-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0;text-align:left}
+.benefit-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;display:flex;align-items:flex-start;gap:14px}
+.bicon{flex-shrink:0;width:34px;height:34px;border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.bicon svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.5}
+.benefit-card p{font-size:14px;line-height:1.5}
+
+/* VSL */
+.vsl-wrap{
+  background:
+    radial-gradient(ellipse 110% 80% at 50% 0%,rgba(130,30,220,.65) 0%,rgba(70,10,120,.8) 55%,var(--bg) 100%);
+  padding:0 24px 64px;
+}
+.vsl-inner{max-width:860px;margin:0 auto}
+.vsl-player{width:100%;aspect-ratio:16/9;background:#180830;border-radius:14px;overflow:hidden;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center}
+.vsl-play{width:76px;height:76px;background:rgba(255,255,255,.92);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(0,0,0,.4);cursor:pointer}
+.vsl-play svg{width:26px;height:26px;fill:#0C0B12;margin-left:4px}
+
+/* ─── CTA BOX ─── */
+.cta-box{background:var(--bg2);padding:48px 24px;text-align:center}
+.guarantee{font-size:13px;color:var(--muted);margin-bottom:4px}
+.guarantee strong{color:var(--text)}
+
+/* ─── DIVIDER STRIP ─── */
+.strip{background:var(--bg);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:16px 0;overflow:hidden}
+.strip-inner{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0;padding:0 20px}
+.strip-item{font-size:13px;color:var(--muted);padding:0 20px;white-space:nowrap}
+.strip-sep{color:rgba(255,255,255,.18);font-size:20px}
+
+/* ─── PARA QUEM ─── */
+.para-quem{background:var(--bg);padding:88px 24px}
+.persona-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.persona-card{
+  background:linear-gradient(140deg,rgba(28,18,52,.95) 0%,rgba(18,12,38,.98) 100%);
+  border:1px solid var(--border);border-radius:16px;padding:28px 22px;
+  display:flex;flex-direction:column;gap:14px;
+  transition:border-color .25s,transform .25s;
+}
+.persona-card:hover{border-color:rgba(255,31,116,.35);transform:translateY(-4px)}
+.picon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.persona-card h3{font-family:'Montserrat',sans-serif;font-weight:700;font-size:15px;color:var(--text)}
+
+/* ─── BEFORE/AFTER COMPARAÇÃO ─── */
+.compare{background:var(--bg2);padding:88px 24px}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:0}
+.compare-side h3{font-family:'Montserrat',sans-serif;font-weight:800;font-size:18px;color:#fff;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid var(--border)}
+.compare-side.bad h3{color:#FF6B6B}
+.compare-side.good h3{color:#4ADE80}
+.compare-list{display:flex;flex-direction:column;gap:10px}
+.cmp-item{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--muted);line-height:1.5}
+.cmp-icon{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.cmp-icon svg{width:10px;height:10px;stroke:#fff;fill:none;stroke-width:2.5}
+
+/* ─── PILARES ─── */
+.pilares{background:var(--bg);padding:88px 24px}
+.pilares-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:48px}
+.pilar-card{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:24px 20px;text-align:center}
+.pilar-num{font-family:'Montserrat',sans-serif;font-weight:900;font-size:36px;color:var(--accent);margin-bottom:8px}
+.pilar-card h4{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;color:#fff;margin-bottom:8px}
+.pilar-card p{font-size:13px;color:var(--muted)}
+
+/* sequências */
+.seq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.seq-card{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:22px 20px}
+.seq-tag{display:inline-block;background:rgba(255,31,116,.15);border:1px solid rgba(255,31,116,.25);border-radius:100px;padding:3px 12px;font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.06em;margin-bottom:10px}
+.seq-card h4{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;color:#fff;margin-bottom:6px}
+.seq-card p{font-size:13px;color:var(--muted)}
+
+/* ─── NICHOS ─── */
+.nichos{background:var(--bg2);padding:88px 24px}
+.nicho-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.nicho-item{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 12px;text-align:center;transition:border-color .2s}
+.nicho-item:hover{border-color:rgba(255,31,116,.3)}
+.nicho-item svg{width:28px;height:28px;stroke:var(--muted);fill:none;stroke-width:1.5;margin:0 auto 8px}
+.nicho-item span{font-size:12px;color:var(--muted)}
+
+/* ─── SOCIAL PROOF INFLUENCERS ─── */
+.influencers{background:var(--bg);padding:88px 24px}
+.inf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:48px}
+.inf-card{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.inf-name{font-family:'Montserrat',sans-serif;font-weight:700;font-size:15px;color:#fff}
+.inf-follow{font-size:12px;color:var(--muted)}
+.inf-thumb{width:100%;aspect-ratio:4/5;border-radius:12px;overflow:hidden;position:relative;border:1px solid var(--border)}
+.inf-thumb-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.inf-play{width:44px;height:44px;background:rgba(255,255,255,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.inf-play svg{width:14px;height:14px;fill:#0C0B12;margin-left:3px}
+.inf-quote{font-size:13px;color:var(--muted);line-height:1.5;max-width:190px}
+
+/* ─── RESULTADOS ALUNOS ─── */
+.resultados{background:var(--bg2);padding:88px 24px}
+.res-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
+.res-card{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:24px}
+.res-card .res-tag{display:inline-block;background:rgba(255,31,116,.15);border:1px solid rgba(255,31,116,.25);border-radius:100px;padding:4px 14px;font-size:12px;font-weight:700;color:var(--accent);margin-bottom:14px}
+.res-card p{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+.res-author{display:flex;align-items:center;gap:10px}
+.res-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.res-name{font-weight:600;font-size:14px;color:var(--text)}
+.res-role{font-size:12px;color:var(--muted)}
+
+/* ─── MENTOR ─── */
+.mentor{background:var(--bg);padding:88px 24px}
+.mentor-inner{max-width:860px;margin:0 auto;display:grid;grid-template-columns:1fr 2fr;gap:48px;align-items:center}
+.mentor-photo{background:linear-gradient(135deg,#2D1060,#1A0840);border-radius:20px;aspect-ratio:3/4;width:100%;display:flex;align-items:center;justify-content:center}
+.mentor-photo svg{width:80px;height:80px;stroke:rgba(255,255,255,.2);fill:none;stroke-width:1}
+.mentor-content h2{font-family:'Montserrat',sans-serif;font-weight:900;font-size:clamp(22px,3vw,32px);color:#fff;margin-bottom:16px}
+.mentor-content p{font-size:15px;color:var(--muted);margin-bottom:16px;line-height:1.7}
+.mentor-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
+.m-stat h4{font-family:'Montserrat',sans-serif;font-weight:900;font-size:clamp(20px,2.5vw,28px);color:var(--accent)}
+.m-stat p{font-size:12px;color:var(--muted)}
+
+/* ─── MIDIA ─── */
+.midia{background:var(--bg2);padding:64px 24px}
+.midia-inner{max-width:760px;margin:0 auto;text-align:center}
+.midia-grid{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:28px;margin-top:36px}
+.midia-badge{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 20px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:var(--muted);letter-spacing:.04em}
+
+/* ─── FAQ ─── */
+.faq{background:var(--bg);padding:88px 24px}
+.faq-list{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:0}
+.faq-item{border-bottom:1px solid var(--border)}
+.faq-item summary{
+  list-style:none;padding:20px 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;
+  font-family:'Montserrat',sans-serif;font-weight:600;font-size:15px;color:#fff;
+}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-icon{width:24px;height:24px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.faq-icon svg{width:10px;height:10px;stroke:var(--muted);fill:none;stroke-width:2;transition:transform .2s}
+details[open] .faq-icon svg{transform:rotate(45deg)}
+.faq-body{padding:0 0 20px;font-size:14px;color:var(--muted);line-height:1.7}
+
+/* ─── FOOTER ─── */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:32px 24px;text-align:center}
+footer p{font-size:12px;color:var(--muted)}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){
+  .benefits-grid{grid-template-columns:1fr}
+  .persona-grid{grid-template-columns:repeat(2,1fr)}
+  .pilares-grid{grid-template-columns:repeat(2,1fr)}
+  .seq-grid{grid-template-columns:1fr}
+  .nicho-grid{grid-template-columns:repeat(3,1fr)}
+  .inf-grid{grid-template-columns:repeat(2,1fr)}
+  .compare-grid{grid-template-columns:1fr}
+  .res-grid{grid-template-columns:1fr}
+  .mentor-inner{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .persona-grid{grid-template-columns:1fr}
+  .nicho-grid{grid-template-columns:repeat(2,1fr)}
+  .pilares-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="logo-wrap">
+      <span class="logo-text">STORIES</span>
+      <span class="logo-arrow"><svg viewBox="0 0 10 12"><path d="M0 0l10 6-10 6z"/></svg></span>
+      <span class="logo-text">10X</span>
+    </div>
+
+    <div class="hero-badge">Para empresários, profissionais liberais e infoprodutores</div>
+
+    <h1>Esse método aumenta em até 10x as visualizações, seguidores e vendas do seu Instagram</h1>
+
+    <p class="hero-sub">Assista a aula e veja a lógica por trás do Stories 10x:</p>
+
+    <div class="benefits-grid" style="margin-bottom:0">
+      <div class="benefit-card">
+        <div class="bicon"><svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></div>
+        <p>Ter ideias de conteúdos infinitos sem ficar cansativo, aumentando sua autoridade</p>
+      </div>
+      <div class="benefit-card">
+        <div class="bicon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+        <p>Qualificar e fazer as pessoas realmente se interessarem pelo que você posta</p>
+      </div>
+      <div class="benefit-card">
+        <div class="bicon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <p>Criar stories de alto impacto mesmo sem tempo ou habilidades com design</p>
+      </div>
+      <div class="benefit-card">
+        <div class="bicon"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+        <p>Aumentar o alcance dos seus stories sem precisar gastar com anúncios</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ VSL ═══ -->
+<section class="vsl-wrap">
+  <div class="vsl-inner">
+    <div class="vsl-player">
+      <div class="vsl-play">
+        <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9z"/></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA PRINCIPAL ═══ -->
+<section class="cta-box">
+  <p class="guarantee"><strong>Risco zero com 7 dias de garantia</strong></p>
+  <p class="guarantee" style="margin-bottom:24px">Você pode testar e, se não gostar, recebe seu dinheiro de volta</p>
+  <a href="#" class="btn-pink full">QUERO VENDER 10X MAIS</a>
+</section>
+
+<!-- ═══ DIVIDER STRIP ═══ -->
+<div class="strip">
+  <div class="strip-inner">
+    <span class="strip-item">Exemplos práticos</span><span class="strip-sep">|</span>
+    <span class="strip-item">Apostila completa</span><span class="strip-sep">|</span>
+    <span class="strip-item">Desafios e exercícios de memorização</span><span class="strip-sep">|</span>
+    <span class="strip-item">Certificado de conclusão</span><span class="strip-sep">|</span>
+    <span class="strip-item">Garantia de 7 dias</span>
+  </div>
+</div>
+
+<!-- ═══ PARA QUEM É ═══ -->
+<section class="para-quem">
+  <div class="sec-wrap">
+    <p class="sec-label">Para quem é</p>
+    <h2 class="sec-title">O Stories 10x faz sentido para você que é...</h2>
+    <div class="persona-grid">
+      <div class="persona-card">
+        <div class="picon" style="background:rgba(100,60,200,.2)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>Profissional liberal</h3>
+      </div>
+      <div class="persona-card">
+        <div class="picon" style="background:rgba(80,130,255,.2)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </div>
+        <h3>Infoprodutor</h3>
+      </div>
+      <div class="persona-card">
+        <div class="picon" style="background:rgba(255,31,116,.2)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F472B6" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        </div>
+        <h3>Loja virtual ou física</h3>
+      </div>
+      <div class="persona-card">
+        <div class="picon" style="background:rgba(60,180,255,.2)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        </div>
+        <h3>Empresários</h3>
+      </div>
+      <div class="persona-card">
+        <div class="picon" style="background:rgba(255,160,50,.2)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FB923C" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <h3>Prestador de serviço</h3>
+      </div>
+      <div class="persona-card">
+        <div class="picon" style="background:rgba(50,220,130,.2)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3>Influenciador digital</h3>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MÉTODO TRADICIONAL VS S10x ═══ -->
+<section class="compare">
+  <div class="sec-wrap">
+    <p class="sec-label">A diferença</p>
+    <h2 class="sec-title">Por que o método tradicional não funciona mais?</h2>
+    <div class="compare-grid">
+      <div class="compare-side bad">
+        <h3>Método tradicional</h3>
+        <div class="compare-list">
+          <div class="cmp-item"><div class="cmp-icon" style="background:#EF4444"><svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg></div>Posta sem estratégia e ninguém assiste até o final</div>
+          <div class="cmp-item"><div class="cmp-icon" style="background:#EF4444"><svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg></div>Mostra o produto e todo mundo pula o story</div>
+          <div class="cmp-item"><div class="cmp-icon" style="background:#EF4444"><svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg></div>Não sabe o que postar e fica dias sem aparecer</div>
+          <div class="cmp-item"><div class="cmp-icon" style="background:#EF4444"><svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg></div>Visualizações caem mês a mês sem entender por quê</div>
+          <div class="cmp-item"><div class="cmp-icon" style="background:#EF4444"><svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg></div>Investe em anúncios mas não converte nada</div>
+        </div>
+      </div>
+      <div class="compare-side good">
+        <h3>Com o Stories 10x</h3>
+        <div class="compare-list">
+          <div class="cmp-item"><div class="cmp-icon" style="background:#22C55E"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>Cada story tem início, meio e fim que prendem a atenção</div>
+          <div class="cmp-item"><div class="cmp-icon" style="background:#22C55E"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>Vende de forma natural sem parecer propaganda</div>
+          <div class="cmp-item"><div class="cmp-icon" style="background:#22C55E"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>Tem 37 dispositivos de conteúdo para nunca ficar sem ideia</div>
+          <div class="cmp-item"><div class="cmp-icon" style="background:#22C55E"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>Visualizações crescem organicamente com a metodologia</div>
+          <div class="cmp-item"><div class="cmp-icon" style="background:#22C55E"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>Clientes chegam no direct prontos para comprar</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PILARES DO MÉTODO ═══ -->
+<section class="pilares">
+  <div class="sec-wrap">
+    <p class="sec-label">A lógica do S10x</p>
+    <h2 class="sec-title">Os 4 pilares que multiplicam seus resultados</h2>
+    <div class="pilares-grid">
+      <div class="pilar-card">
+        <div class="pilar-num">01</div>
+        <h4>Atenção</h4>
+        <p>Técnicas para prender o espectador nos primeiros 3 segundos e manter até o fim</p>
+      </div>
+      <div class="pilar-card">
+        <div class="pilar-num">02</div>
+        <h4>Engajamento</h4>
+        <p>Dispositivos que fazem as pessoas responderem, clicarem e compartilharem</p>
+      </div>
+      <div class="pilar-card">
+        <div class="pilar-num">03</div>
+        <h4>Interesse</h4>
+        <p>Como criar sequências que constroem desejo pelo seu produto de forma orgânica</p>
+      </div>
+      <div class="pilar-card">
+        <div class="pilar-num">04</div>
+        <h4>Conversão</h4>
+        <p>O momento certo de fazer a oferta e como fazer sem parecer vendedor</p>
+      </div>
+    </div>
+
+    <h3 style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:clamp(20px,3vw,28px);color:#fff;text-align:center;margin-bottom:28px">As 3 sequências que vendem automaticamente</h3>
+    <div class="seq-grid">
+      <div class="seq-card">
+        <span class="seq-tag">SEQUÊNCIA 1</span>
+        <h4>Sequência de Autoridade</h4>
+        <p>Como usar sua rotina e bastidores para criar autoridade sem precisar se mostrar "especialista" o tempo todo</p>
+      </div>
+      <div class="seq-card">
+        <span class="seq-tag">SEQUÊNCIA 2</span>
+        <h4>Sequência de Desejo</h4>
+        <p>O passo a passo para fazer seu seguidor querer o que você vende antes mesmo de você oferecer</p>
+      </div>
+      <div class="seq-card">
+        <span class="seq-tag">SEQUÊNCIA 3</span>
+        <h4>Sequência de Venda</h4>
+        <p>Como apresentar sua oferta de forma que pareça uma oportunidade, não uma interrupção</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ NICHOS ═══ -->
+<section class="nichos">
+  <div class="sec-wrap">
+    <p class="sec-label">Compatibilidade</p>
+    <h2 class="sec-title">Funciona para qualquer nicho ou segmento</h2>
+    <div class="nicho-grid">
+      <div class="nicho-item"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.9a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16z"/></svg><span>Coach</span></div>
+      <div class="nicho-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg><span>Imobiliário</span></div>
+      <div class="nicho-item"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span>Saúde & Beleza</span></div>
+      <div class="nicho-item"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Advocacia</span></div>
+      <div class="nicho-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>Psicologia</span></div>
+      <div class="nicho-item"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span>E-commerce</span></div>
+      <div class="nicho-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="3"/></svg><span>Fotografia</span></div>
+      <div class="nicho-item"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Mentoria</span></div>
+      <div class="nicho-item"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>Finanças</span></div>
+      <div class="nicho-item"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span>Educação</span></div>
+      <div class="nicho-item"><svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg><span>Dev / Tech</span></div>
+      <div class="nicho-item"><svg viewBox="0 0 24 24"><polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5"/></svg><span>Arquitetura</span></div>
+      <div class="nicho-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg><span>Nutrição</span></div>
+      <div class="nicho-item"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg><span>Gastronomia</span></div>
+      <div class="nicho-item"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg><span>Esportes</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ INFLUENCERS ═══ -->
+<section class="influencers">
+  <div class="sec-wrap">
+    <p class="sec-label">Prova social</p>
+    <h2 class="sec-title">Grandes creators que já usam a metodologia S10x, para te inspirar</h2>
+    <div class="inf-grid">
+      <div class="inf-card">
+        <div class="inf-name">Cátia Damasceno</div>
+        <div class="inf-follow">13,5 mi seguidores</div>
+        <div class="inf-thumb"><div class="inf-thumb-bg" style="background:linear-gradient(160deg,#4D1A6A,#1A0A30)"><div class="inf-play"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9z" fill="#0C0B12"/></svg></div></div></div>
+        <p class="inf-quote">De 200k visualizações, com o S10x chegamos em 1 mi.</p>
+      </div>
+      <div class="inf-card">
+        <div class="inf-name">Erico Rocha</div>
+        <div class="inf-follow">3 mi seguidores</div>
+        <div class="inf-thumb"><div class="inf-thumb-bg" style="background:linear-gradient(160deg,#1A2A40,#0A1020)"><div class="inf-play"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9z" fill="#0C0B12"/></svg></div></div></div>
+        <p class="inf-quote">Aumentei em 10x mais as visualizações nos meus stories.</p>
+      </div>
+      <div class="inf-card">
+        <div class="inf-name">Pedro Sobral</div>
+        <div class="inf-follow">2 mi seguidores</div>
+        <div class="inf-thumb"><div class="inf-thumb-bg" style="background:linear-gradient(160deg,#1A3020,#0A1810)"><div class="inf-play"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9z" fill="#0C0B12"/></svg></div></div></div>
+        <p class="inf-quote">Eu juro para você, eu bati 25% de cliques nos meus stories, foram quase 20 mil pessoas.</p>
+      </div>
+      <div class="inf-card">
+        <div class="inf-name">Tio Huli</div>
+        <div class="inf-follow">835 mil seguidores</div>
+        <div class="inf-thumb"><div class="inf-thumb-bg" style="background:linear-gradient(160deg,#2A1810,#1A0A08)"><div class="inf-play"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9z" fill="#0C0B12"/></svg></div></div></div>
+        <p class="inf-quote">Dobramos a quantidade de leads qualificados na captura, usando o S10x.</p>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:48px">
+      <a href="#" class="btn-pink">QUERO USAR O STORIES 10X TAMBÉM</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ RESULTADOS DE ALUNOS ═══ -->
+<section class="resultados">
+  <div class="sec-wrap">
+    <p class="sec-label">Resultados reais</p>
+    <h2 class="sec-title">O que os alunos estão conquistando</h2>
+    <div class="res-grid">
+      <div class="res-card">
+        <div class="res-tag">+R$ 30.000</div>
+        <p>Comecei a aplicar a sequência de venda e em 3 dias já tinha feito R$30 mil só pelos stories. Sem anúncio, sem email, sem nada. Só stories.</p>
+        <div class="res-author"><div class="res-avatar" style="background:linear-gradient(135deg,#FF1F74,#9B27D0)">AM</div><div><div class="res-name">Ana Moreira</div><div class="res-role">Mentora de marketing</div></div></div>
+      </div>
+      <div class="res-card">
+        <div class="res-tag">+500 visualizações/dia</div>
+        <p>Antes tinha em média 100 views por story. Depois de 2 semanas aplicando o método, estou com 600+ visualizações e o direct bombando.</p>
+        <div class="res-author"><div class="res-avatar" style="background:linear-gradient(135deg,#3B82F6,#8B5CF6)">RF</div><div><div class="res-name">Rafael Fonseca</div><div class="res-role">Nutricionista</div></div></div>
+      </div>
+      <div class="res-card">
+        <div class="res-tag">1ª venda em 3 dias</div>
+        <p>Nunca tinha vendido nada pelo Instagram. Na primeira semana usando o S10x, fiz minha primeira venda de R$5.000 só pelos stories.</p>
+        <div class="res-author"><div class="res-avatar" style="background:linear-gradient(135deg,#22C55E,#16A34A)">CL</div><div><div class="res-name">Carla Lima</div><div class="res-role">Coach de carreira</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MENTOR ═══ -->
+<section class="mentor">
+  <div class="mentor-inner">
+    <div class="mentor-photo">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <div class="mentor-content">
+      <p style="color:var(--accent);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px">Sobre o criador do método</p>
+      <h2>Leandro Ladeira</h2>
+      <p>Leandro Ladeira é o maior especialista em vendas pelo Instagram stories do Brasil. Com mais de 8 milhões de seguidores e décadas de experiência no mercado digital, desenvolveu o método S10x a partir de anos testando e validando o que realmente funciona para vender pelo Instagram.</p>
+      <p>Já ajudou mais de 220 mil alunos a transformarem seus perfis em máquinas de vendas, gerando mais de R$300 milhões em faturamento combinado.</p>
+      <div class="mentor-stats">
+        <div class="m-stat"><h4>8M+</h4><p>Seguidores no Instagram</p></div>
+        <div class="m-stat"><h4>220K+</h4><p>Alunos formados</p></div>
+        <div class="m-stat"><h4>R$300M+</h4><p>Gerados para alunos</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MÍDIA ═══ -->
+<section class="midia">
+  <div class="midia-inner">
+    <p class="sec-label">Como visto em</p>
+    <div class="midia-grid">
+      <div class="midia-badge">FOLHA DE S.PAULO</div>
+      <div class="midia-badge">VEJA</div>
+      <div class="midia-badge">EXAME</div>
+      <div class="midia-badge">FORBES</div>
+      <div class="midia-badge">BAND</div>
+      <div class="midia-badge">GLOBO</div>
+      <div class="midia-badge">UOL</div>
+      <div class="midia-badge">G1</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FAQ ═══ -->
+<section class="faq">
+  <div class="sec-wrap" style="max-width:760px">
+    <p class="sec-label">Dúvidas frequentes</p>
+    <h2 class="sec-title">Perguntas frequentes</h2>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>O curso é indicado para quem está começando do zero?<div class="faq-icon"><svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg></div></summary>
+        <div class="faq-body">Sim! O método foi desenvolvido para funcionar tanto para quem está começando do zero quanto para quem já tem uma audiência e quer escalar. O passo a passo é direto e aplicável desde o primeiro dia.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Preciso ter muitos seguidores para funcionar?<div class="faq-icon"><svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg></div></summary>
+        <div class="faq-body">Não! O S10x foi criado justamente para resolver esse problema. Alunos com menos de 1.000 seguidores já conquistaram resultados expressivos porque a metodologia foca em engajamento e conversão, não em número de seguidores.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Quanto tempo vou precisar dedicar por dia?<div class="faq-icon"><svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg></div></summary>
+        <div class="faq-body">De 30 minutos a 1 hora por dia já é suficiente para aplicar o método com consistência. O S10x foi pensado para pessoas com rotina ocupada — as técnicas são rápidas de executar.</div>
+      </details>
+      <details class="faq-item">
+        <summary>O curso tem acesso vitalício?<div class="faq-icon"><svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg></div></summary>
+        <div class="faq-body">Sim, você tem acesso vitalício a todo o conteúdo, incluindo atualizações futuras. Uma vez dentro, sempre dentro.</div>
+      </details>
+      <details class="faq-item">
+        <summary>E se eu não gostar do curso?<div class="faq-icon"><svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg></div></summary>
+        <div class="faq-body">Você tem 7 dias de garantia incondicional. Se por qualquer motivo não ficar satisfeito, basta pedir o reembolso e devolveremos 100% do seu dinheiro. Sem perguntas, sem burocracia.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Funciona para nichos específicos como saúde ou direito?<div class="faq-icon"><svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg></div></summary>
+        <div class="faq-body">Sim! O método funciona para qualquer nicho. Temos alunos que são médicos, advogados, nutricionistas, arquitetos, coaches e muito mais — todos com resultados comprovados.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Vou receber suporte durante o curso?<div class="faq-icon"><svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg></div></summary>
+        <div class="faq-body">Sim, você terá acesso à nossa comunidade exclusiva de alunos e ao suporte da equipe para tirar dúvidas durante toda a sua jornada no curso.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Quais são as formas de pagamento?<div class="faq-icon"><svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg></div></summary>
+        <div class="faq-body">Você pode pagar via cartão de crédito em até 12x ou via PIX/boleto à vista. O pagamento é processado pela plataforma Hotmart, 100% seguro.</div>
+      </details>
+      <details class="faq-item">
+        <summary>O conteúdo fica desatualizado com as mudanças do Instagram?<div class="faq-icon"><svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg></div></summary>
+        <div class="faq-body">Não! O S10x é baseado em princípios de comunicação e psicologia que não mudam com as atualizações de algoritmo. Além disso, o curso é atualizado regularmente com as novidades da plataforma.</div>
+      </details>
+    </div>
+    <div style="text-align:center;margin-top:56px">
+      <a href="#" class="btn-pink">QUERO VENDER 10X MAIS</a>
+      <p style="margin-top:14px;font-size:13px;color:var(--muted)">Garantia de 7 dias ou seu dinheiro de volta</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <p>© 2025 Stories 10x · Todos os direitos reservados</p>
+</footer>
+
+</body>
+</html>

@@ -16,8 +16,12 @@ import {
   ExternalLink,
   Zap,
   PanelLeft,
+  Key,
+  CheckCircle,
 } from "lucide-react";
 import { Platform } from "../lib/types";
+import { ApiKeyModal } from "./ApiKeyModal";
+import { useAppContext } from "../(app)/_context";
 
 export interface GenerateData {
   prompt: string;
@@ -67,6 +71,8 @@ const COLOR_PRESETS = [
 
 export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, contentOverride, activeNav }: HomeViewProps) {
   const nav = onNavigate || (() => {});
+  const { apiKey, aiProvider, aiModel, saveApiKey, clearApiKey } = useAppContext();
+  const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [platform, setPlatform] = useState<Platform>("html");
   const [referenceUrl, setReferenceUrl] = useState("");
@@ -113,14 +119,14 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
         <div className="px-2 pt-3 pb-2">
           {sidebarCollapsed ? (
             <div className="flex flex-col items-center gap-2">
-              <img src="/IconeAtual.png" alt="WevyFlow" className="w-8 h-8" />
+              <img src="/IconeAtual3.png" alt="WevyFlow" className="w-8 h-8" />
               <button onClick={() => setSidebarCollapsed(false)} className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6b6b6b] hover:text-[#9a9a9a] hover:bg-white/[0.06] transition-all cursor-pointer" title="Expandir sidebar">
                 <PanelLeft className="w-4 h-4" />
               </button>
             </div>
           ) : (
             <div className="flex items-center px-2">
-              <img src="/IconeAtual.png" alt="WevyFlow" className="w-7 h-7 shrink-0" />
+              <img src="/IconeAtual3.png" alt="WevyFlow" className="w-7 h-7 shrink-0" />
               <div className="flex-1" />
               <button onClick={() => setSidebarCollapsed(true)} className="w-7 h-7 rounded-lg flex items-center justify-center text-[#6b6b6b] hover:text-[#9a9a9a] hover:bg-white/[0.06] transition-all cursor-pointer" title="Recolher sidebar">
                 <PanelLeft className="w-4 h-4" />
@@ -147,28 +153,60 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
           <SidebarItem icon={<Share2 className="w-4 h-4" />} label="Compartilhados" active={activeNav === "projects-shared"} collapsed={sidebarCollapsed} onClick={() => nav("projects-shared")} />
         </nav>
 
-        {/* Bottom */}
+        {/* Bottom — API Key / BYOK */}
         <div className="px-2 pb-3 space-y-1">
           {!sidebarCollapsed ? (
             <>
-              <div className="px-2 py-2 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <Zap className="w-3 h-3 text-purple-400" />
-                  <span className="text-[11px] font-medium text-white/60">Free</span>
-                </div>
-                <p className="text-[10px] text-white/25">500 créditos/mês</p>
-              </div>
-              <button className="flex items-center gap-2 w-full px-2 py-1.5 rounded-xl text-[11px] text-purple-400 hover:bg-purple-500/10 transition-colors cursor-pointer">
-                <ExternalLink className="w-3 h-3" />
-                Upgrade to Pro
-              </button>
+              {apiKey ? (
+                <button
+                  onClick={() => setApiKeyModalOpen(true)}
+                  className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15 transition-colors cursor-pointer group"
+                >
+                  <CheckCircle className="w-3 h-3 text-emerald-400 shrink-0" />
+                  <div className="flex-1 text-left min-w-0">
+                    <p className="text-[11px] font-medium text-emerald-400">IA Conectada</p>
+                    <p className="text-[9px] text-white/25 font-mono truncate">{apiKey.slice(0, 14)}…</p>
+                  </div>
+                </button>
+              ) : (
+                <button
+                  onClick={() => setApiKeyModalOpen(true)}
+                  className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.06] hover:border-purple-500/20 transition-colors cursor-pointer"
+                >
+                  <Key className="w-3 h-3 text-purple-400 shrink-0" />
+                  <div className="flex-1 text-left">
+                    <p className="text-[11px] font-medium text-white/50">Conectar sua IA</p>
+                    <p className="text-[9px] text-white/20">API Key Anthropic</p>
+                  </div>
+                </button>
+              )}
             </>
           ) : (
-            <button className="w-10 h-10 mx-auto rounded-xl flex items-center justify-center text-purple-400 hover:bg-purple-500/10 transition-colors cursor-pointer">
-              <Zap className="w-4 h-4" />
+            <button
+              onClick={() => setApiKeyModalOpen(true)}
+              className={cn(
+                "w-10 h-10 mx-auto rounded-xl flex items-center justify-center transition-colors cursor-pointer",
+                apiKey
+                  ? "text-emerald-400 hover:bg-emerald-500/10"
+                  : "text-purple-400 hover:bg-purple-500/10"
+              )}
+              title={apiKey ? "IA Conectada" : "Conectar sua IA"}
+            >
+              {apiKey ? <CheckCircle className="w-4 h-4" /> : <Key className="w-4 h-4" />}
             </button>
           )}
         </div>
+
+        {/* API Key Modal */}
+        <ApiKeyModal
+          open={apiKeyModalOpen}
+          currentKey={apiKey}
+          currentProvider={aiProvider}
+          currentModel={aiModel}
+          onSave={saveApiKey}
+          onClear={clearApiKey}
+          onClose={() => setApiKeyModalOpen(false)}
+        />
       </aside>
 
       {/* ─── Main Area (rounded card with aurora) ─── */}
