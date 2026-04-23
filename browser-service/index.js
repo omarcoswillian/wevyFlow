@@ -44,10 +44,11 @@ app.post("/render", async (req, res) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.setExtraHTTPHeaders({ "Accept-Language": "pt-BR,pt;q=0.9" });
 
-    await page.goto(url, { waitUntil: "networkidle", timeout: 30000 });
+    // load = DOM + subresources. networkidle trava em páginas com analytics/polling.
+    await page.goto(url, { waitUntil: "load", timeout: 25000 });
 
-    // Extra wait for lazy-loaded elements and animations to settle
-    await page.waitForTimeout(1500);
+    // Extra wait for JS frameworks to hydrate and lazy content to appear
+    await page.waitForTimeout(2000);
 
     // Inline all external stylesheets so the HTML is self-contained
     await page.evaluate(async () => {
