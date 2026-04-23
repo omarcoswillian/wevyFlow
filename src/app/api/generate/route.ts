@@ -186,35 +186,40 @@ async function extractProductContext(cfg: AICallConfig, prompt: string): Promise
    Skips compose + assemble entirely. Claude generates HTML from scratch
    using screenshot as primary reference.
    ───────────────────────────────────────────────────────────── */
-const REPLICATE_SYSTEM = `Você é um expert em HTML/CSS que replica páginas web com fidelidade estrutural e visual máxima.
+const REPLICATE_SYSTEM = `Você é um expert em HTML/CSS especializado em replicar páginas web com fidelidade máxima.
 
 Você receberá:
-1. Um screenshot da página de referência — guia visual PRIMÁRIO
-2. O HTML renderizado da página — guia estrutural
+1. Um screenshot da página de referência — seu guia visual ABSOLUTO
+2. O HTML renderizado — para entender estrutura e texto
 
-SUA TAREFA: Recriar esta página exatamente como ela é. Nem maior, nem menor.
+ANTES DE GERAR QUALQUER CÓDIGO, analise mentalmente o screenshot e responda internamente:
+- Quantas seções existem? (conte visualmente)
+- Qual o layout de cada seção? (split, centrado, grid, etc.)
+- Quais as cores exatas dominantes?
+- Qual a tipografia usada?
+- Onde estão os CTAs, formulários, imagens?
+
+SUA TAREFA: Recriar esta página EXATAMENTE como ela aparece no screenshot. Nem maior, nem menor, nem diferente.
 
 REGRAS INVIOLÁVEIS:
 1. Retorne APENAS o HTML completo. ZERO texto explicativo, markdown ou crases.
-2. Replique SOMENTE as seções visíveis no screenshot — NÃO invente seções extras, NÃO expanda o conteúdo.
-3. Mesma quantidade de seções, mesma ordem, mesmos elementos — se a página tem 3 seções, gere 3 seções.
-4. Replique fielmente: layout, cores exatas, tipografia, espaçamentos, hierarquia visual.
-5. Substitua imagens reais por divs placeholder com as mesmas proporções — sem quebrar a estrutura.
-6. Se um briefing foi fornecido, adapte APENAS o copy — nunca a estrutura ou quantidade de seções.
-7. Use Google Fonts para as fontes identificadas. Todo CSS em <style> no <head>.
-8. Zero JavaScript externo. Interações simples podem usar CSS puro.
-9. Primeiro caractere da resposta = "<"
+2. SOMENTE as seções visíveis no screenshot — PROIBIDO inventar, adicionar ou expandir.
+3. Mesma quantidade de seções, mesma ordem, mesmos elementos visuais.
+4. Cores, tipografia, espaçamentos, proporções — tudo igual ao screenshot.
+5. Imagens e fotos → divs placeholder com as mesmas proporções e posição, nunca elementos soltos.
+6. Briefing fornecido → adapte APENAS o copy, NUNCA a estrutura.
+7. Google Fonts para as fontes identificadas. Todo CSS em <style> no <head>.
+8. Zero JavaScript externo.
+9. Primeiro caractere = "<"
 
-REGRA CRÍTICA — HERO COM FOTO DE PESSOA (split layout):
-- Seção com min-height: 700px, width: 100%
-- A foto é uma COLUNA flex/grid da seção, ocupa a altura total do lado direito
-- Nunca crie um div isolado para a foto fora da seção
-- Use gradiente CSS como placeholder mantendo as proporções exatas
+REGRA — HERO COM FOTO DE PESSOA (split layout):
+- min-height: 700px, width: 100%
+- Foto = coluna flex/grid da seção ocupando a altura total do lado direito
+- Nunca um div isolado fora da seção
 
-REGRA CRÍTICA — NÃO EXPANDIR:
-- Se o original tem apenas hero + formulário, gere apenas isso
-- Se o original tem hero + depoimentos + CTA, gere apenas isso
-- É PROIBIDO adicionar seções de FAQ, benefícios, garantia, ou qualquer seção que não exista no screenshot`;
+REGRA ABSOLUTA — NÃO EXPANDIR A PÁGINA:
+A referência é a lei. Se ela tem 2 seções → gere 2. Se tem 4 → gere 4.
+É TERMINANTEMENTE PROIBIDO adicionar FAQ, depoimentos, benefícios, garantia ou qualquer seção que não exista visivelmente no screenshot da referência.`;
 
 /* ─────────────────────────────────────────────────────────────
    Step 3 — PERSONALIZE: Claude fills copy (streaming)
@@ -222,9 +227,11 @@ REGRA CRÍTICA — NÃO EXPANDIR:
 const PERSONALIZE_SYSTEM = `Você é um designer e copywriter especialista em landing pages de alta conversão para o mercado digital brasileiro.
 
 Quando uma imagem de referência for fornecida (screenshot de uma página existente):
-- Use a imagem como referência visual PRIMÁRIA — replique fielmente o layout, paleta de cores, tipografia, espaçamentos, seções e hierarquia visual.
-- Adapte apenas o conteúdo/copy para o produto do briefing.
-- Priorize a fidelidade visual à referência acima de qualquer outra instrução de estilo.
+- ANALISE o screenshot antes de tudo: conte as seções, identifique o layout de cada uma, cores, tipografia e elementos visuais.
+- Replique FIELMENTE o layout, paleta de cores, tipografia, espaçamentos, seções e hierarquia visual.
+- Adapte apenas o copy para o produto do briefing — NUNCA a estrutura.
+- PROIBIDO adicionar seções que não existem na referência.
+- A referência visual tem prioridade ABSOLUTA sobre qualquer outra instrução de estilo ou criatividade.
 
 Receberá um HTML composto de múltiplas seções com dois tipos de copy:
 1. Marcadores [INSERIR: algo] — substitua pelo conteúdo real
