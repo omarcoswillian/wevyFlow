@@ -186,34 +186,35 @@ async function extractProductContext(cfg: AICallConfig, prompt: string): Promise
    Skips compose + assemble entirely. Claude generates HTML from scratch
    using screenshot as primary reference.
    ───────────────────────────────────────────────────────────── */
-const REPLICATE_SYSTEM = `Você é um expert em HTML/CSS que replica páginas web com fidelidade visual máxima.
+const REPLICATE_SYSTEM = `Você é um expert em HTML/CSS que replica páginas web com fidelidade estrutural e visual máxima.
 
 Você receberá:
-1. Um screenshot da página de referência — use como guia visual PRIMÁRIO
-2. O HTML renderizado da página — use para entender estrutura e conteúdo
+1. Um screenshot da página de referência — guia visual PRIMÁRIO
+2. O HTML renderizado da página — guia estrutural
 
-SUA TAREFA: Recriar esta página em HTML/CSS puro, self-contained e limpo.
+SUA TAREFA: Recriar esta página exatamente como ela é. Nem maior, nem menor.
 
 REGRAS INVIOLÁVEIS:
 1. Retorne APENAS o HTML completo. ZERO texto explicativo, markdown ou crases.
-2. Replique fielmente: layout, cores exatas, tipografia, espaçamentos, seções, hierarquia visual.
-3. Substitua imagens reais por divs placeholder com as mesmas proporções — mas NUNCA quebre a estrutura da seção.
-4. Se um briefing de produto foi fornecido, adapte apenas o copy — mantenha toda a estrutura.
-5. Use Google Fonts para as fontes identificadas. CSS em <style> no <head>.
-6. Não inclua JavaScript externo. Interações simples podem usar CSS puro.
-7. Primeiro caractere da resposta = "<"
+2. Replique SOMENTE as seções visíveis no screenshot — NÃO invente seções extras, NÃO expanda o conteúdo.
+3. Mesma quantidade de seções, mesma ordem, mesmos elementos — se a página tem 3 seções, gere 3 seções.
+4. Replique fielmente: layout, cores exatas, tipografia, espaçamentos, hierarquia visual.
+5. Substitua imagens reais por divs placeholder com as mesmas proporções — sem quebrar a estrutura.
+6. Se um briefing foi fornecido, adapte APENAS o copy — nunca a estrutura ou quantidade de seções.
+7. Use Google Fonts para as fontes identificadas. Todo CSS em <style> no <head>.
+8. Zero JavaScript externo. Interações simples podem usar CSS puro.
+9. Primeiro caractere da resposta = "<"
 
-REGRA CRÍTICA — HERO COM FOTO DE PESSOA:
-Quando o hero tiver uma foto de pessoa ocupando metade da seção (split layout):
-- A seção DEVE ter min-height: 700px e width: 100%
-- A foto NÃO é um elemento separado flutuando — é um div posicionado (position: absolute ou coluna flex) que ocupa toda a altura da seção no lado direito
-- Use background-color com gradiente ou cor sólida como placeholder para a foto, mantendo as proporções exatas
-- O layout split (conteúdo esquerda / foto direita) deve ser replicado com flexbox ou grid, nunca com elementos soltos
-- Nunca crie um div isolado para a foto fora do contexto da seção
+REGRA CRÍTICA — HERO COM FOTO DE PESSOA (split layout):
+- Seção com min-height: 700px, width: 100%
+- A foto é uma COLUNA flex/grid da seção, ocupa a altura total do lado direito
+- Nunca crie um div isolado para a foto fora da seção
+- Use gradiente CSS como placeholder mantendo as proporções exatas
 
-REGRA CRÍTICA — SEÇÕES DE FUNDO COLORIDO/IMAGEM:
-- Seções com background que ocupa largura total devem ter width: 100% e o padding/margin interno correto
-- Nunca use imagens externas reais — use gradientes CSS ou cores sólidas como placeholder com as mesmas dimensões`;
+REGRA CRÍTICA — NÃO EXPANDIR:
+- Se o original tem apenas hero + formulário, gere apenas isso
+- Se o original tem hero + depoimentos + CTA, gere apenas isso
+- É PROIBIDO adicionar seções de FAQ, benefícios, garantia, ou qualquer seção que não exista no screenshot`;
 
 /* ─────────────────────────────────────────────────────────────
    Step 3 — PERSONALIZE: Claude fills copy (streaming)
@@ -339,12 +340,16 @@ export async function POST(request: Request) {
       fontChoice ? `FONTE PREFERIDA: ${fontChoice}` : "",
       `\nURL DE REFERÊNCIA: ${referenceUrl}`,
       browserResult.title ? `TÍTULO DA PÁGINA: ${browserResult.title}` : "",
-      `\nHTML RENDERIZADO (pós-JS, use para estrutura):\n${browserResult.html
-        .replace(/<script[\s\S]*?<\/script>/gi, "")
-        .replace(/<svg[\s\S]*?<\/svg>/gi, "")
-        .replace(/<!--[\s\S]*?-->/g, "")
-        .replace(/\s{2,}/g, " ")
-        .slice(0, 12000)}`,
+      (() => {
+        const cleanHtml = browserResult.html
+          .replace(/<script[\s\S]*?<\/script>/gi, "")
+          .replace(/<svg[\s\S]*?<\/svg>/gi, "")
+          .replace(/<!--[\s\S]*?-->/g, "")
+          .replace(/\s{2,}/g, " ");
+        const sectionCount = (cleanHtml.match(/<section/gi) || []).length;
+        const mainBlocks = (cleanHtml.match(/<(section|main|article|header|footer)[^>]*>/gi) || []).length;
+        return `ESTRUTURA DA PÁGINA: ${sectionCount} <section> tags, ${mainBlocks} blocos principais (section/main/article/header/footer) — replique EXATAMENTE essa quantidade, nem mais nem menos.\n\nHTML RENDERIZADO (pós-JS):\n${cleanHtml.slice(0, 12000)}`;
+      })(),
     ].filter(Boolean).join("\n");
 
     const replicateImages = referenceScreenshot ? [referenceScreenshot] : [];
