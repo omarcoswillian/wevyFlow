@@ -3,6 +3,7 @@ import { TemplateItem } from "./types";
 export const TEMPLATE_CATEGORIES = [
   { id: "vendas" as const, label: "Página de Vendas" },
   { id: "captura" as const, label: "Captura de Leads" },
+  { id: "evento" as const, label: "Evento / Workshop" },
   { id: "saas" as const, label: "SaaS / Produto" },
   { id: "blog" as const, label: "Blog / Conteúdo" },
   { id: "portfolio" as const, label: "Portfolio" },
@@ -276,6 +277,15 @@ Tipografia Sora. Mínimo de elementos. Máximo de impacto.`,
     prompt: "READY:ready-quiz-funnel",
   },
 
+  // ━━━ EVENTO / WORKSHOP ━━━
+  {
+    id: "ready-evento-presencial-dark",
+    label: "Evento Presencial · Dark Red (Pronto)",
+    description: "Página completa para congresso/evento presencial. Hero com data/local/lote, marquee vermelho, prova social + vídeo, depoimentos de quem viveu, carrossel de palestrantes auto-scroll, features da experiência, seção de data/venue em destaque, alcance mundial com bandeiras, 3 tiers de ingresso (com barra de disponibilidade e estado esgotado), FAQ, manifesto do mentor e CTA final. Dark #131313 com accent vermelho intenso — inspirado no Subido ao Vivo.",
+    category: "evento",
+    tags: ["pronto", "evento", "presencial", "congresso", "workshop", "dark", "red", "ingressos", "palestrantes", "lote", "marquee"],
+    prompt: "READY:evento-presencial-dark",
+  },
   // ━━━ SaaS / PRODUTO ━━━
   {
     id: "saas-dashboard",

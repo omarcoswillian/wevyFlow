@@ -10,15 +10,13 @@ interface NumberInputProps {
   step?: number;
   min?: number;
   max?: number;
-  /** Default unit to use when the value has none. */
   defaultUnit?: string;
   placeholder?: string;
-  /** Small label shown left-of-input (e.g., "T", "R", "W"). */
   label?: string;
   className?: string;
+  allowEmpty?: boolean;
 }
 
-// Parses "16px" → { num: 16, unit: "px" }. Tolerant with decimals / negatives.
 function parse(value: string): { num: number | null; unit: string } {
   if (!value) return { num: null, unit: "" };
   const trimmed = value.trim();
@@ -29,25 +27,48 @@ function parse(value: string): { num: number | null; unit: string } {
 
 function format(num: number, unit: string): string {
   const rounded = Math.round(num * 100) / 100;
-  const str = Number.isInteger(rounded) ? rounded.toString() : rounded.toString();
-  return str + unit;
+  return rounded.toString() + unit;
 }
 
 export function NumberInput({ value, onChange, step = 1, min, max, defaultUnit = "px", placeholder, label, className }: NumberInputProps) {
   const [local, setLocal] = useState(value);
+  const localRef = useRef(value);
   const holdTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Sync when external value changes (undo/redo, selection change)
-  useEffect(() => { setLocal(value); }, [value]);
+  useEffect(() => {
+    setLocal(value);
+    localRef.current = value;
+  }, [value]);
 
-  const bump = (delta: number) => {
-    const { num, unit } = parse(local);
-    const current = num ?? 0;
-    let next = current + delta;
+  const stopHold = () => {
+    if (holdTimer.current) {
+      clearInterval(holdTimer.current);
+      holdTimer.current = null;
+    }
+  };
+
+  // Global mouseup — ensures hold always stops even if mouse leaves the button or window.
+  // Also stop on unmount to prevent orphaned timers when parent remounts with a new key.
+  useEffect(() => {
+    window.addEventListener("mouseup", stopHold);
+    return () => {
+      window.removeEventListener("mouseup", stopHold);
+      stopHold();
+    };
+  }, []);
+
+  const bumpFrom = (current: string, delta: number): string => {
+    const { num, unit } = parse(current);
+    const cur = num ?? 0;
+    let next = cur + delta;
     if (typeof min === "number") next = Math.max(min, next);
     if (typeof max === "number") next = Math.min(max, next);
-    const useUnit = unit || defaultUnit;
-    const nextStr = format(next, useUnit);
+    return format(next, unit || defaultUnit);
+  };
+
+  const bump = (delta: number) => {
+    const nextStr = bumpFrom(localRef.current, delta);
+    localRef.current = nextStr;
     setLocal(nextStr);
     onChange(nextStr);
   };
@@ -57,16 +78,13 @@ export function NumberInput({ value, onChange, step = 1, min, max, defaultUnit =
     let count = 0;
     holdTimer.current = setInterval(() => {
       count++;
-      // Accelerate after 10 ticks
-      bump(count > 10 ? delta * 5 : delta);
+      // Read always-fresh ref to avoid stale closure
+      const d = count > 10 ? delta * 5 : delta;
+      const nextStr = bumpFrom(localRef.current, d);
+      localRef.current = nextStr;
+      setLocal(nextStr);
+      onChange(nextStr);
     }, 80);
-  };
-
-  const stopHold = () => {
-    if (holdTimer.current) {
-      clearInterval(holdTimer.current);
-      holdTimer.current = null;
-    }
   };
 
   return (
@@ -75,14 +93,17 @@ export function NumberInput({ value, onChange, step = 1, min, max, defaultUnit =
       <input
         type="text"
         value={local}
-        onChange={(e) => setLocal(e.target.value)}
+        onChange={(e) => {
+          setLocal(e.target.value);
+          localRef.current = e.target.value;
+        }}
         onBlur={() => {
-          // If user cleared, leave as-is; otherwise commit what's typed (adding unit if missing)
           if (!local.trim()) { onChange(""); return; }
           const { num, unit } = parse(local);
           if (num === null) { onChange(local); return; }
           const useUnit = unit || defaultUnit;
           const str = format(num, useUnit);
+          localRef.current = str;
           setLocal(str);
           onChange(str);
         }}
@@ -107,9 +128,7 @@ export function NumberInput({ value, onChange, step = 1, min, max, defaultUnit =
       <div className="flex flex-col border-l border-white/[0.04]">
         <button
           type="button"
-          onMouseDown={() => startHold(step)}
-          onMouseUp={stopHold}
-          onMouseLeave={stopHold}
+          onMouseDown={(e) => { e.preventDefault(); startHold(step); }}
           tabIndex={-1}
           className="px-1 py-0.5 text-white/30 hover:text-white hover:bg-white/[0.04] cursor-pointer transition-colors"
         >
@@ -117,9 +136,7 @@ export function NumberInput({ value, onChange, step = 1, min, max, defaultUnit =
         </button>
         <button
           type="button"
-          onMouseDown={() => startHold(-step)}
-          onMouseUp={stopHold}
-          onMouseLeave={stopHold}
+          onMouseDown={(e) => { e.preventDefault(); startHold(-step); }}
           tabIndex={-1}
           className="px-1 py-0.5 text-white/30 hover:text-white hover:bg-white/[0.04] cursor-pointer transition-colors"
         >

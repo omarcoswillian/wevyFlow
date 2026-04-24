@@ -37,6 +37,8 @@ const TEMPLATE_MAP: Record<string, string> = {
   "ready-stories10x-dark": "lp-vendas-stories10x-dark.html",
   "ready-spe-light": "lp-vendas-spe-light.html",
   "ready-novomercado-dark": "lp-vendas-novomercado-dark.html",
+  // Evento / Workshop
+  "evento-presencial-dark": "evento-presencial-dark.html",
 };
 
 export async function GET(request: Request) {

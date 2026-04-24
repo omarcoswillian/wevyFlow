@@ -55,7 +55,8 @@ export async function callOnce(
     const res = await anthropicClient(config.apiKey).messages.create({
       model,
       max_tokens: maxTokens,
-      system,
+      // Cache system prompt so repeat calls (compose + personalize chain) hit cache
+      system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
       messages: [{ role: "user", content: userMsg }],
     });
     return res.content[0].type === "text" ? res.content[0].text : "";
@@ -102,7 +103,8 @@ export async function startStream(
       model,
       max_tokens: maxTokens,
       stream: true,
-      system,
+      // Cache system prompt — repeated refinements on same session hit cache (~80% cost reduction)
+      system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
       messages: [{ role: "user", content }],
     });
 

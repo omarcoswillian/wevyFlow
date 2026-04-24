@@ -173,6 +173,18 @@ export const PRESETS: Preset[] = [
 
   /* ───────── WORKSHOP ───────── */
   {
+    id: "evento-presencial-dark",
+    label: "Evento Presencial · Dark Red",
+    description: "Página de vendas para evento/congresso presencial. Estrutura completa: hero com data/local/lote, marquee, prova social + vídeo, depoimentos de quem viveu, carrossel de palestrantes auto-scroll, features 4D, seção de data/venue, prova mundial, 3 tiers de ingresso (com barra de disponibilidade e estado esgotado), FAQ, manifesto/platô do mentor e CTA final. Dark #131313 com accent vermelho intenso. Inspirado no Subido ao Vivo.",
+    kind: "workshop",
+    themes: ["dark", "cinematic", "vibrant"],
+    file: "evento-presencial-dark.html",
+    sectionOutline: ["hero", "social-proof", "depoimentos", "features", "oferta", "faq", "manifesto", "cta-final"],
+    monolithic: true,
+    accent: "#EC2C1F",
+    fonts: ["Poppins"],
+  },
+  {
     id: "lp-workshop",
     label: "LP Workshop · Light Blue",
     description: "Página de venda de evento/workshop. Hero com data e lotes, marquee de benefícios, para quem é, agenda em passos, mentor, oferta por lotes, garantia e FAQ. Light blue.",

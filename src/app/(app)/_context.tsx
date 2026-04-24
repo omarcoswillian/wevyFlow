@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, startTransition, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Platform } from "../lib/types";
 import { useHistory } from "../lib/history";
@@ -8,6 +8,7 @@ import { useProjects, Project, ProjectPage } from "../lib/projects";
 import { compactStorage, aggressiveCleanup, formatBytes } from "../lib/storage-compact";
 import { GenerateData } from "../components/HomeView";
 import { AIProvider, DEFAULT_MODELS, STORAGE_KEY_KEY, STORAGE_PROVIDER_KEY, STORAGE_MODEL_KEY } from "../lib/ai-provider";
+import { NewProjectModal } from "../components/NewProjectModal";
 
 /* ───────────────────────────────────────────────────────────
    View / Path mapping
@@ -50,12 +51,13 @@ interface AppContextValue {
   // projects (from useProjects hook)
   projects: Project[];
   saveError: string | null;
-  createProject: (name: string, client: string) => Project;
+  createProject: (name: string, client: string) => Promise<Project>;
   addPageToProject: (projectId: string, page: Omit<ProjectPage, "id" | "createdAt" | "updatedAt">) => void;
   updatePageCode: (projectId: string, pageId: string, code: string) => void;
   toggleStar: (projectId: string) => void;
   deleteProject: (projectId: string) => void;
   deletePageFromProject: (projectId: string, pageId: string) => void;
+  updateCoverImage: (projectId: string, file: File) => Promise<void>;
 
   // generation state
   generatedCode: string;
@@ -113,6 +115,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [activePageId, setActivePageId] = useState<string | null>(null);
   const [storageToast, setStorageToast] = useState<string | null>(null);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [newProjectModalOpen, setNewProjectModalOpen] = useState(false);
 
   // BYOK — provider + key + model stored in localStorage
   const [apiKey, setApiKeyState] = useState<string>("");
@@ -146,7 +149,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const { addEntry } = useHistory();
   const {
     projects, saveError, createProject, addPageToProject, updatePageCode,
-    toggleStar, deleteProject, deletePageFromProject,
+    toggleStar, deleteProject, deletePageFromProject, updateCoverImage,
   } = useProjects();
 
   /* storage error toast */
@@ -209,12 +212,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!reader) throw new Error("Streaming não suportado");
       const decoder = new TextDecoder();
       let fullCode = "";
+      let lastUpdate = 0;
+      const UPDATE_INTERVAL = 80; // ms — throttle re-renders during streaming
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         fullCode += decoder.decode(value, { stream: true });
-        setGeneratedCode(fullCode);
+        const now = Date.now();
+        if (now - lastUpdate >= UPDATE_INTERVAL) {
+          lastUpdate = now;
+          const snapshot = fullCode;
+          startTransition(() => setGeneratedCode(snapshot));
+        }
       }
+      // Always flush final complete code
+      startTransition(() => setGeneratedCode(fullCode));
       return fullCode;
     },
     []
@@ -255,6 +267,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
         const code = await streamFromAPI("/api/generate", {
           ...data,
+          copyDocument: data.copyDocument || undefined,
           apiKey: apiKey || undefined,
           aiProvider: apiKey ? aiProvider : undefined,
           aiModel: apiKey ? aiModel : undefined,
@@ -328,10 +341,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   const handleCreateProject = useCallback(() => {
-    const name = window.prompt("Nome do projeto:");
-    if (!name) return;
-    const client = window.prompt("Nome do cliente:") || "Sem cliente";
-    const project = createProject(name, client);
+    setNewProjectModalOpen(true);
+  }, []);
+
+  const handleCreateProjectConfirm = useCallback(async (name: string, client: string) => {
+    const project = await createProject(name, client);
     setActiveProjectId(project.id);
     router.push(`/projects/${project.id}`);
   }, [createProject, router]);
@@ -400,7 +414,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<AppContextValue>(() => ({
     projects, saveError, createProject, addPageToProject, updatePageCode,
-    toggleStar, deleteProject, deletePageFromProject,
+    toggleStar, deleteProject, deletePageFromProject, updateCoverImage,
     generatedCode, isLoading, isRefining, error, currentPlatform, currentPrompt, activePageId,
     apiKey, aiProvider, aiModel, saveApiKey, clearApiKey,
     commandPaletteOpen, setCommandPaletteOpen,
@@ -410,14 +424,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     handleTemplateFromResources,
   }), [
     projects, saveError, createProject, addPageToProject, updatePageCode,
-    toggleStar, deleteProject, deletePageFromProject,
+    toggleStar, deleteProject, deletePageFromProject, updateCoverImage,
     generatedCode, isLoading, isRefining, error, currentPlatform, currentPrompt, activePageId,
     apiKey, aiProvider, aiModel, saveApiKey, clearApiKey,
     commandPaletteOpen,
     navigate,
     handleGenerate, handleRefine, handleBack,
     handleOpenProject, handleOpenPage, handleCreateProject, handleCreatePage,
-    handleTemplateFromResources,
+    handleTemplateFromResources, handleCreateProjectConfirm,
   ]);
 
   const storageToastIsError = storageToast?.toLowerCase().includes("cheio") || storageToast?.toLowerCase().includes("erro");
@@ -425,6 +439,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider value={value}>
       {children}
+      <NewProjectModal
+        open={newProjectModalOpen}
+        onClose={() => setNewProjectModalOpen(false)}
+        onConfirm={handleCreateProjectConfirm}
+      />
       {storageToast && (
         <div className={`fixed bottom-4 left-1/2 -translate-x-1/2 z-[200] px-4 py-3 rounded-xl border text-[12px] font-medium backdrop-blur-xl shadow-2xl animate-fade-in-delay max-w-md text-center flex items-center gap-3 ${
           storageToastIsError

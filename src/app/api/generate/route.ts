@@ -211,6 +211,8 @@ REGRAS INVIOLÁVEIS:
 7. Google Fonts para as fontes identificadas. Todo CSS em <style> no <head>.
 8. Zero JavaScript externo.
 9. Primeiro caractere = "<"
+10. ZERO emojis em qualquer parte do HTML — use apenas SVG icons inline.
+11. NUNCA use a fonte Unbounded. Fontes padrão quando não especificado: Montserrat ou Sora.
 
 REGRA — HERO COM FOTO DE PESSOA (split layout):
 - min-height: 700px, width: 100%
@@ -245,7 +247,8 @@ REGRAS INVIOLÁVEIS:
 5. Copy em Português Brasileiro, direto e persuasivo.
 6. ZERO emojis. Use SVG icons quando necessário.
 7. Nunca invente nomes reais de pessoas — use nomes ficcionais plausíveis.
-8. Primeiro caractere da resposta = "<"`;
+8. Primeiro caractere da resposta = "<"
+9. NUNCA use a fonte Unbounded. Fontes padrão quando não especificado: Montserrat ou Sora.`;
 
 const COPY_MODE_SYSTEM = `Você é um especialista em landing pages. O usuário forneceu a copy completa e quer que você distribua esse texto exato nas seções do HTML.
 

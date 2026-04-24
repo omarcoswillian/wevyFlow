@@ -7,8 +7,9 @@ import {
   ChevronLeft,
   PanelLeftClose,
   PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
   MessageCircle,
-  Info,
   Plus,
   Package,
   Monitor,
@@ -19,20 +20,10 @@ import {
   Check,
   Download,
   Loader2,
-  Sparkles,
-  Send,
-  ImagePlus,
-  X,
   Eye,
   MousePointer,
-  AlignRight,
+  Layers,
   Code2,
-  Share2,
-  MoreHorizontal,
-  Globe,
-  ArrowRight,
-  Bot,
-  User,
   CheckCircle2,
   Circle,
   Undo2,
@@ -41,6 +32,8 @@ import {
 } from "lucide-react";
 import { Platform, ViewportSize } from "../lib/types";
 import { IFRAME_VISUAL_EDIT_SCRIPT } from "../lib/iframe-inject";
+import { ChatPanel, type ChatMessage } from "./workspace/ChatPanel";
+import { VIEWPORT_WIDTHS } from "./workspace/viewport-config";
 import { BASE_CSS, BASE_SCRIPT } from "../lib/base-css";
 import { useEditHistory } from "../lib/editor/useEditHistory";
 import { googleFontUrl } from "../lib/editor/google-fonts";
@@ -70,13 +63,6 @@ interface WorkspaceViewProps {
   onBack: () => void;
 }
 
-interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-  images?: { name: string; base64: string }[];
-  timestamp: number;
-}
-
 interface BuildStep {
   label: string;
   status: "done" | "active" | "pending";
@@ -89,14 +75,6 @@ const VIEWPORTS: { id: ViewportSize; icon: React.ReactNode; label: string }[] = 
   { id: "mobile", icon: <Smartphone className="w-4 h-4" />, label: "Mobile" },
 ];
 
-// Container max-widths for each viewport. Ultra-wide simulates a 2K display.
-const VIEWPORT_WIDTHS: Record<ViewportSize, string> = {
-  ultrawide: "max-w-[2200px]",
-  desktop: "max-w-full",
-  tablet: "max-w-[768px]",
-  mobile: "max-w-[375px]",
-};
-
 export function WorkspaceView({
   code, isLoading, isRefining, platform, prompt, error, onRefine, onBack,
 }: WorkspaceViewProps) {
@@ -104,17 +82,14 @@ export function WorkspaceView({
   const [userOverrodeTab, setUserOverrodeTab] = useState(false);
   const [viewportSize, setViewportSize] = useState<ViewportSize>("desktop");
   const [copied, setCopied] = useState(false);
-  const [shared, setShared] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [chatInput, setChatInput] = useState("");
-  const [chatImages, setChatImages] = useState<{ name: string; base64: string }[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [leftPanelTab, setLeftPanelTab] = useState<"chat" | "details" | "insert" | "layers" | "library">("chat");
+  const [leftPanelTab, setLeftPanelTab] = useState<"chat" | "details" | "insert" | "layers" | "library">("layers");
   const [leftCollapsed, setLeftCollapsed] = useState(false);
+  const [rightCollapsed, setRightCollapsed] = useState(false);
   const [tree, setTree] = useState<TreeNode[]>([]);
   const { components, add: addComponent, remove: removeComponent, rename: renameComponent } = useComponents();
   const pendingComponentName = useRef<string | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
   const [visualEditMode, setVisualEditMode] = useState(false);
   const [selectedElementProps, setSelectedElementProps] = useState<ElementProps | null>(null);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
@@ -123,7 +98,6 @@ export function WorkspaceView({
   const [elementorCopied, setElementorCopied] = useState(false);
   const [vslDialog, setVslDialog] = useState<{ id: string; config: VSLConfig | null } | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const chatFileRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -516,109 +490,16 @@ export function WorkspaceView({
     }
   }, [code]);
 
-  const handleSend = () => {
-    if ((!chatInput.trim() && chatImages.length === 0) || isRefining) return;
+  const handleChatRefine = useCallback((text: string, images?: { name: string; base64: string }[]) => {
+    setMessages((prev) => [...prev, { role: "user", content: text, images, timestamp: Date.now() }]);
+    onRefine(text, images);
+  }, [onRefine]);
 
-    // If there are images and no text (or text about photo), try to insert directly
-    if (chatImages.length > 0 && (!chatInput.trim() || chatInput.toLowerCase().includes("foto") || chatInput.toLowerCase().includes("imagem") || chatInput.toLowerCase().includes("inserir"))) {
-      // Insert first image directly into template
-      insertPhotoIntoTemplate(chatImages[0].base64);
-      setMessages((prev) => [...prev, { role: "user", content: chatInput.trim() || "Inserir foto no template", images: [...chatImages], timestamp: Date.now() }]);
-      setChatInput("");
-      setChatImages([]);
-      return;
-    }
-
-    const msg = chatInput.trim() || "Analise a imagem e aplique ao layout";
-    const imgs = [...chatImages];
-    setMessages((prev) => [...prev, { role: "user", content: msg, images: imgs.length > 0 ? imgs : undefined, timestamp: Date.now() }]);
-    setChatInput("");
-    setChatImages([]);
-    onRefine(msg, imgs.length > 0 ? imgs : undefined);
-  };
-
-  const addImageFiles = useCallback((files: FileList | File[]) => {
-    Array.from(files).forEach((file) => {
-      if (!file.type.startsWith("image/")) return;
-      if (file.size > 2_000_000) return; // 2MB max
-      const reader = new FileReader();
-      reader.onload = () => {
-        setChatImages((prev) => prev.length >= 3 ? prev : [...prev, { name: file.name, base64: reader.result as string }]);
-      };
-      reader.readAsDataURL(file);
-    });
+  const handleInsertPhotoFromChat = useCallback((base64: string, caption: string) => {
+    insertPhotoIntoTemplate(base64);
+    setMessages((prev) => [...prev, { role: "user", content: caption, images: [{ name: "foto", base64 }], timestamp: Date.now() }]);
   }, []);
 
-  const handleChatImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) addImageFiles(e.target.files);
-    if (chatFileRef.current) chatFileRef.current.value = "";
-  }, [addImageFiles]);
-
-  // Global drag & drop + paste (native events for reliability)
-  useEffect(() => {
-    let dragCounter = 0;
-
-    const onDragEnter = (e: DragEvent) => {
-      e.preventDefault();
-      dragCounter++;
-      if (e.dataTransfer?.types.includes("Files")) {
-        setIsDragging(true);
-      }
-    };
-
-    const onDragOver = (e: DragEvent) => {
-      e.preventDefault();
-      if (e.dataTransfer) e.dataTransfer.dropEffect = "copy";
-    };
-
-    const onDragLeave = (e: DragEvent) => {
-      e.preventDefault();
-      dragCounter--;
-      if (dragCounter <= 0) {
-        dragCounter = 0;
-        setIsDragging(false);
-      }
-    };
-
-    const onDrop = (e: DragEvent) => {
-      e.preventDefault();
-      dragCounter = 0;
-      setIsDragging(false);
-      if (e.dataTransfer?.files.length) {
-        addImageFiles(e.dataTransfer.files);
-      }
-    };
-
-    const onPaste = (e: ClipboardEvent) => {
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      const files: File[] = [];
-      for (const item of items) {
-        if (item.type.startsWith("image/")) {
-          const file = item.getAsFile();
-          if (file) files.push(file);
-        }
-      }
-      if (files.length > 0) {
-        e.preventDefault();
-        addImageFiles(files);
-      }
-    };
-
-    document.addEventListener("dragenter", onDragEnter);
-    document.addEventListener("dragover", onDragOver);
-    document.addEventListener("dragleave", onDragLeave);
-    document.addEventListener("drop", onDrop);
-    window.addEventListener("paste", onPaste);
-
-    return () => {
-      document.removeEventListener("dragenter", onDragEnter);
-      document.removeEventListener("dragover", onDragOver);
-      document.removeEventListener("dragleave", onDragLeave);
-      document.removeEventListener("drop", onDrop);
-      window.removeEventListener("paste", onPaste);
-    };
-  }, [addImageFiles]);
 
   // When refinement completes, add assistant message
   useEffect(() => {
@@ -635,332 +516,113 @@ export function WorkspaceView({
 
   return (
     <div className="flex h-screen bg-[#080809] p-2 gap-2">
-      {/* Global drag overlay */}
-      {isDragging && (
-        <div className="fixed inset-0 z-[100] bg-purple-500/5 border-2 border-dashed border-purple-500/40 flex items-center justify-center backdrop-blur-[2px] pointer-events-none">
-          <div className="text-center bg-[#1a1a1e]/90 backdrop-blur-xl rounded-2xl px-8 py-6 border border-purple-500/20 shadow-2xl">
-            <ImagePlus className="w-10 h-10 text-purple-400 mx-auto mb-3" />
-            <p className="text-sm font-medium text-purple-300">Solte a imagem aqui</p>
-            <p className="text-[11px] text-purple-400/40 mt-1">Print, referência ou mockup</p>
-          </div>
-        </div>
-      )}
 
-      {/* ─── Collapsed Rail (shows instead of full panel) ─── */}
-      {leftCollapsed && (
+      {/* ─── LEFT: Navigator / Chat / Insert / Library ─── */}
+      {leftCollapsed ? (
         <div className="w-[44px] shrink-0 flex flex-col items-center py-3 gap-1 bg-[#0e0e11] rounded-[20px]">
-          <button onClick={() => setLeftCollapsed(false)} title="Expandir painel (⌘\\)"
+          <button onClick={() => setLeftCollapsed(false)} title="Expandir (⌘\\)"
             className="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/[0.06] cursor-pointer transition-colors">
             <PanelLeftOpen className="w-4 h-4" />
           </button>
           <div className="w-6 h-px bg-white/[0.06] my-1" />
           <RailButton active={leftPanelTab === "chat"} onClick={() => { setLeftPanelTab("chat"); setLeftCollapsed(false); }} title="Chat" icon={<MessageCircle className="w-4 h-4" />} />
-          <RailButton active={leftPanelTab === "details"} onClick={() => { setLeftPanelTab("details"); setLeftCollapsed(false); }} title="Detalhes" icon={<Info className="w-4 h-4" />} />
           {code && !isLoading && <RailButton active={leftPanelTab === "insert"} onClick={() => { setLeftPanelTab("insert"); setLeftCollapsed(false); }} title="Inserir" icon={<Plus className="w-4 h-4" />} />}
+          {code && !isLoading && <RailButton active={leftPanelTab === "layers"} onClick={() => { setLeftPanelTab("layers"); setLeftCollapsed(false); }} title="Navigator" icon={<Layers className="w-4 h-4" />} />}
           {code && !isLoading && <RailButton active={leftPanelTab === "library"} onClick={() => { setLeftPanelTab("library"); setLeftCollapsed(false); }} title="Biblioteca" icon={<Package className="w-4 h-4" />} />}
-          {code && !isLoading && <RailButton active={leftPanelTab === "layers"} onClick={() => { setLeftPanelTab("layers"); setLeftCollapsed(false); }} title="Camadas" icon={<AlignRight className="w-4 h-4" />} />}
         </div>
-      )}
-
-      {/* ─── Left Panel: Chat + Steps ─── */}
-      {!leftCollapsed && (
-      <div
-        ref={dropZoneRef}
-        className="w-[380px] shrink-0 flex flex-col bg-[#0e0e11] rounded-[20px] overflow-hidden relative"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
-          <div className="flex items-center gap-2">
-            <button onClick={onBack} className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/[0.05] transition-all cursor-pointer">
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <div>
-              <h2 className="text-[13px] font-medium text-white/80 truncate max-w-[220px]">{prompt.slice(0, 50)}{prompt.length > 50 ? "..." : ""}</h2>
-              <p className="text-[10px] text-white/25">
-                {isLoading ? "Construindo..." : isRefining ? "Refinando..." : "Concluído"}
-              </p>
-            </div>
-          </div>
-          <button onClick={() => setLeftCollapsed(true)} title="Recolher painel (⌘\\)"
-            className="p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/[0.06] cursor-pointer transition-colors">
-            <PanelLeftClose className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex gap-0.5 px-3 pt-3 pb-1">
-          <button onClick={() => { setLeftPanelTab("chat"); if (visualEditMode) toggleVisualEdit(); }}
-            className={cn("px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer",
-              leftPanelTab === "chat" && !visualEditMode ? "bg-white/[0.07] text-white/80" : "text-white/30 hover:text-white/50")}>
-            Chat
-          </button>
-          <button onClick={() => { setLeftPanelTab("details"); if (visualEditMode) toggleVisualEdit(); }}
-            className={cn("px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer",
-              leftPanelTab === "details" && !visualEditMode ? "bg-white/[0.07] text-white/80" : "text-white/30 hover:text-white/50")}>
-            Detalhes
-          </button>
-          {code && !isLoading && (
-            <button onClick={() => { setLeftPanelTab("insert"); if (visualEditMode) toggleVisualEdit(); }}
-              className={cn("px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer",
-                leftPanelTab === "insert" && !visualEditMode ? "bg-white/[0.07] text-white/80" : "text-white/30 hover:text-white/50")}>
-              Inserir
-            </button>
-          )}
-          {code && !isLoading && (
-            <button onClick={() => { setLeftPanelTab("library"); if (visualEditMode) toggleVisualEdit(); }}
-              className={cn("px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer",
-                leftPanelTab === "library" && !visualEditMode ? "bg-white/[0.07] text-white/80" : "text-white/30 hover:text-white/50")}>
-              Biblioteca
-            </button>
-          )}
-          {code && !isLoading && (
-            <button
-              onClick={() => { setLeftPanelTab("layers"); if (visualEditMode) toggleVisualEdit(); }}
-              title="Camadas"
-              className={cn("flex items-center justify-center w-8 h-[30px] rounded-lg transition-all cursor-pointer ml-auto",
-                leftPanelTab === "layers" && !visualEditMode ? "bg-white/[0.07] text-white/80" : "text-white/30 hover:text-white/50 hover:bg-white/[0.04]")}>
-              <AlignRight className="w-3.5 h-3.5" />
-            </button>
-          )}
-          {code && !isLoading && (
-            <button onClick={() => { toggleVisualEdit(); setLeftPanelTab("chat"); }}
-              title="Editar visual"
-              className={cn("flex items-center justify-center w-8 h-[30px] rounded-lg transition-all cursor-pointer",
-                visualEditMode ? "bg-purple-500/20 text-purple-400" : "text-white/30 hover:text-white/50 hover:bg-white/[0.04]")}>
-              <MousePointer className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
-
-        {/* Content */}
-        {vslDialog ? (
-          // VSL config takes over the left panel until the user closes it.
-          // Re-mounted per element via `key` so internal state resets cleanly.
-          <VSLConfigPanel
-            key={vslDialog.id}
-            initialConfig={vslDialog.config}
-            onClose={() => setVslDialog(null)}
-            onSave={handleVSLSave}
-          />
-        ) : visualEditMode ? (
-          <VisualEditor
-            elementProps={selectedElementProps}
-            viewport={viewportSize}
-            onStyleChange={handleVisualStyleChange}
-            onTextChange={handleVisualTextChange}
-            onAttrChange={handleVisualAttrChange}
-            onFontLoad={handleLoadFont}
-            onDuplicate={duplicateSelected}
-            onDelete={deleteSelected}
-            onMove={moveSelected}
-            onSaveComponent={handleSaveComponent}
-            onBack={toggleVisualEdit}
-          />
-        ) : (
-        <>
-        {leftPanelTab === "insert" ? (
-          <InsertPanel onInsert={handleInsertHtml} onDragHtml={handleDragHtml} />
-        ) : leftPanelTab === "layers" ? (
-          <LayersPanel
-            tree={tree}
-            selectedId={selectedElementId}
-            onSelect={handleLayerSelect}
-            onDelete={handleLayerDelete}
-            onToggleHidden={handleLayerToggleHidden}
-            onRename={handleLayerRename}
-          />
-        ) : leftPanelTab === "library" ? (
-          <LibraryPanel
-            components={components}
-            pageHtml={finalCode || code}
-            onInsert={handleInsertHtml}
-            onDragHtml={handleDragHtml}
-            onRemoveComponent={removeComponent}
-            onRenameComponent={renameComponent}
-          />
-        ) : (
-        <>
-        <div className="flex-1 overflow-y-auto px-3 py-3">
-          {leftPanelTab === "details" && (
-            <div className="space-y-2">
-              <p className="text-[10px] text-white/25 uppercase tracking-widest font-medium mb-3">Etapas de construção</p>
-              {buildSteps.map((step, i) => (
-                <div key={i} className="flex items-start gap-2.5 py-1.5">
-                  {step.status === "done" ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                  ) : step.status === "active" ? (
-                    <Loader2 className="w-4 h-4 text-purple-400 shrink-0 mt-0.5 animate-spin" />
-                  ) : (
-                    <Circle className="w-4 h-4 text-white/10 shrink-0 mt-0.5" />
-                  )}
-                  <span className={cn("text-[12px]",
-                    step.status === "done" ? "text-white/50" : step.status === "active" ? "text-purple-400" : "text-white/15"
-                  )}>{step.label}</span>
-                </div>
-              ))}
-
+      ) : (
+        <div ref={dropZoneRef} className="w-[260px] shrink-0 flex flex-col bg-[#0e0e11] rounded-[20px] overflow-hidden relative">
+          {/* Header */}
+          <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/[0.06]">
+            <div className="flex items-center gap-1">
+              <button onClick={onBack} className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/[0.05] transition-all cursor-pointer" title="Voltar">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button onClick={() => setLeftPanelTab("chat")} title="Chat"
+                className={cn("p-1.5 rounded-lg transition-all cursor-pointer", leftPanelTab === "chat" ? "bg-white/[0.08] text-white" : "text-white/30 hover:text-white/50")}>
+                <MessageCircle className="w-3.5 h-3.5" />
+              </button>
               {code && !isLoading && (
-                <div className="mt-6 pt-4 border-t border-white/[0.06] space-y-3">
-                  <p className="text-[10px] text-white/25 uppercase tracking-widest font-medium">Exportar para</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    <ExportButton label="Elementor" desc="WordPress" onClick={handleCopy} />
-                    <ExportButton label="Webflow" desc="Embed code" onClick={handleCopy} />
-                    <ExportButton label="Framer" desc="Code override" onClick={handleCopy} />
-                    <ExportButton label="HTML" desc="Download" onClick={handleDownload} />
-                  </div>
-                </div>
+                <button onClick={() => setLeftPanelTab("insert")} title="Inserir"
+                  className={cn("p-1.5 rounded-lg transition-all cursor-pointer", leftPanelTab === "insert" ? "bg-white/[0.08] text-white" : "text-white/30 hover:text-white/50")}>
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {code && !isLoading && (
+                <button onClick={() => setLeftPanelTab("layers")} title="Navigator"
+                  className={cn("p-1.5 rounded-lg transition-all cursor-pointer", leftPanelTab === "layers" ? "bg-white/[0.08] text-white" : "text-white/30 hover:text-white/50")}>
+                  <Layers className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {code && !isLoading && (
+                <button onClick={() => setLeftPanelTab("library")} title="Biblioteca"
+                  className={cn("p-1.5 rounded-lg transition-all cursor-pointer", leftPanelTab === "library" ? "bg-white/[0.08] text-white" : "text-white/30 hover:text-white/50")}>
+                  <Package className="w-3.5 h-3.5" />
+                </button>
               )}
             </div>
-          )}
-
-          {leftPanelTab === "chat" && (
-            <div className="space-y-4">
-              {messages.map((msg, i) => (
-                <div key={i} className="flex gap-2.5">
-                  <div className={cn(
-                    "w-6 h-6 rounded-lg shrink-0 flex items-center justify-center mt-0.5",
-                    msg.role === "user" ? "bg-white/[0.06]" : "bg-purple-500/15"
-                  )}>
-                    {msg.role === "user" ? <User className="w-3 h-3 text-white/40" /> : <Bot className="w-3 h-3 text-purple-400" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] text-white/25 mb-1">{msg.role === "user" ? "Você" : "WevyFlow"}</p>
-                    {msg.images && msg.images.length > 0 && (
-                      <div className="flex gap-1.5 mb-2">
-                        {msg.images.map((img, j) => (
-                          <img key={j} src={img.base64} alt={img.name} className="w-20 h-20 rounded-xl object-cover border border-white/[0.1]" />
-                        ))}
-                      </div>
-                    )}
-                    <p className="text-[12px] text-white/60 leading-relaxed">{msg.content}</p>
-                  </div>
-                </div>
-              ))}
-
-              {(isLoading || isRefining) && (
-                <div className="flex gap-2.5">
-                  <div className="w-6 h-6 rounded-lg bg-purple-500/15 shrink-0 flex items-center justify-center mt-0.5">
-                    <Bot className="w-3 h-3 text-purple-400" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-[10px] text-white/25 mb-1">WevyFlow</p>
-                    <div className="flex items-center gap-2 text-[12px] text-purple-400">
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                      {isRefining ? "Aplicando refinamento..." : "Construindo layout..."}
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div ref={chatEndRef} />
-            </div>
-          )}
-        </div>
-
-        {/* Photo insert banner - shows when template has photo placeholder */}
-        {(finalCode || code) && ((finalCode || code).includes("photo-placeholder") || (finalCode || code).includes("hero-right-fallback")) && (
-          <div className="px-3 pt-2">
-            <button
-              onClick={() => {
-                const input = document.createElement("input");
-                input.type = "file";
-                input.accept = "image/*";
-                input.onchange = (e) => {
-                  const file = (e.target as HTMLInputElement).files?.[0];
-                  if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    insertPhotoIntoTemplate(reader.result as string);
-                    setMessages((prev) => [...prev, { role: "assistant", content: "Foto inserida no template!", timestamp: Date.now() }]);
-                  };
-                  reader.readAsDataURL(file);
-                };
-                input.click();
-              }}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold hover:bg-emerald-500/15 transition-all cursor-pointer"
-            >
-              <ImagePlus className="w-4 h-4" />
-              Inserir foto do mentor / produto
+            <button onClick={() => setLeftCollapsed(true)} title="Recolher (⌘\\)"
+              className="p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/[0.06] cursor-pointer transition-colors">
+              <PanelLeftClose className="w-4 h-4" />
             </button>
           </div>
-        )}
 
-        {/* Chat input */}
-        <div className="px-3 pb-3 pt-1 space-y-2">
-          {/* Image preview strip */}
-          {chatImages.length > 0 && (
-            <div className="flex gap-1.5 px-1">
-              {chatImages.map((img, i) => (
-                <div key={i} className="relative group">
-                  <img src={img.base64} alt={img.name} className="w-12 h-12 rounded-lg object-cover border border-white/[0.1]" />
-                  <button onClick={() => setChatImages(prev => prev.filter((_, idx) => idx !== i))}
-                    className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                    <X className="w-2.5 h-2.5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="flex items-center gap-1.5 bg-white/[0.03] border border-white/[0.06] rounded-xl px-2.5 py-2 focus-within:border-purple-500/30 transition-colors">
-            {/* Image upload button */}
-            <button
-              onClick={() => chatFileRef.current?.click()}
-              disabled={isLoading || chatImages.length >= 3}
-              className={cn(
-                "p-1.5 rounded-lg transition-all cursor-pointer shrink-0",
-                chatImages.length >= 3 ? "text-white/10 cursor-not-allowed" : "text-white/25 hover:text-purple-400 hover:bg-white/[0.05]"
-              )}
-              title="Enviar imagem (print, referência, mockup)"
-            >
-              <ImagePlus className="w-4 h-4" />
-            </button>
-            <input ref={chatFileRef} type="file" accept="image/*" multiple onChange={handleChatImageUpload} className="hidden" />
-
-            <input
-              type="text"
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-              placeholder={chatImages.length > 0 ? "Descreva o que quer baseado na imagem..." : "Peça alterações, envie prints..."}
-              className="flex-1 bg-transparent text-[12px] text-white placeholder:text-white/20 focus:outline-none"
-              disabled={isLoading}
+          {/* Content */}
+          {vslDialog ? (
+            <VSLConfigPanel
+              key={vslDialog.id}
+              initialConfig={vslDialog.config}
+              onClose={() => setVslDialog(null)}
+              onSave={handleVSLSave}
             />
-            <button
-              onClick={handleSend}
-              disabled={isRefining || isLoading || (!chatInput.trim() && chatImages.length === 0)}
-              className={cn(
-                "p-1.5 rounded-lg transition-all cursor-pointer shrink-0",
-                (chatInput.trim() || chatImages.length > 0) && !isRefining && !isLoading
-                  ? "bg-purple-500 text-white hover:bg-purple-400"
-                  : "text-white/15"
-              )}
-            >
-              <Send className="w-3.5 h-3.5" />
-            </button>
-          </div>
-          <p className="text-[9px] text-white/15 text-center">Envie prints e referências — a IA analisa visualmente</p>
+          ) : leftPanelTab === "layers" ? (
+            <LayersPanel
+              tree={tree}
+              selectedId={selectedElementId}
+              onSelect={handleLayerSelect}
+              onDelete={handleLayerDelete}
+              onToggleHidden={handleLayerToggleHidden}
+              onRename={handleLayerRename}
+            />
+          ) : leftPanelTab === "insert" ? (
+            <InsertPanel onInsert={handleInsertHtml} onDragHtml={handleDragHtml} />
+          ) : leftPanelTab === "library" ? (
+            <LibraryPanel
+              components={components}
+              pageHtml={finalCode || code}
+              onInsert={handleInsertHtml}
+              onDragHtml={handleDragHtml}
+              onRemoveComponent={removeComponent}
+              onRenameComponent={renameComponent}
+            />
+          ) : (
+            <ChatPanel
+              messages={messages}
+              isLoading={isLoading}
+              isRefining={isRefining}
+              code={finalCode || code}
+              onRefine={handleChatRefine}
+              onInsertPhoto={handleInsertPhotoFromChat}
+              endRef={chatEndRef}
+            />
+          )}
         </div>
-        </>
-        )}
-        </>
-        )}
-      </div>
       )}
 
-      {/* ─── Right Panel: Preview / Code ─── */}
-      <div className="flex-1 flex flex-col rounded-[20px] bg-[#0c0c10] overflow-hidden">
+      {/* ─── CENTER: Preview / Code ─── */}
+      <div className="flex-1 flex flex-col rounded-[20px] bg-[#0c0c10] overflow-hidden min-w-0">
         {/* Toolbar */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06] bg-[#0c0c10]">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/[0.06] bg-[#0c0c10]">
+          <div className="flex items-center gap-1.5">
             {/* Preview / Code toggle */}
             <div className="flex gap-0.5 p-0.5 rounded-lg bg-white/[0.03]">
               <button onClick={() => { setRightTab("preview"); setUserOverrodeTab(true); }}
-                className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium transition-all cursor-pointer",
+                className={cn("flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-all cursor-pointer",
                   rightTab === "preview" ? "bg-white/[0.08] text-white" : "text-white/30 hover:text-white/50")}>
                 <Eye className="w-3.5 h-3.5" /> Preview
               </button>
               <button onClick={() => { setRightTab("code"); setUserOverrodeTab(true); }}
-                className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium transition-all cursor-pointer",
+                className={cn("flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-all cursor-pointer",
                   rightTab === "code" ? "bg-white/[0.08] text-white" : "text-white/30 hover:text-white/50")}>
                 <Code2 className="w-3.5 h-3.5" /> Código
               </button>
@@ -968,7 +630,7 @@ export function WorkspaceView({
 
             {/* Viewports */}
             {rightTab === "preview" && (
-              <div className="flex gap-0.5 ml-1">
+              <div className="flex gap-0.5">
                 {VIEWPORTS.map((v) => (
                   <button key={v.id} onClick={() => setViewportSize(v.id)}
                     className={cn("p-1.5 rounded-md transition-all cursor-pointer",
@@ -981,69 +643,52 @@ export function WorkspaceView({
 
             {/* Undo / Redo */}
             {code && !isStreaming && (
-              <div className="flex gap-0.5 ml-1 pl-2 border-l border-white/[0.06]">
-                <button
-                  onClick={editHistory.undo}
-                  disabled={!editHistory.canUndo}
-                  title="Desfazer (⌘Z)"
+              <div className="flex gap-0.5 pl-1.5 border-l border-white/[0.06]">
+                <button onClick={editHistory.undo} disabled={!editHistory.canUndo} title="Desfazer (⌘Z)"
                   className={cn("p-1.5 rounded-md transition-all",
                     editHistory.canUndo ? "text-white/40 hover:text-white hover:bg-white/[0.05] cursor-pointer" : "text-white/10 cursor-not-allowed")}>
-                  <Undo2 className="w-4 h-4" />
+                  <Undo2 className="w-3.5 h-3.5" />
                 </button>
-                <button
-                  onClick={editHistory.redo}
-                  disabled={!editHistory.canRedo}
-                  title="Refazer (⇧⌘Z)"
+                <button onClick={editHistory.redo} disabled={!editHistory.canRedo} title="Refazer (⇧⌘Z)"
                   className={cn("p-1.5 rounded-md transition-all",
                     editHistory.canRedo ? "text-white/40 hover:text-white hover:bg-white/[0.05] cursor-pointer" : "text-white/10 cursor-not-allowed")}>
-                  <Redo2 className="w-4 h-4" />
+                  <Redo2 className="w-3.5 h-3.5" />
                 </button>
               </div>
+            )}
+
+            {/* Visual Edit toggle */}
+            {code && !isStreaming && (
+              <button onClick={toggleVisualEdit} title="Modo edição visual — clique para selecionar elementos"
+                className={cn("p-1.5 rounded-md transition-all cursor-pointer",
+                  visualEditMode ? "bg-purple-500/20 text-purple-400" : "text-white/30 hover:text-white/50 hover:bg-white/[0.05]")}>
+                <MousePointer className="w-3.5 h-3.5" />
+              </button>
             )}
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             {code && (
               <>
                 <button onClick={handleCopy}
-                  className={cn("flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer",
+                  className={cn("flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer",
                     copied ? "bg-emerald-500/15 text-emerald-400" : "text-white/30 hover:text-white/50 hover:bg-white/[0.05]")}>
                   {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copied ? "Copiado!" : "Copiar"}
+                  {copied ? "OK!" : "Copiar"}
                 </button>
-                <button
-                  onClick={() => {
-                    const codeToShare = finalCode || code;
-                    const fullHtml = `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Layout WevyFlow</title>\n</head>\n<body>\n${codeToShare}\n</body>\n</html>`;
-                    if (navigator.share) {
-                      const blob = new Blob([fullHtml], { type: "text/html" });
-                      const file = new File([blob], "wevyflow-layout.html", { type: "text/html" });
-                      navigator.share({ title: "Layout WevyFlow", files: [file] }).catch(() => {});
-                    } else {
-                      navigator.clipboard.writeText(codeToShare);
-                      setShared(true);
-                      setTimeout(() => setShared(false), 2000);
-                    }
-                  }}
-                  className={cn("flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer",
-                    shared ? "bg-emerald-500/15 text-emerald-400" : "text-white/30 hover:text-white/50 hover:bg-white/[0.05]")}
-                >
-                  {shared ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
-                  {shared ? "Copiado!" : "Share"}
-                </button>
-                <button onClick={handleSave} title="Salvar alterações localmente (este navegador)"
-                  className={cn("flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer",
+                <button onClick={handleSave} title="Salvar draft localmente"
+                  className={cn("flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer",
                     saved ? "bg-emerald-500/15 text-emerald-400" : "text-white/30 hover:text-white/50 hover:bg-white/[0.05]")}>
                   {saved ? <Check className="w-3.5 h-3.5" /> : <Save className="w-3.5 h-3.5" />}
                   {saved ? "Salvo!" : "Salvar"}
                 </button>
                 <button onClick={handleDownload}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-white/30 hover:text-white/50 hover:bg-white/[0.05] transition-all cursor-pointer">
+                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium text-white/30 hover:text-white/50 hover:bg-white/[0.05] transition-all cursor-pointer">
                   <Download className="w-3.5 h-3.5" /> HTML
                 </button>
                 <button onClick={handleCopyElementor}
-                  className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer",
+                  className={cn("flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer",
                     elementorCopied
                       ? "bg-emerald-500/15 text-emerald-400"
                       : "bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:shadow-lg hover:shadow-orange-500/20")}>
@@ -1106,6 +751,39 @@ export function WorkspaceView({
         )}
       </div>
 
+      {/* ─── RIGHT: CSS Style Panel ─── */}
+      {rightCollapsed ? (
+        <div className="w-[44px] shrink-0 flex flex-col items-center py-3 gap-1 bg-[#0e0e11] rounded-[20px]">
+          <button onClick={() => setRightCollapsed(false)} title="Abrir painel de estilo"
+            className="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/[0.06] cursor-pointer transition-colors">
+            <PanelRightOpen className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        <div className="w-[260px] shrink-0 flex flex-col bg-[#0e0e11] rounded-[20px] overflow-hidden">
+          <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/[0.06] shrink-0">
+            <span className="text-[11px] font-medium text-white/40 uppercase tracking-widest">Estilo</span>
+            <button onClick={() => setRightCollapsed(true)} title="Recolher painel de estilo"
+              className="p-1 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/[0.05] transition-all cursor-pointer">
+              <PanelRightClose className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <VisualEditor
+            elementProps={selectedElementProps}
+            viewport={viewportSize}
+            onStyleChange={handleVisualStyleChange}
+            onTextChange={handleVisualTextChange}
+            onAttrChange={handleVisualAttrChange}
+            onFontLoad={handleLoadFont}
+            onDuplicate={duplicateSelected}
+            onDelete={deleteSelected}
+            onMove={moveSelected}
+            onSaveComponent={handleSaveComponent}
+            onBack={toggleVisualEdit}
+          />
+        </div>
+      )}
+
       {/* Elementor Export Modal */}
       {showElementorExport && (
         <ElementorExport
@@ -1125,16 +803,6 @@ function RailButton({ active, onClick, title, icon }: { active: boolean; onClick
       className={cn("p-2 rounded-lg cursor-pointer transition-colors",
         active ? "bg-purple-500/20 text-purple-400" : "text-white/40 hover:text-white hover:bg-white/[0.05]")}>
       {icon}
-    </button>
-  );
-}
-
-function ExportButton({ label, desc, onClick }: { label: string; desc: string; onClick: () => void }) {
-  return (
-    <button onClick={onClick}
-      className="flex flex-col items-start px-3 py-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:border-purple-500/30 hover:bg-white/[0.04] transition-all cursor-pointer group">
-      <span className="text-[11px] font-medium text-white/60 group-hover:text-purple-400 transition-colors">{label}</span>
-      <span className="text-[9px] text-white/20">{desc}</span>
     </button>
   );
 }

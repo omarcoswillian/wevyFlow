@@ -1,0 +1,572 @@
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#131313;
+  --surface:#1a1a1a;
+  --card:#222222;
+  --text:#ffffff;
+  --muted:#a0a0a0;
+  --accent:#EC2C1F;
+  --accent-hover:#c9241a;
+  --border:rgba(255,255,255,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{text-decoration:none;color:inherit}
+ul{list-style:none}
+.container{max-width:1100px;margin:0 auto;padding:0 40px}
+@media(max-width:768px){.container{padding:0 20px}}
+
+/* CTA */
+.btn-cta{display:inline-flex;align-items:center;justify-content:center;background:var(--accent);color:#fff;font-family:'Poppins',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;padding:18px 48px;border-radius:4px;cursor:pointer;border:none;transition:background 0.2s,transform 0.15s;line-height:1}
+.btn-cta:hover{background:var(--accent-hover);transform:translateY(-2px)}
+
+/* ────── HERO ────── */
+.ev-hero{background:var(--bg);padding:60px 0 70px;position:relative;overflow:hidden}
+.ev-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(236,44,31,0.10),transparent 70%);pointer-events:none}
+.ev-hero .container{display:flex;flex-direction:column;align-items:center;text-align:center;gap:28px}
+.ev-hero-logo{font-size:clamp(28px,5vw,48px);font-weight:900;letter-spacing:0.12em;text-transform:uppercase;color:#fff}
+.ev-hero-logo span{color:var(--accent)}
+.ev-hero-datlocal{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap}
+.ev-hero-datlocal .data-badge,.ev-hero-datlocal .local-badge{display:flex;flex-direction:column;align-items:center;font-size:13px;color:var(--muted);line-height:1.4}
+.ev-hero-datlocal .data-badge strong,.ev-hero-datlocal .local-badge strong{font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.3)}
+.ev-hero-divider{width:1px;height:32px;background:var(--border)}
+.ev-hero-lote{display:inline-block;font-size:clamp(13px,1.5vw,15px);font-style:italic;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:-8px}
+.ev-hero h1{font-size:clamp(26px,4.5vw,48px);font-weight:900;text-transform:uppercase;line-height:1.1;max-width:800px}
+.ev-hero h2{font-size:clamp(15px,2vw,19px);font-weight:400;color:var(--muted);max-width:660px;line-height:1.6}
+.ev-hero-local-final{font-size:13px;color:rgba(255,255,255,0.3);letter-spacing:0.06em;text-transform:uppercase}
+
+/* ────── MARQUEE ────── */
+.ev-marquee{background:var(--accent);padding:14px 0;overflow:hidden}
+.ev-marquee-track{display:flex;gap:0;white-space:nowrap;animation:marquee-scroll 20s linear infinite}
+.ev-marquee-track span{display:inline-flex;align-items:center;gap:16px;padding:0 32px;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#fff}
+.ev-marquee-track span::after{content:'★';color:rgba(255,255,255,0.4);margin-left:16px}
+@keyframes marquee-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ────── PROVA SOCIAL / VIDEO ────── */
+.ev-prova{padding:80px 0;background:var(--surface)}
+.ev-prova .container{display:flex;flex-direction:column;align-items:center;gap:40px}
+.ev-prova-sponsors{display:flex;align-items:center;gap:40px;flex-wrap:wrap;justify-content:center}
+.ev-prova-sponsor{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.ev-prova-sponsor span{font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.3)}
+.ev-prova-sponsor-name{font-size:16px;font-weight:800;letter-spacing:0.08em;color:rgba(255,255,255,0.7)}
+.ev-prova-divider-v{width:1px;height:40px;background:var(--border)}
+.ev-prova-headline{font-size:clamp(22px,3.5vw,38px);font-weight:900;text-transform:uppercase;text-align:center;line-height:1.15;max-width:700px}
+.ev-prova-headline b{color:var(--accent)}
+.ev-video-wrapper{width:100%;max-width:800px;aspect-ratio:16/9;background:#000;border-radius:8px;overflow:hidden;position:relative;border:1px solid var(--border)}
+.ev-video-placeholder{width:100%;height:100%;background:linear-gradient(135deg,#1e1e1e,#2a2a2a);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;cursor:pointer}
+.ev-video-play{width:72px;height:72px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center}
+.ev-video-play svg{width:28px;height:28px;fill:#fff;margin-left:4px}
+.ev-video-label{font-size:13px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.1em}
+
+/* ────── DEPOIMENTOS QUEM VIVEU ────── */
+.ev-depo{padding:80px 0;background:var(--bg)}
+.ev-depo h2{text-align:center;font-size:clamp(22px,3vw,36px);font-weight:900;text-transform:uppercase;margin-bottom:48px}
+.ev-depo h2 b{color:var(--accent)}
+.ev-depo-list{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.ev-depo-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:28px;display:flex;flex-direction:column;gap:16px;transition:border-color 0.2s}
+.ev-depo-card:hover{border-color:rgba(236,44,31,0.3)}
+.ev-depo-person{display:flex;align-items:center;gap:14px}
+.ev-depo-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a01810);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;flex-shrink:0}
+.ev-depo-name{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em}
+.ev-depo-result{font-size:clamp(14px,1.5vw,16px);font-weight:800;text-transform:uppercase;line-height:1.3;color:#fff}
+.ev-depo-quote{font-size:14px;color:var(--muted);line-height:1.6;font-style:italic}
+.ev-depo-quote::before{content:'"'}
+.ev-depo-quote::after{content:'"'}
+.ev-depo-cta{text-align:center;margin-top:48px}
+@media(max-width:768px){.ev-depo-list{grid-template-columns:1fr}}
+
+/* ────── PALESTRANTES ────── */
+.ev-speakers{padding:80px 0;background:var(--surface)}
+.ev-speakers h2{text-align:center;font-size:clamp(20px,2.5vw,30px);font-weight:600;margin-bottom:48px;color:rgba(255,255,255,0.7)}
+.ev-speakers h2 b{color:#fff;font-weight:900}
+.ev-speakers-track-wrap{overflow:hidden;position:relative}
+.ev-speakers-track-wrap::before,.ev-speakers-track-wrap::after{content:'';position:absolute;top:0;bottom:0;width:80px;z-index:2;pointer-events:none}
+.ev-speakers-track-wrap::before{left:0;background:linear-gradient(to right,var(--surface),transparent)}
+.ev-speakers-track-wrap::after{right:0;background:linear-gradient(to left,var(--surface),transparent)}
+.ev-speakers-track{display:flex;gap:32px;animation:speakers-scroll 30s linear infinite;width:max-content}
+.ev-speakers-track:hover{animation-play-state:paused}
+.ev-speaker-item{display:flex;flex-direction:column;align-items:center;gap:10px;width:120px}
+.ev-speaker-photo{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#2a2a2a,#3a3a3a);border:2px solid var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:rgba(255,255,255,0.2);flex-shrink:0}
+.ev-speaker-name{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;text-align:center;line-height:1.3}
+@keyframes speakers-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ────── EXPERIÊNCIA / FEATURES ────── */
+.ev-exp{padding:90px 0;background:var(--bg)}
+.ev-exp .container{display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
+.ev-exp-pretitle{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.16em;color:var(--accent)}
+.ev-exp h2{font-size:clamp(24px,4vw,42px);font-weight:900;text-transform:uppercase;line-height:1.1}
+.ev-exp h2 b{color:var(--accent)}
+.ev-exp h2 sup{font-size:0.45em;vertical-align:super;font-weight:400;color:var(--muted)}
+.ev-exp-sub{font-size:15px;color:var(--muted);max-width:700px;line-height:1.7;margin-top:8px}
+.ev-exp-divider{width:60px;height:2px;background:var(--accent);margin:16px auto}
+.ev-exp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;width:100%;margin-top:32px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.ev-exp-card{background:var(--surface);padding:40px 32px;text-align:left;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden}
+.ev-exp-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);opacity:0;transition:opacity 0.2s}
+.ev-exp-card:hover::before{opacity:1}
+.ev-exp-num{font-size:48px;font-weight:900;color:rgba(236,44,31,0.12);line-height:1;letter-spacing:-0.02em}
+.ev-exp-card h3{font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em}
+.ev-exp-card p{font-size:14px;color:var(--muted);line-height:1.6}
+@media(max-width:768px){.ev-exp-grid{grid-template-columns:1fr}}
+
+/* ────── LOCAL / DATA ────── */
+.ev-local{padding:60px 0;background:var(--accent)}
+.ev-local .container{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.ev-local-date{font-size:clamp(18px,3vw,32px);font-weight:900;text-transform:uppercase;letter-spacing:0.06em;line-height:1.2}
+.ev-local-date b{display:block;font-size:0.6em;font-weight:500;opacity:0.8;letter-spacing:0.08em;margin-top:4px}
+.ev-local-venue{font-size:clamp(22px,3.5vw,40px);font-weight:900;text-transform:uppercase;letter-spacing:0.06em;line-height:1.2;margin-top:8px}
+.ev-local-venue b{display:block;font-size:0.55em;font-weight:500;opacity:0.85;letter-spacing:0.08em;margin-top:4px}
+
+/* ────── PROVA MUNDIAL ────── */
+.ev-mundial{padding:80px 0;background:var(--surface)}
+.ev-mundial .container{display:flex;flex-direction:column;align-items:center;gap:40px;text-align:center}
+.ev-mundial h2{font-size:clamp(22px,3vw,36px);font-weight:900;text-transform:uppercase;max-width:600px;line-height:1.15}
+.ev-mundial p{font-size:15px;color:var(--muted);max-width:520px;line-height:1.6}
+.ev-mundial-flags{font-size:28px;letter-spacing:4px;opacity:0.6}
+.ev-depo-photos{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;max-width:900px}
+.ev-depo-photo-card{aspect-ratio:4/5;background:linear-gradient(135deg,#2a2a2a,#1a1a1a);border-radius:8px;overflow:hidden;border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+.ev-depo-photo-card svg{width:40px;height:40px;opacity:0.15}
+@media(max-width:640px){.ev-depo-photos{grid-template-columns:repeat(2,1fr)}}
+
+/* ────── INGRESSOS ────── */
+.ev-ingressos{padding:90px 0;background:var(--bg)}
+.ev-ingressos h2{text-align:center;font-size:clamp(20px,2.8vw,34px);font-weight:900;text-transform:uppercase;margin-bottom:56px;line-height:1.2}
+.ev-ingressos h2 b{color:var(--accent)}
+.ev-tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
+.ev-tier{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:36px 28px;display:flex;flex-direction:column;gap:20px;position:relative;transition:border-color 0.2s}
+.ev-tier.featured{border-color:var(--accent);background:linear-gradient(180deg,rgba(236,44,31,0.05),var(--surface))}
+.ev-tier.esgotado{opacity:0.5;pointer-events:none}
+.ev-tier-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;padding:4px 14px;border-radius:20px;white-space:nowrap}
+.ev-tier-lote{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.16em;color:var(--accent)}
+.ev-tier h3{font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:0.04em}
+.ev-tier-pricing{display:flex;flex-direction:column;gap:4px}
+.ev-tier-old{font-size:12px;color:var(--muted)}
+.ev-tier-old s{opacity:0.6}
+.ev-tier-install{font-size:15px;font-weight:700}
+.ev-tier-install i{font-style:normal;font-size:22px;color:var(--accent);font-weight:900}
+.ev-tier-avista{font-size:13px;font-weight:600;color:rgba(255,255,255,0.6)}
+.ev-tier-features{display:flex;flex-direction:column;gap:10px}
+.ev-tier-feature{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);line-height:1.4}
+.ev-tier-feature.disabled{opacity:0.35;text-decoration:line-through}
+.ev-tier-feature-icon{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ev-tier-feature-icon.ok{background:rgba(34,197,94,0.12)}
+.ev-tier-feature-icon.no{background:rgba(255,255,255,0.05)}
+.ev-tier .btn-cta{width:100%;text-align:center;font-size:13px;padding:15px 20px}
+.ev-tier-local{text-align:center;font-size:11px;color:rgba(255,255,255,0.2);letter-spacing:0.08em;text-transform:uppercase;margin-top:-8px}
+@media(max-width:900px){.ev-tiers{grid-template-columns:1fr}}
+
+/* ────── PROGRESS BAR (disponibilidade) ────── */
+.ev-progress{margin-bottom:12px}
+.ev-progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em}
+.ev-progress-bar{height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden}
+.ev-progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 1s ease}
+
+/* ────── FAQ ────── */
+.ev-faq{padding:80px 0;background:var(--surface)}
+.ev-faq .container{max-width:760px}
+.ev-faq h2{text-align:center;font-size:clamp(20px,2.5vw,30px);font-weight:900;text-transform:uppercase;margin-bottom:40px}
+.ev-faq-item{border-bottom:1px solid var(--border);padding:0}
+.ev-faq-item summary{padding:20px 0;font-size:15px;font-weight:600;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:16px;user-select:none}
+.ev-faq-item summary::-webkit-details-marker{display:none}
+.ev-faq-item summary::after{content:'+';font-size:22px;font-weight:300;color:var(--accent);line-height:1;flex-shrink:0;transition:transform 0.2s}
+.ev-faq-item[open] summary::after{content:'−'}
+.ev-faq-item p{padding:0 0 20px;font-size:14px;color:var(--muted);line-height:1.7}
+
+/* ────── MANIFESTO / PLATO ────── */
+.ev-manifesto{padding:90px 0;background:var(--bg)}
+.ev-manifesto .container{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.ev-manifesto-pretitle{font-size:13px;font-weight:400;color:var(--muted);line-height:1.5;margin-bottom:8px}
+.ev-manifesto-title{font-size:clamp(28px,3.5vw,42px);font-weight:900;line-height:1.1;margin-bottom:4px}
+.ev-manifesto-subtitle{font-size:clamp(28px,3.5vw,42px);font-weight:400;line-height:1.1;color:var(--muted);margin-bottom:32px}
+.ev-manifesto-body{font-size:15px;color:var(--muted);line-height:1.8}
+.ev-manifesto-body h3{font-size:17px;font-weight:700;color:#fff;margin-bottom:8px}
+.ev-manifesto-body p{margin-bottom:16px}
+.ev-manifesto-body span.destaque{color:#fff;font-weight:600;font-style:italic}
+.ev-manifesto-visual{background:linear-gradient(135deg,var(--surface),var(--card));border-radius:12px;aspect-ratio:3/4;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:32px}
+.ev-manifesto-visual-icon{font-size:64px;opacity:0.3}
+.ev-manifesto-visual-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.3)}
+.ev-manifesto-pontos{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0}
+.ev-manifesto-ponto{background:rgba(236,44,31,0.12);border:1px solid rgba(236,44,31,0.2);color:var(--accent);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:8px 16px;border-radius:4px}
+@media(max-width:768px){.ev-manifesto .container{grid-template-columns:1fr}}
+@media(max-width:768px){.ev-manifesto-visual{display:none}}
+
+/* ────── CTA FINAL ────── */
+.ev-cta-final{padding:100px 0;background:var(--surface);text-align:center}
+.ev-cta-final .container{display:flex;flex-direction:column;align-items:center;gap:24px}
+.ev-cta-final h2{font-size:clamp(24px,4vw,48px);font-weight:900;text-transform:uppercase;line-height:1.1;max-width:700px}
+.ev-cta-final h2 b{color:var(--accent)}
+.ev-cta-final p{font-size:15px;color:var(--muted);max-width:480px;line-height:1.6}
+</style>
+
+<!-- ══════════════════════════════════════
+     HERO
+══════════════════════════════════════ -->
+<section class="ev-hero">
+  <div class="container">
+    <div class="ev-hero-logo">SUMMIT<span>.</span>PRO</div>
+
+    <div class="ev-hero-datlocal">
+      <div class="data-badge">
+        14, 15 e 16 de novembro de 2026
+        <strong>Sexta, sábado e domingo</strong>
+      </div>
+      <div class="ev-hero-divider"></div>
+      <div class="local-badge">
+        São Paulo, SP
+        <strong>Vibra São Paulo</strong>
+      </div>
+    </div>
+
+    <span class="ev-hero-lote">Lote 1 Liberado: Garanta sua vaga pelo menor preço</span>
+
+    <h1>Garanta seu ingresso para o maior evento de negócios e marketing digital do Brasil</h1>
+
+    <p class="ev-hero" style="font-size:17px;color:var(--muted);max-width:640px;line-height:1.6;text-align:center">Viva 3 dias intensos que vão transformar sua mentalidade, expandir sua rede e destravar o próximo nível do seu negócio.</p>
+
+    <a href="#ingressos" class="btn-cta">GARANTIR O MENOR PREÇO</a>
+
+    <span class="ev-hero-local-final">São Paulo, SP</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     MARQUEE
+══════════════════════════════════════ -->
+<div class="ev-marquee">
+  <div class="ev-marquee-track">
+    <span>Networking Real</span>
+    <span>Palco de Referências</span>
+    <span>Metodologia Comprovada</span>
+    <span>Mentalidade de Alto Nível</span>
+    <span>Resultados Reais</span>
+    <span>Comunidade Vibrante</span>
+    <!-- duplicated for seamless loop -->
+    <span>Networking Real</span>
+    <span>Palco de Referências</span>
+    <span>Metodologia Comprovada</span>
+    <span>Mentalidade de Alto Nível</span>
+    <span>Resultados Reais</span>
+    <span>Comunidade Vibrante</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PROVA SOCIAL + VIDEO
+══════════════════════════════════════ -->
+<section class="ev-prova">
+  <div class="container">
+    <div class="ev-prova-sponsors">
+      <div class="ev-prova-sponsor">
+        <span>Realização</span>
+        <div class="ev-prova-sponsor-name">GRUPO SUMMIT</div>
+      </div>
+      <div class="ev-prova-divider-v"></div>
+      <div class="ev-prova-sponsor">
+        <span>Patrocinador Oficial</span>
+        <div class="ev-prova-sponsor-name">HOTMART</div>
+      </div>
+    </div>
+
+    <h2 class="ev-prova-headline">JUNTE-SE A <b>12.000 PESSOAS</b> NO MAIOR CONGRESSO DE MARKETING DIGITAL DO BRASIL</h2>
+
+    <div class="ev-video-wrapper">
+      <div class="ev-video-placeholder">
+        <div class="ev-video-play">
+          <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+        </div>
+        <span class="ev-video-label">Assista e descubra o que te espera</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     DEPOIMENTOS — QUEM VIVEU
+══════════════════════════════════════ -->
+<section class="ev-depo">
+  <div class="container">
+    <h2>SÓ QUEM VIVEU <b>"SUMMIT.PRO"</b></h2>
+
+    <div class="ev-depo-list">
+      <div class="ev-depo-card">
+        <div class="ev-depo-person">
+          <div class="ev-depo-avatar">C</div>
+          <span class="ev-depo-name">Carlos Mendonça</span>
+        </div>
+        <p class="ev-depo-result">R$ 280K FATURADOS NOS 30 DIAS APÓS O EVENTO</p>
+        <p class="ev-depo-quote">Eu saí do Summit com clareza total. Em 30 dias implementei tudo e bati meu recorde histórico de faturamento.</p>
+      </div>
+      <div class="ev-depo-card">
+        <div class="ev-depo-person">
+          <div class="ev-depo-avatar">A</div>
+          <span class="ev-depo-name">Amanda Ferreira</span>
+        </div>
+        <p class="ev-depo-result">AGÊNCIA TRIPLICOU O FATURAMENTO EM 3 MESES</p>
+        <p class="ev-depo-quote">Além do conteúdo incrível, conheci dois parceiros estratégicos que mudaram o rumo da minha agência para sempre.</p>
+      </div>
+      <div class="ev-depo-card">
+        <div class="ev-depo-person">
+          <div class="ev-depo-avatar">R</div>
+          <span class="ev-depo-name">Rafael Souza</span>
+        </div>
+        <p class="ev-depo-result">PRIMEIRA VENDA DE R$ 50K LOGO DEPOIS DO EVENTO</p>
+        <p class="ev-depo-quote">Sempre soube que estava pronto. Faltava o ambiente certo para me provar. O Summit me deu exatamente isso.</p>
+      </div>
+    </div>
+
+    <div class="ev-depo-cta">
+      <a href="#ingressos" class="btn-cta">GARANTIR INGRESSO NO LOTE 1</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     PALESTRANTES
+══════════════════════════════════════ -->
+<section class="ev-speakers">
+  <div class="container">
+    <h2>Veja os nomes que já <br><b>passaram pelo nosso palco</b></h2>
+  </div>
+  <div class="ev-speakers-track-wrap">
+    <div class="ev-speakers-track">
+      <!-- Nomes 1-10 -->
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">L</div><div class="ev-speaker-name">Leandro Vieira</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">P</div><div class="ev-speaker-name">Patricia Costa</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">M</div><div class="ev-speaker-name">Marcelo Duarte</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">F</div><div class="ev-speaker-name">Fernanda Lima</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">R</div><div class="ev-speaker-name">Roberto Alves</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">C</div><div class="ev-speaker-name">Camila Torres</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">T</div><div class="ev-speaker-name">Thiago Monteiro</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">J</div><div class="ev-speaker-name">Juliana Neves</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">A</div><div class="ev-speaker-name">André Carvalho</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">B</div><div class="ev-speaker-name">Bruno Martins</div></div>
+      <!-- duplicated for seamless loop -->
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">L</div><div class="ev-speaker-name">Leandro Vieira</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">P</div><div class="ev-speaker-name">Patricia Costa</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">M</div><div class="ev-speaker-name">Marcelo Duarte</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">F</div><div class="ev-speaker-name">Fernanda Lima</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">R</div><div class="ev-speaker-name">Roberto Alves</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">C</div><div class="ev-speaker-name">Camila Torres</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">T</div><div class="ev-speaker-name">Thiago Monteiro</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">J</div><div class="ev-speaker-name">Juliana Neves</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">A</div><div class="ev-speaker-name">André Carvalho</div></div>
+      <div class="ev-speaker-item"><div class="ev-speaker-photo">B</div><div class="ev-speaker-name">Bruno Martins</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     EXPERIÊNCIA / FEATURES
+══════════════════════════════════════ -->
+<section class="ev-exp">
+  <div class="container">
+    <span class="ev-exp-pretitle">O que você vai viver</span>
+    <h2>UMA <b>EXPERIÊNCIA 4D<sup>™</sup></b></h2>
+    <p class="ev-exp-sub">Cada palestra, dinâmica e conexão foi projetada para destravar o seu próximo nível em 72 horas de imersão total.</p>
+    <div class="ev-exp-divider"></div>
+
+    <div class="ev-exp-grid">
+      <div class="ev-exp-card">
+        <div class="ev-exp-num">01</div>
+        <h3>VENÇA A ESTAGNAÇÃO</h3>
+        <p>Quebre os padrões que te mantêm no mesmo lugar. Aqui você aprende na prática como sair do piloto automático e agir com intenção e direção.</p>
+      </div>
+      <div class="ev-exp-card">
+        <div class="ev-exp-num">02</div>
+        <h3>DESBLOQUEIE O PRÓXIMO NÍVEL</h3>
+        <p>Descubra os gatilhos de crescimento que separam quem fatura R$30K de quem fatura R$300K por mês e implemente ainda no evento.</p>
+      </div>
+      <div class="ev-exp-card">
+        <div class="ev-exp-num">03</div>
+        <h3>ANTECIPE SEUS SONHOS</h3>
+        <p>Construa as conexões, o plano e a mentalidade necessários para chegar no seu próximo objetivo em metade do tempo que você imaginava.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:40px">
+      <a href="#ingressos" class="btn-cta">QUERO VIVER ESSA EXPERIÊNCIA</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     LOCAL E DATA
+══════════════════════════════════════ -->
+<section class="ev-local">
+  <div class="container">
+    <div class="ev-local-date">
+      14, 15 E 16 DE NOVEMBRO DE 2026
+      <b>SEXTA, SÁBADO E DOMINGO</b>
+    </div>
+    <div class="ev-local-venue">
+      VIBRA SÃO PAULO
+      <b>SÃO PAULO, SP</b>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     ALCANCE MUNDIAL
+══════════════════════════════════════ -->
+<section class="ev-mundial">
+  <div class="container">
+    <h2>TODOS OS CAMINHOS LEVAM AO SUMMIT</h2>
+    <p>Participantes de mais de 18 países já estiveram em nossas edições anteriores. O Summit.Pro reúne os melhores talentos do marketing digital falando português.</p>
+    <div class="ev-mundial-flags">🇧🇷 🇵🇹 🇺🇸 🇦🇷 🇨🇴 🇲🇽 🇵🇦 🇨🇱 🇩🇪 🇪🇸</div>
+    <div class="ev-depo-photos">
+      <div class="ev-depo-photo-card"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+      <div class="ev-depo-photo-card"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+      <div class="ev-depo-photo-card"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+      <div class="ev-depo-photo-card"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     INGRESSOS
+══════════════════════════════════════ -->
+<section class="ev-ingressos" id="ingressos">
+  <div class="container">
+    <h2>Lote 1 Liberado — <b>GARANTA O SEU INGRESSO PELO MENOR VALOR</b></h2>
+
+    <div class="ev-tiers">
+      <!-- TIER 1: START -->
+      <div class="ev-tier">
+        <div class="ev-tier-lote">lote 1</div>
+        <h3>START</h3>
+        <div class="ev-progress">
+          <div class="ev-progress-label"><span>Disponibilidade</span><span>68%</span></div>
+          <div class="ev-progress-bar"><div class="ev-progress-fill" style="width:68%"></div></div>
+        </div>
+        <div class="ev-tier-pricing">
+          <div class="ev-tier-old">de <s>R$ 2.997</s></div>
+          <div class="ev-tier-install">por 12x de <i>R$ 147</i></div>
+          <div class="ev-tier-avista">ou R$ 1.497 à vista</div>
+        </div>
+        <div class="ev-tier-features">
+          <div class="ev-tier-feature"><div class="ev-tier-feature-icon ok"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#22C55E" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Acesso aos 3 dias de evento</div>
+          <div class="ev-tier-feature"><div class="ev-tier-feature-icon ok"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#22C55E" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Material exclusivo do participante</div>
+          <div class="ev-tier-feature"><div class="ev-tier-feature-icon ok"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#22C55E" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Acesso à área de networking</div>
+          <div class="ev-tier-feature disabled"><div class="ev-tier-feature-icon no"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.2)" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></div>Área VIP e recepção exclusiva</div>
+        </div>
+        <a href="#" class="btn-cta">GARANTIR MEU INGRESSO</a>
+        <div class="ev-tier-local">São Paulo, SP</div>
+      </div>
+
+      <!-- TIER 2: PREMIUM (destaque) -->
+      <div class="ev-tier featured">
+        <div class="ev-tier-badge">Mais popular</div>
+        <div class="ev-tier-lote">lote 1</div>
+        <h3>PREMIUM</h3>
+        <div class="ev-progress">
+          <div class="ev-progress-label"><span>Disponibilidade</span><span>52%</span></div>
+          <div class="ev-progress-bar"><div class="ev-progress-fill" style="width:52%"></div></div>
+        </div>
+        <div class="ev-tier-pricing">
+          <div class="ev-tier-old">de <s>R$ 4.997</s></div>
+          <div class="ev-tier-install">por 12x de <i>R$ 247</i></div>
+          <div class="ev-tier-avista">ou R$ 2.497 à vista</div>
+        </div>
+        <div class="ev-tier-features">
+          <div class="ev-tier-feature"><div class="ev-tier-feature-icon ok"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#22C55E" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Acesso aos 3 dias de evento</div>
+          <div class="ev-tier-feature"><div class="ev-tier-feature-icon ok"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#22C55E" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Material exclusivo do participante</div>
+          <div class="ev-tier-feature"><div class="ev-tier-feature-icon ok"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#22C55E" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Jantar exclusivo com os palestrantes</div>
+          <div class="ev-tier-feature"><div class="ev-tier-feature-icon ok"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#22C55E" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Assento preferencial nas fileiras da frente</div>
+        </div>
+        <a href="#" class="btn-cta">GARANTIR MEU INGRESSO</a>
+        <div class="ev-tier-local">São Paulo, SP</div>
+      </div>
+
+      <!-- TIER 3: BLACK (esgotado) -->
+      <div class="ev-tier esgotado">
+        <div class="ev-tier-lote">lote 1</div>
+        <h3>BLACK</h3>
+        <div class="ev-tier-pricing">
+          <div class="ev-tier-old">de <s>R$ 9.997</s></div>
+          <div class="ev-tier-install">por <i>R$ 6.997</i></div>
+          <div class="ev-tier-avista">em até 12x no cartão de crédito</div>
+        </div>
+        <div class="ev-tier-features">
+          <div class="ev-tier-feature"><div class="ev-tier-feature-icon ok"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#22C55E" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Tudo do Premium incluído</div>
+          <div class="ev-tier-feature"><div class="ev-tier-feature-icon ok"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#22C55E" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Área VIP exclusiva com open bar</div>
+          <div class="ev-tier-feature"><div class="ev-tier-feature-icon ok"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#22C55E" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Foto e mentoria rápida com palestrantes</div>
+          <div class="ev-tier-feature"><div class="ev-tier-feature-icon ok"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#22C55E" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Certificado de participação premium</div>
+        </div>
+        <a href="#" class="btn-cta" style="background:#444;cursor:not-allowed">INGRESSOS ESGOTADOS</a>
+        <div class="ev-tier-local">São Paulo, SP</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     FAQ
+══════════════════════════════════════ -->
+<section class="ev-faq">
+  <div class="container">
+    <h2>Perguntas Frequentes</h2>
+
+    <details class="ev-faq-item" open>
+      <summary>Quando e onde acontece o Summit.Pro 2026?</summary>
+      <p>O Summit.Pro 2026 acontece nos dias 14, 15 e 16 de novembro de 2026 na Vibra São Paulo, em São Paulo, SP. As portas abrem às 8h e o conteúdo vai até às 22h em cada um dos três dias.</p>
+    </details>
+    <details class="ev-faq-item">
+      <summary>Posso transferir meu ingresso para outra pessoa?</summary>
+      <p>Sim. O ingresso pode ser transferido para outra pessoa mediante solicitação via e-mail até 7 dias antes do evento. Basta entrar em contato com nosso suporte com os dados do novo titular.</p>
+    </details>
+    <details class="ev-faq-item">
+      <summary>O evento é presencial ou tem opção online?</summary>
+      <p>O Summit.Pro é 100% presencial. Toda a experiência foi desenhada para acontecer ao vivo, com networking real, energia única e conexões que você só faz olho no olho. Não há transmissão online nem gravação disponível para compra.</p>
+    </details>
+    <details class="ev-faq-item">
+      <summary>Os ingressos são parcelados?</summary>
+      <p>Sim! Você pode parcelar em até 12x no cartão de crédito. Os valores à vista têm desconto especial aplicado automaticamente no checkout. O preço atual é de lote 1 e pode subir a qualquer momento conforme as vagas são preenchidas.</p>
+    </details>
+    <details class="ev-faq-item">
+      <summary>Posso cancelar meu ingresso?</summary>
+      <p>Sim, dentro do prazo de 7 dias corridos após a compra, conforme o Código de Defesa do Consumidor. Após esse prazo, o ingresso pode ser transferido para outra pessoa, mas não será reembolsado.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     MANIFESTO / PLATÔ
+══════════════════════════════════════ -->
+<section class="ev-manifesto">
+  <div class="container">
+    <div>
+      <p class="ev-manifesto-pretitle">Por que o Summit.Pro existe</p>
+      <h2 class="ev-manifesto-title">A única coisa entre você</h2>
+      <h2 class="ev-manifesto-subtitle">e o próximo nível é o ambiente certo</h2>
+      <div class="ev-manifesto-body">
+        <h3>Eu já estive onde você está.</h3>
+        <p>Você aplica, você estuda, você executa. E ainda assim sente que está correndo em círculos. Parece que todos ao redor estão avançando enquanto você continua no mesmo degrau, fazendo mais do que nunca e chegando no mesmo lugar.</p>
+        <p><span class="destaque">"Mas isso não é falta de capacidade. É falta de contexto."</span></p>
+        <p>O Summit.Pro existe para te colocar no ambiente onde as regras do jogo são diferentes. Onde as conversas certas acontecem, os padrões certos são instalados e as decisões que você precisava tomar ficam óbvias. Três dias que comprimem anos de aprendizado.</p>
+      </div>
+      <div class="ev-manifesto-pontos">
+        <div class="ev-manifesto-ponto">FATURAMENTO</div>
+        <div class="ev-manifesto-ponto">CONEXÕES</div>
+        <div class="ev-manifesto-ponto">CLAREZA</div>
+      </div>
+      <a href="#ingressos" class="btn-cta">QUERO MINHA VAGA AGORA</a>
+    </div>
+    <div class="ev-manifesto-visual">
+      <div class="ev-manifesto-visual-icon">🎤</div>
+      <div class="ev-manifesto-visual-label">Foto do mentor / palestrante principal</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     CTA FINAL
+══════════════════════════════════════ -->
+<section class="ev-cta-final">
+  <div class="container">
+    <h2>NÃO DEIXE PARA DEPOIS.<br><b>O LOTE 1 TEM VAGAS LIMITADAS.</b></h2>
+    <p>Cada dia que passa, os preços sobem e as vagas diminuem. Garanta agora pelo menor valor antes que o lote esgote de vez.</p>
+    <a href="#ingressos" class="btn-cta" style="font-size:17px;padding:20px 64px">GARANTIR MEU INGRESSO AGORA</a>
+    <span style="font-size:12px;color:rgba(255,255,255,0.2);letter-spacing:0.1em;text-transform:uppercase">SÃO PAULO, SP · 14, 15 E 16 DE NOVEMBRO DE 2026</span>
+  </div>
+</section>

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { Database } from "@/lib/supabase/types";
 
 export interface ProjectPage {
   id: string;
@@ -16,155 +18,265 @@ export interface Project {
   name: string;
   client: string;
   pages: ProjectPage[];
-  thumbnail: string; // first 200 chars of first page code
+  thumbnail: string;
+  coverImage: string;
   starred: boolean;
   createdBy: "me" | "shared";
   createdAt: number;
   updatedAt: number;
 }
 
-const STORAGE_KEY = "wevyflow-projects";
-const STORAGE_VERSION_KEY = "wevyflow-projects-version";
+type ProjectRow = Database["public"]["Tables"]["projects"]["Row"];
+type PageRow = Database["public"]["Tables"]["project_pages"]["Row"];
+type ProjectWithPages = ProjectRow & { project_pages: PageRow[] };
 
-function load(): Project[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
+function mapPage(row: PageRow): ProjectPage {
+  return {
+    id: row.id,
+    name: row.name,
+    code: row.code,
+    platform: row.platform,
+    createdAt: new Date(row.created_at).getTime(),
+    updatedAt: new Date(row.updated_at).getTime(),
+  };
 }
 
-function save(projects: Project[]): boolean {
-  try {
-    const version = Date.now().toString();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-    localStorage.setItem(STORAGE_VERSION_KEY, version);
-    return true;
-  } catch (err) {
-    const isQuota = err instanceof DOMException && (err.code === 22 || err.code === 1014 || err.name === "QuotaExceededError");
-    console.error("[WevyFlow] Erro ao salvar projetos:", isQuota ? "Armazenamento cheio" : err);
-    if (typeof window !== "undefined" && window.dispatchEvent) {
-      window.dispatchEvent(new CustomEvent("wevyflow-storage-error", {
-        detail: { type: isQuota ? "quota" : "unknown", message: isQuota ? "Armazenamento local cheio. Exclua projetos antigos para liberar espaço." : "Erro ao salvar dados localmente." },
-      }));
-    }
-    return false;
-  }
+function mapProject(row: ProjectWithPages): Project {
+  return {
+    id: row.id,
+    name: row.name,
+    client: row.client,
+    thumbnail: row.thumbnail,
+    coverImage: row.cover_image ?? "",
+    starred: row.starred,
+    createdBy: "me",
+    createdAt: new Date(row.created_at).getTime(),
+    updatedAt: new Date(row.updated_at).getTime(),
+    pages: (row.project_pages || []).map(mapPage),
+  };
 }
 
 export function useProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const supabase = useMemo(() => createClient(), []);
 
-  useEffect(() => { setProjects(load()); }, []);
+  const loadProjects = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("projects")
+      .select("*, project_pages(*)")
+      .order("updated_at", { ascending: false });
 
-  // Listen for storage changes from other tabs
+    if (error) {
+      setSaveError(error.message);
+      return;
+    }
+
+    setProjects(((data as ProjectWithPages[]) || []).map(mapProject));
+  }, [supabase]);
+
   useEffect(() => {
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY && e.newValue) {
-        try { setProjects(JSON.parse(e.newValue)); } catch {}
+    loadProjects();
+  }, [loadProjects]);
+
+  const createProject = useCallback(
+    async (name: string, client: string): Promise<Project> => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      const { data, error } = await supabase
+        .from("projects")
+        .insert({ name, client, user_id: user!.id })
+        .select("*, project_pages(*)")
+        .single();
+
+      if (error) {
+        setSaveError(error.message);
+        throw error;
       }
-    };
-    const handleSaveError = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      setSaveError(detail?.message || "Erro ao salvar");
-      setTimeout(() => setSaveError(null), 5000);
-    };
-    window.addEventListener("storage", handleStorage);
-    window.addEventListener("wevyflow-storage-error", handleSaveError);
-    return () => {
-      window.removeEventListener("storage", handleStorage);
-      window.removeEventListener("wevyflow-storage-error", handleSaveError);
-    };
-  }, []);
 
-  const createProject = useCallback((name: string, client: string): Project => {
-    const project: Project = {
-      id: crypto.randomUUID(),
-      name,
-      client,
-      pages: [],
-      thumbnail: "",
-      starred: false,
-      createdBy: "me",
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-    setProjects((prev) => {
-      const next = [project, ...prev];
-      save(next);
-      return next;
-    });
-    return project;
-  }, []);
+      const project = mapProject(data as ProjectWithPages);
+      setProjects((prev) => [project, ...prev]);
+      return project;
+    },
+    [supabase]
+  );
 
-  const addPageToProject = useCallback((projectId: string, page: Omit<ProjectPage, "id" | "createdAt" | "updatedAt">) => {
-    setProjects((prev) => {
-      const next = prev.map((p) => {
-        if (p.id !== projectId) return p;
-        const newPage: ProjectPage = {
-          ...page,
-          id: crypto.randomUUID(),
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        };
-        const updated = {
-          ...p,
-          pages: [...p.pages, newPage],
-          thumbnail: page.code.slice(0, 200),
-          updatedAt: Date.now(),
-        };
-        return updated;
-      });
-      save(next);
-      return next;
-    });
-  }, []);
+  const addPageToProject = useCallback(
+    async (projectId: string, page: Omit<ProjectPage, "id" | "createdAt" | "updatedAt">) => {
+      const { data, error } = await supabase
+        .from("project_pages")
+        .insert({
+          project_id: projectId,
+          name: page.name,
+          code: page.code,
+          platform: page.platform,
+        })
+        .select()
+        .single();
 
-  const updatePageCode = useCallback((projectId: string, pageId: string, code: string) => {
-    setProjects((prev) => {
-      const next = prev.map((p) => {
-        if (p.id !== projectId) return p;
-        return {
-          ...p,
-          pages: p.pages.map((pg) => pg.id === pageId ? { ...pg, code, updatedAt: Date.now() } : pg),
-          thumbnail: code.slice(0, 200),
-          updatedAt: Date.now(),
-        };
-      });
-      save(next);
-      return next;
-    });
-  }, []);
+      if (error) {
+        setSaveError(error.message);
+        return;
+      }
 
-  const toggleStar = useCallback((projectId: string) => {
-    setProjects((prev) => {
-      const next = prev.map((p) => p.id === projectId ? { ...p, starred: !p.starred } : p);
-      save(next);
-      return next;
-    });
-  }, []);
+      const newPage = mapPage(data);
+      const thumbnail = page.code.slice(0, 200);
 
-  const deleteProject = useCallback((projectId: string) => {
-    setProjects((prev) => {
-      const next = prev.filter((p) => p.id !== projectId);
-      save(next);
-      return next;
-    });
-  }, []);
+      await supabase
+        .from("projects")
+        .update({ thumbnail })
+        .eq("id", projectId);
 
-  const deletePageFromProject = useCallback((projectId: string, pageId: string) => {
-    setProjects((prev) => {
-      const next = prev.map((p) => {
-        if (p.id !== projectId) return p;
-        return { ...p, pages: p.pages.filter((pg) => pg.id !== pageId), updatedAt: Date.now() };
-      });
-      save(next);
-      return next;
-    });
-  }, []);
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.id !== projectId
+            ? p
+            : { ...p, pages: [...p.pages, newPage], thumbnail, updatedAt: Date.now() }
+        )
+      );
+    },
+    [supabase]
+  );
+
+  const updatePageCode = useCallback(
+    async (projectId: string, pageId: string, code: string) => {
+      const { error } = await supabase
+        .from("project_pages")
+        .update({ code })
+        .eq("id", pageId);
+
+      if (error) {
+        setSaveError(error.message);
+        return;
+      }
+
+      const thumbnail = code.slice(0, 200);
+      await supabase.from("projects").update({ thumbnail }).eq("id", projectId);
+
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.id !== projectId
+            ? p
+            : {
+                ...p,
+                pages: p.pages.map((pg) =>
+                  pg.id === pageId ? { ...pg, code, updatedAt: Date.now() } : pg
+                ),
+                thumbnail,
+                updatedAt: Date.now(),
+              }
+        )
+      );
+    },
+    [supabase]
+  );
+
+  const toggleStar = useCallback(
+    async (projectId: string) => {
+      const project = projects.find((p) => p.id === projectId);
+      if (!project) return;
+      const starred = !project.starred;
+
+      setProjects((prev) =>
+        prev.map((p) => (p.id === projectId ? { ...p, starred } : p))
+      );
+
+      const { error } = await supabase
+        .from("projects")
+        .update({ starred })
+        .eq("id", projectId);
+
+      if (error) {
+        setSaveError(error.message);
+        setProjects((prev) =>
+          prev.map((p) => (p.id === projectId ? { ...p, starred: !starred } : p))
+        );
+      }
+    },
+    [supabase, projects]
+  );
+
+  const deleteProject = useCallback(
+    async (projectId: string) => {
+      setProjects((prev) => prev.filter((p) => p.id !== projectId));
+
+      const { error } = await supabase
+        .from("projects")
+        .delete()
+        .eq("id", projectId);
+
+      if (error) {
+        setSaveError(error.message);
+        loadProjects();
+      }
+    },
+    [supabase, loadProjects]
+  );
+
+  const deletePageFromProject = useCallback(
+    async (projectId: string, pageId: string) => {
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.id !== projectId
+            ? p
+            : { ...p, pages: p.pages.filter((pg) => pg.id !== pageId), updatedAt: Date.now() }
+        )
+      );
+
+      const { error } = await supabase
+        .from("project_pages")
+        .delete()
+        .eq("id", pageId);
+
+      if (error) {
+        setSaveError(error.message);
+        loadProjects();
+      }
+    },
+    [supabase, loadProjects]
+  );
+
+  const updateCoverImage = useCallback(
+    async (projectId: string, file: File) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `${user.id}/${projectId}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("project-covers")
+        .upload(path, file, { upsert: true, contentType: file.type });
+
+      if (uploadError) {
+        setSaveError(uploadError.message);
+        throw new Error(uploadError.message);
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("project-covers")
+        .getPublicUrl(path);
+
+      const { error: updateError } = await supabase
+        .from("projects")
+        .update({ cover_image: publicUrl })
+        .eq("id", projectId);
+
+      if (updateError) {
+        setSaveError(updateError.message);
+        throw new Error(updateError.message);
+      }
+
+      setProjects((prev) =>
+        prev.map((p) => (p.id === projectId ? { ...p, coverImage: publicUrl } : p))
+      );
+    },
+    [supabase]
+  );
 
   return {
     projects,
@@ -175,6 +287,7 @@ export function useProjects() {
     toggleStar,
     deleteProject,
     deletePageFromProject,
+    updateCoverImage,
   };
 }
 

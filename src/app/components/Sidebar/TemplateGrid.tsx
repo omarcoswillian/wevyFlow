@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "../../lib/cn";
+import { cn } from "@/lib/utils";
 import { TEMPLATES, TEMPLATE_CATEGORIES } from "../../lib/templates";
 import { TemplateCategory } from "../../lib/types";
 

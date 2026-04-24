@@ -28,7 +28,7 @@ export const GOOGLE_FONTS: GoogleFont[] = [
   { family: "Geist", category: "sans", weights: [300, 400, 500, 600, 700, 800, 900] },
 
   // Display
-  { family: "Unbounded", category: "display", weights: [300, 400, 500, 600, 700, 800, 900] },
+  { family: "Montserrat", category: "display", weights: [300, 400, 500, 600, 700, 800, 900] },
   { family: "Bebas Neue", category: "display", weights: [400] },
   { family: "Archivo Black", category: "display", weights: [400] },
   { family: "Oswald", category: "display", weights: [300, 400, 500, 600, 700] },

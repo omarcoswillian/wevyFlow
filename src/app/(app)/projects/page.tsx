@@ -7,7 +7,7 @@ import { useAppContext } from "../_context";
 export default function Page() {
   const {
     handleGenerate, isLoading, navigate, setCommandPaletteOpen,
-    projects, handleOpenProject, handleCreateProject, toggleStar, deleteProject,
+    projects, handleOpenProject, handleCreateProject, toggleStar, deleteProject, updateCoverImage,
   } = useAppContext();
 
   return (
@@ -25,6 +25,7 @@ export default function Page() {
           onCreateProject={handleCreateProject}
           onToggleStar={toggleStar}
           onDeleteProject={deleteProject}
+          onUpdateCover={updateCoverImage}
         />
       }
     />

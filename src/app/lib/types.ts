@@ -10,7 +10,7 @@ export const VIEWPORT_MEDIA: Record<Exclude<ViewportSize, "desktop">, string> = 
   mobile: "@media (max-width: 480px)",
 };
 
-export type TemplateCategory = "vendas" | "captura" | "saas" | "blog" | "portfolio" | "sections";
+export type TemplateCategory = "vendas" | "captura" | "saas" | "blog" | "portfolio" | "sections" | "evento";
 
 export interface TemplateItem {
   id: string;

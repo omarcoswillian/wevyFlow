@@ -18,6 +18,8 @@ import {
   PanelLeft,
   Key,
   CheckCircle,
+  FileText,
+  X,
 } from "lucide-react";
 import { Platform } from "../lib/types";
 import { ApiKeyModal } from "./ApiKeyModal";
@@ -34,6 +36,7 @@ export interface GenerateData {
   fontChoice: string;
   stylePreset: string;
   images: { name: string; base64: string }[];
+  copyDocument?: string;
 }
 
 interface HomeViewProps {
@@ -85,11 +88,60 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
   const [images, setImages] = useState<{ name: string; base64: string }[]>([]);
   const [showConfig, setShowConfig] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [copyDocument, setCopyDocument] = useState("");
+  const [copyFileName, setCopyFileName] = useState<string | null>(null);
+  const [copyUploading, setCopyUploading] = useState(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
+  const [copyTab, setCopyTab] = useState<"upload" | "url">("upload");
+  const [copyUrl, setCopyUrl] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const docInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDocUpload = useCallback(async (file: File) => {
+    const ext = file.name.toLowerCase().split(".").pop();
+    if (ext !== "docx" && ext !== "pdf") { setCopyError("Use .docx ou .pdf"); return; }
+    setCopyUploading(true); setCopyError(null);
+    const form = new FormData();
+    form.append("file", file);
+    try {
+      const res = await fetch("/api/parse-document", { method: "POST", body: form });
+      const json = await res.json();
+      if (!res.ok) { setCopyError(json.error || "Erro ao processar"); return; }
+      setCopyDocument(json.text.slice(0, 20000));
+      setCopyFileName(json.fileName);
+    } catch { setCopyError("Erro de conexão"); }
+    finally { setCopyUploading(false); }
+  }, []);
+
+  const handleDocFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleDocUpload(file);
+    e.target.value = "";
+  };
+
+  const handleDocUrlImport = useCallback(async () => {
+    if (!copyUrl.trim()) return;
+    setCopyUploading(true); setCopyError(null);
+    try {
+      const res = await fetch("/api/parse-document", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: copyUrl.trim() }),
+      });
+      const json = await res.json();
+      if (!res.ok) { setCopyError(json.error || "Erro ao importar"); return; }
+      setCopyDocument(json.text.slice(0, 20000));
+      setCopyFileName(json.fileName);
+      setCopyUrl("");
+    } catch { setCopyError("Erro de conexão"); }
+    finally { setCopyUploading(false); }
+  }, [copyUrl]);
+
+  const clearCopyDocument = () => { setCopyDocument(""); setCopyFileName(null); setCopyError(null); setCopyUrl(""); };
 
   const handleSubmit = () => {
-    if ((!prompt.trim() && images.length === 0) || isLoading) return;
-    onGenerate({ prompt, platform, referenceUrl, brandReference, expectations, primaryColor, secondaryColor, fontChoice, stylePreset, images });
+    if ((!prompt.trim() && images.length === 0 && !copyDocument.trim()) || isLoading) return;
+    onGenerate({ prompt, platform, referenceUrl, brandReference, expectations, primaryColor, secondaryColor, fontChoice, stylePreset, images, copyDocument: copyDocument.trim() || undefined });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -289,6 +341,93 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
                 )}
                 <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
               </div>
+
+              {/* ─── Copy Document ─── */}
+              <div className="pt-1 border-t border-white/[0.05]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[9px] text-white/25 uppercase tracking-widest">Copy pronta</span>
+                  {copyFileName && (
+                    <button onClick={clearCopyDocument} className="text-[9px] text-red-400/60 hover:text-red-400 transition-colors cursor-pointer flex items-center gap-1">
+                      <X className="w-2.5 h-2.5" /> Remover
+                    </button>
+                  )}
+                </div>
+
+                {/* Loaded indicator */}
+                {copyFileName ? (
+                  <div className="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                    <FileText className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                    <span className="text-[11px] text-purple-300 truncate flex-1">{copyFileName}</span>
+                    <span className="text-[9px] text-white/25">{copyDocument.length.toLocaleString()} chars</span>
+                  </div>
+                ) : (
+                  <>
+                    {/* Tabs */}
+                    <div className="flex rounded-lg bg-white/[0.04] p-0.5 mb-2">
+                      {(["upload", "url"] as const).map((tab) => (
+                        <button
+                          key={tab}
+                          onClick={() => { setCopyTab(tab); setCopyError(null); }}
+                          className={cn(
+                            "flex-1 py-1 rounded-md text-[10px] font-medium transition-all cursor-pointer",
+                            copyTab === tab ? "bg-white/[0.08] text-white/70" : "text-white/25 hover:text-white/40"
+                          )}
+                        >
+                          {tab === "upload" ? "Upload .docx / .pdf" : "URL do Google Docs"}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Upload tab */}
+                    {copyTab === "upload" && (
+                      <button
+                        onClick={() => docInputRef.current?.click()}
+                        disabled={copyUploading}
+                        className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-dashed border-white/10 text-white/25 hover:text-purple-400 hover:border-purple-500/30 transition-all cursor-pointer text-[11px] disabled:opacity-50"
+                      >
+                        {copyUploading
+                          ? <><Loader2 className="w-3 h-3 animate-spin" /> Processando…</>
+                          : <><FileText className="w-3 h-3" /> Selecionar arquivo</>
+                        }
+                      </button>
+                    )}
+
+                    {/* URL tab */}
+                    {copyTab === "url" && (
+                      <div className="space-y-1.5">
+                        <div className="flex gap-1.5">
+                          <input
+                            type="url"
+                            value={copyUrl}
+                            onChange={(e) => setCopyUrl(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleDocUrlImport()}
+                            placeholder="https://docs.google.com/document/d/..."
+                            className="flex-1 bg-white/[0.04] border border-white/[0.06] rounded-lg px-2.5 py-1.5 text-[11px] text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/30 min-w-0"
+                          />
+                          <button
+                            onClick={handleDocUrlImport}
+                            disabled={copyUploading || !copyUrl.trim()}
+                            className={cn(
+                              "shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer",
+                              copyUploading || !copyUrl.trim()
+                                ? "bg-white/[0.04] text-white/20 cursor-not-allowed"
+                                : "bg-purple-500/20 text-purple-300 hover:bg-purple-500/30"
+                            )}
+                          >
+                            {copyUploading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Importar"}
+                          </button>
+                        </div>
+                        <p className="text-[9px] text-white/20 leading-relaxed">
+                          O documento deve estar público ("Qualquer pessoa com o link").
+                        </p>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {copyError && <p className="text-[10px] text-red-400/70 mt-1.5">{copyError}</p>}
+                <input ref={docInputRef} type="file" accept=".docx,.pdf" onChange={handleDocFileInput} className="hidden" />
+              </div>
             </div>
           )}
 
@@ -312,10 +451,21 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Descreva o layout que você quer criar..."
+                placeholder={copyFileName ? `Copy carregada — descreva o estilo desejado…` : "Descreva o layout que você quer criar..."}
                 className="flex-1 bg-transparent text-[13px] text-white placeholder:text-white/25 focus:outline-none px-1"
                 autoFocus
               />
+
+              {/* Doc badge */}
+              {copyFileName && (
+                <div className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-full bg-purple-500/15 border border-purple-500/25">
+                  <FileText className="w-3 h-3 text-purple-400" />
+                  <span className="text-[10px] text-purple-300 max-w-[80px] truncate">{copyFileName}</span>
+                  <button onClick={clearCopyDocument} className="text-purple-400/50 hover:text-purple-300 cursor-pointer ml-0.5">
+                    <X className="w-2.5 h-2.5" />
+                  </button>
+                </div>
+              )}
 
               {/* Platform pill */}
               <select
@@ -332,10 +482,10 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
               {/* Build */}
               <button
                 onClick={handleSubmit}
-                disabled={isLoading || !prompt.trim()}
+                disabled={isLoading || (!prompt.trim() && !copyDocument.trim() && images.length === 0)}
                 className={cn(
                   "shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer",
-                  isLoading || !prompt.trim()
+                  isLoading || (!prompt.trim() && !copyDocument.trim() && images.length === 0)
                     ? "bg-white/[0.05] text-white/15 cursor-not-allowed"
                     : "bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-purple-500/30 hover:scale-105 active:scale-95"
                 )}

@@ -1,65 +1,72 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { HistoryEntry } from "./types";
 
-const STORAGE_KEY = "wevyflow-history";
 const MAX_ENTRIES = 20;
-
-function loadEntries(): HistoryEntry[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed;
-  } catch {
-    return [];
-  }
-}
-
-function saveEntries(entries: HistoryEntry[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-  } catch (err) {
-    const isQuota = err instanceof DOMException && (err.code === 22 || err.code === 1014 || err.name === "QuotaExceededError");
-    console.error("[WevyFlow] Erro ao salvar histórico:", isQuota ? "Armazenamento cheio" : err);
-    if (typeof window !== "undefined" && window.dispatchEvent) {
-      window.dispatchEvent(new CustomEvent("wevyflow-storage-error", {
-        detail: { type: isQuota ? "quota" : "unknown", message: isQuota ? "Armazenamento local cheio. Limpe o histórico para liberar espaço." : "Erro ao salvar histórico." },
-      }));
-    }
-  }
-}
 
 export function useHistory() {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
-    setEntries(loadEntries());
-  }, []);
+    supabase
+      .from("generation_history")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(MAX_ENTRIES)
+      .then(({ data }) => {
+        if (!data) return;
+        setEntries(
+          data.map((row) => ({
+            id: row.id,
+            prompt: row.prompt,
+            platform: row.platform,
+            code: row.code,
+            createdAt: new Date(row.created_at).getTime(),
+          }))
+        );
+      });
+  }, [supabase]);
 
-  const addEntry = useCallback((entry: HistoryEntry) => {
-    setEntries((prev) => {
-      const next = [entry, ...prev].slice(0, MAX_ENTRIES);
-      saveEntries(next);
-      return next;
-    });
-  }, []);
+  const addEntry = useCallback(
+    async (entry: HistoryEntry) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
 
-  const removeEntry = useCallback((id: string) => {
-    setEntries((prev) => {
-      const next = prev.filter((e) => e.id !== id);
-      saveEntries(next);
-      return next;
-    });
-  }, []);
+      setEntries((prev) => [entry, ...prev].slice(0, MAX_ENTRIES));
 
-  const clearHistory = useCallback(() => {
+      await supabase.from("generation_history").insert({
+        id: entry.id,
+        user_id: user.id,
+        prompt: entry.prompt,
+        platform: entry.platform,
+        code: entry.code,
+        created_at: new Date(entry.createdAt).toISOString(),
+      });
+    },
+    [supabase]
+  );
+
+  const removeEntry = useCallback(
+    async (id: string) => {
+      setEntries((prev) => prev.filter((e) => e.id !== id));
+      await supabase.from("generation_history").delete().eq("id", id);
+    },
+    [supabase]
+  );
+
+  const clearHistory = useCallback(async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
     setEntries([]);
-    localStorage.removeItem(STORAGE_KEY);
-  }, []);
+    await supabase.from("generation_history").delete().eq("user_id", user.id);
+  }, [supabase]);
 
   return { entries, addEntry, removeEntry, clearHistory };
 }

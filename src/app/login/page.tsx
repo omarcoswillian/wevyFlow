@@ -1,23 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
+  const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+  const supabase = createClient();
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const passwordValid = password.length >= 6;
-  const canSubmit = emailValid && passwordValid && !submitting;
+  const canSubmit = emailValid && passwordValid && !isPending;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
-    setSubmitting(true);
-    setTimeout(() => setSubmitting(false), 900);
+    setAuthError(null);
+    startTransition(async () => {
+      if (mode === "login") {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) { setAuthError(error.message); return; }
+      } else {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) { setAuthError(error.message); return; }
+      }
+      router.push("/");
+      router.refresh();
+    });
+  };
+
+  const handleGoogle = () => {
+    setAuthError(null);
+    startTransition(async () => {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      });
+      if (error) setAuthError(error.message);
+    });
   };
 
   return (
@@ -59,11 +86,11 @@ export default function LoginPage() {
             </div>
 
             <div className="wf-head">
-              <h2 className="wf-title">Acessar plataforma</h2>
-              <p className="wf-sub">Entre com sua conta para continuar</p>
+              <h2 className="wf-title">{mode === "login" ? "Acessar plataforma" : "Criar sua conta"}</h2>
+              <p className="wf-sub">{mode === "login" ? "Entre com sua conta para continuar" : "Crie sua conta gratuitamente"}</p>
             </div>
 
-            <button type="button" className="wf-btn-oauth">
+            <button type="button" className="wf-btn-oauth" onClick={handleGoogle} disabled={isPending}>
               <GoogleIcon />
               <span>Continuar com Google</span>
             </button>
@@ -122,16 +149,20 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              {authError && (
+                <p className="wf-auth-error">{authError}</p>
+              )}
+
               <button
                 type="submit"
                 disabled={!canSubmit}
                 className={`wf-btn-submit ${canSubmit ? "" : "is-disabled"}`}
               >
-                {submitting ? (
+                {isPending ? (
                   <span className="wf-spinner" />
                 ) : (
                   <>
-                    <span>ENTRAR</span>
+                    <span>{mode === "login" ? "ENTRAR" : "CRIAR CONTA"}</span>
                     <ArrowRight size={16} strokeWidth={2.75} />
                   </>
                 )}
@@ -139,10 +170,14 @@ export default function LoginPage() {
             </form>
 
             <p className="wf-meta">
-              Não tem conta?{" "}
-              <a href="#" className="wf-link wf-link-strong">
-                Criar conta grátis
-              </a>
+              {mode === "login" ? "Não tem conta?" : "Já tem conta?"}{" "}
+              <button
+                type="button"
+                className="wf-link wf-link-strong"
+                onClick={() => { setMode(mode === "login" ? "signup" : "login"); setAuthError(null); }}
+              >
+                {mode === "login" ? "Criar conta grátis" : "Fazer login"}
+              </button>
             </p>
 
             <div className="wf-safe">
@@ -555,5 +590,25 @@ const css = `
   .wf-safe-text {
     font-size: 12px;
     color: rgba(255, 255, 255, 0.42);
+  }
+
+  .wf-auth-error {
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    font-size: 13px;
+    color: #fca5a5;
+    line-height: 1.5;
+  }
+
+  .wf-link[type="button"] {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
   }
 `;

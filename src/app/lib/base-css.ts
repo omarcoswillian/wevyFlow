@@ -1,7 +1,7 @@
 export const BASE_CSS = `
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
 <style>
-:root{--bg-primary:#0C0C0C;--bg-surface:#161616;--bg-card:#1E1E1E;--text-primary:#F5F5F5;--text-secondary:#999;--text-muted:#666;--accent:#FF5C00;--accent-hover:#E04E00;--accent-glow:rgba(255,92,0,0.35);--highlight:#FFCC00;--success:#22C55E;--border:rgba(255,255,255,0.08);--border-hover:rgba(255,92,0,0.3);--font-display:'Unbounded',sans-serif;--font-body:'DM Sans',sans-serif;--text-hero:clamp(32px,5vw,56px);--text-h2:clamp(22px,3vw,32px);--text-h3:18px;--text-body:16px;--text-small:13px;--text-cta:16px;--section-y:clamp(56px,8vw,96px);--container:1100px;--card-pad:28px;--gap-cards:20px;--radius-card:12px;--radius-btn:6px;--radius-badge:20px;--shadow-cta:0 0 32px rgba(255,92,0,0.4);--transition:all 0.2s ease}
+:root{--bg-primary:#0C0C0C;--bg-surface:#161616;--bg-card:#1E1E1E;--text-primary:#F5F5F5;--text-secondary:#999;--text-muted:#666;--accent:#FF5C00;--accent-hover:#E04E00;--accent-glow:rgba(255,92,0,0.35);--highlight:#FFCC00;--success:#22C55E;--border:rgba(255,255,255,0.08);--border-hover:rgba(255,92,0,0.3);--font-display:'Montserrat',sans-serif;--font-body:'DM Sans',sans-serif;--text-hero:clamp(26px,3.5vw,45px);--text-h2:clamp(22px,3vw,32px);--text-h3:18px;--text-body:16px;--text-small:13px;--text-cta:16px;--section-y:clamp(56px,8vw,96px);--container:1100px;--card-pad:28px;--gap-cards:20px;--radius-card:12px;--radius-btn:6px;--radius-badge:20px;--shadow-cta:0 0 32px rgba(255,92,0,0.4);--transition:all 0.2s ease}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:var(--font-body);background:var(--bg-primary);color:var(--text-primary);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;line-height:1.6;overflow-x:hidden}
@@ -9,8 +9,8 @@ body{font-family:var(--font-body);background:var(--bg-primary);color:var(--text-
 @media(max-width:768px){.container{padding:0 20px}}
 .section{padding:var(--section-y) 0}
 .section-alt{background:var(--bg-surface)}
-h1,.h1{font-family:var(--font-display);font-size:var(--text-hero);font-weight:800;line-height:1.1;letter-spacing:-0.02em;color:var(--text-primary)}
-h2,.h2{font-family:var(--font-display);font-size:var(--text-h2);font-weight:700;line-height:1.2;color:var(--text-primary)}
+h1,.h1{font-family:var(--font-display);font-size:var(--text-hero);font-weight:700;line-height:1.1;letter-spacing:-0.02em;color:var(--text-primary)}
+h2,.h2{font-family:var(--font-display);font-size:var(--text-h2);font-weight:600;line-height:1.2;color:var(--text-primary)}
 h3,.h3{font-family:var(--font-body);font-size:var(--text-h3);font-weight:600;line-height:1.35;color:var(--text-primary)}
 @media(max-width:768px){h1,.h1{font-size:32px}h2,.h2{font-size:22px}}
 p{font-size:var(--text-body);line-height:1.7;color:var(--text-secondary)}

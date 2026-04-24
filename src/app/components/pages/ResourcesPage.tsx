@@ -53,6 +53,7 @@ const TEMPLATE_VISUALS: Record<string, { gradient: string; mockupType: "hero-pho
   "ready-ecommerce-apple": { gradient: "from-gray-100 via-white to-gray-50", mockupType: "cards", ready: true },
   "ready-store-apple": { gradient: "from-gray-50 via-white to-gray-100", mockupType: "saas", ready: true },
   "ready-lp-workshop": { gradient: "from-white via-blue-50 to-white", mockupType: "form", ready: true },
+  "ready-evento-presencial-dark": { gradient: "from-[#131313] via-red-950/40 to-[#131313]", mockupType: "cards", ready: true },
   "ready-saas-harmonic": { gradient: "from-gray-950 via-emerald-950/20 to-gray-900", mockupType: "saas", ready: true },
   "ready-saas-agency": { gradient: "from-gray-900 via-orange-950/20 to-gray-950", mockupType: "hero-photo", ready: true },
   "ready-captura-comunidade": { gradient: "from-violet-950 via-gray-950 to-violet-950", mockupType: "hero-photo", ready: true },

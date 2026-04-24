@@ -1,5 +1,5 @@
 /* DESIGN TOKENS — PRYMO LP SYSTEM */
-@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
 
 :root {
   --bg-primary:    #0C0C0C;
@@ -15,9 +15,9 @@
   --success:       #22C55E;
   --border:        rgba(255,255,255,0.08);
   --border-hover:  rgba(255,92,0,0.3);
-  --font-display:  'Unbounded', sans-serif;
+  --font-display:  'Montserrat', sans-serif;
   --font-body:     'DM Sans', sans-serif;
-  --text-hero:     clamp(32px, 5vw, 56px);
+  --text-hero:     clamp(26px, 3.5vw, 45px);
   --text-h2:       clamp(22px, 3vw, 32px);
   --text-h3:       18px;
   --text-body:     16px;
@@ -55,8 +55,8 @@ body {
 .section-alt { background: var(--bg-surface); }
 
 /* Headings */
-h1, .h1 { font-family: var(--font-display); font-size: var(--text-hero); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; }
-h2, .h2 { font-family: var(--font-display); font-size: var(--text-h2); font-weight: 700; line-height: 1.2; }
+h1, .h1 { font-family: var(--font-display); font-size: var(--text-hero); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; }
+h2, .h2 { font-family: var(--font-display); font-size: var(--text-h2); font-weight: 600; line-height: 1.2; }
 h3, .h3 { font-family: var(--font-body); font-size: var(--text-h3); font-weight: 600; line-height: 1.35; }
 @media (max-width: 768px) { h1, .h1 { font-size: 32px; } h2, .h2 { font-size: 22px; } }
 

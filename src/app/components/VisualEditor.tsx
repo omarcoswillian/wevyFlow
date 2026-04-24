@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Type, Palette, Space, MousePointer, AlignLeft, AlignCenter, AlignRight, AlignJustify, Underline, Strikethrough, Italic, LayoutGrid, MoveHorizontal, MoveVertical, ArrowDownNarrowWide, Copy, Trash2, ArrowUp, ArrowDown, Link2, FileText, LogIn, Mail, Phone, Anchor, Package, PlayCircle } from "lucide-react";
+import { Type, Palette, Space, MousePointer, AlignLeft, AlignCenter, AlignRight, AlignJustify, Underline, Strikethrough, Italic, LayoutGrid, MoveHorizontal, MoveVertical, ArrowDownNarrowWide, Copy, Trash2, ArrowUp, ArrowDown, Link2, FileText, LogIn, Mail, Phone, Anchor, Package, PlayCircle, Plus, X, Hash, Eye, EyeOff } from "lucide-react";
 import { GOOGLE_FONTS, findFont, cssFontStack } from "@/app/lib/editor/google-fonts";
 import { NumberInput } from "./inspector/NumberInput";
 import { ColorPicker } from "./inspector/ColorPicker";
@@ -11,6 +11,8 @@ import { ColorPicker } from "./inspector/ColorPicker";
 export interface ElementProps {
   tag: string;
   tagName: string;
+  id: string;
+  className: string;
   text: string | null;
   href: string;
   target: string;
@@ -29,6 +31,13 @@ export interface ElementProps {
   paddingBottom: string;
   paddingLeft: string;
   borderRadius: string;
+  borderTopLeftRadius: string;
+  borderTopRightRadius: string;
+  borderBottomRightRadius: string;
+  borderBottomLeftRadius: string;
+  borderStyle: string;
+  borderWidth: string;
+  borderColor: string;
   textAlign: string;
   lineHeight: string;
   letterSpacing: string;
@@ -42,7 +51,23 @@ export interface ElementProps {
   gap: string;
   width: string;
   height: string;
+  minWidth: string;
+  minHeight: string;
+  maxWidth: string;
+  maxHeight: string;
+  overflow: string;
+  position: string;
+  top: string;
+  right: string;
+  bottom: string;
+  left: string;
+  zIndex: string;
   opacity: string;
+  boxShadow: string;
+  transform: string;
+  transition: string;
+  backdropFilter: string;
+  mixBlendMode: string;
   backgroundImage: string;
   backgroundSize: string;
   backgroundPosition: string;
@@ -70,7 +95,7 @@ const VIEWPORT_BADGE: Record<string, { label: string; bg: string; text: string }
   mobile:    { label: "MOBILE",      bg: "bg-rose-500/15",     text: "text-rose-300" },
 };
 
-const FONT_SIZES = ["10px", "11px", "12px", "13px", "14px", "15px", "16px", "18px", "20px", "24px", "28px", "32px", "36px", "40px", "48px", "56px", "64px", "72px", "84px", "96px"];
+const FONT_UNITS = ["px", "em", "rem", "vw", "vh", "%"] as const;
 const FONT_WEIGHTS = [
   { value: "100", label: "Thin" },
   { value: "200", label: "Extra Light" },
@@ -156,37 +181,30 @@ const INTERACTIVE_TAGS = new Set([
 
 export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange, onTextChange, onAttrChange, onFontLoad, onDuplicate, onDelete, onMove, onSaveComponent, onBack }: VisualEditorProps) {
   const badge = VIEWPORT_BADGE[viewport] || VIEWPORT_BADGE.desktop;
+  const [activeTab, setActiveTab] = useState<"style" | "settings">("style");
+
   if (!elementProps) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
         <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center mb-3">
           <MousePointer className="w-5 h-5 text-purple-400" />
         </div>
-        <p className="text-[13px] font-medium text-white/60 mb-1">Visual edits</p>
-        <p className="text-[11px] text-white/30 leading-relaxed">Clique em um elemento no preview para editá-lo</p>
-        <p className="text-[10px] text-white/15 mt-3">Cmd+click para múltiplos</p>
+        <p className="text-[13px] font-medium text-white/60 mb-1">Selecione um elemento</p>
+        <p className="text-[11px] text-white/30 leading-relaxed">Ative o modo edição (cursor) e clique em qualquer elemento no preview</p>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto flex flex-col">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-white/[0.06]">
-        <button onClick={onBack} className="flex items-center gap-2 text-[12px] text-white/40 hover:text-white/70 transition-colors cursor-pointer mb-2">
-          <ArrowLeft className="w-3.5 h-3.5" />
-          Voltar ao Chat
-        </button>
+      <div className="px-3 py-2.5 border-b border-white/[0.06] shrink-0">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className="px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-400 text-[10px] font-mono truncate">{elementProps.tag}</span>
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <span className="px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-400 text-[10px] font-mono truncate max-w-[120px]">{elementProps.tag}</span>
             <span
-              title={
-                viewport === "desktop"
-                  ? "Edicoes em desktop sao a base — propagam para todos os breakpoints"
-                  : `Edicoes aqui SO valem em ${badge.label.toLowerCase()}`
-              }
-              className={cn("px-2 py-0.5 rounded-md text-[9px] font-bold tracking-wider whitespace-nowrap", badge.bg, badge.text)}
+              title={viewport === "desktop" ? "Desktop — base para todos os breakpoints" : `Apenas ${badge.label}`}
+              className={cn("px-1.5 py-0.5 rounded-md text-[9px] font-bold tracking-wider whitespace-nowrap", badge.bg, badge.text)}
             >
               {badge.label}
             </span>
@@ -194,51 +212,134 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
           <div className="flex items-center gap-0.5">
             <button onClick={() => onMove("up")} title="Mover para cima (⌘↑)"
               className="p-1 rounded-md text-white/40 hover:text-white hover:bg-white/[0.06] cursor-pointer transition-colors">
-              <ArrowUp className="w-3.5 h-3.5" />
+              <ArrowUp className="w-3 h-3" />
             </button>
             <button onClick={() => onMove("down")} title="Mover para baixo (⌘↓)"
               className="p-1 rounded-md text-white/40 hover:text-white hover:bg-white/[0.06] cursor-pointer transition-colors">
-              <ArrowDown className="w-3.5 h-3.5" />
+              <ArrowDown className="w-3 h-3" />
             </button>
             <button onClick={onDuplicate} title="Duplicar (⌘D)"
               className="p-1 rounded-md text-white/40 hover:text-white hover:bg-white/[0.06] cursor-pointer transition-colors">
-              <Copy className="w-3.5 h-3.5" />
+              <Copy className="w-3 h-3" />
             </button>
             <button onClick={onSaveComponent} title="Salvar como componente"
               className="p-1 rounded-md text-purple-400/70 hover:text-purple-400 hover:bg-purple-500/10 cursor-pointer transition-colors">
-              <Package className="w-3.5 h-3.5" />
+              <Package className="w-3 h-3" />
             </button>
             <button onClick={onDelete} title="Excluir (Delete)"
               className="p-1 rounded-md text-red-400/70 hover:text-red-400 hover:bg-red-500/10 cursor-pointer transition-colors">
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="w-3 h-3" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Interactive-element hint: clicks in edit mode are captured by the editor for selection,
-          so play/pause/iframe controls don't fire. Surface a one-click way to exit edit mode. */}
-      {INTERACTIVE_TAGS.has(elementProps.tagName) && (
-        <div className="mx-4 mt-3 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/25 flex items-start gap-2">
+      {/* Style / Settings tabs */}
+      <div className="flex gap-0.5 px-3 pt-2 pb-0 shrink-0 border-b border-white/[0.04]">
+        <button onClick={() => setActiveTab("style")}
+          className={cn("px-3 py-1.5 text-[11px] font-medium transition-all cursor-pointer border-b-2 -mb-px",
+            activeTab === "style" ? "border-purple-500 text-white" : "border-transparent text-white/35 hover:text-white/60")}>
+          Estilo
+        </button>
+        <button onClick={() => setActiveTab("settings")}
+          className={cn("px-3 py-1.5 text-[11px] font-medium transition-all cursor-pointer border-b-2 -mb-px",
+            activeTab === "settings" ? "border-purple-500 text-white" : "border-transparent text-white/35 hover:text-white/60")}>
+          Config
+        </button>
+      </div>
+
+      {/* Interactive-element hint */}
+      {INTERACTIVE_TAGS.has(elementProps.tagName) && activeTab === "style" && (
+        <div className="mx-3 mt-3 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/25 flex items-start gap-2 shrink-0">
           <PlayCircle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
-            <p className="text-[11px] text-amber-300 font-medium leading-snug">
-              Modo edição ativo
-            </p>
+            <p className="text-[11px] text-amber-300 font-medium leading-snug">Modo edição ativo</p>
             <p className="text-[10px] text-amber-200/70 leading-snug mt-0.5">
-              Clicks no preview selecionam elementos. Para dar play / interagir com o vídeo, saia do modo edição.
+              Cliques selecionam elementos. Para interagir com o vídeo, saia do modo edição.
             </p>
-            <button
-              onClick={onBack}
-              className="mt-1.5 px-2 py-1 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-[10px] font-semibold cursor-pointer"
-            >
+            <button onClick={onBack}
+              className="mt-1.5 px-2 py-1 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-[10px] font-semibold cursor-pointer">
               Sair do modo edição
             </button>
           </div>
         </div>
       )}
 
-      <div className="px-4 py-3 space-y-5">
+      {/* ── SETTINGS TAB ── */}
+      {activeTab === "settings" && (
+        <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4">
+          {/* ID */}
+          <section>
+            <Label className="flex items-center gap-1.5 mb-2">
+              <Hash className="w-3 h-3" /> ID
+            </Label>
+            <input
+              key={"id-" + elementProps.id}
+              type="text"
+              defaultValue={elementProps.id}
+              onBlur={(e) => onAttrChange("id", e.target.value || null)}
+              onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+              placeholder="ex: hero-section"
+              className="w-full bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2 text-[11px] text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/30 font-mono"
+            />
+            <p className="text-[9px] text-white/20 mt-1">Usado para âncoras (#id) e links internos</p>
+          </section>
+
+          {/* Class */}
+          <section>
+            <Label className="flex items-center gap-1.5 mb-2">
+              <Type className="w-3 h-3" /> Classe CSS
+            </Label>
+            <input
+              key={"class-" + elementProps.className}
+              type="text"
+              defaultValue={elementProps.className}
+              onBlur={(e) => onAttrChange("class", e.target.value || null)}
+              onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+              placeholder="ex: btn btn-primary"
+              className="w-full bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2 text-[11px] text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/30 font-mono"
+            />
+          </section>
+
+          {/* Visibility */}
+          <section>
+            <Label className="flex items-center gap-1.5 mb-2">
+              <Eye className="w-3 h-3" /> Visibilidade
+            </Label>
+            <div className="flex gap-0.5 p-0.5 rounded-xl bg-white/[0.03] border border-white/[0.04]">
+              <button
+                onClick={() => onStyleChange("display", elementProps.display === "none" ? "block" : elementProps.display)}
+                className={cn("flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-medium cursor-pointer transition-all",
+                  elementProps.display !== "none" ? "bg-white/[0.08] text-white" : "text-white/30 hover:text-white/50")}>
+                <Eye className="w-3 h-3" /> Visível
+              </button>
+              <button
+                onClick={() => onStyleChange("display", "none")}
+                className={cn("flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-medium cursor-pointer transition-all",
+                  elementProps.display === "none" ? "bg-white/[0.08] text-white" : "text-white/30 hover:text-white/50")}>
+                <EyeOff className="w-3 h-3" /> Oculto
+              </button>
+            </div>
+          </section>
+
+          {/* Link settings — only for anchor/button elements */}
+          {(elementProps.tagName === "a" || elementProps.tagName === "button") && (
+            <section>
+              <Label className="flex items-center gap-1.5 mb-2">
+                <Link2 className="w-3 h-3" /> Link
+              </Label>
+              <LinkSection elementProps={elementProps} onAttrChange={onAttrChange} />
+            </section>
+          )}
+
+          {/* Custom attributes */}
+          <CustomAttributesSection elementProps={elementProps} onAttrChange={onAttrChange} />
+        </div>
+      )}
+
+      {/* ── STYLE TAB ── */}
+      {activeTab === "style" && (
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-5">
         {/* Text */}
         {elementProps.text !== null && (
           <section>
@@ -253,11 +354,6 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
               className="w-full bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2 text-[12px] text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/30 resize-none h-20"
             />
           </section>
-        )}
-
-        {/* Link — aparece quando elemento é <a> */}
-        {elementProps.tagName === "a" && (
-          <LinkSection elementProps={elementProps} onAttrChange={onAttrChange} />
         )}
 
         {/* Typography */}
@@ -307,16 +403,40 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
               </div>
               <div>
                 <span className="text-[9px] text-white/20 mb-1 block">Tamanho</span>
-                <select
-                  key={"s-" + elementProps.fontSize}
-                  defaultValue={elementProps.fontSize}
-                  onChange={(e) => onStyleChange("fontSize", e.target.value)}
-                  className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none cursor-pointer"
-                >
-                  {FONT_SIZES.map((s) => (
-                    <option key={s} value={s} className="bg-[#1a1a1a]">{s}</option>
-                  ))}
-                </select>
+                <div className="flex items-center bg-white/[0.04] border border-white/[0.06] rounded-lg focus-within:border-purple-500/30 transition-colors">
+                  <input
+                    key={"fsn-" + elementProps.fontSize}
+                    type="text"
+                    inputMode="decimal"
+                    defaultValue={elementProps.fontSize.match(/^(-?[\d.]+)/)?.[1] ?? elementProps.fontSize}
+                    onBlur={(e) => {
+                      const unit = (elementProps.fontSize.match(/^-?[\d.]+(px|em|rem|vw|vh|%)/i)?.[1] ?? "px").toLowerCase();
+                      const n = parseFloat(e.target.value);
+                      if (!isNaN(n)) onStyleChange("fontSize", `${Math.round(n * 100) / 100}${unit}`);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") { (e.target as HTMLInputElement).blur(); return; }
+                      const unit = (elementProps.fontSize.match(/^-?[\d.]+(px|em|rem|vw|vh|%)/i)?.[1] ?? "px").toLowerCase();
+                      const cur = parseFloat((e.target as HTMLInputElement).value) || 0;
+                      const s = e.shiftKey ? 10 : 1;
+                      if (e.key === "ArrowUp") { e.preventDefault(); onStyleChange("fontSize", `${cur + s}${unit}`); }
+                      if (e.key === "ArrowDown") { e.preventDefault(); onStyleChange("fontSize", `${Math.max(0, cur - s)}${unit}`); }
+                    }}
+                    className="flex-1 min-w-0 bg-transparent px-2 py-1.5 text-[11px] text-white focus:outline-none w-0"
+                  />
+                  <select
+                    value={(elementProps.fontSize.match(/^-?[\d.]+(px|em|rem|vw|vh|%)/i)?.[1] ?? "px").toLowerCase()}
+                    onChange={(e) => {
+                      const n = elementProps.fontSize.match(/^(-?[\d.]+)/)?.[1] ?? "16";
+                      onStyleChange("fontSize", `${n}${e.target.value}`);
+                    }}
+                    className="bg-transparent border-l border-white/[0.06] px-1.5 py-1.5 text-[10px] text-purple-400 focus:outline-none cursor-pointer font-mono"
+                  >
+                    {FONT_UNITS.map((u) => (
+                      <option key={u} value={u} className="bg-[#1a1a1a] text-white">{u}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -337,7 +457,6 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
               <div>
                 <span className="text-[9px] text-white/20 mb-1 block">Espaçamento</span>
                 <NumberInput
-                  key={"ls-" + elementProps.letterSpacing}
                   value={elementProps.letterSpacing === "normal" ? "0px" : elementProps.letterSpacing}
                   onChange={(v) => onStyleChange("letterSpacing", v || "normal")}
                   step={0.5}
@@ -450,7 +569,6 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
                   <div>
                     <span className="text-[9px] text-white/20 mb-1 block">Gap</span>
                     <NumberInput
-                      key={"gap-" + elementProps.gap}
                       value={elementProps.gap === "normal" ? "0px" : elementProps.gap}
                       onChange={(v) => onStyleChange("gap", v || "0")}
                       min={0}
@@ -532,7 +650,7 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
               <div className="grid grid-cols-2 gap-1.5">
                 {(["marginTop", "marginRight", "marginBottom", "marginLeft"] as const).map((prop, i) => (
                   <NumberInput
-                    key={prop + "-" + elementProps[prop]}
+                    key={prop}
                     label={["T", "R", "B", "L"][i]}
                     value={elementProps[prop]}
                     onChange={(v) => onStyleChange(prop, v)}
@@ -546,7 +664,7 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
               <div className="grid grid-cols-2 gap-1.5">
                 {(["paddingTop", "paddingRight", "paddingBottom", "paddingLeft"] as const).map((prop, i) => (
                   <NumberInput
-                    key={prop + "-" + elementProps[prop]}
+                    key={prop}
                     label={["T", "R", "B", "L"][i]}
                     value={elementProps[prop]}
                     onChange={(v) => onStyleChange(prop, v)}
@@ -556,19 +674,275 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
               </div>
             </div>
 
+          </div>
+        </section>
+
+        {/* Size — min/max/overflow */}
+        <section>
+          <Label className="flex items-center gap-1.5 mb-2">
+            <ArrowDownNarrowWide className="w-3 h-3" /> Tamanho
+          </Label>
+          <div className="space-y-1.5">
+            <div className="grid grid-cols-2 gap-1.5">
+              <SizeInput label="Min W" value={elementProps.minWidth} onChange={(v) => onStyleChange("minWidth", v)} />
+              <SizeInput label="Min H" value={elementProps.minHeight} onChange={(v) => onStyleChange("minHeight", v)} />
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              <SizeInput label="Max W" value={elementProps.maxWidth} onChange={(v) => onStyleChange("maxWidth", v)} />
+              <SizeInput label="Max H" value={elementProps.maxHeight} onChange={(v) => onStyleChange("maxHeight", v)} />
+            </div>
             <div>
-              <span className="text-[9px] text-white/20 mb-1 block">Border Radius</span>
-              <NumberInput
-                key={"br-" + elementProps.borderRadius}
-                value={elementProps.borderRadius}
-                onChange={(v) => onStyleChange("borderRadius", v)}
-                min={0}
+              <span className="text-[9px] text-white/20 mb-1 block">Overflow</span>
+              <div className="flex gap-0.5">
+                {(["visible", "hidden", "auto", "scroll"] as const).map((v) => (
+                  <button key={v} onClick={() => onStyleChange("overflow", v)}
+                    className={cn("flex-1 py-1.5 rounded-lg cursor-pointer transition-all text-[9px]",
+                      elementProps.overflow === v ? "bg-purple-500/20 text-purple-400" : "bg-white/[0.03] text-white/30 hover:text-white/50")}>
+                    {v === "visible" ? "—" : v === "hidden" ? "clip" : v}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Position */}
+        <section>
+          <Label className="flex items-center gap-1.5 mb-2">
+            <MousePointer className="w-3 h-3" /> Posição
+          </Label>
+          <div className="space-y-2">
+            <div>
+              <span className="text-[9px] text-white/20 mb-1 block">Tipo</span>
+              <div className="flex gap-0.5">
+                {(["static", "relative", "absolute", "fixed", "sticky"] as const).map((pos) => (
+                  <button key={pos} onClick={() => onStyleChange("position", pos)}
+                    title={pos}
+                    className={cn("flex-1 py-1.5 rounded-lg cursor-pointer transition-all text-[9px] capitalize",
+                      elementProps.position === pos ? "bg-purple-500/20 text-purple-400" : "bg-white/[0.03] text-white/30 hover:text-white/50")}>
+                    {pos === "static" ? "—" : pos === "relative" ? "rel" : pos === "absolute" ? "abs" : pos === "fixed" ? "fix" : "stk"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {elementProps.position !== "static" && (
+              <>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <NumberInput label="T" value={elementProps.top || ""} onChange={(v) => onStyleChange("top", v)} allowEmpty />
+                  <NumberInput label="R" value={elementProps.right || ""} onChange={(v) => onStyleChange("right", v)} allowEmpty />
+                  <NumberInput label="B" value={elementProps.bottom || ""} onChange={(v) => onStyleChange("bottom", v)} allowEmpty />
+                  <NumberInput label="L" value={elementProps.left || ""} onChange={(v) => onStyleChange("left", v)} allowEmpty />
+                </div>
+                <div>
+                  <span className="text-[9px] text-white/20 mb-1 block">Z-Index</span>
+                  <NumberInput value={elementProps.zIndex || ""} onChange={(v) => onStyleChange("zIndex", v)} allowEmpty />
+                </div>
+              </>
+            )}
+          </div>
+        </section>
+
+        {/* Borders */}
+        <section>
+          <Label className="flex items-center gap-1.5 mb-2">
+            <LayoutGrid className="w-3 h-3" /> Bordas
+          </Label>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] text-white/20 w-10 shrink-0">Estilo</span>
+              <select
+                key={"bs-" + elementProps.borderStyle}
+                defaultValue={elementProps.borderStyle}
+                onChange={(e) => onStyleChange("borderStyle", e.target.value)}
+                className="flex-1 bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none cursor-pointer"
+              >
+                <option value="none" className="bg-[#1a1a1a]">Nenhuma</option>
+                <option value="solid" className="bg-[#1a1a1a]">Sólida</option>
+                <option value="dashed" className="bg-[#1a1a1a]">Tracejada</option>
+                <option value="dotted" className="bg-[#1a1a1a]">Pontilhada</option>
+                <option value="double" className="bg-[#1a1a1a]">Dupla</option>
+              </select>
+            </div>
+            {elementProps.borderStyle !== "none" && (
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] text-white/20 w-10 shrink-0">Largura</span>
+                <div className="flex-1">
+                  <NumberInput
+                    value={elementProps.borderWidth}
+                    onChange={(v) => onStyleChange("borderWidth", v)}
+                    min={0}
+                  />
+                </div>
+                <ColorPicker
+                  value={elementProps.borderColor}
+                  onChange={(v) => onStyleChange("borderColor", v)}
+                />
+              </div>
+            )}
+            <div>
+              <span className="text-[9px] text-white/20 mb-1.5 block">Raio por canto</span>
+              <div className="grid grid-cols-2 gap-1.5">
+                <NumberInput label="TL" value={elementProps.borderTopLeftRadius} onChange={(v) => onStyleChange("borderTopLeftRadius", v)} min={0} />
+                <NumberInput label="TR" value={elementProps.borderTopRightRadius} onChange={(v) => onStyleChange("borderTopRightRadius", v)} min={0} />
+                <NumberInput label="BR" value={elementProps.borderBottomRightRadius} onChange={(v) => onStyleChange("borderBottomRightRadius", v)} min={0} />
+                <NumberInput label="BL" value={elementProps.borderBottomLeftRadius} onChange={(v) => onStyleChange("borderBottomLeftRadius", v)} min={0} />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Effects */}
+        <section>
+          <Label className="flex items-center gap-1.5 mb-2">
+            <Space className="w-3 h-3" /> Efeitos
+          </Label>
+          <div className="space-y-2.5">
+            {/* Opacity */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[9px] text-white/20">Opacidade</span>
+                <span className="text-[10px] text-white/40 font-mono">{Math.round(parseFloat(elementProps.opacity || "1") * 100)}%</span>
+              </div>
+              <input
+                type="range" min={0} max={1} step={0.01}
+                value={parseFloat(elementProps.opacity || "1")}
+                onChange={(e) => onStyleChange("opacity", e.target.value)}
+                className="w-full h-1 accent-purple-500 cursor-pointer"
               />
+            </div>
+            {/* Box shadow */}
+            <div>
+              <span className="text-[9px] text-white/20 mb-1 block">Box Shadow</span>
+              <input
+                key={"shadow-" + elementProps.boxShadow}
+                type="text"
+                defaultValue={elementProps.boxShadow}
+                onBlur={(e) => onStyleChange("boxShadow", e.target.value || "none")}
+                onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                placeholder="0 4px 12px rgba(0,0,0,0.2)"
+                className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-purple-500/30 font-mono"
+              />
+            </div>
+            {/* Transform */}
+            <div>
+              <span className="text-[9px] text-white/20 mb-1 block">Transform</span>
+              <input
+                key={"transform-" + elementProps.transform}
+                type="text"
+                defaultValue={elementProps.transform}
+                onBlur={(e) => onStyleChange("transform", e.target.value || "none")}
+                onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                placeholder="rotate(0deg) scale(1)"
+                className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-purple-500/30 font-mono"
+              />
+            </div>
+            {/* Transition */}
+            <div>
+              <span className="text-[9px] text-white/20 mb-1 block">Transition</span>
+              <input
+                key={"transition-" + elementProps.transition}
+                type="text"
+                defaultValue={elementProps.transition}
+                onBlur={(e) => onStyleChange("transition", e.target.value || "none")}
+                onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                placeholder="all 0.3s ease"
+                className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-purple-500/30 font-mono"
+              />
+            </div>
+            {/* Backdrop filter */}
+            <div>
+              <span className="text-[9px] text-white/20 mb-1 block">Backdrop Filter</span>
+              <input
+                key={"bdfilter-" + elementProps.backdropFilter}
+                type="text"
+                defaultValue={elementProps.backdropFilter}
+                onBlur={(e) => onStyleChange("backdropFilter", e.target.value || "none")}
+                onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                placeholder="blur(10px)"
+                className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-purple-500/30 font-mono"
+              />
+            </div>
+            {/* Mix blend mode */}
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] text-white/20 w-10 shrink-0">Blend</span>
+              <select
+                key={"blend-" + elementProps.mixBlendMode}
+                defaultValue={elementProps.mixBlendMode || "normal"}
+                onChange={(e) => onStyleChange("mixBlendMode", e.target.value)}
+                className="flex-1 bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none cursor-pointer"
+              >
+                {["normal","multiply","screen","overlay","darken","lighten","color-dodge","color-burn","hard-light","soft-light","difference","exclusion"].map((m) => (
+                  <option key={m} value={m} className="bg-[#1a1a1a]">{m}</option>
+                ))}
+              </select>
             </div>
           </div>
         </section>
       </div>
+      )}
     </div>
+  );
+}
+
+function CustomAttributesSection({ elementProps, onAttrChange }: { elementProps: ElementProps; onAttrChange: (name: string, value: string | null) => void }) {
+  const [attrs, setAttrs] = useState<{ key: string; value: string }[]>([]);
+  const [newKey, setNewKey] = useState("");
+  const [newValue, setNewValue] = useState("");
+
+  const add = () => {
+    if (!newKey.trim()) return;
+    const k = newKey.trim();
+    const v = newValue.trim();
+    onAttrChange(k, v);
+    setAttrs((prev) => [...prev.filter((a) => a.key !== k), { key: k, value: v }]);
+    setNewKey("");
+    setNewValue("");
+  };
+
+  const remove = (key: string) => {
+    onAttrChange(key, null);
+    setAttrs((prev) => prev.filter((a) => a.key !== key));
+  };
+
+  return (
+    <section>
+      <Label className="flex items-center gap-1.5 mb-2">
+        <Hash className="w-3 h-3" /> Atributos personalizados
+      </Label>
+      <div className="space-y-1.5">
+        {attrs.map((a) => (
+          <div key={a.key} className="flex items-center gap-1.5">
+            <span className="flex-1 text-[10px] text-white/50 font-mono truncate bg-white/[0.03] border border-white/[0.05] rounded-lg px-2 py-1.5">{a.key}={a.value}</span>
+            <button onClick={() => remove(a.key)}
+              className="p-1 rounded-md text-red-400/60 hover:text-red-400 cursor-pointer">
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        ))}
+        <div className="flex gap-1">
+          <input
+            type="text"
+            value={newKey}
+            onChange={(e) => setNewKey(e.target.value)}
+            placeholder="atributo"
+            className="flex-1 min-w-0 bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[10px] text-white placeholder:text-white/20 focus:outline-none font-mono"
+            onKeyDown={(e) => { if (e.key === "Enter") add(); }}
+          />
+          <input
+            type="text"
+            value={newValue}
+            onChange={(e) => setNewValue(e.target.value)}
+            placeholder="valor"
+            className="flex-1 min-w-0 bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[10px] text-white placeholder:text-white/20 focus:outline-none font-mono"
+            onKeyDown={(e) => { if (e.key === "Enter") add(); }}
+          />
+          <button onClick={add}
+            className="p-1.5 rounded-lg bg-purple-500/15 text-purple-400 hover:bg-purple-500/25 cursor-pointer transition-all">
+            <Plus className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+    </section>
   );
 }
 

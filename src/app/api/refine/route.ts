@@ -1,7 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { resolveConfig, iterableToReadable, parseApiError, startStream } from "../../lib/ai-client";
+import { DESIGN_TOKENS_PROMPT } from "../../lib/design-tokens";
 
-// Simple in-memory rate limiter
+// In-memory rate limiter (resets on cold-start — replace with Upstash Redis for production)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_MAX = 30;
 const RATE_LIMIT_WINDOW = 60_000;
@@ -49,14 +49,7 @@ Se o usuário enviar uma imagem (screenshot, referência, mockup), analise-a VIS
     return base + `\n\nDESIGN CONTEXT DO PROJETO (respeite ao refinar):\n${tokens.join("\n")}`;
   }
 
-  return base + `\n\nDESIGN TOKENS PADRAO:
-- H1: Unbounded, 48px/32px mobile, weight 800
-- Body: DM Sans, 16px, weight 400, line-height 1.7
-- CTA: bg #FF5C00, texto branco uppercase, min-height 52px, radius 6px, hover glow laranja
-- Cores: bg #0C0C0C, surface #161616, card #1E1E1E, texto #F5F5F5, secundario #999
-- Secoes: py 80px desktop, alternando bg #0C0C0C e #161616
-- Cards: bg #1E1E1E, border rgba(255,255,255,0.08), radius 12px, hover translateY(-2px)
-- Contraste minimo 4.5:1. Texto sobre dark SEMPRE #F5F5F5 ou #999 (nunca abaixo)`;
+  return base + `\n\n${DESIGN_TOKENS_PROMPT}`;
 }
 
 export async function POST(request: Request) {
@@ -108,32 +101,10 @@ export async function POST(request: Request) {
       }
     }
 
-    // Build message content - supports multimodal (text + images)
-    const contentParts: Anthropic.MessageCreateParams["messages"][0]["content"] = [];
+    const codeLength = compactCode.length;
+    const maxTokens = codeLength > 40000 ? 32000 : 16000;
 
-    // Add images first if present (vision)
-    if (images && Array.isArray(images) && images.length > 0) {
-      for (const img of images) {
-        if (img.base64 && typeof img.base64 === "string") {
-          const match = img.base64.match(/^data:(image\/[^;]+);base64,(.+)$/);
-          if (match) {
-            contentParts.push({
-              type: "image",
-              source: {
-                type: "base64",
-                media_type: match[1] as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
-                data: match[2],
-              },
-            });
-          }
-        }
-      }
-    }
-
-    // Add text content
-    contentParts.push({
-      type: "text",
-      text: `PLATAFORMA: ${platform || "html"}
+    const userMsg = `PLATAFORMA: ${platform || "html"}
 
 CÓDIGO ATUAL DO LAYOUT:
 ${compactCode}
@@ -141,19 +112,16 @@ ${compactCode}
 PEDIDO DO USUÁRIO: ${refinementRequest}
 ${images && images.length > 0 ? "\nO usuário enviou imagem(ns) acima como referência visual. Analise e aplique ao layout." : ""}
 
-Retorne o código HTML/CSS COMPLETO com as alterações aplicadas.`,
-    });
+Retorne o código HTML/CSS COMPLETO com as alterações aplicadas.`;
 
-    const codeLength = compactCode.length;
-    const maxTokens = codeLength > 40000 ? 32000 : 16000;
-
-    // Build text message from contentParts
-    const textPart = contentParts.find((p) => p.type === "text") as { type: "text"; text: string } | undefined;
-    const userMsg = textPart?.text ?? `PEDIDO: ${refinementRequest}\n\nCÓDIGO:\n${compactCode}`;
+    // Pass images directly to startStream — works for both Anthropic (multimodal) and OpenAI
+    const imagePayload = images && Array.isArray(images) && images.length > 0
+      ? (images as { base64: string; name: string }[])
+      : undefined;
 
     let gen: AsyncIterable<string>;
     try {
-      gen = await startStream(aiConfig, buildSystemPrompt(designContext), userMsg, maxTokens);
+      gen = await startStream(aiConfig, buildSystemPrompt(designContext), userMsg, maxTokens, imagePayload);
     } catch (e: unknown) {
       const { status, message } = parseApiError(e, aiConfig.provider);
       return Response.json({ error: message }, { status });

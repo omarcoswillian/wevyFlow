@@ -17,14 +17,14 @@ export const SECTIONS: Section[] = [
   {
     id: "hero-simples",
     label: "Hero Simples · Dark Orange",
-    description: "Hero centralizado com badge, headline em Unbounded, subheadline, CTA laranja e 3 provas sociais com checks verdes. Dark com accent laranja vibrante.",
+    description: "Hero centralizado com badge, headline em Montserrat semi-bold, subheadline, CTA laranja e 3 provas sociais com checks verdes. Dark com accent laranja vibrante.",
     kind: "hero",
     themes: ["dark", "vibrant", "minimal"],
     suits: ["vendas", "captura", "saas"],
     file: "sections/hero-simples.html",
     slots: ["badge texto", "headline principal", "palavra destaque", "subheadline descritiva com beneficio principal", "texto CTA", "prova social 1", "prova social 2", "prova social 3"],
     hasSlots: true,
-    fonts: ["Unbounded", "DM Sans"],
+    fonts: ["Montserrat", "DM Sans"],
     accent: "#FF5C00",
   },
   {
@@ -120,7 +120,7 @@ export const SECTIONS: Section[] = [
     file: "sections/para-quem-e.html",
     slots: ["headline secao", "subtitulo explicando o avatar ideal", "perfil 1 titulo", "perfil 1 descricao", "perfil 2 titulo", "perfil 2 descricao", "perfil 3 titulo", "perfil 3 descricao"],
     hasSlots: true,
-    fonts: ["Unbounded"],
+    fonts: ["Montserrat"],
     accent: "#FF5C00",
   },
 
@@ -135,7 +135,7 @@ export const SECTIONS: Section[] = [
     file: "sections/depoimentos-grid.html",
     slots: ["headline depoimentos", "iniciais", "nome 1", "nicho/cargo 1", "depoimento 1 texto", "resultado 1", "nome 2", "nicho/cargo 2", "depoimento 2 texto", "resultado 2", "nome 3", "nicho/cargo 3", "depoimento 3 texto", "resultado 3"],
     hasSlots: true,
-    fonts: ["Unbounded"],
+    fonts: ["Montserrat"],
     accent: "#FF5C00",
   },
 
@@ -150,7 +150,7 @@ export const SECTIONS: Section[] = [
     file: "sections/oferta-preco.html",
     slots: ["headline oferta", "subtitulo oferta", "item incluso 1", "item incluso 2", "item incluso 3", "bonus 1", "bonus 2", "preco antigo", "preco", "parcelas ex \"12x R$ 97\"", "dias", "texto CTA"],
     hasSlots: true,
-    fonts: ["Unbounded"],
+    fonts: ["Montserrat"],
     accent: "#FF5C00",
   },
 
@@ -165,7 +165,7 @@ export const SECTIONS: Section[] = [
     file: "sections/faq-accordion.html",
     slots: ["pergunta 1", "resposta 1", "pergunta 2", "resposta 2", "pergunta 3", "resposta 3", "pergunta 4", "resposta 4", "pergunta 5", "resposta 5", "pergunta 6", "resposta 6"],
     hasSlots: true,
-    fonts: ["Unbounded", "DM Sans"],
+    fonts: ["Montserrat", "DM Sans"],
     accent: "#FF5C00",
   },
 ];
