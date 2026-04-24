@@ -13,6 +13,22 @@ export const TEMPLATE_CATEGORIES = [
 export const TEMPLATES: TemplateItem[] = [
   // ━━━ PÁGINA DE VENDAS ━━━
   {
+    id: "ready-metodo-rmx",
+    label: "Método RMX 5.0 · Dark Purple Premium (Pronto)",
+    description: "Página de vendas premium para método/curso. Hero dark com glow roxo e grid animado, stats strip, 3 pilares com hover animado, resultados em grid 2x3, módulos em accordion interativo, seção de upgrade em vermelho com bonus cards, oferta com preço e CTA, garantia e fechamento com contador animado.",
+    category: "vendas",
+    tags: ["pronto", "vendas", "dark", "roxo", "purple", "método", "curso", "infoproduto", "premium", "accordion", "animado"],
+    prompt: "READY:ready-metodo-rmx",
+  },
+  {
+    id: "ready-metodo-rmx-light",
+    label: "Método RMX 5.0 · Light Purple (Pronto)",
+    description: "Versão clara da página do Método RMX. Fundo branco/lavanda com accent roxo, cards com hover lift e sombra roxa, quote break em roxo sólido, upgrade em dark com bonus cards, módulos em accordion e oferta com card gradient roxo no topo.",
+    category: "vendas",
+    tags: ["pronto", "vendas", "light", "branco", "roxo", "purple", "método", "curso", "infoproduto", "premium", "accordion"],
+    prompt: "READY:ready-metodo-rmx-light",
+  },
+  {
     id: "ready-stories10x-dark",
     label: "LP Vendas · Stories 10x Dark Pink (Pronto)",
     description: "Página de vendas dark roxo/pink estilo Stories 10x. Hero com badge + 4 benefícios em grade, player VSL, CTA pink com glow, faixa de bônus horizontal, para quem é em 6 cards, 4 depoimentos de video e CTA final.",

@@ -11,6 +11,8 @@ interface ResourcesPageProps {
 
 // Visual gradient schemes for each template (more impactful than tiny iframes)
 const TEMPLATE_VISUALS: Record<string, { gradient: string; mockupType: "hero-photo" | "saas" | "cards" | "form" | "blog" | "portfolio" | "minimal"; ready?: boolean }> = {
+  "ready-metodo-rmx": { gradient: "from-[#080808] via-violet-950/40 to-[#080808]", mockupType: "saas", ready: true },
+  "ready-metodo-rmx-light": { gradient: "from-[#F3EEFF] via-white to-[#EAE0FF]", mockupType: "cards", ready: true },
   "ready-vendas-black-boutique": { gradient: "from-purple-950 via-gray-900 to-purple-950/80", mockupType: "hero-photo", ready: true },
   "ready-vendas-white-boutique": { gradient: "from-stone-200 via-purple-100 to-stone-300", mockupType: "hero-photo", ready: true },
   "ready-lp-vendas": { gradient: "from-gray-950 via-orange-950/30 to-gray-950", mockupType: "saas", ready: true },

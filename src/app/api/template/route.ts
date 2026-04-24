@@ -39,6 +39,9 @@ const TEMPLATE_MAP: Record<string, string> = {
   "ready-novomercado-dark": "lp-vendas-novomercado-dark.html",
   // Evento / Workshop
   "evento-presencial-dark": "evento-presencial-dark.html",
+  // Método RMX
+  "ready-metodo-rmx": "lp-vendas-metodo-rmx.html",
+  "ready-metodo-rmx-light": "lp-vendas-metodo-rmx-light.html",
 };
 
 export async function GET(request: Request) {

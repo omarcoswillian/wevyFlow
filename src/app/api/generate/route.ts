@@ -358,7 +358,7 @@ export async function POST(request: Request) {
           .replace(/\s{2,}/g, " ");
         const sectionCount = (cleanHtml.match(/<section/gi) || []).length;
         const mainBlocks = (cleanHtml.match(/<(section|main|article|header|footer)[^>]*>/gi) || []).length;
-        return `ESTRUTURA DA PÁGINA: ${sectionCount} <section> tags, ${mainBlocks} blocos principais (section/main/article/header/footer) — replique EXATAMENTE essa quantidade, nem mais nem menos.\n\nHTML RENDERIZADO (pós-JS):\n${cleanHtml.slice(0, 12000)}`;
+        return `ESTRUTURA DA PÁGINA: ${sectionCount} <section> tags, ${mainBlocks} blocos principais (section/main/article/header/footer) — replique EXATAMENTE essa quantidade, nem mais nem menos.\n\nHTML RENDERIZADO (pós-JS):\n${cleanHtml.slice(0, 60000)}`;
       })(),
     ].filter(Boolean).join("\n");
 
@@ -370,7 +370,7 @@ export async function POST(request: Request) {
         aiConfig,
         REPLICATE_SYSTEM,
         replicateMsg,
-        32000,
+        64000,
         replicateImages.length > 0 ? replicateImages : undefined
       );
     } catch (e: unknown) {
@@ -491,7 +491,7 @@ export async function POST(request: Request) {
       aiConfig,
       hasCopyDocument ? COPY_MODE_SYSTEM : PERSONALIZE_SYSTEM,
       personalizeUserMsg,
-      32000,
+      64000,
       allImages.length > 0 ? allImages : undefined
     );
   } catch (e: unknown) {

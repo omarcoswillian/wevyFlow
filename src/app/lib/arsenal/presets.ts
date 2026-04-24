@@ -73,6 +73,18 @@ export const PRESETS: Preset[] = [
 
   /* ───────── VENDAS ───────── */
   {
+    id: "metodo-rmx",
+    label: "Método RMX 5.0 · Dark Purple Premium",
+    description: "Página de vendas premium para método/curso. Hero dark com gradiente roxo, 3 pilares animados, resultados em grid, módulos em accordion interativo, seção de upgrade em vermelho, oferta com preço e CTA, garantia e fechamento com contador. Copy e estrutura fiéis ao Método RMX — reutilizável para qualquer método infoprodutor.",
+    kind: "vendas",
+    themes: ["dark", "luxury", "vibrant"],
+    file: "lp-vendas-metodo-rmx.html",
+    sectionOutline: ["hero", "stats", "pilares", "results", "modules", "upgrade", "oferta", "garantia", "social-proof"],
+    monolithic: true,
+    accent: "#6100FF",
+    fonts: ["Urbanist", "Raleway"],
+  },
+  {
     id: "lp-vendas",
     label: "LP Vendas Completa · Dark Orange",
     description: "Página de vendas completa: hero com stats, para quem é, depoimentos, oferta com stack de valor, bônus, garantia, FAQ e CTA final. Dark com accent laranja.",
