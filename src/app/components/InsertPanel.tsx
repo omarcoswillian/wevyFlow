@@ -39,6 +39,8 @@ export function InsertPanel({ onInsert, onDragHtml }: InsertPanelProps) {
     card: `<div class="card reveal"><h3>Título do card</h3><p>Descrição do card.</p></div>`,
   };
 
+  const EMPTY_IMG_SRC = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='100%25' height='100%25' fill='%23161616'/%3E%3Ctext x='50%25' y='50%25' font-family='system-ui' font-size='14' fill='%23555' text-anchor='middle' dominant-baseline='middle'%3EClique para editar imagem%3C/text%3E%3C/svg%3E`;
+
   const onImageFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -46,7 +48,7 @@ export function InsertPanel({ onInsert, onDragHtml }: InsertPanelProps) {
     const reader = new FileReader();
     reader.onload = () => {
       const url = reader.result as string;
-      onInsert(`<img src="${url}" alt="" class="reveal" style="max-width:100%;height:auto;border-radius:12px">`);
+      onInsert(`<img src="${url}" alt="" class="reveal" style="max-width:100%;height:auto;display:block;border-radius:8px">`);
     };
     reader.readAsDataURL(file);
     if (fileRef.current) fileRef.current.value = "";
@@ -77,13 +79,17 @@ export function InsertPanel({ onInsert, onDragHtml }: InsertPanelProps) {
           <input ref={fileRef} type="file" accept="image/*" onChange={onImageFile} className="hidden" />
           <InsertCard
             icon={<ImageIcon className="w-4 h-4" />}
-            label="Imagem"
-            html={`<div class="reveal" style="width:100%;aspect-ratio:16/9;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.3);font-size:12px;font-family:system-ui">Imagem — use Fill para trocar</div>`}
-            onInsert={onInsert}
-            onDragHtml={onDragHtml}
+            label="Imagem (upload)"
             onClick={() => fileRef.current?.click()}
           />
           <InsertCard icon={<ImageIcon className="w-4 h-4" />} label="Imagem (URL)" onClick={() => setSubForm("image-url")} />
+          <InsertCard
+            icon={<ImageIcon className="w-4 h-4" />}
+            label="Imagem vazia"
+            html={`<img src="${EMPTY_IMG_SRC}" alt="" class="reveal" style="max-width:100%;height:auto;display:block;border-radius:8px">`}
+            onInsert={onInsert}
+            onDragHtml={onDragHtml}
+          />
           <InsertCard icon={<Film className="w-4 h-4" />} label="YouTube" onClick={() => setSubForm("youtube")} />
           <InsertCard
             icon={<PlayCircle className="w-4 h-4" />}
@@ -100,7 +106,7 @@ export function InsertPanel({ onInsert, onDragHtml }: InsertPanelProps) {
             label="URL da imagem"
             onCancel={() => setSubForm(null)}
             onSubmit={(url) => {
-              onInsert(`<img src="${escapeAttr(url)}" alt="" class="reveal" style="max-width:100%;height:auto;border-radius:12px">`);
+              onInsert(`<img src="${escapeAttr(url)}" alt="" class="reveal" style="max-width:100%;height:auto;display:block;border-radius:8px">`);
               setSubForm(null);
             }}
           />

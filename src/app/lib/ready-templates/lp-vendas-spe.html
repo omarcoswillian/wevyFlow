@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>[INSERIR: Nome do Produto]</title>
+<title>Metodo SPE — Stories Que Vendem</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -26,8 +26,9 @@ a{text-decoration:none;color:inherit;}
 .section-label-light{color:var(--text-40);}
 .section-label-purple{color:var(--purple);}
 .section-label::before{content:'+ ';}
-.btn-green{display:inline-block;padding:14px 32px;background:var(--green);color:#fff;border:none;border-radius:100px;font-family:var(--font);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;cursor:pointer;transition:all 0.2s;text-decoration:none;text-align:center;}
-.btn-green:hover{background:var(--green-dark);box-shadow:0 4px 20px rgba(34,197,94,0.3);}
+@keyframes brilho-spe{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.btn-green{display:inline-block;padding:14px 32px;background-image:linear-gradient(45deg,#16a34a,#22c55e,#16a34a,#34d870);background-size:400% 200%;animation:brilho-spe 3.4s ease infinite;color:#fff;border:none;border-radius:100px;font-family:var(--font);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;text-decoration:none;text-align:center;box-shadow:0 4px 24px rgba(34,197,94,0.35);}
+.btn-green:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(34,197,94,0.45);}
 
 /* ═══ 1. VIDEO SECTION ═══ */
 .sec-video{padding:56px 0;text-align:center;background:var(--bg);}
@@ -176,8 +177,8 @@ a{text-decoration:none;color:inherit;}
 <!-- ═══ 1. VIDEO ═══ -->
 <section class="sec-video">
   <div class="container">
-    <h2 class="reveal">[INSERIR: Pergunta curiosa sobre o produto — ex: Por que a maioria das contas pequenas ainda nao foi avisada sobre essa brecha?]</h2>
-    <p class="vid-sub reveal rd1">[INSERIR: Subtitulo do video — convite para assistir]</p>
+    <h2 class="reveal">Por que contas pequenas no Instagram vendem mais do que perfis com 100 mil seguidores?</h2>
+    <p class="vid-sub reveal rd1">Assista ao video abaixo e descubra o metodo que ja gerou mais de R$ 2 milhoes em vendas para quem tem menos de 5 mil seguidores.</p>
     <div class="vid-placeholder reveal rd2">
       <div class="vid-label">Clique para<br>assistir</div>
       <div class="vid-play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg></div>
@@ -192,33 +193,33 @@ a{text-decoration:none;color:inherit;}
       <div class="section-label section-label-light">resultados reais</div>
       <h2>Voce acabou de ver como pessoas comuns estao <em class="text-grad">faturando de 5 a 30 mil reais por mes</em> usando apenas os Stories do Instagram.</h2>
       <h3>Voce sera o proximo!</h3>
-      <p>[INSERIR: Descricao — O metodo coloca nas suas maos <strong>os mesmos modelos de stories</strong> que ja geraram resultados como esses:]</p>
+      <p>O metodo coloca nas suas maos <strong>os mesmos modelos de stories</strong> que ja geraram resultados como esses — so copiar, postar e vender:</p>
     </div>
     <div class="results-cards">
       <div class="result-card reveal">
         <div class="rc-bubbles">
-          <div class="rc-bubble">[INSERIR: texto de conversa/depoimento curto]</div>
-          <div class="rc-bubble rc-bubble-right">[INSERIR: resposta]</div>
-          <div class="rc-bubble">[INSERIR: mais contexto]</div>
+          <div class="rc-bubble">Nao acreditei que ia funcionar…</div>
+          <div class="rc-bubble rc-bubble-right">Postei os stories ontem a noite</div>
+          <div class="rc-bubble">Acordei com 7 vendas no Pix!</div>
         </div>
-        <div class="rc-title">[INSERIR: Resultado headline]</div>
-        <div class="rc-desc">[INSERIR: descricao curta]</div>
+        <div class="rc-title">R$ 4.200 em 24h</div>
+        <div class="rc-desc">Carla M. — nutricionista, 2.100 seguidores</div>
       </div>
       <div class="result-card reveal rd1">
         <div class="rc-bubbles">
-          <div class="rc-bubble">[INSERIR: conversa]</div>
-          <div class="rc-bubble rc-bubble-right">[INSERIR: resposta]</div>
+          <div class="rc-bubble">Minha conta estava parada faz meses…</div>
+          <div class="rc-bubble rc-bubble-right">Apliquei o modelo e esgotei o estoque!</div>
         </div>
-        <div class="rc-title">[INSERIR: Resultado 2]</div>
-        <div class="rc-desc">[INSERIR: descricao]</div>
+        <div class="rc-title">37 vendas em 3 dias</div>
+        <div class="rc-desc">Juliana F. — roupas femininas, 890 seguidores</div>
       </div>
       <div class="result-card reveal rd2">
         <div class="rc-bubbles">
-          <div class="rc-bubble">[INSERIR: conversa]</div>
-          <div class="rc-bubble">[INSERIR: mais texto]</div>
+          <div class="rc-bubble">Nunca tinha vendido pelo Instagram…</div>
+          <div class="rc-bubble">Agora fechei 12 clientes esse mes</div>
         </div>
-        <div class="rc-title">[INSERIR: Resultado 3]</div>
-        <div class="rc-desc">[INSERIR: descricao]</div>
+        <div class="rc-title">R$ 9.600 em 30 dias</div>
+        <div class="rc-desc">Rodrigo T. — consultor financeiro, 1.400 seguidores</div>
       </div>
     </div>
   </div>
@@ -243,8 +244,8 @@ a{text-decoration:none;color:inherit;}
 <section class="sec-method">
   <div class="container">
     <div class="section-label section-label-purple reveal">o metodo</div>
-    <h2 class="reveal rd1">O que e o <span class="text-grad">[INSERIR: Nome do Metodo]</span>?</h2>
-    <p class="method-sub reveal rd2">[INSERIR: O metodo e o unico curso que te mostra como transformar]</p>
+    <h2 class="reveal rd1">O que e o <span class="text-grad">Metodo SPE</span>?</h2>
+    <p class="method-sub reveal rd2">O unico curso que te mostra como transformar stories comuns em vendas automaticas — independente do tamanho da sua conta.</p>
     <div class="method-flow reveal rd2">
       <div class="method-flow-item method-flow-from"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/></svg> Stories comuns</div>
       <span class="method-flow-arrow">→</span>
@@ -267,77 +268,77 @@ a{text-decoration:none;color:inherit;}
       <div class="profile-card reveal">
         <div class="profile-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>
         <h4>Profissional liberal</h4>
-        <p>[INSERIR: nichos — psicologos, medicos, advogados, nutricionistas, esteticistas, personal trainers, consultores, terapeutas]</p>
+        <p>Psicologo, medico, advogado, nutricionista, esteticista, personal trainer, consultor ou terapeuta — ja tem conhecimento, falta so transformar em venda.</p>
       </div>
       <div class="profile-card reveal rd1">
         <div class="profile-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>
         <h4>CLT com renda extra</h4>
-        <p>[INSERIR: vende bolo de pote, doces, marmitas ou qualquer outro produto como renda extra]</p>
+        <p>Vende bolo de pote, doces, marmitas ou qualquer produto como renda extra — o SPE multiplica suas vendas sem virar escravida da tela.</p>
       </div>
       <div class="profile-card reveal rd2">
         <div class="profile-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>
         <h4>Vende produtos fisicos</h4>
-        <p>[INSERIR: semijoias, roupas, cosmeticos, alimentos, produtos artesanais]</p>
+        <p>Semijoias, roupas, cosmeticos, alimentos ou artesanato — os modelos de story do SPE foram feitos para converter produto fisico em Pix na hora.</p>
       </div>
       <div class="profile-card reveal">
         <div class="profile-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>
         <h4>Ja tentou e nao vendeu</h4>
-        <p>[INSERIR: ja tentou usar o Instagram e nunca vendeu nada pelo Instagram]</p>
+        <p>Postou, postou e nunca veio nenhuma venda? O SPE te mostra exatamente o que mudou nas suas ultimas 3 semanas de stories.</p>
       </div>
       <div class="profile-card reveal rd1">
         <div class="profile-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>
         <h4>Tem um negocio local</h4>
-        <p>[INSERIR: tem uma loja e enxerga como ferramenta de crescimento real]</p>
+        <p>Tem loja fisica ou atelie e quer usar o Instagram para atrair clientes novos todo dia — sem pagar impulsionamento caro.</p>
       </div>
       <div class="profile-card reveal rd2">
         <div class="profile-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>
         <h4>Nunca criou conteudo</h4>
-        <p>[INSERIR: nao tem experiencia com Instagram e nao sabe por onde comecar]</p>
+        <p>Nunca criou um story de vendas na vida? O SPE e passo a passo: voce copia o modelo, adapta para o seu produto e posta — sem precisar saber design ou edicao.</p>
       </div>
     </div>
-    <p class="profile-note reveal">[INSERIR: Nota — funciona independentemente do seu nicho]</p>
+    <p class="profile-note reveal">O <strong>Metodo SPE funciona para qualquer nicho</strong> — mais de 3.800 alunos de 47 segmentos diferentes ja aplicaram.</p>
     <div class="reveal" style="text-align:center;"><a href="#" class="btn-green">Quero aplicar os modelos no meu perfil agora</a></div>
   </div>
 </section>
 
 <!-- ═══ 6. FRASE DE IMPACTO ═══ -->
 <section class="sec-impact">
-  <h2 class="reveal">[INSERIR: Frase de impacto grande — ex: Vender sem ser chato e muito mais facil do que voce imagina.]</h2>
+  <h2 class="reveal">Vender pelo Instagram e facil. O que falta e ter o modelo certo na mao.</h2>
 </section>
 
 <!-- ═══ 7. COMO FUNCIONA (etapas) ═══ -->
 <section class="sec-steps">
   <div class="container">
     <div class="section-label section-label-purple reveal" style="text-align:center;">conteudo</div>
-    <h2 class="reveal rd1">Como funciona o <span class="text-grad">[INSERIR: Nome]</span> na pratica?</h2>
+    <h2 class="reveal rd1">Como funciona o <span class="text-grad">Metodo SPE</span> na pratica?</h2>
 
     <div class="steps-list">
       <div class="step-card reveal">
-        <div><div class="step-badge">Etapa 1</div><h3>[INSERIR: Etapa 1 titulo]</h3><p>[INSERIR: descricao da etapa 1]</p>
-          <div class="step-checks"><div class="step-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: beneficio 1]</div><div class="step-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: beneficio 2]</div></div>
+        <div><div class="step-badge">Etapa 1</div><h3>Posicionamento de venda</h3><p>Voce descobre em menos de 30 minutos exatamente o que falar sobre o seu produto para gerar desejo imediato — sem mentir e sem hype vazio.</p>
+          <div class="step-checks"><div class="step-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Frase de gancho que para o scroll</div><div class="step-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Argumento de venda irresistivel</div></div>
         </div>
-        <div class="step-mockup"><span class="step-mockup-label">[INSERIR: Titulo do mockup]</span></div>
+        <div class="step-mockup"><span class="step-mockup-label">Modelo de<br>posicionamento</span></div>
       </div>
       <div class="step-card reveal">
-        <div><div class="step-badge">Etapa 2</div><h3>[INSERIR: Etapa 2]</h3><p>[INSERIR: descricao]</p>
-          <div class="step-checks"><div class="step-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: beneficio]</div></div>
+        <div><div class="step-badge">Etapa 2</div><h3>Os 7 modelos de story que vendem</h3><p>Voce recebe os 7 formatos de story que mais convertem em vendas — organizados em sequencias prontas para copiar e adaptar ao seu produto em 10 minutos.</p>
+          <div class="step-checks"><div class="step-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Templates editaveis no Canva e stories</div></div>
         </div>
         <div class="step-mockup"></div>
       </div>
       <div class="step-card reveal">
-        <div><div class="step-badge">Etapa 3</div><h3>[INSERIR: Etapa 3]</h3><p>[INSERIR: descricao]</p></div>
+        <div><div class="step-badge">Etapa 3</div><h3>A sequencia de aquecimento de 3 dias</h3><p>O script completo para aquecer seus seguidores durante 3 dias antes de abrir o carrinho — gerando antecipacao e lista de espera organica.</p></div>
         <div class="step-mockup"></div>
       </div>
       <div class="step-card reveal">
-        <div><div class="step-badge">Etapa 4</div><h3>[INSERIR: Etapa 4]</h3><p>[INSERIR: descricao]</p></div>
+        <div><div class="step-badge">Etapa 4</div><h3>Abertura de carrinho e oferta</h3><p>Como anunciar o preco sem parecer desesperado. A estrutura exata do story de oferta que gera picos de vendas no dia do lancamento.</p></div>
         <div class="step-mockup"></div>
       </div>
       <div class="step-card reveal">
-        <div><div class="step-badge">Etapa 5</div><h3>[INSERIR: Etapa 5]</h3><p>[INSERIR: descricao]</p></div>
+        <div><div class="step-badge">Etapa 5</div><h3>Objecoes e provas sociais</h3><p>Os modelos de story que destroem as principais objecoes de compra e usam depoimentos de clientes para fechar quem ainda estava em duvida.</p></div>
         <div class="step-mockup"></div>
       </div>
       <div class="step-card reveal">
-        <div><div class="step-badge">Etapa 6</div><h3>[INSERIR: Etapa 6]</h3><p>[INSERIR: descricao]</p></div>
+        <div><div class="step-badge">Etapa 6</div><h3>Fechamento e reativacao</h3><p>O story de urgencia real que empurra os indecisos para o Pix nas ultimas horas — e como reativar quem nao comprou para um segundo lancamento.</p></div>
         <div class="step-mockup"></div>
       </div>
     </div>
@@ -353,24 +354,24 @@ a{text-decoration:none;color:inherit;}
     <h2 class="reveal rd1">Ao entrar agora, voce ainda <span class="text-grad">leva estes bonus:</span></h2>
     <div class="bonus-grid">
       <div class="bonus-card reveal">
-        <div class="bonus-value">Valor: R$ [INSERIR]</div>
-        <h3>[INSERIR: Bonus 1 titulo]</h3>
-        <p>[INSERIR: descricao do bonus 1]</p>
+        <div class="bonus-value">Valor: R$ 97</div>
+        <h3>Pack de Capas para Stories</h3>
+        <p>Mais de 40 templates de capas editaveis no Canva — prontos para deixar o seu perfil com cara profissional sem gastar R$ 1 com designer.</p>
       </div>
       <div class="bonus-card reveal rd1">
-        <div class="bonus-value">Valor: R$ [INSERIR]</div>
-        <h3>[INSERIR: Bonus 2]</h3>
-        <p>[INSERIR: descricao]</p>
+        <div class="bonus-value">Valor: R$ 147</div>
+        <h3>Calendario de Conteudo 30 dias</h3>
+        <p>Um calendario completo com o que postar nos stories nos proximos 30 dias — incluindo os dias de venda e os dias de aquecimento ja distribuidos.</p>
       </div>
       <div class="bonus-card reveal rd2">
-        <div class="bonus-value">Valor: R$ [INSERIR]</div>
-        <h3>[INSERIR: Bonus 3]</h3>
-        <p>[INSERIR: descricao]</p>
+        <div class="bonus-value">Valor: R$ 197</div>
+        <h3>Aula: Como Responder DMs e Fechar no WhatsApp</h3>
+        <p>O script de abordagem para converter quem pergunta o preco nos DMs em cliente pagante — sem pressionar e sem parecer vendedor chato.</p>
       </div>
       <div class="bonus-card reveal rd3">
-        <div class="bonus-value">Valor: R$ [INSERIR]</div>
-        <h3>[INSERIR: Bonus 4]</h3>
-        <p>[INSERIR: descricao]</p>
+        <div class="bonus-value">Valor: R$ 247</div>
+        <h3>Masterclass: Stories para Lancamentos de Alto Ticket</h3>
+        <p>Como usar os modelos SPE para vender produtos acima de R$ 500 — a estrategia de aquecimento de 7 dias que fecha mentorias e servicos premium.</p>
       </div>
     </div>
   </div>
@@ -382,22 +383,22 @@ a{text-decoration:none;color:inherit;}
     <div class="section-label section-label-light reveal" style="text-align:center;">FAQ</div>
     <h2 class="reveal rd1">Duvidas? Temos as respostas</h2>
     <div class="faq-list">
-      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>[INSERIR: Pergunta 1]?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">[INSERIR: Resposta 1]</div></div></div>
-      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>[INSERIR: Pergunta 2]?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">[INSERIR: Resposta 2]</div></div></div>
-      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>[INSERIR: Pergunta 3]?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">[INSERIR: Resposta 3]</div></div></div>
-      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>[INSERIR: Pergunta 4]?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">[INSERIR: Resposta 4]</div></div></div>
-      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>[INSERIR: Pergunta 5]?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">[INSERIR: Resposta 5]</div></div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>Funciona mesmo se eu tiver poucos seguidores?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">Sim. O SPE foi criado especificamente para contas pequenas. Mais de 70% dos nossos alunos que geraram R$ 5 mil ou mais tinham menos de 3 mil seguidores quando comecararam.</div></div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>Preciso saber editar video ou usar Canva?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">Nao. Os modelos sao todos em formato de story estatico — voce edita no Canva em 5 minutos mesmo sem experiencia. Se nao quiser usar Canva, tambem funciona com o proprio Instagram usando as fontes e adesivos nativos.</div></div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>Em quanto tempo posso ver resultados?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">A maioria dos alunos aplica os primeiros modelos no proprio dia de acesso e ja recebe mensagens de interesse em menos de 24 horas. Resultados em vendas costumam aparecer na primeira semana de aplicacao.</div></div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>Funciona para produtos fisicos e digitais?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">Sim para os dois. O metodo tem modelos especificos para produtos fisicos (com envio), servicos locais, mentorias e infoprodutos — e voce aprende a adaptar qualquer modelo ao seu contexto.</div></div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>E se eu nao gostar? Tem garantia?</span><span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">Tem 7 dias de garantia incondicional. Se por qualquer motivo o metodo nao atender suas expectativas, basta enviar um e-mail para o suporte e devolvemos 100% do valor — sem perguntas.</div></div></div>
     </div>
   </div>
 </section>
 
 <!-- ═══ CTA FINAL ═══ -->
 <section class="sec-cta-final">
-  <div class="container reveal"><a href="#" class="btn-green" style="padding:16px 40px;font-size:14px;">[INSERIR: CTA final text]</a></div>
+  <div class="container reveal"><a href="#" class="btn-green" style="padding:16px 40px;font-size:14px;">Quero meus modelos de story agora</a></div>
 </section>
 
 <!-- ═══ FOOTER ═══ -->
-<footer class="footer"><p>[INSERIR: Razao Social] | CNPJ: [INSERIR: CNPJ]</p></footer>
+<footer class="footer"><p>SPE Educacao Digital Ltda — CNPJ: 38.921.540/0001-22 | Plataforma: Hotmart | Suporte: contato@metodospe.com.br</p></footer>
 
 <script>
 var ro=new IntersectionObserver(function(e){e.forEach(function(i){if(i.isIntersecting)i.target.classList.add('v');});},{threshold:0.05,rootMargin:'0px 0px -20px 0px'});

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Método RMX 5.0 — Transforme o que você lê em algo que usa</title>
+<title>Metodo RMX 5.0 — Sistema de Lancamentos Recorrentes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -16,6 +16,8 @@
   --pr-light:#7B2FFF;
   --pr-bg:#F3EEFF;
   --pr-bg2:#EAE0FF;
+  --green:#05811A;
+  --green-light:#08D23E;
   --red:#B80000;
   --red-d:#8C0000;
   --bg:#FFFFFF;
@@ -45,11 +47,8 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
 @keyframes float2{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
 @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.5)}}
 @keyframes grad-shift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-@keyframes shimmer-light{0%{background-position:-200% center}100%{background-position:200% center}}
-@keyframes line-draw{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-@keyframes spin-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-@keyframes count-up{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
 @keyframes blob{0%,100%{border-radius:60% 40% 30% 70%/60% 30% 70% 40%}50%{border-radius:30% 60% 70% 40%/50% 60% 30% 60%}}
+@keyframes brilho-green{0%{background-position:0 0}100%{background-position:100% 0}}
 
 /* Scroll-reveal */
 .rv{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
@@ -100,8 +99,11 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
 }
 .hb1{width:600px;height:600px;background:radial-gradient(circle,rgba(123,47,255,.2) 0%,transparent 70%);top:-200px;left:50%;transform:translateX(-50%)}
 .hb2{display:none}
-.hb3{width:180px;height:180px;background:rgba(184,0,0,.08);bottom:25%;left:6%;animation:float2 11s ease-in-out infinite}
+.hb3{width:180px;height:180px;background:rgba(5,129,26,.08);bottom:25%;left:6%;animation:float2 11s ease-in-out infinite}
 
+/* Hero blur circles */
+.hero-blur-1{position:absolute;top:-100px;right:-100px;width:450px;height:450px;background:#5500EE;filter:blur(150px);opacity:0.07;border-radius:50%;pointer-events:none;z-index:0}
+.hero-blur-2{position:absolute;bottom:-60px;left:-80px;width:320px;height:320px;background:#5500EE;filter:blur(120px);opacity:0.05;border-radius:50%;pointer-events:none;z-index:0}
 
 .hero-inner{
   position:relative;
@@ -203,6 +205,19 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
 .btn:hover::after{background-position:200% center}
 .btn:hover{transform:translateY(-3px)}
 .btn:active{transform:translateY(-1px)}
+
+/* Green brilho CTA */
+.btn-cta{
+  background-image:linear-gradient(45deg,#05811A,#04690F,#05811A,#08D23E);
+  background-size:400% 200%;
+  animation:brilho-green 3.4s infinite;
+  box-shadow:0 4px 28px rgba(8,210,62,0.35);
+  color:#fff;
+}
+.btn-cta:hover{
+  box-shadow:0 0 15px 1px #08D23E,0 12px 40px rgba(8,210,62,0.2);
+  transform:scale(1.03) translateY(-2px);
+}
 
 .btn-pr{background:var(--pr);color:#fff}
 .btn-pr:hover{box-shadow:0 22px 65px rgba(85,0,238,.4)}
@@ -323,7 +338,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
   position:absolute;
   top:0;left:0;right:0;
   height:3px;
-  background:linear-gradient(90deg,var(--pr),var(--pr-light));
+  background:linear-gradient(90deg,var(--green),var(--green-light));
   transform:scaleX(0);
   transform-origin:left;
   transition:transform .45s ease;
@@ -424,7 +439,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
 .res-item:hover{
   background:var(--pr-bg);
   border-color:var(--border2);
-  transform:translateY(-5px);
+  transform:translateY(-6px);
   box-shadow:0 20px 60px rgba(85,0,238,.1);
 }
 .res-ico{
@@ -521,9 +536,8 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
   display:flex;align-items:center;justify-content:center;
   font-family:var(--fh);font-size:13px;font-weight:800;color:#fff;
   border:2px solid rgba(255,255,255,.25);
+  background:linear-gradient(135deg,#7B2FFF,#5500EE);
 }
-.instr-avatar:first-child{background:linear-gradient(135deg,#7B2FFF,#5500EE)}
-.instr-avatar:last-child{background:linear-gradient(135deg,#C084FC,#7B2FFF);margin-left:-10px}
 .video-play-btn{
   width:36px;height:36px;background:rgba(255,255,255,.9);
   border-radius:50%;display:flex;align-items:center;justify-content:center;
@@ -719,7 +733,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
   position:absolute;
   bottom:-200px;left:-150px;
   width:500px;height:500px;
-  background:radial-gradient(circle,rgba(184,0,0,.15) 0%,transparent 65%);
+  background:radial-gradient(circle,rgba(5,129,26,.12) 0%,transparent 65%);
   border-radius:50%;
   pointer-events:none;
 }
@@ -774,8 +788,8 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
 }
 .bonus-tag{
   display:inline-block;
-  background:rgba(184,0,0,.3);
-  border:1px solid rgba(255,100,100,.2);
+  background:rgba(5,129,26,.25);
+  border:1px solid rgba(8,210,62,.2);
   border-radius:100px;
   padding:3px 13px;
   font-family:var(--fh);
@@ -783,7 +797,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
   font-weight:700;
   letter-spacing:.18em;
   text-transform:uppercase;
-  color:rgba(255,150,150,.9);
+  color:rgba(8,210,62,.9);
   margin-bottom:14px;
 }
 .bonus-h{
@@ -1013,31 +1027,34 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
   <div class="hero-blob hb1"></div>
   <div class="hero-blob hb2"></div>
   <div class="hero-blob hb3"></div>
+  <div class="hero-blur-1"></div>
+  <div class="hero-blur-2"></div>
   <div class="wrap">
     <div class="hero-inner">
       <div class="hero-badge">
         <span class="badge-dot"></span>
-        Método RMX 5.0
+        Metodo RMX 5.0 — Rodrigo Marques
       </div>
 
       <h1 class="hero-h1">
-        O RMX ficou <span class="grad">ainda melhor.</span><br>
-        E desta vez, ele pode ser<br>seu para sempre.
+        O sistema que leva infoprodutores a<br>
+        <span class="grad">R$50k por mes</span><br>
+        de forma previsivel e recorrente.
       </h1>
 
       <p class="hero-sub">
-        O RMX 5.0 chegou com novas técnicas, novas ferramentas e uma oferta que nunca fizemos antes — exclusiva para quem já faz parte.
+        Mais de 1.200 produtores digitais aplicaram o Metodo RMX 5.0 e transformaram lançamentos esporadicos em uma maquina de receita mensal consistente — sem depender de grandes audiencias nem de eventos pontuais.
       </p>
 
       <div class="hero-actions">
-        <a href="https://pay.kiwify.com.br/fZJR29c" class="btn btn-pr btn-lg" target="_blank" rel="noopener noreferrer">
-          Quero entrar no RMX agora
+        <a href="#offer" class="btn btn-cta btn-lg">
+          Quero o Metodo RMX 5.0
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
         <div class="trust-row">
           <span class="trust-item">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            7 dias de garantia
+            15 dias de garantia
           </span>
           <span class="trust-item">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -1058,16 +1075,16 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
   <div class="wrap">
     <div class="stats-grid">
       <div class="stat-item rv">
-        <div class="stat-num">25.000+</div>
-        <div class="stat-label">alunos transformados</div>
+        <div class="stat-num">1.200+</div>
+        <div class="stat-label">alunos premium formados</div>
       </div>
       <div class="stat-item rv d2">
-        <div class="stat-num">5.0</div>
-        <div class="stat-label">versão mais completa</div>
+        <div class="stat-num">R$50k</div>
+        <div class="stat-label">meta mensal alcancada pelos alunos</div>
       </div>
       <div class="stat-item rv d3">
-        <div class="stat-num">100%</div>
-        <div class="stat-label">garantia de reembolso</div>
+        <div class="stat-num">15 dias</div>
+        <div class="stat-label">garantia incondicional</div>
       </div>
     </div>
   </div>
@@ -1078,27 +1095,27 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
   <div class="wrap">
     <div class="pill-header">
       <span class="section-label rv">Como funciona</span>
-      <h2 class="section-h h-xl rv d1">O RMX 5.0 funciona em<br><span style="color:var(--pr)">3 pilares simples.</span></h2>
-      <p class="txt-muted rv d2" style="margin-top:16px;max-width:500px;margin-left:auto;margin-right:auto;font-size:.98rem">Cada um resolve uma parte do problema.</p>
+      <h2 class="section-h h-xl rv d1">O RMX 5.0 opera em<br><span style="color:var(--pr)">3 pilares de receita.</span></h2>
+      <p class="txt-muted rv d2" style="margin-top:16px;max-width:500px;margin-left:auto;margin-right:auto;font-size:.98rem">Cada pilar elimina uma dependencia que impede o crescimento previsivel.</p>
     </div>
 
     <div class="pill-grid">
       <div class="pill-card rv">
         <span class="pill-num">01</span>
         <svg class="pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
         </svg>
-        <span class="pill-name">Registre</span>
-        <p class="pill-txt">Aprenda a capturar apenas o que importa — sem sublinhar tudo, sem anotações intermináveis. Um sistema simples que garante que as ideias certas não se percam.</p>
+        <span class="pill-name">Recorrencia</span>
+        <p class="pill-txt">Construa fontes de receita que se renovam automaticamente todo mes — sem precisar reinventar a roda em cada ciclo. O modelo que faz o dinheiro chegar mesmo quando voce nao esta lancando.</p>
       </div>
 
       <div class="pill-card rv d2">
         <span class="pill-num">02</span>
         <svg class="pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
         </svg>
-        <span class="pill-name">Remixe</span>
-        <p class="pill-txt">Conecte ideias de livros diferentes. Combine conceitos. Crie conexões que só existem na sua cabeça — e que se tornam o seu diferencial.</p>
+        <span class="pill-name">Mecanismo</span>
+        <p class="pill-txt">O sistema de lancamento recorrente que converte audiencias pequenas em clientes fieis de alto valor. Voce aprende a estruturar ofertas que as pessoas pedem para comprar — e pedem para indicar.</p>
       </div>
 
       <div class="pill-card rv d3">
@@ -1106,8 +1123,8 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
         <svg class="pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
         </svg>
-        <span class="pill-name">Execute</span>
-        <p class="pill-txt">Transforme essas conexões em algo real. Um conteúdo. Uma palestra. Um projeto. Uma decisão. O conhecimento finalmente sai de você.</p>
+        <span class="pill-name">Escala</span>
+        <p class="pill-txt">Como ampliar o faturamento sem ampliar o trabalho — eliminando os gargalos que bloqueiam o crescimento. Da R$10k a R$50k por mes sem contratar time grande nem virar escravo do proprio negocio.</p>
       </div>
     </div>
   </div>
@@ -1117,8 +1134,8 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
 <section class="quote">
   <div class="wrap-md">
     <p class="quote-inner rv">
-      Não é sobre ler mais.<br>
-      <span>É sobre usar melhor o que você já leu.</span>
+      Lancamento esporadico e loteria.<br>
+      <span>Lancamento recorrente e negocio.</span>
     </p>
     <div class="quote-divider rv d2"></div>
   </div>
@@ -1128,19 +1145,19 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
 <section class="results">
   <div class="wrap">
     <div class="results-head">
-      <span class="section-label rv">O que muda</span>
-      <h2 class="section-h h-xl rv d1">Veja o que você vai construir<br>com o RMX 5.0</h2>
+      <span class="section-label rv">Transformacoes reais</span>
+      <h2 class="section-h h-xl rv d1">O que muda na vida de quem<br>aplica o Metodo RMX 5.0</h2>
     </div>
-    <p class="results-eye rv d2">Quando o conhecimento desbloqueia, ele vira coisa real.</p>
+    <p class="results-eye rv d2">Mais de 1.200 infoprodutores ja viraram a chave. O proximo pode ser voce.</p>
 
     <div class="results-grid">
       <div class="res-item rv">
         <div class="res-ico">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         </div>
         <div>
-          <div class="res-title">Conteúdo que vem de dentro</div>
-          <p class="res-text">Aquele livro que você leu vira um post, um artigo, uma aula. Você para de encarar a tela em branco — porque agora tem de onde tirar.</p>
+          <div class="res-title">Faturamento mensal previsivel</div>
+          <p class="res-text">Voce sabe quanto vai entrar no mes que vem antes de ele comecar. Fim da ansiedade financeira e do ciclo de boom-e-crise que desgasta qualquer negocio digital.</p>
         </div>
       </div>
 
@@ -1149,18 +1166,18 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
         <div>
-          <div class="res-title">Repertório real em palestras</div>
-          <p class="res-text">Você entra numa palestra ou apresentação com repertório real. As ideias aparecem na hora certa, com as palavras certas.</p>
+          <div class="res-title">Base de clientes que volta e indica</div>
+          <p class="res-text">Quando a oferta e construida com o mecanismo RMX, o proprio aluno vira canal de aquisicao. Crescimento organico sem gastar mais com trafego.</p>
         </div>
       </div>
 
       <div class="res-item rv d1">
         <div class="res-ico">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
         </div>
         <div>
-          <div class="res-title">Autoridade percebida</div>
-          <p class="res-text">Você passa a ser a pessoa na sala que conecta ideias que ninguém conectou. Isso tem nome: autoridade percebida.</p>
+          <div class="res-title">Lancamentos menores com resultado maior</div>
+          <p class="res-text">Voce para de precisar de eventos gigantes para bater metas. Lancamentos enxutos e bem posicionados superam campanhas massivas quando o mecanismo esta certo.</p>
         </div>
       </div>
 
@@ -1169,18 +1186,18 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         </div>
         <div>
-          <div class="res-title">Decisões melhores</div>
-          <p class="res-text">O que você leu sobre liderança, comportamento, estratégia — passa a aparecer nas suas decisões do dia a dia. Não como teoria. Como ação.</p>
+          <div class="res-title">Meta de R$50k no horizonte real</div>
+          <p class="res-text">Com o modelo aplicado corretamente, R$50k por mes deixa de ser sonho distante e passa a ser alvo mensuravel com etapas claras. Alunos chegam la em 3 a 6 meses de metodo.</p>
         </div>
       </div>
 
       <div class="res-item rv d2">
         <div class="res-ico">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </div>
         <div>
-          <div class="res-title">Ideias que saem da cabeça</div>
-          <p class="res-text">Aquela ideia que ficava na cabeça finalmente sai. Com estrutura, com base, com clareza para começar.</p>
+          <div class="res-title">Mais tempo, menos operacao</div>
+          <p class="res-text">O sistema e projetado para rodar com estrutura enxuta. Voce volta a ter tempo para criar, estrategizar e viver — sem ficar preso na execucao de campanhas o ano todo.</p>
         </div>
       </div>
 
@@ -1189,8 +1206,8 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
         </div>
         <div>
-          <div class="res-title">Legado e método autoral</div>
-          <p class="res-text">Seu conhecimento se torna métodos autorais que transformam vidas e criam legado.</p>
+          <div class="res-title">Posicionamento de autoridade no nicho</div>
+          <p class="res-text">Quem opera com recorrencia e resultados consistentes constroi autoridade de forma natural. Voce para de correr atras de clientes — eles comecam a correr atras de voce.</p>
         </div>
       </div>
     </div>
@@ -1201,10 +1218,104 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
 <section class="modules">
   <div class="wrap">
     <div class="mod-head">
-      <span class="section-label rv">O que você vai aprender</span>
-      <h2 class="section-h h-xl rv d1">Tudo o que você precisa para transformar<br>o que lê em algo que gera resultado</h2>
-      <p class="mod-sub rv d2">Bem-vindo(a) ao Método RMX 5.0</p>
+      <span class="section-label rv">O que voce vai aprender</span>
+      <h2 class="section-h h-xl rv d1">O conteudo completo para construir<br>seu sistema de lancamentos recorrentes</h2>
+      <p class="mod-sub rv d2">Bem-vindo ao Metodo RMX 5.0 — por Rodrigo Marques</p>
       <div class="divider rv d3"></div>
+    </div>
+
+    <!-- Device mockup -->
+    <div class="device-wrap rv d4">
+      <div class="device-laptop">
+        <div class="device-screen">
+          <div class="screen-chrome">
+            <span class="chrome-dot" style="background:#FF5F57"></span>
+            <span class="chrome-dot" style="background:#FEBC2E"></span>
+            <span class="chrome-dot" style="background:#28C840"></span>
+          </div>
+          <div class="screen-body">
+            <div class="screen-sidebar">
+              <div class="sidebar-logo">RMX</div>
+              <div class="sidebar-nav">
+                <div class="snav-item active">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                  Inicio
+                </div>
+                <div class="snav-item">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                  Modulos
+                </div>
+                <div class="snav-item">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+                  Materiais
+                </div>
+              </div>
+            </div>
+            <div class="screen-main">
+              <div class="screen-video">
+                <div class="video-overlay">
+                  <div class="video-instructors">
+                    <div class="instr-avatar">R</div>
+                  </div>
+                  <div class="video-play-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/></svg>
+                  </div>
+                  <div class="video-label">Rodrigo Marques — Modulo 1</div>
+                </div>
+              </div>
+              <div class="screen-modules">
+                <div class="sm-row active-row">
+                  <span class="sm-dot"></span>
+                  <span class="sm-title">Modulo 1 — Fundamentos RMX</span>
+                  <span class="sm-prog">100%</span>
+                </div>
+                <div class="sm-row">
+                  <span class="sm-dot" style="background:rgba(85,0,238,.2)"></span>
+                  <span class="sm-title" style="opacity:.6">Modulo 2 — Mecanismo de Lancamento</span>
+                  <span class="sm-prog" style="color:rgba(85,0,238,.3)">60%</span>
+                </div>
+                <div class="sm-row">
+                  <span class="sm-dot" style="background:rgba(85,0,238,.08)"></span>
+                  <span class="sm-title" style="opacity:.35">Modulo 3 — Escala e Recorrencia</span>
+                  <span class="sm-prog" style="color:rgba(85,0,238,.15)">0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="device-base">
+          <div class="device-foot"></div>
+          <div class="device-stand"></div>
+        </div>
+      </div>
+      <div class="device-phone">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="phone-content">
+            <div class="phone-header">RMX 5.0</div>
+            <div class="phone-module">
+              <div class="phone-mod-thumb"></div>
+              <div class="phone-mod-info">
+                <div class="phone-mod-title"></div>
+                <div class="phone-mod-sub"></div>
+              </div>
+            </div>
+            <div class="phone-module" style="opacity:.5">
+              <div class="phone-mod-thumb" style="background:rgba(85,0,238,.12)"></div>
+              <div class="phone-mod-info">
+                <div class="phone-mod-title" style="width:70%;background:rgba(85,0,238,.2)"></div>
+                <div class="phone-mod-sub" style="width:50%"></div>
+              </div>
+            </div>
+            <div class="phone-progress">
+              <div class="phone-prog-bar">
+                <div class="phone-prog-fill"></div>
+              </div>
+              <span class="phone-prog-label">60% concluido</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="mod-list">
@@ -1212,15 +1323,15 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
         <div class="mod-hd">
           <span class="mod-n">01</span>
           <div class="mod-txt">
-            <span class="mod-lvl">Módulo 1</span>
-            <span class="mod-title">Pensamento de Primeiro Nível: Aprenda do Jeito Certo</span>
+            <span class="mod-lvl">Modulo 1</span>
+            <span class="mod-title">Fundamentos do Lancamento Recorrente</span>
           </div>
           <div class="mod-tog">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </div>
         </div>
         <div class="mod-body">
-          <p class="mod-desc">Como o seu cérebro realmente aprende — e por que ninguém te ensinou isso antes. Você vai descobrir os 4 níveis de leitura, o sistema de marcação que transforma leitura passiva em processamento real, e a planilha que funciona como HD externo do seu conhecimento. Sai daqui com um método completo para capturar, organizar e nunca mais perder uma ideia.</p>
+          <p class="mod-desc">Por que 90% dos infoprodutores ficam presos no ciclo de lancamentos esporadicos — e o que os outros 10% fazem de diferente. O mapa completo do sistema RMX: do primeiro lancamento ao mes de R$50k.</p>
         </div>
       </div>
 
@@ -1228,15 +1339,15 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
         <div class="mod-hd">
           <span class="mod-n">02</span>
           <div class="mod-txt">
-            <span class="mod-lvl">Módulo 2</span>
-            <span class="mod-title">Pensamento de Segundo Nível: Remix e Síntese</span>
+            <span class="mod-lvl">Modulo 2</span>
+            <span class="mod-title">O Mecanismo de Lancamento RMX</span>
           </div>
           <div class="mod-tog">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </div>
         </div>
         <div class="mod-body">
-          <p class="mod-desc">Aqui você para de consumir e começa a criar. Aprende a misturar conhecimentos de fontes diferentes para construir conceitos autorais, desenvolver repertório que impressiona e formar opinião própria sobre qualquer assunto. Quem domina esse nível para de repetir o que leu — e começa a pensar.</p>
+          <p class="mod-desc">A arquitetura completa do lancamento recorrente: como estruturar a oferta, posicionar o preco, criar urgencia real e executar um ciclo que pode ser repetido todo mes sem perder energia ou conversao.</p>
         </div>
       </div>
 
@@ -1244,15 +1355,47 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
         <div class="mod-hd">
           <span class="mod-n">03</span>
           <div class="mod-txt">
-            <span class="mod-lvl">Módulo 3</span>
-            <span class="mod-title">Pensamento de Terceiro Nível: Do Conhecimento à Realidade</span>
+            <span class="mod-lvl">Modulo 3</span>
+            <span class="mod-title">Escala, Retencao e Recorrencia</span>
           </div>
           <div class="mod-tog">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </div>
         </div>
         <div class="mod-body">
-          <p class="mod-desc">O nível dos resultados. Você vai entender por que seu cérebro sabota a aplicação, como transformar qualquer insight em decisão concreta, como construir seus próprios modelos mentais e criar um protocolo pessoal que fecha o ciclo entre o que você aprende e o que você faz. O mundo é de quem realiza — não de quem apenas estuda.</p>
+          <p class="mod-desc">Como multiplicar o faturamento sem multiplicar o trabalho — as alavancas que transformam R$10k em R$50k sem contratar um exercito. O modelo de upsell que dobra o ticket medio e o sistema de indicacao que torna seu negocio autossustentavel.</p>
+        </div>
+      </div>
+
+      <div class="mod-item rv d3">
+        <div class="mod-hd">
+          <span class="mod-n">04</span>
+          <div class="mod-txt">
+            <span class="mod-lvl">Modulo 4</span>
+            <span class="mod-title">Trafego para Lancamento Recorrente</span>
+          </div>
+          <div class="mod-tog">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+        </div>
+        <div class="mod-body">
+          <p class="mod-desc">Como construir audiencias qualificadas de forma continua, ativar a base existente antes de cada lancamento e usar trafego pago de forma cirurgica — gastando menos e convertendo mais em cada ciclo recorrente.</p>
+        </div>
+      </div>
+
+      <div class="mod-item rv d4">
+        <div class="mod-hd">
+          <span class="mod-n">05</span>
+          <div class="mod-txt">
+            <span class="mod-lvl">Modulo 5</span>
+            <span class="mod-title">Copy e Posicionamento de Alta Conversao</span>
+          </div>
+          <div class="mod-tog">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+        </div>
+        <div class="mod-body">
+          <p class="mod-desc">As palavras certas, no canal certo, para o publico certo — em cada fase do ciclo de lancamento. Templates, estruturas e revisoes de campanha inclusos para voce sair aplicando sem comecar do zero toda vez.</p>
         </div>
       </div>
     </div>
@@ -1263,31 +1406,31 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
 <section class="upgrade">
   <div class="wrap upg-inner">
     <div style="text-align:center;margin-bottom:52px">
-      <span class="upg-badge rv">Unica oportunidade este ano</span>
-      <h2 class="upg-h rv d1">Pela primeira e única vez:<br>acesso vitalício para quem<br>já confiou em nós.</h2>
-      <p class="upg-sub rv d2">Essa oferta não existe para o público geral. É exclusiva para quem já faz parte — e não vai se repetir.</p>
+      <span class="upg-badge rv">Bonus exclusivos da turma atual</span>
+      <h2 class="upg-h rv d1">Tudo que voce precisa para<br>executar o primeiro lancamento<br>recorrente ainda este mes.</h2>
+      <p class="upg-sub rv d2">Alem do metodo completo, voce recebe ferramentas praticas para ja sair aplicando — sem enrolar.</p>
     </div>
 
     <div class="bonus-grid">
       <div class="bonus-card rv">
-        <span class="bonus-tag">Bonus</span>
-        <h3 class="bonus-h">RMX Studio — 1 mês grátis</h3>
-        <p class="bonus-p">Um diagnóstico que descobre qual conhecimento você mais precisa agora e recomenda três livros da nossa biblioteca pessoal. Lidos, aplicados e curados por nós. É indicação de quem viveu o método.</p>
+        <span class="bonus-tag">Bonus 1</span>
+        <h3 class="bonus-h">Calculadora RMX de Metas</h3>
+        <p class="bonus-p">A planilha que mostra exatamente quantos alunos, em qual ticket, com qual frequencia de lancamento voce precisa para bater R$50k no mes. Entrada dos seus numeros e sai o plano tactico.</p>
       </div>
       <div class="bonus-card rv d2">
-        <span class="bonus-tag">Bonus</span>
-        <h3 class="bonus-h">RMX Session — Manhã ao vivo com Alê e Ka</h3>
-        <p class="bonus-p">Uma manhã inteira com Alê e Ka destrinchando os insights mais valiosos do Mastermind. Ao vivo. Extração, organização e transformação em tempo real — na sua frente.</p>
+        <span class="bonus-tag">Bonus 2</span>
+        <h3 class="bonus-h">Templates de Copy para Lancamento Recorrente</h3>
+        <p class="bonus-p">30 templates de email, stories e pagina de vendas ja formatados para ciclo recorrente. Voce edita com sua voz e lanca — sem comecar do zero toda vez que abre uma nova janela.</p>
       </div>
       <div class="bonus-card rv d3">
-        <span class="bonus-tag">Bonus</span>
-        <h3 class="bonus-h">RMX Unique — 3 livros da nossa biblioteca pessoal</h3>
-        <p class="bonus-p">Um diagnóstico que descobre qual conhecimento você mais precisa agora e recomenda três livros da nossa biblioteca pessoal. É indicação de quem viveu o método.</p>
+        <span class="bonus-tag">Bonus 3</span>
+        <h3 class="bonus-h">Mapa de Lancamento em 21 dias</h3>
+        <p class="bonus-p">O cronograma semana a semana com cada acao, cada entrega e cada ponto de decisao para executar o primeiro ciclo RMX em 21 dias. Sem improvisar, sem travar, sem atrasar.</p>
       </div>
       <div class="bonus-card rv d4">
-        <span class="bonus-tag">Exclusivo</span>
-        <h3 class="bonus-h">Acesso Vitalício ao RMX</h3>
-        <p class="bonus-p">Você nunca mais vai pagar R$1,00 para renovar o Método RMX enquanto ele existir. Um presente único e exclusivo para quem já confiou em nós.</p>
+        <span class="bonus-tag">Bonus 4</span>
+        <h3 class="bonus-h">Mentoria em Grupo ao Vivo com Rodrigo Marques</h3>
+        <p class="bonus-p">Uma sessao ao vivo exclusiva para alunos da turma atual onde Rodrigo analisa lancamentos reais, responde perguntas e da feedback direto em tempo real. So quem esta dentro acessa.</p>
       </div>
     </div>
   </div>
@@ -1297,40 +1440,36 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
 <section class="offer" id="offer">
   <div class="wrap">
     <div class="offer-head">
-      <span class="section-label rv">Oferta especial alunos</span>
-      <h2 class="section-h h-lg rv d1">Finalize sua inscrição e garanta<br>a oferta especial para alunos!</h2>
+      <span class="section-label rv">Investimento</span>
+      <h2 class="section-h h-lg rv d1">Garanta sua vaga no<br>Metodo RMX 5.0 agora</h2>
     </div>
 
     <div class="offer-card rv-s">
       <div class="offer-top">
-        <span class="offer-eyebrow">O que você vai receber em instantes</span>
-        <h3 class="offer-h3">Método RMX 5.0 — Oferta Especial Alunos</h3>
+        <span class="offer-eyebrow">O que voce recebe em instantes</span>
+        <h3 class="offer-h3">Metodo RMX 5.0 — Rodrigo Marques</h3>
       </div>
       <div class="offer-body">
         <div class="offer-items">
-          <div class="offer-row"><div class="check-circle"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Método RMX 5.0 completo</div>
-          <div class="offer-row"><div class="check-circle"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Planilha RMX 5.0</div>
-          <div class="offer-row"><div class="check-circle"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>RMX Studio — 1 mês grátis*</div>
-          <div class="offer-row"><div class="check-circle"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>RMX Unique 1.0*</div>
-          <div class="offer-row"><div class="check-circle"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Casos de Sucesso*</div>
-          <div class="offer-row"><div class="check-circle"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>RMX Session*</div>
-          <div class="offer-row" style="font-size:.78rem;color:var(--muted2);margin-top:4px">
-            <div class="check-circle" style="background:transparent"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-            *Acesso vitalício ao Método RMX
-          </div>
+          <div class="offer-row"><div class="check-circle"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>5 modulos completos do Metodo RMX 5.0</div>
+          <div class="offer-row"><div class="check-circle"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Calculadora RMX de Metas</div>
+          <div class="offer-row"><div class="check-circle"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>30 Templates de Copy para Lancamento Recorrente</div>
+          <div class="offer-row"><div class="check-circle"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Mapa de Lancamento em 21 dias</div>
+          <div class="offer-row"><div class="check-circle"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Mentoria em Grupo ao Vivo com Rodrigo Marques</div>
+          <div class="offer-row"><div class="check-circle"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Acesso vitalicio a todas as atualizacoes</div>
         </div>
 
         <div class="offer-sep"></div>
-        <p class="price-old">De R$997,00</p>
-        <p class="price-main">12X de R$30,72</p>
-        <p class="price-alt">ou R$297 à vista</p>
+        <p class="price-old">De R$4.997,00</p>
+        <p class="price-main">12X de R$297</p>
+        <p class="price-alt">ou R$2.997 a vista</p>
 
-        <a href="https://pay.kiwify.com.br/fZJR29c" class="btn btn-pr" style="width:100%;border-radius:12px;font-size:1.05rem;padding:22px 40px" target="_blank" rel="noopener noreferrer">
-          QUERO APROVEITAR A OFERTA!
+        <a href="#offer" class="btn btn-cta" style="width:100%;border-radius:12px;font-size:1.05rem;padding:22px 40px">
+          QUERO O METODO RMX 5.0
         </a>
 
         <div class="offer-trust-row">
-          <span class="ot-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>7 dias de garantia</span>
+          <span class="ot-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>15 dias de garantia</span>
           <span class="ot-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Compra segura</span>
           <span class="ot-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Acesso imediato</span>
         </div>
@@ -1345,20 +1484,20 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
     <div class="gtee-shield rv">
       <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
     </div>
-    <h2 class="gtee-h rv d1">Risco zero.</h2>
-    <p class="gtee-p rv d2">Se em 7 dias você sentir que o RMX não é para você, devolvemos 100% do seu dinheiro. Sem perguntas, sem burocracia.</p>
+    <h2 class="gtee-h rv d1">15 dias de garantia total.</h2>
+    <p class="gtee-p rv d2">Acesse o metodo completo, teste o sistema, aplique os templates. Se em 15 dias voce nao estiver convicto de que esse e o caminho, devolvemos 100% do seu investimento — sem perguntas, sem burocracia.</p>
   </div>
 </section>
 
 <!-- ═══════════════ CLOSER ═══════════════ -->
 <section class="closer">
   <div class="wrap">
-    <div class="closer-num rv">25.000+</div>
-    <p class="closer-sub rv d1">pessoas já transformaram o que leem em algo real.</p>
-    <p class="closer-bold rv d2">Você é o próximo.</p>
+    <div class="closer-num rv">1.200+</div>
+    <p class="closer-sub rv d1">infoprodutores ja estao construindo receita recorrente com o Metodo RMX 5.0.</p>
+    <p class="closer-bold rv d2">Voce e o proximo.</p>
     <div style="display:flex;justify-content:center" class="rv d3">
-      <a href="https://pay.kiwify.com.br/fZJR29c" class="btn btn-pr btn-lg" target="_blank" rel="noopener noreferrer">
-        Quero entrar no RMX agora
+      <a href="#offer" class="btn btn-cta btn-lg">
+        Quero o Metodo RMX 5.0
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </a>
     </div>
@@ -1367,8 +1506,8 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hid
 
 <!-- ═══════════════ STICKY MOBILE ═══════════════ -->
 <div class="sticky-cta">
-  <a href="https://pay.kiwify.com.br/fZJR29c" class="btn btn-pr" target="_blank" rel="noopener noreferrer">
-    Quero aproveitar a oferta
+  <a href="#offer" class="btn btn-cta">
+    Quero o Metodo RMX 5.0
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
   </a>
 </div>
@@ -1400,22 +1539,6 @@ function initMods() {
 }
 document.addEventListener('DOMContentLoaded', initMods);
 window.addEventListener('load', initMods);
-
-const counterEls = document.querySelectorAll('.closer-num, .stat-num');
-const cObs = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting && e.target.textContent.includes('25')) {
-      let s = 0;
-      const timer = setInterval(() => {
-        s += 25000 / (1400 / 16);
-        if (s >= 25000) { s = 25000; clearInterval(timer); }
-        e.target.textContent = Math.floor(s).toLocaleString('pt-BR') + '+';
-      }, 16);
-      cObs.unobserve(e.target);
-    }
-  });
-}, { threshold: 0.6 });
-counterEls.forEach(el => { if (el.textContent.includes('25')) cObs.observe(el); });
 </script>
 </body>
 </html>

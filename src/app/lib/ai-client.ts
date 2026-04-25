@@ -170,8 +170,8 @@ export function iterableToReadable(gen: AsyncIterable<string>): ReadableStream {
           controller.enqueue(encoder.encode(chunk));
         }
         controller.close();
-      } catch {
-        controller.close();
+      } catch (e) {
+        controller.error(e);
       }
     },
   });

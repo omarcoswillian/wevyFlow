@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>O Novo Mercado · Chegou a hora de executar</title>
+<title>Academia Novo Mercado — Formacao Digital do Zero a R$100k/mes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
@@ -16,6 +16,7 @@
   --accent-blue:#3B82F6;
   --accent-purple:#8B5CF6;
   --accent-glow:rgba(232,23,106,0.35);
+  --card-border:rgba(255,255,255,0.14);
   --text:#F0EFF8;
   --muted:#8A8FAD;
   --card:rgba(255,255,255,0.04);
@@ -59,8 +60,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .hero h1 .hl{color:var(--accent)}
 .hero h1 .hl-blue{color:var(--accent-blue)}
 .hero-sub{font-size:1.15rem;color:var(--muted);max-width:540px;margin:0 auto 36px}
-.btn-hero{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#fff;font-family:'Montserrat',sans-serif;font-weight:800;font-size:1rem;letter-spacing:0.04em;text-transform:uppercase;text-decoration:none;padding:18px 46px;border-radius:100px;box-shadow:0 0 40px var(--accent-glow);transition:transform .2s,box-shadow .2s}
-.btn-hero:hover{transform:translateY(-2px);box-shadow:0 0 60px var(--accent-glow)}
+@keyframes brilho-pink{0%{background-position:0 0}100%{background-position:100% 0}}
+.btn-hero{display:inline-flex;align-items:center;gap:10px;background-image:linear-gradient(45deg,#E8176A,#B80050,#E8176A,#FF4D8D);background-size:400% 200%;animation:brilho-pink 3.4s infinite;color:#fff;font-family:'Montserrat',sans-serif;font-weight:800;font-size:1rem;letter-spacing:0.04em;text-transform:uppercase;text-decoration:none;padding:18px 46px;border-radius:100px;box-shadow:0 4px 32px rgba(232,23,106,0.45);transition:transform .25s,box-shadow .25s}
+.btn-hero:hover{box-shadow:0 0 48px rgba(232,23,106,0.6),0 12px 40px rgba(232,23,106,0.25);transform:translateY(-3px) scale(1.02)}
 .hero-social{display:flex;align-items:center;gap:12px;justify-content:center;margin-top:22px}
 .hero-social-imgs{display:flex}
 .avatar-stack{width:28px;height:28px;border-radius:50%;border:2px solid var(--bg);background:linear-gradient(135deg,#8B5CF6,#E8176A);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;margin-left:-8px}
@@ -226,8 +228,8 @@ section{padding:80px 24px}
 .price-features li::before{content:'✓';color:#22C55E;font-weight:700;flex-shrink:0;margin-top:1px}
 .price-features li.no::before{content:'✗';color:#EF4444}
 .btn-price{display:block;width:100%;text-align:center;font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;letter-spacing:0.04em;text-transform:uppercase;text-decoration:none;padding:16px;border-radius:100px;transition:transform .2s,box-shadow .2s}
-.btn-price.primary{background:var(--accent);color:#fff;box-shadow:0 0 30px var(--accent-glow)}
-.btn-price.primary:hover{transform:translateY(-2px);box-shadow:0 0 50px var(--accent-glow)}
+.btn-price.primary{background-image:linear-gradient(45deg,#E8176A,#B80050,#E8176A,#FF4D8D);background-size:400% 200%;animation:brilho-pink 3.4s infinite;color:#fff;box-shadow:0 4px 28px rgba(232,23,106,0.4)}
+.btn-price.primary:hover{box-shadow:0 0 42px rgba(232,23,106,0.55);transform:translateY(-2px) scale(1.01)}
 .btn-price.secondary{background:transparent;color:var(--text);border:1.5px solid var(--card-border)}
 .btn-price.secondary:hover{border-color:var(--text)}
 
@@ -299,10 +301,10 @@ footer{background:var(--bg2);border-top:1px solid var(--card-border);padding:60p
 <nav class="nav">
   <div class="nav-inner">
     <a class="nav-logo" href="#">
-      <div class="nav-logo-dot"><span>O</span></div>
-      O Novo Mercado
+      <div class="nav-logo-dot"><span>A</span></div>
+      Academia Novo Mercado
     </a>
-    <a class="btn-nav" href="#pricing">Entrar Agora</a>
+    <a class="btn-nav" href="#pricing">Quero entrar na Academia</a>
   </div>
 </nav>
 
@@ -366,13 +368,12 @@ footer{background:var(--bg2);border-top:1px solid var(--card-border);padding:60p
 
   <div class="hero-inner">
     <div class="hero-badge">
-      <span class="hero-badge-icon">🚀</span>
-      <span class="hero-badge-text">A maior plataforma de marketing digital do Brasil</span>
+      <span class="hero-badge-text">Formacao Digital — Academia Novo Mercado</span>
     </div>
-    <h1>Chegou a hora de<br><span class="hl">executar</span> de verdade</h1>
-    <p class="hero-sub">Aprenda, produza, venda e contrate tudo dentro de uma só plataforma. O mercado não espera — e agora você também não precisa.</p>
+    <h1>Do zero a <span class="hl">R$100k por mes</span><br>com marketing <span class="hl-blue">digital</span></h1>
+    <p class="hero-sub">A formacao completa para profissionais que querem construir um negocio digital solido, lucrativo e escalavel — do primeiro cliente ao primeiro cem mil reais por mes.</p>
     <a class="btn-hero" href="#pricing">
-      ENTRAR AGORA
+      QUERO ENTRAR NA ACADEMIA
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </a>
     <div class="hero-social">
@@ -383,7 +384,7 @@ footer{background:var(--bg2);border-top:1px solid var(--card-border);padding:60p
         <div class="avatar-stack">R</div>
         <div class="avatar-stack">+</div>
       </div>
-      <span class="hero-social-text"><strong>+120.000 profissionais</strong> já estão dentro</span>
+      <span class="hero-social-text"><strong>+800 alunos formados</strong> ja estao construindo seus negocios digitais</span>
     </div>
   </div>
 </section>
@@ -392,13 +393,13 @@ footer{background:var(--bg2);border-top:1px solid var(--card-border);padding:60p
 <section class="lead-form-section">
   <div class="container">
     <div class="lead-form-left">
-      <div class="section-label">Acesso Gratuito por 7 dias</div>
-      <h2 class="section-title">Comece hoje.<br>Sem compromisso.</h2>
-      <p>Crie sua conta e explore tudo que O Novo Mercado tem a oferecer. Cursos, comunidade, marketplace e as ferramentas do MAV — tudo no mesmo lugar.</p>
+      <div class="section-label">Candidatura — Vagas Limitadas</div>
+      <h2 class="section-title">Reserve sua vaga<br>na Academia Novo Mercado.</h2>
+      <p>Preencha o formulario abaixo para iniciar sua candidatura. Nossa equipe entrara em contato em ate 24 horas para confirmar disponibilidade e explicar os proximos passos.</p>
     </div>
     <div class="lead-form">
-      <div class="form-title">Criar conta gratuita</div>
-      <div class="form-sub">7 dias sem cobrar nada. Cancele quando quiser.</div>
+      <div class="form-title">Quero entrar na Academia</div>
+      <div class="form-sub">Preencha e aguarde o contato da nossa equipe.</div>
       <div class="form-group">
         <label>Seu nome</label>
         <input type="text" placeholder="Ex: João Silva">
@@ -411,8 +412,8 @@ footer{background:var(--bg2);border-top:1px solid var(--card-border);padding:60p
         <label>WhatsApp</label>
         <input type="tel" placeholder="(11) 99999-9999">
       </div>
-      <button class="btn-form">CRIAR MINHA CONTA GRÁTIS →</button>
-      <div class="form-security">🔒 Seus dados estão seguros e protegidos</div>
+      <button class="btn-form">QUERO ENTRAR NA ACADEMIA →</button>
+      <div class="form-security">Seus dados estao seguros e protegidos</div>
     </div>
   </div>
 </section>
@@ -421,35 +422,45 @@ footer{background:var(--bg2);border-top:1px solid var(--card-border);padding:60p
 <section>
   <div class="container">
     <div style="text-align:center">
-      <div class="section-label">A Plataforma Completa</div>
-      <h2 class="section-title">Cinco pilares que<br>transformam sua carreira</h2>
-      <p class="section-sub" style="margin:0 auto">Não é só um curso. É um ecossistema completo para você aprender, produzir, vender e contratar profissionais de marketing digital.</p>
+      <div class="section-label">A Formacao Completa</div>
+      <h2 class="section-title">Cinco trilhas que<br>constroem seu negocio digital</h2>
+      <p class="section-sub" style="margin:0 auto">Nao e so um curso. E uma formacao estruturada para voce aprender, executar, vender e escalar — com suporte real em cada etapa do caminho.</p>
     </div>
     <div class="pillars-grid">
       <div class="pillar-card">
-        <div class="pillar-icon pink">🎓</div>
-        <div class="pillar-name">Plataforma de Aulas</div>
-        <div class="pillar-desc">Mais de 500 horas de conteúdo com os maiores especialistas do mercado digital brasileiro</div>
+        <div class="pillar-icon pink">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </div>
+        <div class="pillar-name">Formacao Tecnica</div>
+        <div class="pillar-desc">Mais de 400 horas de conteudo pratico em trafego, copy, lancamentos, social media e gestao de negocios digitais</div>
       </div>
       <div class="pillar-card">
-        <div class="pillar-icon blue">⚙️</div>
-        <div class="pillar-name">MAV OMNIA</div>
-        <div class="pillar-desc">A ferramenta tudo-em-um para criar produtos, páginas, e-mails e funis sem precisar de terceiros</div>
+        <div class="pillar-icon blue">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="pillar-name">Ferramentas Integradas</div>
+        <div class="pillar-desc">Plataforma tudo-em-um para criar produtos, paginas, e-mails e funis sem depender de terceiros — tudo incluso</div>
       </div>
       <div class="pillar-card">
-        <div class="pillar-icon purple">🤖</div>
-        <div class="pillar-name">OMNIA AI</div>
-        <div class="pillar-desc">Inteligência artificial treinada para o marketing digital. 3 milhões de requisições por mês incluídas</div>
+        <div class="pillar-icon purple">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        </div>
+        <div class="pillar-name">Mentoria Ao Vivo</div>
+        <div class="pillar-desc">Sessoes semanais ao vivo onde voce apresenta seus projetos, tira duvidas e recebe feedback direto de especialistas</div>
       </div>
       <div class="pillar-card">
-        <div class="pillar-icon teal">👥</div>
-        <div class="pillar-name">Comunidade</div>
-        <div class="pillar-desc">Conecte-se com +120 mil profissionais, tire dúvidas e acelere seu crescimento em grupo</div>
+        <div class="pillar-icon teal">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="pillar-name">Comunidade Premium</div>
+        <div class="pillar-desc">Conecte-se com mais de 800 profissionais formados, troque experiencias e construa parcerias que aceleram seu crescimento</div>
       </div>
       <div class="pillar-card">
-        <div class="pillar-icon orange">💼</div>
-        <div class="pillar-name">Mercado de Trabalho</div>
-        <div class="pillar-desc">Marketplace com +800 vagas mensais para você oferecer seus serviços e faturar como freelancer</div>
+        <div class="pillar-icon orange">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="pillar-name">Aceleracao de Receita</div>
+        <div class="pillar-desc">Trilha especifica para chegar ao primeiro R$10k, depois R$50k e finalmente R$100k por mes com etapas claras e mensuravelmente</div>
       </div>
     </div>
   </div>
@@ -460,8 +471,8 @@ footer{background:var(--bg2);border-top:1px solid var(--card-border);padding:60p
   <div class="container">
     <div style="text-align:center">
       <div class="section-label">Resultados Reais</div>
-      <h2 class="section-title">Quem aplicou,<br><span class="hl">transformou</span></h2>
-      <p class="section-sub" style="margin:0 auto">Histórias reais de alunos que saíram do zero e chegaram a resultados que nem imaginavam possíveis.</p>
+      <h2 class="section-title">Quem entrou na Academia,<br><span class="hl">transformou</span></h2>
+      <p class="section-sub" style="margin:0 auto">Historias reais de alunos que saíram do zero e chegaram a resultados que nem imaginavam possiveis.</p>
     </div>
     <div class="stories-grid">
       <div class="story-card">
@@ -833,45 +844,44 @@ footer{background:var(--bg2);border-top:1px solid var(--card-border);padding:60p
 <!-- PRICING -->
 <section class="pricing-section" id="pricing">
   <div class="container" style="text-align:center">
-    <div class="section-label">Escolha seu Plano</div>
-    <h2 class="section-title">Invista no seu futuro.<br><span class="hl">Cancele quando quiser.</span></h2>
-    <p class="section-sub" style="margin:0 auto 0">Sem multa, sem contrato. Você pode cancelar a qualquer momento.</p>
+    <div class="section-label">Investimento</div>
+    <h2 class="section-title">Garanta sua vaga na<br><span class="hl">Academia Novo Mercado.</span></h2>
+    <p class="section-sub" style="margin:0 auto 0">Investimento unico — acesso completo a toda a formacao, ferramentas, mentoria e comunidade.</p>
     <div class="pricing-grid">
       <div class="price-card">
-        <div class="price-plan">Plano Básico</div>
-        <div class="price-name">ONM Básico</div>
-        <div class="price-from">De R$147/mês</div>
-        <div class="price-main"><span>R$</span>97<span style="font-size:1.1rem;font-weight:500;vertical-align:baseline;">/mês</span></div>
-        <div class="price-period">cobrado mensalmente · cancele quando quiser</div>
+        <div class="price-plan">Plano Mensal</div>
+        <div class="price-name">Academia ANM</div>
+        <div class="price-from">De R$597/mes</div>
+        <div class="price-main"><span>R$</span>397<span style="font-size:1.1rem;font-weight:500;vertical-align:baseline;">/mes</span></div>
+        <div class="price-period">cobrado mensalmente — cancele quando quiser</div>
         <ul class="price-features">
-          <li>Acesso a todos os cursos da plataforma</li>
-          <li>Comunidade com +120.000 membros</li>
-          <li>Marketplace de vagas e serviços</li>
-          <li>MAV Básico (páginas + e-mail marketing)</li>
-          <li class="no">OMNIA AI (não incluído)</li>
-          <li class="no">Suporte prioritário (não incluído)</li>
-          <li class="no">Mentorias ao vivo exclusivas</li>
+          <li>Acesso a todas as formacoes tecnicas</li>
+          <li>Comunidade com +800 alunos premium</li>
+          <li>Ferramentas de criacao e automacao</li>
+          <li>Mentorias em grupo semanais</li>
+          <li class="no">Mentoria individual (nao inclusa)</li>
+          <li class="no">Acesso vitalicio (nao incluso)</li>
         </ul>
-        <a class="btn-price secondary" href="#">Começar com o Básico</a>
+        <a class="btn-price secondary" href="#pricing">Comecar com Mensal</a>
       </div>
       <div class="price-card featured">
-        <div class="price-badge">MAIS POPULAR</div>
-        <div class="price-plan">Plano Completo</div>
-        <div class="price-name">ONM PRO</div>
-        <div class="price-save">🔥 Economize R$600/ano</div>
-        <div class="price-from">De R$297/mês</div>
-        <div class="price-main"><span>R$</span>197<span style="font-size:1.1rem;font-weight:500;vertical-align:baseline;">/mês</span></div>
-        <div class="price-period">cobrado mensalmente · cancele quando quiser</div>
+        <div class="price-badge">MELHOR CUSTO-BENEFICIO</div>
+        <div class="price-plan">Plano Anual</div>
+        <div class="price-name">Academia ANM Anual</div>
+        <div class="price-save">Economize R$2.400 no ano</div>
+        <div class="price-from">De R$7.164/ano</div>
+        <div class="price-main"><span>R$</span>4.764<span style="font-size:1.1rem;font-weight:500;vertical-align:baseline;">/ano</span></div>
+        <div class="price-period">equivale a 12x de R$397 — ou R$3.997 a vista</div>
         <ul class="price-features">
-          <li>Tudo do plano Básico</li>
-          <li>MAV OMNIA completo (todas as ferramentas)</li>
-          <li>OMNIA AI — 3 milhões de requisições/mês</li>
-          <li>Suporte prioritário 24/7</li>
-          <li>Mentorias ao vivo semanais</li>
-          <li>Acesso antecipado a novos cursos</li>
-          <li>Certificados de conclusão reconhecidos</li>
+          <li>Tudo do plano mensal</li>
+          <li>Acesso vitalicio ao conteudo do ano</li>
+          <li>Mentoria individual trimestral</li>
+          <li>Certificado de conclusao ANM</li>
+          <li>Suporte prioritario 24/7</li>
+          <li>Acesso antecipado a novos modulos</li>
+          <li>Gravacoes de todas as mentorias ao vivo</li>
         </ul>
-        <a class="btn-price primary" href="#">ENTRAR NO ONM PRO →</a>
+        <a class="btn-price primary" href="#pricing">QUERO ENTRAR NA ACADEMIA</a>
       </div>
     </div>
   </div>
@@ -886,8 +896,8 @@ footer{background:var(--bg2);border-top:1px solid var(--card-border);padding:60p
       <div class="guarantee-box">
         <div class="guarantee-seal">🛡️</div>
         <div class="guarantee-body">
-          <div class="guarantee-title">Garantia de 7 dias · 100% do seu dinheiro de volta</div>
-          <div class="guarantee-text">Entre, acesse tudo, explore a plataforma, use o MAV, interaja na comunidade. Se em 7 dias você não ficar satisfeito por qualquer motivo, devolvemos cada centavo sem perguntas e sem burocracia. A decisão é sua.</div>
+          <div class="guarantee-title">Garantia de 30 dias — 100% do seu dinheiro de volta</div>
+          <div class="guarantee-text">Entre na Academia, acesse todas as formacoes, participe das mentorias, use as ferramentas. Se em 30 dias voce nao estiver convicto de que esse e o caminho para chegar a R$100k por mes, devolvemos cada centavo sem perguntas e sem burocracia.</div>
         </div>
       </div>
     </div>
@@ -941,13 +951,13 @@ footer{background:var(--bg2);border-top:1px solid var(--card-border);padding:60p
 <!-- FINAL CTA -->
 <section class="final-cta">
   <div class="container">
-    <h2 class="final-cta-title">Pronto para executar<br>de <span class="hl">verdade</span>?</h2>
-    <p class="final-cta-sub">Mais de 120 mil profissionais já estão dentro. Chegou a sua hora de entrar no maior ecossistema de marketing digital do Brasil.</p>
+    <h2 class="final-cta-title">Pronto para construir<br>seu negocio de <span class="hl">R$100k</span>?</h2>
+    <p class="final-cta-sub">Mais de 800 alunos ja estao na Academia Novo Mercado. A proxima turma esta com vagas limitadas — garanta a sua agora.</p>
     <a class="btn-hero" href="#pricing">
-      ENTRAR AGORA NO ONM
+      QUERO ENTRAR NA ACADEMIA
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </a>
-    <p style="color:var(--muted);font-size:13px;margin-top:16px">🛡️ Garantia de 7 dias · Cancele quando quiser · Sem fidelidade</p>
+    <p style="color:var(--muted);font-size:13px;margin-top:16px">Garantia de 30 dias — Acesso imediato — Compra segura</p>
   </div>
 </section>
 
@@ -957,10 +967,10 @@ footer{background:var(--bg2);border-top:1px solid var(--card-border);padding:60p
     <div class="footer-top">
       <div>
         <a class="footer-brand-logo" href="#">
-          <div class="nav-logo-dot"><span>O</span></div>
-          O Novo Mercado
+          <div class="nav-logo-dot"><span>A</span></div>
+          Academia Novo Mercado
         </a>
-        <p class="footer-brand-desc">O maior ecossistema de marketing digital do Brasil. Aprenda, produza, venda e contrate tudo dentro de uma só plataforma.</p>
+        <p class="footer-brand-desc">Formacao digital completa para profissionais que querem construir negocios solidos e chegar a R$100k por mes com marketing digital.</p>
         <a class="footer-whatsapp" href="#">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
           Suporte via WhatsApp

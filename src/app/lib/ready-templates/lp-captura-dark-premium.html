@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>[INSERIR: Nome do Produto]</title>
+<title>Desafio Trfego 7 Dias — Inscrio Gratuita</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0a0a0f;--bg-2:#111118;--bg-card:#16161e;--bg-input:rgba(255,255,255,0.03);
   --text:#f0f0f0;--text-70:rgba(240,240,240,0.7);--text-40:rgba(240,240,240,0.4);--text-20:rgba(240,240,240,0.2);
-  --accent:#c8a832;--accent-dark:#a68b28;--accent-glow:rgba(200,168,50,0.12);
+  --accent:#FF5C00;--accent-dark:#E04E00;--accent-glow:rgba(255,92,0,0.25);
   --green:#22c55e;--green-dark:#16a34a;
   --border:rgba(255,255,255,0.06);--border-hover:rgba(255,255,255,0.1);
   --font:'Montserrat',-apple-system,sans-serif;
@@ -21,18 +21,25 @@ body{font-family:var(--font);color:var(--text);background:var(--bg);line-height:
 a{text-decoration:none;color:inherit;}
 .container{max-width:var(--container);margin:0 auto;padding:0 28px;}
 
-/* ═══ 1. HERO ═══ */
+@keyframes brilho{
+  0%{background-position:0 0;}
+  100%{background-position:100% 0;}
+}
+
+/* = 1. HERO = */
 .hero{display:grid;grid-template-columns:1fr 1fr;min-height:100vh;overflow:hidden;position:relative;}
-/* Glow sutil */
 .hero::before{content:'';position:absolute;top:10%;right:30%;width:400px;height:400px;background:radial-gradient(circle,var(--accent-glow),transparent 70%);pointer-events:none;z-index:0;}
+/* Blur circles decorativos */
+.hero-blur-1{position:absolute;top:-100px;right:-100px;width:500px;height:500px;background:#FF5C00;filter:blur(180px);opacity:0.10;border-radius:50%;pointer-events:none;z-index:0;}
+.hero-blur-2{position:absolute;bottom:-80px;left:-80px;width:380px;height:380px;background:#FF5C00;filter:blur(160px);opacity:0.07;border-radius:50%;pointer-events:none;z-index:0;}
 
 .hero-content{padding:48px 40px 48px 48px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:1;}
 .hero-logo{display:flex;align-items:center;gap:8px;margin-bottom:32px;}
-.hero-logo-mark{width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:var(--bg);}
+.hero-logo-mark{width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;box-shadow:0 0 24px rgba(255,92,0,0.25);}
 .hero-logo-text{font-size:14px;font-weight:700;color:var(--text);letter-spacing:-0.01em;}
 .hero-logo-text span{font-weight:400;color:var(--text-40);margin-left:4px;font-size:12px;}
 
-.hero h1{font-size:clamp(26px,3.5vw,40px);font-weight:800;color:var(--text);letter-spacing:-0.04em;line-height:1.1;margin-bottom:14px;}
+.hero h1{font-size:clamp(26px,3.5vw,40px);font-weight:800;color:var(--text);letter-spacing:-0.03em;line-height:1.1;margin-bottom:14px;}
 .hero h1 .accent{color:var(--accent);}
 .hero .hero-sub{font-size:13px;color:var(--text-40);line-height:1.6;max-width:380px;margin-bottom:24px;}
 .hero .hero-sub strong{color:var(--text-70);font-weight:600;}
@@ -44,15 +51,21 @@ a{text-decoration:none;color:inherit;}
 .form-input{padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:12px;color:var(--text);background:var(--bg-input);outline:none;transition:border-color 0.2s;}
 .form-input::placeholder{color:var(--text-20);}
 .form-input:focus{border-color:var(--accent);}
-.btn-accent{width:100%;padding:12px;background:var(--accent);color:var(--bg);border:none;border-radius:8px;font-family:var(--font);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;cursor:pointer;transition:all 0.2s;margin-top:4px;}
-.btn-accent:hover{background:var(--accent-dark);box-shadow:0 4px 20px var(--accent-glow);}
+
+.btn-cta-dark{width:100%;padding:13px;border:none;border-radius:8px;font-family:var(--font);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;cursor:pointer;margin-top:4px;
+  background-image:linear-gradient(45deg,#FF5C00,#E04E00,#FF5C00,#FF7A20);
+  background-size:400% 200%;
+  animation:brilho 3.4s infinite;
+  box-shadow:0 4px 32px rgba(255,92,0,0.35);
+  color:#fff;
+  transition:all 0.3s ease;}
+.btn-cta-dark:hover{box-shadow:0 0 48px rgba(255,92,0,0.5),0 12px 40px rgba(255,92,0,0.2);transform:translateY(-3px) scale(1.02);}
 .hero-legal{font-size:9px;color:var(--text-20);max-width:340px;line-height:1.5;}
 
 /* Coluna direita */
 .hero-visual{position:relative;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;z-index:1;}
 .hero-photo-placeholder{width:100%;height:100%;background:linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 50%,#1a1820 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:10px;color:var(--text-20);}
 .hero-photo-placeholder svg{width:56px;height:56px;opacity:0.08;}
-/* Overlay gradient para foto integrar */
 .hero-visual::after{content:'';position:absolute;bottom:0;left:0;right:0;height:120px;background:linear-gradient(to top,var(--bg),transparent);pointer-events:none;z-index:2;}
 
 /* Floating cards */
@@ -64,7 +77,7 @@ a{text-decoration:none;color:inherit;}
 .fc-row{display:flex;align-items:center;gap:8px;}
 .fc-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
-.fc-avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-dark));display:flex;align-items:center;justify-content:center;color:var(--bg);font-size:8px;font-weight:700;}
+.fc-avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-dark));display:flex;align-items:center;justify-content:center;color:#fff;font-size:8px;font-weight:700;}
 .fc-name{font-size:10px;font-weight:600;color:var(--text);}
 .fc-action{font-size:8px;color:var(--green);font-weight:500;}
 .fc-value{font-size:16px;font-weight:800;color:var(--accent);line-height:1;}
@@ -74,7 +87,7 @@ a{text-decoration:none;color:inherit;}
 .fc-stat-num{font-size:14px;font-weight:800;color:var(--text);}
 .fc-stat-label{font-size:7px;color:var(--text-40);}
 
-/* ═══ 2. PROVA SOCIAL ═══ */
+/* = 2. PROVA SOCIAL = */
 .sec-proof{padding:40px 0;background:var(--bg-2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
 .proof-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;text-align:center;}
 .proof-item{padding:16px 12px;border-right:1px solid var(--border);}
@@ -82,20 +95,20 @@ a{text-decoration:none;color:inherit;}
 .proof-num{font-size:clamp(22px,3vw,32px);font-weight:800;color:var(--accent);letter-spacing:-0.03em;line-height:1;}
 .proof-label{font-size:9px;color:var(--text-40);text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;}
 
-/* ═══ 3. BENEFICIOS ═══ */
+/* = 3. BENEFICIOS = */
 .sec-benefits{padding:48px 0;background:var(--bg);}
 .benefits-header{text-align:center;margin-bottom:32px;}
 .benefits-header h2{font-size:clamp(20px,2.5vw,28px);font-weight:800;color:var(--text);letter-spacing:-0.03em;margin-bottom:4px;}
 .benefits-header p{font-size:12px;color:var(--text-40);}
 .benefits-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 .benefit-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:22px 18px;transition:border-color 0.3s,transform 0.3s;}
-.benefit-card:hover{border-color:rgba(200,168,50,0.2);transform:translateY(-2px);}
-.benefit-icon{width:36px;height:36px;border-radius:10px;background:var(--accent-glow);border:1px solid rgba(200,168,50,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+.benefit-card:hover{border-color:rgba(255,92,0,0.2);transform:translateY(-2px);box-shadow:0 0 24px rgba(255,92,0,0.25);}
+.benefit-icon{width:36px;height:36px;border-radius:10px;background:rgba(255,92,0,0.06);border:1px solid rgba(255,92,0,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
 .benefit-icon svg{width:18px;height:18px;color:var(--accent);}
 .benefit-card h3{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:-0.01em;}
 .benefit-card p{font-size:10px;color:var(--text-40);line-height:1.5;}
 
-/* ═══ 4. CTA FINAL ═══ */
+/* = 4. CTA FINAL = */
 .sec-cta{padding:48px 0;background:var(--bg-2);text-align:center;border-top:1px solid var(--border);}
 .cta-box{max-width:420px;margin:0 auto;}
 .cta-box h2{font-size:clamp(20px,2.5vw,28px);font-weight:800;color:var(--text);letter-spacing:-0.03em;margin-bottom:6px;}
@@ -103,8 +116,14 @@ a{text-decoration:none;color:inherit;}
 .cta-form{display:flex;gap:6px;margin-bottom:12px;}
 .cta-form input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:100px;font-family:var(--font);font-size:12px;color:var(--text);outline:none;background:var(--bg-input);}
 .cta-form input::placeholder{color:var(--text-20);}
-.btn-accent-pill{padding:10px 22px;background:var(--accent);color:var(--bg);border:none;border-radius:100px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
-.btn-accent-pill:hover{background:var(--accent-dark);box-shadow:0 4px 16px var(--accent-glow);}
+.btn-cta-pill{padding:10px 22px;border:none;border-radius:100px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;
+  background-image:linear-gradient(45deg,#FF5C00,#E04E00,#FF5C00,#FF7A20);
+  background-size:400% 200%;
+  animation:brilho 3.4s infinite;
+  box-shadow:0 4px 24px rgba(255,92,0,0.35);
+  color:#fff;
+  transition:all 0.3s ease;}
+.btn-cta-pill:hover{box-shadow:0 0 32px rgba(255,92,0,0.5);transform:scale(1.03);}
 .cta-trust{display:flex;justify-content:center;gap:16px;font-size:9px;color:var(--text-40);}
 .cta-trust span{display:flex;align-items:center;gap:3px;}
 .cta-trust svg{width:10px;height:10px;color:var(--accent);}
@@ -131,24 +150,25 @@ a{text-decoration:none;color:inherit;}
 </head>
 <body>
 
-<!-- ═══ 1. HERO ═══ -->
+<!-- = 1. HERO = -->
 <section class="hero">
+  <div class="hero-blur-1"></div>
+  <div class="hero-blur-2"></div>
   <div class="hero-content">
     <div class="hero-logo reveal">
-      <div class="hero-logo-mark">W</div>
-      <div class="hero-logo-text">[INSERIR: Marca] <span>| [INSERIR: Produto]</span></div>
+      <div class="hero-logo-mark">T</div>
+      <div class="hero-logo-text">Trfego Pro <span>| Desafio 7 Dias</span></div>
     </div>
 
-    <h1 class="reveal rd1">[INSERIR: Headline parte 1] <span class="accent">[INSERIR: destaque]</span> [INSERIR: parte 2]</h1>
-    <p class="hero-sub reveal rd2">[INSERIR: Subtitulo — Tenha acesso ao <strong>metodo comprovado</strong> que ja ajudou mais de <strong>X pessoas</strong> a alcançar Y resultado.]</p>
+    <h1 class="reveal rd1">Os 3 Pilares do Trfego <span class="accent">Orgnico</span> que Geram Leads Todo Dia</h1>
+    <p class="hero-sub reveal rd2">Participe do <strong>Desafio Gratuito de 7 Dias</strong> e aprenda o mtodo exato que mais de <strong>4.200 empreendedores</strong> usaram para atrair clientes todos os dias sem pagar um centavo em anncio.</p>
 
     <form class="hero-form reveal rd3" onsubmit="event.preventDefault();">
       <div class="form-group"><label class="form-label">Nome *</label><input class="form-input" type="text" placeholder="Seu nome completo" required></div>
       <div class="form-group"><label class="form-label">Email *</label><input class="form-input" type="email" placeholder="seu@email.com" required></div>
-      <div class="form-group"><label class="form-label">WhatsApp *</label><input class="form-input" type="tel" placeholder="(00) 00000-0000" required></div>
-      <button type="submit" class="btn-accent">[INSERIR: CTA — ex: Quero garantir minha vaga]</button>
+      <button type="submit" class="btn-cta-dark">Quero participar do desafio</button>
     </form>
-    <p class="hero-legal reveal rd3">[INSERIR: Texto legal]</p>
+    <p class="hero-legal reveal rd3">Ao se inscrever voc concorda com nossa Poltica de Privacidade. Seus dados esto 100% seguros e nunca sero compartilhados.</p>
   </div>
 
   <div class="hero-visual">
@@ -157,84 +177,84 @@ a{text-decoration:none;color:inherit;}
       Foto do especialista
     </div>
     <div class="float-card float-card-1">
-      <div class="fc-value">[INSERIR: R$ X.XXX]</div>
-      <div class="fc-label">[INSERIR: metrica]</div>
+      <div class="fc-value">+847</div>
+      <div class="fc-label">Leads gerados esta semana</div>
     </div>
     <div class="float-card float-card-2">
       <div class="fc-row">
         <div class="fc-dot"></div>
-        <div class="fc-avatar">M</div>
-        <div><div class="fc-name">[INSERIR: Nome]</div><div class="fc-action">[INSERIR: acao]</div></div>
+        <div class="fc-avatar">A</div>
+        <div><div class="fc-name">Ana Souza</div><div class="fc-action">Acabou de se inscrever</div></div>
       </div>
     </div>
     <div class="float-card float-card-3">
       <div class="fc-stat">
-        <div class="fc-stat-item"><div class="fc-stat-num">[X]+</div><div class="fc-stat-label">alunos</div></div>
-        <div class="fc-stat-item"><div class="fc-stat-num">[X]%</div><div class="fc-stat-label">satisfacao</div></div>
+        <div class="fc-stat-item"><div class="fc-stat-num">4.2k+</div><div class="fc-stat-label">alunos</div></div>
+        <div class="fc-stat-item"><div class="fc-stat-num">97%</div><div class="fc-stat-label">aprovao</div></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══ 2. PROVA SOCIAL ═══ -->
+<!-- = 2. PROVA SOCIAL = -->
 <section class="sec-proof">
   <div class="container">
     <div class="proof-grid">
-      <div class="proof-item reveal"><div class="proof-num">+[X]</div><div class="proof-label">[INSERIR: Metrica 1]</div></div>
-      <div class="proof-item reveal rd1"><div class="proof-num">[X]%</div><div class="proof-label">[INSERIR: Metrica 2]</div></div>
-      <div class="proof-item reveal rd2"><div class="proof-num">[X]</div><div class="proof-label">[INSERIR: Metrica 3]</div></div>
-      <div class="proof-item reveal rd3"><div class="proof-num">[X]+</div><div class="proof-label">[INSERIR: Metrica 4]</div></div>
+      <div class="proof-item reveal"><div class="proof-num">+4.200</div><div class="proof-label">Participantes ativos</div></div>
+      <div class="proof-item reveal rd1"><div class="proof-num">97%</div><div class="proof-label">Taxa de aprovao</div></div>
+      <div class="proof-item reveal rd2"><div class="proof-num">7 dias</div><div class="proof-label">Para ver resultado</div></div>
+      <div class="proof-item reveal rd3"><div class="proof-num">100%</div><div class="proof-label">Gratuito</div></div>
     </div>
   </div>
 </section>
 
-<!-- ═══ 3. BENEFICIOS ═══ -->
+<!-- = 3. BENEFICIOS = -->
 <section class="sec-benefits">
   <div class="container">
     <div class="benefits-header reveal">
-      <h2>[INSERIR: Headline beneficios]</h2>
-      <p>[INSERIR: Subtitulo]</p>
+      <h2>O que voc vai aprender no desafio</h2>
+      <p>Contedo prtico, denso e aplicvel a partir do dia 1</p>
     </div>
     <div class="benefits-grid">
       <div class="benefit-card reveal">
-        <div class="benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-        <h3>[INSERIR: Beneficio 1]</h3>
-        <p>[INSERIR: Descricao]</p>
+        <div class="benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+        <h3>Pilar 1: Audincia Magntica</h3>
+        <p>Descubra como posicionar seu contedo para atrair exatamente o pblico que est pronto para comprar — sem boost, sem ads.</p>
       </div>
       <div class="benefit-card reveal rd1">
-        <div class="benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <h3>[INSERIR: Beneficio 2]</h3>
-        <p>[INSERIR: Descricao]</p>
+        <div class="benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 013.002 3.002L7.368 18.635a2 2 0 01-.855.506l-2.872.838a.5.5 0 01-.62-.62l.838-2.872a2 2 0 01.506-.854z"/></svg></div>
+        <h3>Pilar 2: Contedo que Converte</h3>
+        <p>Aprenda o framework de 3 tipos de post que geram leads organicamente todos os dias, em qualquer nicho.</p>
       </div>
       <div class="benefit-card reveal rd2">
-        <div class="benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-        <h3>[INSERIR: Beneficio 3]</h3>
-        <p>[INSERIR: Descricao]</p>
+        <div class="benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg></div>
+        <h3>Pilar 3: Escala Orgnica</h3>
+        <p>O sistema de consistncia que mantm o fluxo de leads funcionando mesmo quando voc no est produzindo contedo.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══ 4. CTA FINAL ═══ -->
+<!-- = 4. CTA FINAL = -->
 <section class="sec-cta">
   <div class="container">
     <div class="cta-box reveal">
-      <h2>[INSERIR: CTA headline]</h2>
-      <p>[INSERIR: Frase de urgencia]</p>
+      <h2>Comece o desafio ainda hoje</h2>
+      <p>As vagas so limitadas. Garanta sua posio no grupo exclusivo antes que encerre.</p>
       <div class="cta-form">
-        <input type="email" placeholder="Seu melhor email">
-        <button class="btn-accent-pill">[INSERIR: CTA]</button>
+        <input type="email" placeholder="seu@email.com">
+        <button class="btn-cta-pill">Quero participar</button>
       </div>
       <div class="cta-trust">
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> 100% seguro</span>
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Garantia 7 dias</span>
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Sem spam</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> 100% gratuito</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Sem spam</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Cancele quando quiser</span>
       </div>
     </div>
   </div>
 </section>
 
-<footer class="footer"><p>[INSERIR: Razao Social] | CNPJ: [INSERIR: CNPJ] | Todos os direitos reservados</p></footer>
+<footer class="footer"><p>Trfego Pro Educao Digital Ltda | CNPJ: 00.000.000/0001-00 | Todos os direitos reservados &copy; 2026</p></footer>
 
 <script>
 var ro=new IntersectionObserver(function(e){e.forEach(function(i){if(i.isIntersecting)i.target.classList.add('v');});},{threshold:0.05,rootMargin:'0px 0px -20px 0px'});

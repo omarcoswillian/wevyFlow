@@ -1,0 +1,49 @@
+<style>
+.stats{padding:80px 0;background:#0C0C0C;position:relative;overflow:hidden}
+.stats::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background-image:radial-gradient(circle,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:24px 24px;pointer-events:none}
+.stats::after{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,92,0,0.08);transform:translateY(-50%);pointer-events:none}
+.stats .container{max-width:1100px;margin:0 auto;padding:0 80px;position:relative}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr)}
+.stats-item{text-align:center;padding:48px 24px;position:relative}
+.stats-item+.stats-item::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);height:72px;width:1px;background:rgba(255,255,255,0.08)}
+.stats-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:160px;height:160px;background:radial-gradient(circle,rgba(255,92,0,0.14),transparent 70%);pointer-events:none;border-radius:50%}
+.stats-num{font-family:'Montserrat',sans-serif;font-size:clamp(40px,6vw,64px);font-weight:900;color:#FF5C00;line-height:1;letter-spacing:-0.03em;margin-bottom:10px;position:relative;text-shadow:0 0 40px rgba(255,92,0,0.4)}
+.stats-label{font-size:13px;color:#888;text-transform:uppercase;letter-spacing:0.10em;font-weight:600;line-height:1.5;position:relative;max-width:160px;margin:0 auto}
+@media(max-width:768px){
+  .stats .container{padding:0 20px}
+  .stats{padding:48px 0}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .stats-item+.stats-item::before{display:none}
+  .stats-item{padding:32px 16px;border:1px solid rgba(255,255,255,0.06)}
+  .stats-item:nth-child(odd){border-right:none}
+  .stats-item:nth-child(n+3){border-top:none}
+  .stats-num{font-size:40px}
+}
+</style>
+
+<section class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stats-item">
+        <div class="stats-glow"></div>
+        <div class="stats-num">4.200+</div>
+        <div class="stats-label">alunos formados</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-glow"></div>
+        <div class="stats-num">R$ 2,3M</div>
+        <div class="stats-label">gerados pelos alunos</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-glow"></div>
+        <div class="stats-num">97%</div>
+        <div class="stats-label">taxa de satisfacao</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-glow"></div>
+        <div class="stats-num">30 dias</div>
+        <div class="stats-label">para os primeiros resultados</div>
+      </div>
+    </div>
+  </div>
+</section>

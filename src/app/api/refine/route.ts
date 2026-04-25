@@ -102,7 +102,7 @@ export async function POST(request: Request) {
     }
 
     const codeLength = compactCode.length;
-    const maxTokens = codeLength > 40000 ? 32000 : 16000;
+    const maxTokens = codeLength > 40000 ? 64000 : 32000;
 
     const userMsg = `PLATAFORMA: ${platform || "html"}
 

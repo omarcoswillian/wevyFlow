@@ -76,6 +76,66 @@ export type Database = {
           },
         ];
       };
+      criativos: {
+        Row: {
+          id: string;
+          user_id: string;
+          format: string;
+          url: string;
+          headline: string | null;
+          produto: string | null;
+          prompt: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          format: string;
+          url: string;
+          headline?: string | null;
+          produto?: string | null;
+          prompt?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          format?: string;
+          url?: string;
+          headline?: string | null;
+          produto?: string | null;
+          prompt?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      ai_images: {
+        Row: {
+          id: string;
+          user_id: string;
+          url: string;
+          prompt: string | null;
+          mode: "create" | "edit" | "upload";
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          url: string;
+          prompt?: string | null;
+          mode?: "create" | "edit" | "upload";
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          url?: string;
+          prompt?: string | null;
+          mode?: "create" | "edit" | "upload";
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       generation_history: {
         Row: {
           id: string;

@@ -3,14 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>[INSERIR: Nome do Workshop]</title>
+<title>Workshop Lançamento Lucrativo — Vagas Gratuitas Abertas</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════════════════════════════════════
-   LP VENDAS WORKSHOP — Estilo clean/white
-   16 secoes, pagina completa de evento/imersao
-   WevyFlow Arsenal
-   ═══════════════════════════════════════════════════════ */
 :root {
   --bg: #ffffff;
   --bg-alt: #fafafa;
@@ -41,19 +36,28 @@ a { color: var(--accent); text-decoration:none; }
 .container-wide { max-width:var(--container-wide); margin:0 auto; padding:0 24px; }
 .section { padding:var(--section-py) 0; }
 
+@keyframes brilho-blue{0%{background-position:0 0}100%{background-position:100% 0}}
+
 .btn {
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
   font-family:var(--font); font-weight:700; border:none; cursor:pointer;
-  transition:all 0.25s; text-decoration:none;
+  transition:all 0.25s; text-decoration:none; position:relative; overflow:hidden;
 }
 .btn-primary {
-  background:var(--accent); color:#fff; padding:16px 36px;
+  background-image:linear-gradient(45deg,#1d4ed8,#1245b8,#2563eb,#3b7ff5);
+  background-size:400% 200%;
+  animation:brilho-blue 3.4s infinite;
+  color:#fff; padding:16px 36px;
   border-radius:8px; font-size:15px; letter-spacing:0.02em;
+  box-shadow:0 4px 24px rgba(37,99,235,0.35);
 }
-.btn-primary:hover { background:var(--accent-hover); transform:translateY(-1px); box-shadow:0 4px 20px rgba(37,99,235,0.3); }
+.btn-primary:hover {
+  box-shadow:0 0 36px rgba(37,99,235,0.5),0 8px 32px rgba(37,99,235,0.2);
+  transform:translateY(-2px) scale(1.01);
+}
 .btn-full { width:100%; }
-.btn-whatsapp { background:var(--green-wa); color:#fff; padding:14px 32px; border-radius:8px; font-size:14px; }
-.btn-whatsapp:hover { background:#20bd5a; }
+.btn-whatsapp { background:var(--green-wa); color:#fff; padding:14px 32px; border-radius:8px; font-size:14px; box-shadow:0 4px 16px rgba(37,211,102,0.25); }
+.btn-whatsapp:hover { background:#20bd5a; transform:translateY(-1px); }
 
 /* ── 1. HERO ── */
 .hero-ws {
@@ -82,6 +86,8 @@ a { color: var(--accent); text-decoration:none; }
   color:var(--text);
   margin-bottom:20px;
 }
+
+.hero-ws h1 .hl { color:var(--accent); }
 
 .hero-ws .hero-desc {
   font-size:clamp(16px, 2vw, 19px);
@@ -162,13 +168,14 @@ a { color: var(--accent); text-decoration:none; }
 .test-img {
   width:100%;
   aspect-ratio:9/16;
-  background:linear-gradient(135deg, #eee, #e0e0e0);
+  background:linear-gradient(135deg, #dbeafe, #bfdbfe);
   border-radius:12px;
   display:flex;
   align-items:center;
   justify-content:center;
   font-size:10px;
-  color:#bbb;
+  color:#60a5fa;
+  border:1px solid #bfdbfe;
 }
 
 /* ── 4. PROBLEMA ── */
@@ -252,25 +259,22 @@ a { color: var(--accent); text-decoration:none; }
   width:20px;
   height:20px;
   border-radius:50%;
-  background:var(--accent-light);
   flex-shrink:0;
   margin-top:2px;
-  background-image:url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='3' stroke-linecap='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;
-  background-position:center;
-  background-size:12px;
+  background:var(--accent-light) url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='3' stroke-linecap='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") no-repeat center / 12px;
 }
 
 .solution-img {
   width:100%;
   aspect-ratio:4/5;
-  background:linear-gradient(135deg, #f0f0f0, #e4e4e4);
+  background:linear-gradient(135deg, #dbeafe, #eff6ff);
   border-radius:var(--radius);
   display:flex;
   align-items:center;
   justify-content:center;
   font-size:12px;
-  color:#bbb;
+  color:#60a5fa;
+  border:1px solid #bfdbfe;
 }
 
 /* ── 6. PARA QUEM ── */
@@ -606,6 +610,20 @@ a { color: var(--accent); text-decoration:none; }
   margin-bottom:20px;
 }
 
+.price-free {
+  font-size:36px;
+  font-weight:900;
+  color:var(--accent);
+  letter-spacing:-0.03em;
+  margin-bottom:4px;
+}
+
+.price-free-label {
+  font-size:13px;
+  color:var(--text-muted);
+  margin-bottom:20px;
+}
+
 /* ── 11. INSTRUTORES ── */
 .instructors-ws {
   padding:var(--section-py) 0;
@@ -616,11 +634,6 @@ a { color: var(--accent); text-decoration:none; }
   font-size:15px;
   color:var(--text-muted);
   margin-bottom:8px;
-}
-
-.instructors-ws .inst-greeting {
-  font-size:24px;
-  margin-bottom:4px;
 }
 
 .instructors-ws .inst-name {
@@ -635,13 +648,14 @@ a { color: var(--accent); text-decoration:none; }
   width:200px;
   height:200px;
   border-radius:50%;
-  background:linear-gradient(135deg, #e8e8e8, #d8d8d8);
+  background:linear-gradient(135deg, #dbeafe, #bfdbfe);
   margin:0 auto 28px;
   display:flex;
   align-items:center;
   justify-content:center;
   font-size:11px;
-  color:#bbb;
+  color:#60a5fa;
+  border:3px solid #bfdbfe;
 }
 
 .inst-bio {
@@ -868,49 +882,49 @@ a { color: var(--accent); text-decoration:none; }
 <!-- ══════════════ 1. HERO ══════════════ -->
 <section class="hero-ws">
   <div class="container">
-    <div class="hero-badge reveal">Lote 01 disponivel por tempo limitado</div>
-    <h1 class="reveal rd1">[INSERIR: Nome do Workshop]</h1>
-    <p class="hero-desc reveal rd2">[INSERIR: Descricao principal — em 2 dias de imersao pratica, acesse a estrategia que fara voce alcançar X resultado]</p>
-    <p class="hero-desc reveal rd2">[INSERIR: Prova social — plano validado por mais de X profissionais que tiveram resultado Y]</p>
-    <p class="hero-date reveal rd3">[INSERIR: Data] <strong>ao vivo no Zoom</strong></p>
+    <div class="hero-badge reveal">200 vagas gratuitas — Inscricoes abertas</div>
+    <h1 class="reveal rd1">Workshop <span class="hl">Lancamento Lucrativo</span></h1>
+    <p class="hero-desc reveal rd2">Em 3 dias de imersao ao vivo, voce vai aprender o sistema completo para estruturar, lançar e vender seu primeiro (ou proximo) produto digital — mesmo que voce ainda nao tenha audiencia, produto nem experiencia com lancamentos.</p>
+    <p class="hero-desc reveal rd2">O metodo ja foi aplicado por mais de 4.800 profissionais que saíram do zero e faturaram seus primeiros R$10k a R$50k em um unico lancamento.</p>
+    <p class="hero-date reveal rd3"><strong>3 dias ao vivo no Zoom</strong> — acesso gratuito e imediato</p>
     <div class="reveal rd3">
-      <a href="#preco" class="btn btn-primary">Garantir ingresso</a>
+      <a href="#preco" class="btn btn-primary">Quero minha vaga gratuita</a>
     </div>
-    <p class="hero-sold reveal rd4"><strong>35%</strong> dos ingressos vendidos a <strong>R$ 47,00</strong></p>
+    <p class="hero-sold reveal rd4"><strong>168 das 200 vagas</strong> ja foram reservadas</p>
   </div>
 </section>
 
 <!-- ══════════════ 2. MARQUEE ══════════════ -->
 <div class="marquee-wrap">
   <div class="marquee-track">
-    <span class="marquee-item">Ao vivo <span class="marquee-sep">&#10022;</span></span>
-    <span class="marquee-item">Experiencia pratica <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Ao vivo por 3 dias <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">100% gratuito <span class="marquee-sep">&#10022;</span></span>
     <span class="marquee-item">Aplicacao imediata <span class="marquee-sep">&#10022;</span></span>
-    <span class="marquee-item">Sem precisar postar todo dia <span class="marquee-sep">&#10022;</span></span>
-    <span class="marquee-item">Clientes que pagam R$5k+ <span class="marquee-sep">&#10022;</span></span>
-    <span class="marquee-item">Ao vivo <span class="marquee-sep">&#10022;</span></span>
-    <span class="marquee-item">Experiencia pratica <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Sem precisar ter produto pronto <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Primeiros R$10k em um lancamento <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Apenas 200 vagas <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Ao vivo por 3 dias <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">100% gratuito <span class="marquee-sep">&#10022;</span></span>
     <span class="marquee-item">Aplicacao imediata <span class="marquee-sep">&#10022;</span></span>
-    <span class="marquee-item">Sem precisar postar todo dia <span class="marquee-sep">&#10022;</span></span>
-    <span class="marquee-item">Clientes que pagam R$5k+ <span class="marquee-sep">&#10022;</span></span>
-    <span class="marquee-item">Ao vivo <span class="marquee-sep">&#10022;</span></span>
-    <span class="marquee-item">Experiencia pratica <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Sem precisar ter produto pronto <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Primeiros R$10k em um lancamento <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Apenas 200 vagas <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">Ao vivo por 3 dias <span class="marquee-sep">&#10022;</span></span>
+    <span class="marquee-item">100% gratuito <span class="marquee-sep">&#10022;</span></span>
     <span class="marquee-item">Aplicacao imediata <span class="marquee-sep">&#10022;</span></span>
-    <span class="marquee-item">Sem precisar postar todo dia <span class="marquee-sep">&#10022;</span></span>
-    <span class="marquee-item">Clientes que pagam R$5k+ <span class="marquee-sep">&#10022;</span></span>
   </div>
 </div>
 
 <!-- ══════════════ 3. DEPOIMENTOS ══════════════ -->
 <section class="testimonials-ws">
   <div class="container-wide">
-    <h2 class="reveal">[INSERIR: Headline de prova social — ex: Hoje, eles cobram ate 3x mais pelo proprio servico]</h2>
+    <h2 class="reveal">Quem aplicou o metodo, lancou — e faturou.</h2>
     <div class="test-grid reveal rd1">
-      <div class="test-img">Print resultado 1</div>
-      <div class="test-img">Print resultado 2</div>
-      <div class="test-img">Print resultado 3</div>
-      <div class="test-img">Print resultado 4</div>
-      <div class="test-img">Print resultado 5</div>
+      <div class="test-img">Print resultado aluno 1</div>
+      <div class="test-img">Print resultado aluno 2</div>
+      <div class="test-img">Print resultado aluno 3</div>
+      <div class="test-img">Print resultado aluno 4</div>
+      <div class="test-img">Print resultado aluno 5</div>
     </div>
   </div>
 </section>
@@ -918,10 +932,10 @@ a { color: var(--accent); text-decoration:none; }
 <!-- ══════════════ 4. PROBLEMA ══════════════ -->
 <section class="problem-section">
   <div class="container">
-    <h2 class="reveal">[INSERIR: Headline de empatia — ex: Porem, sabemos que a realidade dos profissionais e diferente]</h2>
-    <p class="reveal rd1">[INSERIR: Paragrafo de dor — descreva a situacao real do publico-alvo]</p>
-    <p class="reveal rd2"><em>[INSERIR: Pergunta retorica — ex: E agora? Sera que tudo ate aqui foi em vao?]</em></p>
-    <p class="reveal rd3" style="font-size:13px;color:var(--text-muted);">A verdade e que...</p>
+    <h2 class="reveal">Voce ja sabe que precisa lançar. Mas toda vez que tenta, trava.</h2>
+    <p class="reveal rd1">Voce tem conhecimento para ensinar. Tem algo que as pessoas precisam aprender. Mas na hora de transformar isso em um produto e lançar, surgem as duvidas: por onde comecar? Qual plataforma usar? Como criar urgencia real? Como atrair pessoas sem uma audiencia gigante?</p>
+    <p class="reveal rd2"><em>A verdade e que a maioria das pessoas nao trava por falta de conteudo. Trava por falta de estrutura.</em></p>
+    <p class="reveal rd3" style="font-size:13px;color:var(--text-muted);">E e exatamente essa estrutura que voce vai dominar no Workshop Lancamento Lucrativo.</p>
   </div>
 </section>
 
@@ -930,19 +944,19 @@ a { color: var(--accent); text-decoration:none; }
   <div class="container-wide">
     <div class="solution-grid">
       <div class="solution-text">
-        <h2 class="reveal">[INSERIR: Headline de promessa — ex: E possivel SIM alcançar X resultado sem abandonar sua essencia]</h2>
-        <p class="question reveal rd1">"Mas... como?"</p>
+        <h2 class="reveal">Em 3 dias voce vai sair com seu lancamento estruturado e pronto para executar.</h2>
+        <p class="question reveal rd1">"Mas... por onde comecar?"</p>
         <ul class="solution-list reveal rd2">
-          <li>[INSERIR: Beneficio 1 — conteudo pratico, 100% focado em implementacao]</li>
-          <li>[INSERIR: Beneficio 2 — objetivo claro do workshop]</li>
-          <li>[INSERIR: Beneficio 3 — sem necessidade de X coisa negativa]</li>
-          <li>[INSERIR: Beneficio 4 — respeita sua integridade]</li>
-          <li>[INSERIR: Beneficio 5 — ferramentas certas para resultado]</li>
-          <li>[INSERIR: Beneficio 6 — elimina problema recorrente]</li>
+          <li>Conteudo 100% pratico — sem teoria desnecessaria, sem fluff</li>
+          <li>Estrutura completa do lancamento: oferta, copy, pagina, email e trafego</li>
+          <li>Funciona mesmo que voce nao tenha produto, audiencia ou experiencia previa</li>
+          <li>Metodo baseado em mais de 4.800 lancamentos reais, de diferentes nichos</li>
+          <li>Ferramentas gratuitas e acessiveis — zero investimento para comecar</li>
+          <li>Voce sai com o blueprint do seu lancamento ja desenhado e pronto para executar</li>
         </ul>
       </div>
       <div class="reveal rd3">
-        <div class="solution-img">Foto do especialista ou imagem de apoio</div>
+        <div class="solution-img">Foto do especialista ou imagem do workshop</div>
       </div>
     </div>
   </div>
@@ -952,18 +966,18 @@ a { color: var(--accent); text-decoration:none; }
 <section class="audience-section">
   <div class="container">
     <h2 class="reveal">Para quem e este Workshop?</h2>
-    <p class="audience-intro reveal rd1">[INSERIR: Intro — Esta imersao foi feita para voce, profissional...]</p>
+    <p class="audience-intro reveal rd1">Esta imersao foi feita para voce, que quer faturar com conhecimento digital mas ainda nao sabe como estruturar um lancamento que converta.</p>
     <ul class="audience-list">
-      <li class="reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: Perfil 1]</li>
-      <li class="reveal rd1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: Perfil 2]</li>
-      <li class="reveal rd2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: Perfil 3]</li>
-      <li class="reveal rd3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: Perfil 4]</li>
-      <li class="reveal rd4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: Perfil 5]</li>
-      <li class="reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>[INSERIR: Perfil 6]</li>
+      <li class="reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Profissionais com conhecimento a compartilhar que ainda nao monetizaram</li>
+      <li class="reveal rd1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Iniciantes que querem seu primeiro produto e seu primeiro lancamento</li>
+      <li class="reveal rd2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Produtores que ja tentaram lançar mas nao tiveram o resultado esperado</li>
+      <li class="reveal rd3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Freelancers e prestadores de servicos que querem criar renda extra com infoprodutos</li>
+      <li class="reveal rd4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Criadores de conteudo que querem monetizar sua audiencia com lancamentos</li>
+      <li class="reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Qualquer pessoa que quer transformar conhecimento em receita digital</li>
     </ul>
     <div class="audience-cta reveal">
-      <p>Se voce se identifica com ao menos 1 item acima, o <em>Workshop e para voce!</em></p>
-      <a href="#preco" class="btn btn-primary">Quero participar</a>
+      <p>Se voce se identifica com ao menos 1 perfil acima, este <em>Workshop e para voce!</em></p>
+      <a href="#preco" class="btn btn-primary">Quero minha vaga gratuita</a>
     </div>
   </div>
 </section>
@@ -971,14 +985,14 @@ a { color: var(--accent); text-decoration:none; }
 <!-- ══════════════ 7. BENEFICIOS ══════════════ -->
 <section class="benefits-ws">
   <div class="container">
-    <h2 class="reveal">[INSERIR: Headline — Com o Workshop voce vai...]</h2>
+    <h2 class="reveal">Com o Workshop Lancamento Lucrativo voce vai...</h2>
     <div class="benefits-grid">
-      <div class="benefit-item reveal">[INSERIR: Beneficio 1]</div>
-      <div class="benefit-item reveal rd1">[INSERIR: Beneficio 2]</div>
-      <div class="benefit-item reveal rd2">[INSERIR: Beneficio 3]</div>
-      <div class="benefit-item reveal rd3">[INSERIR: Beneficio 4]</div>
-      <div class="benefit-item reveal">[INSERIR: Beneficio 5]</div>
-      <div class="benefit-item reveal rd1">[INSERIR: Beneficio 6]</div>
+      <div class="benefit-item reveal">Definir sua oferta irresistivel em menos de 2 horas</div>
+      <div class="benefit-item reveal rd1">Construir sua pagina de vendas que converte sem designer</div>
+      <div class="benefit-item reveal rd2">Escrever os emails do seu lancamento do zero</div>
+      <div class="benefit-item reveal rd3">Criar urgencia real sem parecer desesperado</div>
+      <div class="benefit-item reveal">Atrair os primeiros clientes sem gastar em trafego</div>
+      <div class="benefit-item reveal rd1">Sair com o blueprint completo do seu lancamento pronto</div>
     </div>
   </div>
 </section>
@@ -986,56 +1000,56 @@ a { color: var(--accent); text-decoration:none; }
 <!-- ══════════════ 8. CONTEUDO ══════════════ -->
 <section class="content-ws">
   <div class="container">
-    <h2 class="reveal">[INSERIR: Headline — 2 dias praticos com acesso a...]</h2>
+    <h2 class="reveal">3 dias de imersao pratica — o que voce vai aprender</h2>
     <div class="module-list">
       <div class="module-card reveal">
         <div class="module-num">1</div>
         <div>
-          <div class="module-title">[INSERIR: Modulo 1 — Titulo]</div>
-          <div class="module-desc">[INSERIR: Descricao do modulo 1]</div>
+          <div class="module-title">Dia 1 — Oferta e Posicionamento</div>
+          <div class="module-desc">Como criar uma oferta que as pessoas pagam sem questionar o preco. Voce vai aprender a identificar o problema real do seu publico, construir a promessa do seu produto e posicionar seu lancamento de forma que se venda sozinho antes mesmo da pagina de vendas ficar pronta.</div>
         </div>
       </div>
       <div class="module-card reveal rd1">
         <div class="module-num">2</div>
         <div>
-          <div class="module-title">[INSERIR: Modulo 2 — Titulo]</div>
-          <div class="module-desc">[INSERIR: Descricao do modulo 2]</div>
+          <div class="module-title">Dia 2 — Estrutura e Copy de Conversao</div>
+          <div class="module-desc">A anatomia completa do lancamento que converte: pagina de vendas, sequencia de emails, copy para stories e urgencia que funciona. Voce vai escrever cada peca ao vivo, com feedback direto — e sair com tudo pronto para publicar.</div>
         </div>
       </div>
       <div class="module-card reveal rd2">
         <div class="module-num">3</div>
         <div>
-          <div class="module-title">[INSERIR: Modulo 3 — Titulo]</div>
-          <div class="module-desc">[INSERIR: Descricao do modulo 3]</div>
+          <div class="module-title">Dia 3 — Trafego, Lancamento e Escala</div>
+          <div class="module-desc">Como atrair os primeiros clientes com trafego organico e pago de forma acessivel. O checklist completo de lancamento para voce executar sem travar. E como escalar o que funcionou para multiplicar o resultado no proximo ciclo.</div>
         </div>
       </div>
       <div class="module-card reveal rd3">
         <div class="module-num">4</div>
         <div>
-          <div class="module-title">[INSERIR: Modulo 4 — Titulo]</div>
-          <div class="module-desc">[INSERIR: Descricao do modulo 4]</div>
+          <div class="module-title">Sessao de Perguntas e Respostas ao Vivo</div>
+          <div class="module-desc">Ao final de cada dia, uma sessao dedicada para voce tirar duvidas especificas do seu negocio, validar sua oferta e receber feedback sobre seu posicionamento — em tempo real, com o especialista presente.</div>
         </div>
       </div>
     </div>
 
     <div class="reveal" style="text-align:center;margin-bottom:32px;">
-      <h3 style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:24px;">E mais...</h3>
+      <h3 style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:24px;">Exclusivo para inscritos VIP</h3>
     </div>
 
     <div class="module-card reveal" style="border-color:var(--gold);border-width:2px;">
       <div class="module-num" style="background:var(--gold-light);color:var(--gold);">VIP</div>
       <div>
-        <div class="vip-badge">Disponivel apenas na categoria VIP</div>
-        <div class="module-title">[INSERIR: Bonus VIP 1 — ex: Gravacao do Workshop]</div>
-        <div class="module-desc">[INSERIR: Descricao do bonus VIP 1]</div>
+        <div class="vip-badge">Disponivel apenas para VIP</div>
+        <div class="module-title">Gravacao completa dos 3 dias</div>
+        <div class="module-desc">Acesso as gravacoes de todos os dias do workshop para rever quantas vezes precisar. Ideal para quem nao pode assistir ao vivo em algum dos dias ou quer rever o conteudo durante a execucao.</div>
       </div>
     </div>
     <div class="module-card reveal rd1" style="border-color:var(--gold);border-width:2px;margin-top:16px;">
       <div class="module-num" style="background:var(--gold-light);color:var(--gold);">VIP</div>
       <div>
-        <div class="vip-badge">Disponivel apenas na categoria VIP</div>
-        <div class="module-title">[INSERIR: Bonus VIP 2 — ex: Sala VIP de tira-duvidas]</div>
-        <div class="module-desc">[INSERIR: Descricao do bonus VIP 2]</div>
+        <div class="vip-badge">Disponivel apenas para VIP</div>
+        <div class="module-title">Sala VIP de implementacao pos-workshop</div>
+        <div class="module-desc">Acesso exclusivo a um grupo fechado onde voce pode apresentar sua oferta, sua pagina de vendas e seus emails para receber feedback dos mentores antes de lançar. Valido por 30 dias apos o workshop.</div>
       </div>
     </div>
   </div>
@@ -1044,12 +1058,12 @@ a { color: var(--accent); text-decoration:none; }
 <!-- ══════════════ 9. CRONOGRAMA ══════════════ -->
 <section class="schedule-ws">
   <div class="container">
-    <h2 class="reveal">[INSERIR: Nome do Workshop]</h2>
-    <p class="schedule-meta reveal rd1"><strong>[INSERIR: Data]</strong> | Do conforto da sua casa, 100% online, No Zoom | Ao vivo</p>
-    <p class="schedule-sub reveal rd2">Um cronograma completo, com mais de 7 horas de conteudo pratico</p>
+    <h2 class="reveal">Workshop Lancamento Lucrativo</h2>
+    <p class="schedule-meta reveal rd1"><strong>3 dias consecutivos ao vivo</strong> | Zoom | 100% online | Acesso gratuito</p>
+    <p class="schedule-sub reveal rd2">Cada dia com mais de 4 horas de conteudo pratico e sessao de perguntas ao vivo</p>
     <div class="timeline reveal rd3">
       <div class="timeline-item">
-        <div class="timeline-time">08H30</div>
+        <div class="timeline-time">09H00</div>
         <div class="timeline-dot"></div>
         <div class="timeline-label">Inicio</div>
       </div>
@@ -1064,7 +1078,7 @@ a { color: var(--accent); text-decoration:none; }
         <div class="timeline-label">Retorno</div>
       </div>
       <div class="timeline-item">
-        <div class="timeline-time">17H30</div>
+        <div class="timeline-time">17H00</div>
         <div class="timeline-dot"></div>
         <div class="timeline-label">Encerramento</div>
       </div>
@@ -1075,40 +1089,38 @@ a { color: var(--accent); text-decoration:none; }
 <!-- ══════════════ 10. PRICING ══════════════ -->
 <section class="pricing-ws" id="preco">
   <div class="container">
-    <h2 class="reveal">Recapitulando tudo o que voce ganha</h2>
-    <div class="pricing-alert reveal rd1">Lote 01 disponivel por tempo limitado</div>
+    <h2 class="reveal">Escolha como voce quer participar</h2>
+    <div class="pricing-alert reveal rd1">Atencao: apenas 200 vagas gratuitas — 168 ja foram preenchidas</div>
     <div class="pricing-grid">
-      <!-- Card Start -->
+      <!-- Card Gratuito -->
       <div class="price-card reveal">
-        <div class="price-card-title">Ingresso Start</div>
+        <div class="price-card-title">Ingresso Gratuito</div>
         <ul class="price-card-list">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>2 dias completos de imersao</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>+14h de conteudo profundo</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Exercicios praticos</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Diagnostico completo</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Estabeleca seu novo preco</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Plano para atrair clientes</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>E muito mais!</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>3 dias completos ao vivo no Zoom</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Sessao de perguntas ao vivo em cada dia</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Acesso ao blueprint de lancamento</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Template de oferta e copy de vendas</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Comunidade de participantes no Telegram</li>
         </ul>
-        <div class="price-installment">11x <small>de</small> R$ 5,22</div>
-        <div class="price-full">Ou R$ 47 a vista com desconto</div>
-        <a href="#" class="btn btn-primary btn-full">Garantir minha vaga</a>
+        <div class="price-free">GRATIS</div>
+        <div class="price-free-label">100% gratuito — sem cartao de credito</div>
+        <a href="#preco" class="btn btn-primary btn-full">Garantir minha vaga gratuita</a>
       </div>
 
       <!-- Card VIP -->
       <div class="price-card featured reveal rd1">
         <div class="price-card-title">Ingresso VIP</div>
         <ul class="price-card-list">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Acesso aos 2 dias de imersao</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Material pratico em PDF</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Exercicios de execucao</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Implementacao mao na massa</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Gravacao do Workshop</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Sala VIP de tira-duvidas</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Tudo do ingresso gratuito</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Gravacao completa dos 3 dias</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Sala VIP de implementacao pos-workshop</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Feedback individual sobre sua oferta</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Checklist completo de lancamento em PDF</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>Acesso antecipado a proxima turma</li>
         </ul>
-        <div class="price-installment">12x <small>de</small> R$ 25,24</div>
-        <div class="price-full">Ou R$ 244 a vista com desconto</div>
-        <a href="#" class="btn btn-primary btn-full">Garantir VIP</a>
+        <div class="price-installment">12x <small>de</small> R$ 19,90</div>
+        <div class="price-full">Ou R$ 197 a vista com desconto</div>
+        <a href="#preco" class="btn btn-primary btn-full">Garantir ingresso VIP</a>
       </div>
     </div>
   </div>
@@ -1117,19 +1129,18 @@ a { color: var(--accent); text-decoration:none; }
 <!-- ══════════════ 11. INSTRUTORES ══════════════ -->
 <section class="instructors-ws">
   <div class="container">
-    <p class="inst-label reveal">Durante o Workshop, voce sera conduzido por</p>
-    <div class="inst-photo reveal rd1">Foto instrutor(es)</div>
-    <p class="inst-greeting reveal rd2">&#128075;</p>
-    <h2 class="inst-name reveal rd2">[INSERIR: Nome do(s) Instrutor(es)]</h2>
+    <p class="inst-label reveal">Durante o workshop, voce sera conduzido por</p>
+    <div class="inst-photo reveal rd1">Foto do instrutor</div>
+    <h2 class="inst-name reveal rd2">Rafael Lara — Estrategista de Lancamentos</h2>
     <div class="inst-bio">
-      <p class="reveal rd3">[INSERIR: Bio — formacao, experiencia, filosofia de trabalho]</p>
-      <p class="reveal rd3"><strong>[INSERIR: Frase de impacto sobre autoridade/metodo]</strong></p>
-      <p class="reveal rd4">[INSERIR: Resultados — faturamento, numero de alunos, etc]</p>
+      <p class="reveal rd3"><strong>Rafael Lara estruturou mais de 4.800 lancamentos digitais</strong> em 14 nichos diferentes ao longo de 9 anos trabalhando exclusivamente com infoprodutores do zero ao mercado consolidado.</p>
+      <p class="reveal rd3">Ele e responsavel por ter formado uma das maiores redes de lancadores independentes do Brasil — profissionais que constroem receita recorrente com lancamentos enxutos, sem depender de grandes audiencias nem de altos investimentos em trafego.</p>
+      <p class="reveal rd4">No Workshop Lancamento Lucrativo, Rafael compartilha o mesmo sistema que usa com seus mentorados que chegam a R$10k a R$50k em lancamentos de estreia.</p>
     </div>
     <div class="inst-stats reveal rd4">
-      <div><div class="inst-stat-num">[X]M+</div><div class="inst-stat-label">Faturamento</div></div>
-      <div><div class="inst-stat-num">[X]K+</div><div class="inst-stat-label">Profissionais impactados</div></div>
-      <div><div class="inst-stat-num">[X]+</div><div class="inst-stat-label">Anos de experiencia</div></div>
+      <div><div class="inst-stat-num">4.800+</div><div class="inst-stat-label">Lancamentos estruturados</div></div>
+      <div><div class="inst-stat-num">9 anos</div><div class="inst-stat-label">De experiencia</div></div>
+      <div><div class="inst-stat-num">14</div><div class="inst-stat-label">Nichos diferentes</div></div>
     </div>
   </div>
 </section>
@@ -1138,11 +1149,11 @@ a { color: var(--accent); text-decoration:none; }
 <section class="guarantee-ws">
   <div class="container">
     <div class="guarantee-box reveal">
-      <p class="g-label">Portanto, nao se preocupe.</p>
-      <h3>Seu risco e zero!</h3>
-      <p class="g-title">Termo de Garantia</p>
-      <p>[INSERIR: Texto da garantia — Se voce assistir a toda imersao e nao gostar, ou caso ache que o conteudo nao agregou, voce pede seu investimento de volta em ate 7 dias, e devolvemos cada centavo, sem questionamentos.]</p>
-      <p class="g-closing">Nao existe risco. O unico risco e voce ficar de fora.</p>
+      <p class="g-label">Portanto, nao se preocupe com risco nenhum.</p>
+      <h3>Participacao 100% segura!</h3>
+      <p class="g-title">Sua garantia de satisfacao</p>
+      <p>Assista ao primeiro dia do workshop. Se voce nao sair com pelo menos uma ideia clara de lancamento que pode executar ainda esta semana, basta nos avisar e o ingresso VIP e reembolsado integralmente — sem perguntas, sem burocracia, sem delay.</p>
+      <p class="g-closing">O unico risco e ficar fora com as vagas esgotadas.</p>
     </div>
   </div>
 </section>
@@ -1151,12 +1162,12 @@ a { color: var(--accent); text-decoration:none; }
 <section class="contact-ws">
   <div class="container">
     <h2 class="reveal">Ficou alguma duvida?</h2>
-    <p class="reveal rd1">Toque no botao abaixo e fale com o nosso time de atendimento.</p>
-    <p class="contact-hours reveal rd2">Atendimento em horario comercial: <strong>de segunda a sexta-feira, das 9 as 18:00</strong></p>
+    <p class="reveal rd1">Nossa equipe esta disponivel para responder qualquer pergunta sobre o workshop.</p>
+    <p class="contact-hours reveal rd2">Atendimento de <strong>segunda a sexta-feira, das 9 as 18h</strong></p>
     <div class="reveal rd3">
       <a href="#" class="btn btn-whatsapp">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.613.613l4.458-1.495A11.932 11.932 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
-        Falar com consultor
+        Falar com o time de suporte
       </a>
     </div>
   </div>
@@ -1169,52 +1180,52 @@ a { color: var(--accent); text-decoration:none; }
     <div class="faq-list-ws">
       <div class="faq-item-ws reveal">
         <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>Quando sera o workshop?</span>
+          <span>O workshop e realmente gratuito?</span>
           <div class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
         </button>
-        <div class="faq-a"><p>[INSERIR: Data, horario, plataforma]</p></div>
+        <div class="faq-a"><p>Sim. <strong>O ingresso gratuito nao exige cartao de credito</strong> nem qualquer pagamento. Voce se inscreve, recebe o link do Zoom e participa dos 3 dias completos sem pagar nada. O ingresso VIP (pago) e opcional e adiciona acesso as gravacoes e a sala de implementacao.</p></div>
       </div>
       <div class="faq-item-ws reveal">
         <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>Vai ficar gravado?</span>
+          <span>Preciso ter um produto pronto para participar?</span>
           <div class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
         </button>
-        <div class="faq-a"><p>[INSERIR: Detalhes sobre gravacao — acesso VIP, replay, etc]</p></div>
+        <div class="faq-a"><p>Nao. O workshop foi desenhado especialmente para quem ainda nao tem produto. Voce vai <strong>criar sua oferta durante os 3 dias</strong>, com orientacao em cada etapa. Quem ja tem produto tambem se beneficia — o metodo aplica igualmente para novos lancamentos.</p></div>
       </div>
       <div class="faq-item-ws reveal">
         <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>Funciona para qual tipo de profissional?</span>
+          <span>O workshop vai ficar gravado?</span>
           <div class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
         </button>
-        <div class="faq-a"><p>[INSERIR: Publico-alvo, areas de atuacao, perfil ideal]</p></div>
+        <div class="faq-a"><p>A gravacao completa dos 3 dias esta disponivel <strong>apenas no Ingresso VIP</strong>. Para o ingresso gratuito, o conteudo e exclusivamente ao vivo — incentivamos a participacao presencial para maior aproveitamento e interacao com o especialista.</p></div>
+      </div>
+      <div class="faq-item-ws reveal">
+        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          <span>Para qual nicho funciona?</span>
+          <div class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        </button>
+        <div class="faq-a"><p>O metodo ja foi aplicado em <strong>14 nichos diferentes</strong> — saude, financas, educacao, culinaria, marketing, estetica, espiritualidade, idiomas, relacionamentos, produtividade e outros. Se voce tem conhecimento que ajuda pessoas, o metodo funciona para voce.</p></div>
       </div>
       <div class="faq-item-ws reveal">
         <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
           <span>Vou sair do workshop com algo pronto?</span>
           <div class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
         </button>
-        <div class="faq-a"><p>[INSERIR: O que o participante sai com — decisoes claras, estrutura organizada, proximos passos]</p></div>
+        <div class="faq-a"><p>Sim. Voce vai sair com a oferta definida, o copy da pagina de vendas escrito, a sequencia de emails estruturada e o blueprint de lancamento preenchido. <strong>O objetivo e que voce consiga executar seu primeiro lancamento ainda na semana seguinte ao workshop.</strong></p></div>
       </div>
       <div class="faq-item-ws reveal">
         <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
           <span>Ja fiz outros cursos e nao funcionou. Esse e diferente?</span>
           <div class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
         </button>
-        <div class="faq-a"><p>[INSERIR: Diferencial do metodo, o que faz diferente dos outros]</p></div>
+        <div class="faq-a"><p>A diferenca e a execucao ao vivo. Voce nao assiste o conteudo para aplicar depois — voce <strong>aplica durante o proprio workshop</strong>, com feedback imediato. E impossivel sair sem algo concreto para lançar, porque voce constroi durante os 3 dias.</p></div>
       </div>
       <div class="faq-item-ws reveal">
         <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>E se eu nao gostar?</span>
+          <span>Por que o ingresso gratuito e limitado a 200 vagas?</span>
           <div class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
         </button>
-        <div class="faq-a"><p>[INSERIR: Garantia de 7 dias, sem questionamentos]</p></div>
-      </div>
-      <div class="faq-item-ws reveal">
-        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>Por que o valor e tao baixo?</span>
-          <div class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
-        </button>
-        <div class="faq-a"><p>[INSERIR: Justificativa do preco — valor simbolico, filtro de comprometimento, entrega x apresentacao]</p></div>
+        <div class="faq-a"><p>Para manter a qualidade das sessoes ao vivo e garantir que cada participante consiga fazer perguntas e receber atencao, limitamos a turma. Quando as 200 vagas forem preenchidas, <strong>nao abriremos novas inscricoes</strong> para esta edicao.</p></div>
       </div>
     </div>
   </div>
@@ -1224,14 +1235,16 @@ a { color: var(--accent); text-decoration:none; }
 <section class="cta-final-ws">
   <div class="container" style="text-align:center;">
     <div class="reveal">
-      <a href="#" class="btn btn-primary" style="padding:16px 40px;font-size:15px;">Comprar Ingresso | Lote 02</a>
+      <h2 style="font-size:clamp(22px,3vw,32px);font-weight:800;letter-spacing:-0.03em;margin-bottom:12px;">Ainda ha vagas disponiveis. Por quanto tempo, nao sabemos.</h2>
+      <p style="font-size:15px;color:var(--text-body);max-width:500px;margin:0 auto 28px;">168 das 200 vagas ja foram preenchidas. Garanta a sua antes que acabem.</p>
+      <a href="#preco" class="btn btn-primary" style="padding:18px 48px;font-size:16px;">Quero minha vaga gratuita</a>
     </div>
   </div>
 </section>
 
 <!-- ══════════════ 16. FOOTER ══════════════ -->
 <footer class="footer-ws">
-  <p>[INSERIR: Razao Social] | CNPJ: [INSERIR: CNPJ]<br>Site 100% Seguro | Pagamento processado por [INSERIR: Plataforma]</p>
+  <p>Workshop Lancamento Lucrativo | Todos os direitos reservados<br>Site 100% Seguro | Pagamento processado com segurança</p>
 </footer>
 
 <!-- ══════════════ SCRIPTS ══════════════ -->

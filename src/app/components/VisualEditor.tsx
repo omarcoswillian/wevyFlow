@@ -3,7 +3,8 @@
 import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
-import { Type, Palette, Space, MousePointer, AlignLeft, AlignCenter, AlignRight, AlignJustify, Underline, Strikethrough, Italic, LayoutGrid, MoveHorizontal, MoveVertical, ArrowDownNarrowWide, Copy, Trash2, ArrowUp, ArrowDown, Link2, FileText, LogIn, Mail, Phone, Anchor, Package, PlayCircle, Plus, X, Hash, Eye, EyeOff } from "lucide-react";
+import { Type, Palette, Space, MousePointer, AlignLeft, AlignCenter, AlignRight, AlignJustify, Underline, Strikethrough, Italic, LayoutGrid, MoveHorizontal, MoveVertical, ArrowDownNarrowWide, Copy, Trash2, ArrowUp, ArrowDown, Link2, FileText, LogIn, Mail, Phone, Anchor, Package, PlayCircle, Plus, X, Hash, Eye, EyeOff, Sparkles, Image } from "lucide-react";
+import { ImageGeneratorModal } from "./ImageGeneratorModal";
 import { GOOGLE_FONTS, findFont, cssFontStack } from "@/app/lib/editor/google-fonts";
 import { NumberInput } from "./inspector/NumberInput";
 import { ColorPicker } from "./inspector/ColorPicker";
@@ -16,6 +17,8 @@ export interface ElementProps {
   text: string | null;
   href: string;
   target: string;
+  src: string;
+  alt: string;
   fontSize: string;
   fontWeight: string;
   fontStyle: string;
@@ -72,6 +75,15 @@ export interface ElementProps {
   backgroundSize: string;
   backgroundPosition: string;
   filter: string;
+  objectFit: string;
+  objectPosition: string;
+  textShadow: string;
+  gridTemplateColumns: string;
+  gridTemplateRows: string;
+  justifyItems: string;
+  cursor: string;
+  aspectRatio: string;
+  pointerEvents: string;
 }
 
 interface VisualEditorProps {
@@ -182,6 +194,7 @@ const INTERACTIVE_TAGS = new Set([
 export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange, onTextChange, onAttrChange, onFontLoad, onDuplicate, onDelete, onMove, onSaveComponent, onBack }: VisualEditorProps) {
   const badge = VIEWPORT_BADGE[viewport] || VIEWPORT_BADGE.desktop;
   const [activeTab, setActiveTab] = useState<"style" | "settings">("style");
+  const [imgGenOpen, setImgGenOpen] = useState(false);
 
   if (!elementProps) {
     return (
@@ -332,9 +345,58 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
             </section>
           )}
 
+          {/* Image settings — only for img elements */}
+          {elementProps.tagName === "img" && (
+            <section>
+              <Label className="flex items-center gap-1.5 mb-2">
+                <Image className="w-3 h-3" /> Imagem
+              </Label>
+              <div className="space-y-2">
+                {/* Alt text */}
+                <div>
+                  <span className="text-[9px] text-white/20 mb-1 block">Texto alternativo (alt)</span>
+                  <input
+                    key={"alt-" + elementProps.alt}
+                    type="text"
+                    defaultValue={elementProps.alt}
+                    onBlur={(e) => onAttrChange("alt", e.target.value || null)}
+                    onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                    placeholder="Descreva a imagem..."
+                    className="w-full bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2 text-[11px] text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/30"
+                  />
+                </div>
+                {/* Current src */}
+                {elementProps.src && (
+                  <div>
+                    <span className="text-[9px] text-white/20 mb-1 block">URL atual</span>
+                    <p className="text-[10px] text-white/30 font-mono truncate bg-white/[0.02] px-2 py-1.5 rounded-lg border border-white/[0.04]">
+                      {elementProps.src.startsWith("data:") ? "(imagem gerada por IA)" : elementProps.src}
+                    </p>
+                  </div>
+                )}
+                {/* Generate button */}
+                <button
+                  onClick={() => setImgGenOpen(true)}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 hover:border-purple-500/50 text-purple-300 text-[11px] font-semibold cursor-pointer transition-all"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Gerar com gpt-image-2
+                </button>
+              </div>
+            </section>
+          )}
+
           {/* Custom attributes */}
           <CustomAttributesSection elementProps={elementProps} onAttrChange={onAttrChange} />
         </div>
+      )}
+
+      {/* Image Generator Modal */}
+      {imgGenOpen && (
+        <ImageGeneratorModal
+          onInsert={(dataUrl) => onAttrChange("src", dataUrl)}
+          onClose={() => setImgGenOpen(false)}
+        />
       )}
 
       {/* ── STYLE TAB ── */}
@@ -622,6 +684,72 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
               </>
             )}
 
+            {/* Grid-only controls */}
+            {elementProps.display === "grid" && (
+              <>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <span className="text-[9px] text-white/20 mb-1 block">Colunas</span>
+                    <input
+                      key={"gtc-" + elementProps.gridTemplateColumns}
+                      type="text"
+                      defaultValue={elementProps.gridTemplateColumns || ""}
+                      onBlur={(e) => onStyleChange("gridTemplateColumns", e.target.value || "none")}
+                      onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                      placeholder="repeat(3, 1fr)"
+                      className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-purple-500/30 font-mono"
+                    />
+                  </div>
+                  <div>
+                    <span className="text-[9px] text-white/20 mb-1 block">Linhas</span>
+                    <input
+                      key={"gtr-" + elementProps.gridTemplateRows}
+                      type="text"
+                      defaultValue={elementProps.gridTemplateRows || ""}
+                      onBlur={(e) => onStyleChange("gridTemplateRows", e.target.value || "none")}
+                      onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                      placeholder="auto"
+                      className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-purple-500/30 font-mono"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <span className="text-[9px] text-white/20 mb-1 block">Gap</span>
+                  <NumberInput
+                    value={elementProps.gap === "normal" ? "0px" : elementProps.gap}
+                    onChange={(v) => onStyleChange("gap", v || "0")}
+                    min={0}
+                  />
+                </div>
+                <div>
+                  <span className="text-[9px] text-white/20 mb-1 block">Justify items</span>
+                  <select
+                    key={"ji-" + elementProps.justifyItems}
+                    defaultValue={elementProps.justifyItems || "stretch"}
+                    onChange={(e) => onStyleChange("justifyItems", e.target.value)}
+                    className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none cursor-pointer"
+                  >
+                    {["stretch", "start", "center", "end"].map((o) => (
+                      <option key={o} value={o} className="bg-[#1a1a1a]">{o}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <span className="text-[9px] text-white/20 mb-1 block">Align items</span>
+                  <select
+                    key={"ai-grid-" + elementProps.alignItems}
+                    defaultValue={elementProps.alignItems || "stretch"}
+                    onChange={(e) => onStyleChange("alignItems", e.target.value)}
+                    className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none cursor-pointer"
+                  >
+                    {["stretch", "start", "center", "end", "baseline"].map((o) => (
+                      <option key={o} value={o} className="bg-[#1a1a1a]">{o}</option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
+
             {/* Size */}
             <div>
               <span className="text-[9px] text-white/20 mb-1 block flex items-center gap-1">
@@ -634,6 +762,41 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
             </div>
           </div>
         </section>
+
+        {/* Image object-fit / object-position — only for <img> */}
+        {elementProps.tagName === "img" && (
+          <section>
+            <Label className="flex items-center gap-1.5 mb-2">
+              <Image className="w-3 h-3" /> Imagem
+            </Label>
+            <div className="space-y-2">
+              <div>
+                <span className="text-[9px] text-white/20 mb-1 block">Encaixe</span>
+                <div className="flex gap-0.5">
+                  {["fill", "contain", "cover", "none", "scale-down"].map((v) => (
+                    <button key={v} onClick={() => onStyleChange("objectFit", v)}
+                      className={cn("flex-1 py-1.5 rounded-lg cursor-pointer transition-all text-[9px]",
+                        elementProps.objectFit === v ? "bg-purple-500/20 text-purple-400" : "bg-white/[0.03] text-white/30 hover:text-white/50")}>
+                      {v === "fill" ? "fill" : v === "contain" ? "fit" : v === "cover" ? "cov" : v === "none" ? "—" : "dn"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <span className="text-[9px] text-white/20 mb-1 block">Posição focal</span>
+                <select
+                  onChange={(e) => onStyleChange("objectPosition", e.target.value)}
+                  defaultValue={elementProps.objectPosition || "center"}
+                  className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none cursor-pointer"
+                >
+                  {["center", "top", "bottom", "left", "right", "top left", "top right", "bottom left", "bottom right"].map((p) => (
+                    <option key={p} value={p} className="bg-[#1a1a1a]">{p}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Fill (cor + imagem) */}
         <FillSection elementProps={elementProps} onStyleChange={onStyleChange} />
@@ -692,6 +855,18 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
               <SizeInput label="Max H" value={elementProps.maxHeight} onChange={(v) => onStyleChange("maxHeight", v)} />
             </div>
             <div>
+              <span className="text-[9px] text-white/20 mb-1 block">Aspect Ratio</span>
+              <input
+                key={"ar-" + elementProps.aspectRatio}
+                type="text"
+                defaultValue={elementProps.aspectRatio && elementProps.aspectRatio !== "auto" ? elementProps.aspectRatio : ""}
+                onBlur={(e) => onStyleChange("aspectRatio", e.target.value || "auto")}
+                onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                placeholder="16/9 · 1/1 · 4/3"
+                className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-purple-500/30 font-mono"
+              />
+            </div>
+            <div>
               <span className="text-[9px] text-white/20 mb-1 block">Overflow</span>
               <div className="flex gap-0.5">
                 {(["visible", "hidden", "auto", "scroll"] as const).map((v) => (
@@ -739,6 +914,19 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
                 </div>
               </>
             )}
+            <div>
+              <span className="text-[9px] text-white/20 mb-1 block">Cursor</span>
+              <select
+                key={"cursor-" + elementProps.cursor}
+                defaultValue={elementProps.cursor || "auto"}
+                onChange={(e) => onStyleChange("cursor", e.target.value)}
+                className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none cursor-pointer"
+              >
+                {["auto", "default", "pointer", "text", "move", "grab", "not-allowed", "none", "crosshair", "zoom-in", "zoom-out"].map((c) => (
+                  <option key={c} value={c} className="bg-[#1a1a1a]">{c}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </section>
 
@@ -813,6 +1001,25 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
             {/* Box shadow */}
             <div>
               <span className="text-[9px] text-white/20 mb-1 block">Box Shadow</span>
+              <div className="flex gap-1 mb-1.5">
+                {[
+                  { label: "—", value: "none" },
+                  { label: "sm", value: "0 2px 8px rgba(0,0,0,0.25)" },
+                  { label: "md", value: "0 4px 16px rgba(0,0,0,0.3)" },
+                  { label: "lg", value: "0 8px 32px rgba(0,0,0,0.4)" },
+                  { label: "glow", value: "0 0 24px rgba(255,92,0,0.35)" },
+                  { label: "glow+", value: "0 0 48px rgba(255,92,0,0.5), 0 8px 32px rgba(255,92,0,0.2)" },
+                ].map((p) => (
+                  <button key={p.label} onClick={() => onStyleChange("boxShadow", p.value)}
+                    title={p.value}
+                    className={cn("flex-1 py-1 rounded-md text-[9px] cursor-pointer transition-all border",
+                      elementProps.boxShadow === p.value
+                        ? "bg-purple-500/20 text-purple-400 border-purple-500/30"
+                        : "bg-white/[0.03] text-white/30 hover:text-white/50 border-white/[0.04]")}>
+                    {p.label}
+                  </button>
+                ))}
+              </div>
               <input
                 key={"shadow-" + elementProps.boxShadow}
                 type="text"
@@ -820,6 +1027,19 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
                 onBlur={(e) => onStyleChange("boxShadow", e.target.value || "none")}
                 onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
                 placeholder="0 4px 12px rgba(0,0,0,0.2)"
+                className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-purple-500/30 font-mono"
+              />
+            </div>
+            {/* Text shadow */}
+            <div>
+              <span className="text-[9px] text-white/20 mb-1 block">Text Shadow</span>
+              <input
+                key={"tshadow-" + elementProps.textShadow}
+                type="text"
+                defaultValue={elementProps.textShadow || ""}
+                onBlur={(e) => onStyleChange("textShadow", e.target.value || "none")}
+                onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                placeholder="0 2px 8px rgba(0,0,0,0.4)"
                 className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-purple-500/30 font-mono"
               />
             </div>
@@ -875,6 +1095,19 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
                   <option key={m} value={m} className="bg-[#1a1a1a]">{m}</option>
                 ))}
               </select>
+            </div>
+            {/* Pointer events */}
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] text-white/20 w-24 shrink-0">Pointer Events</span>
+              <div className="flex gap-0.5 flex-1">
+                {["auto", "none"].map((v) => (
+                  <button key={v} onClick={() => onStyleChange("pointerEvents", v)}
+                    className={cn("flex-1 py-1.5 rounded-lg cursor-pointer transition-all text-[9px]",
+                      elementProps.pointerEvents === v ? "bg-purple-500/20 text-purple-400" : "bg-white/[0.03] text-white/30 hover:text-white/50")}>
+                    {v === "auto" ? "Ativo" : "Bloqueado"}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -1035,7 +1268,8 @@ function FillSection({ elementProps, onStyleChange }: { elementProps: ElementPro
   // show the upload button so the user can replace them with a real image.
   const bg = elementProps.backgroundImage || "";
   const hasImage = bg !== "" && bg !== "none" && bg.includes("url(");
-  const initialTab = hasImage ? "image" : "color";
+  const hasGradient = bg !== "" && bg !== "none" && bg.includes("gradient");
+  const initialTab = (hasImage || hasGradient) ? "image" : "color";
   const [tab, setTab] = useState<"color" | "image">(initialTab);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -1114,6 +1348,49 @@ function FillSection({ elementProps, onStyleChange }: { elementProps: ElementPro
       {tab === "image" && (
         <div className="space-y-2">
           <input ref={fileRef} type="file" accept="image/*" onChange={onImageFile} className="hidden" />
+
+          {/* Gradient editor */}
+          {hasGradient && !hasImage && (
+            <div>
+              <span className="text-[9px] text-white/20 mb-1 block">Gradient CSS</span>
+              <textarea
+                key={"bg-gradient-" + bg}
+                defaultValue={bg}
+                onBlur={(e) => onStyleChange("backgroundImage", e.target.value || "none")}
+                rows={3}
+                className="w-full bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2 text-[10px] text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/30 resize-none font-mono"
+                placeholder="linear-gradient(135deg, #FF5C00, #E04E00)"
+              />
+              <div className="flex gap-1.5 mt-1.5">
+                {[
+                  "linear-gradient(135deg, #FF5C00, #E04E00)",
+                  "linear-gradient(180deg, #0C0C0C, #161616)",
+                  "radial-gradient(circle at 50% 0%, rgba(255,92,0,0.15), transparent 70%)",
+                  "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                ].map((preset, i) => (
+                  <button
+                    key={i}
+                    onClick={() => onStyleChange("backgroundImage", preset)}
+                    className="w-6 h-6 rounded-md border border-white/[0.08] cursor-pointer hover:scale-110 transition-transform shrink-0"
+                    style={{ background: preset }}
+                    title={preset}
+                  />
+                ))}
+              </div>
+              <div className="flex gap-0.5 mt-1.5">
+                <button onClick={uploadImage}
+                  className="flex-1 py-1 rounded-md text-[10px] bg-white/[0.06] text-white/70 hover:bg-white/[0.1] cursor-pointer">
+                  Substituir por imagem
+                </button>
+                <button onClick={removeImage}
+                  className="flex-1 py-1 rounded-md text-[10px] bg-red-500/15 text-red-400 hover:bg-red-500/25 cursor-pointer">
+                  Remover
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Image upload/preview */}
           {hasImage ? (
             <div className="relative rounded-xl overflow-hidden border border-white/[0.08]">
               <div className="w-full h-24 bg-center bg-cover"
@@ -1129,12 +1406,19 @@ function FillSection({ elementProps, onStyleChange }: { elementProps: ElementPro
                 </button>
               </div>
             </div>
-          ) : (
-            <button onClick={uploadImage}
-              className="w-full py-4 rounded-xl bg-white/[0.03] border border-dashed border-white/[0.1] text-[11px] text-white/40 hover:bg-white/[0.06] hover:text-white/60 cursor-pointer transition-all">
-              Upload de imagem
-            </button>
-          )}
+          ) : !hasGradient ? (
+            <>
+              <button onClick={uploadImage}
+                className="w-full py-4 rounded-xl bg-white/[0.03] border border-dashed border-white/[0.1] text-[11px] text-white/40 hover:bg-white/[0.06] hover:text-white/60 cursor-pointer transition-all">
+                Upload de imagem
+              </button>
+              <button
+                onClick={() => onStyleChange("backgroundImage", "linear-gradient(135deg, rgba(255,92,0,0.1), transparent)")}
+                className="w-full py-2 rounded-lg text-[10px] text-white/40 bg-white/[0.02] border border-dashed border-white/[0.08] hover:text-white/60 cursor-pointer mt-1.5">
+                + Adicionar gradient
+              </button>
+            </>
+          ) : null}
 
           {hasImage && (
             <>

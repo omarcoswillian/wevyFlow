@@ -29,6 +29,7 @@ import {
   Undo2,
   Redo2,
   Save,
+  ImageIcon,
 } from "lucide-react";
 import { Platform, ViewportSize } from "../lib/types";
 import { IFRAME_VISUAL_EDIT_SCRIPT } from "../lib/iframe-inject";
@@ -41,6 +42,7 @@ import { VisualEditor, ElementProps } from "./VisualEditor";
 import { InsertPanel } from "./InsertPanel";
 import { LayersPanel, TreeNode } from "./LayersPanel";
 import { LibraryPanel } from "./LibraryPanel";
+import { ImageAIPanel } from "./ImageAIPanel";
 import { useComponents } from "../lib/editor/useComponents";
 import { ElementorExport } from "./ElementorExport";
 import { VSLConfigPanel } from "./VSLConfigPanel";
@@ -84,7 +86,7 @@ export function WorkspaceView({
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [leftPanelTab, setLeftPanelTab] = useState<"chat" | "details" | "insert" | "layers" | "library">("layers");
+  const [leftPanelTab, setLeftPanelTab] = useState<"chat" | "details" | "insert" | "layers" | "library" | "images">("layers");
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
   const [tree, setTree] = useState<TreeNode[]>([]);
@@ -345,6 +347,14 @@ export function WorkspaceView({
     iframeRef.current?.contentWindow?.postMessage({ type: "wf-insert-html", html }, "*");
   }, [visualEditMode]);
 
+  const handleInsertImage = useCallback((url: string) => {
+    if (selectedElementProps?.tagName === "img") {
+      iframeRef.current?.contentWindow?.postMessage({ type: "wf-apply-attr", name: "src", value: url }, "*");
+    } else {
+      handleInsertHtml(`<img src="${url}" alt="Imagem" style="max-width:100%;height:auto;display:block;">`);
+    }
+  }, [selectedElementProps, handleInsertHtml]);
+
   const handleSaveComponent = useCallback(() => {
     if (!selectedElementId) return;
     const name = window.prompt("Nome do componente:");
@@ -529,6 +539,7 @@ export function WorkspaceView({
           {code && !isLoading && <RailButton active={leftPanelTab === "insert"} onClick={() => { setLeftPanelTab("insert"); setLeftCollapsed(false); }} title="Inserir" icon={<Plus className="w-4 h-4" />} />}
           {code && !isLoading && <RailButton active={leftPanelTab === "layers"} onClick={() => { setLeftPanelTab("layers"); setLeftCollapsed(false); }} title="Navigator" icon={<Layers className="w-4 h-4" />} />}
           {code && !isLoading && <RailButton active={leftPanelTab === "library"} onClick={() => { setLeftPanelTab("library"); setLeftCollapsed(false); }} title="Biblioteca" icon={<Package className="w-4 h-4" />} />}
+          {code && !isLoading && <RailButton active={leftPanelTab === "images"} onClick={() => { setLeftPanelTab("images"); setLeftCollapsed(false); }} title="Imagens IA" icon={<ImageIcon className="w-4 h-4" />} />}
         </div>
       ) : (
         <div ref={dropZoneRef} className="w-[260px] shrink-0 flex flex-col bg-[#0e0e11] rounded-[20px] overflow-hidden relative">
@@ -558,6 +569,12 @@ export function WorkspaceView({
                 <button onClick={() => setLeftPanelTab("library")} title="Biblioteca"
                   className={cn("p-1.5 rounded-lg transition-all cursor-pointer", leftPanelTab === "library" ? "bg-white/[0.08] text-white" : "text-white/30 hover:text-white/50")}>
                   <Package className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {code && !isLoading && (
+                <button onClick={() => setLeftPanelTab("images")} title="Imagens IA"
+                  className={cn("p-1.5 rounded-lg transition-all cursor-pointer", leftPanelTab === "images" ? "bg-white/[0.08] text-white" : "text-white/30 hover:text-white/50")}>
+                  <ImageIcon className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
@@ -594,6 +611,11 @@ export function WorkspaceView({
               onDragHtml={handleDragHtml}
               onRemoveComponent={removeComponent}
               onRenameComponent={renameComponent}
+            />
+          ) : leftPanelTab === "images" ? (
+            <ImageAIPanel
+              selectedElementTagName={selectedElementProps?.tagName ?? null}
+              onInsertImage={handleInsertImage}
             />
           ) : (
             <ChatPanel

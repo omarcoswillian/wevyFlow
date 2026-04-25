@@ -154,6 +154,111 @@ export const SECTIONS: Section[] = [
     accent: "#FF5C00",
   },
 
+  /* ───────── BENEFÍCIOS ───────── */
+  {
+    id: "beneficios-grid",
+    label: "Benefícios · Grid 6 Cards Dark",
+    description: "Grid 3x2 de benefícios/features com ícones SVG únicos, título e descrição. Dark com hover glow laranja.",
+    kind: "beneficios",
+    themes: ["dark", "vibrant"],
+    suits: ["vendas", "saas", "workshop"],
+    file: "sections/beneficios-grid.html",
+    slots: ["headline", "subtitulo", "beneficio 1 titulo", "beneficio 1 descricao", "beneficio 2 titulo", "beneficio 2 descricao", "beneficio 3 titulo", "beneficio 3 descricao", "beneficio 4 titulo", "beneficio 4 descricao", "beneficio 5 titulo", "beneficio 5 descricao", "beneficio 6 titulo", "beneficio 6 descricao"],
+    hasSlots: true,
+    fonts: ["Montserrat", "DM Sans"],
+    accent: "#FF5C00",
+  },
+
+  /* ───────── AUTORIDADE ───────── */
+  {
+    id: "autoridade-expert",
+    label: "Autoridade · Expert Split Dark",
+    description: "Seção sobre o especialista com foto placeholder, bio em 2 parágrafos, 4 credenciais e 3 stats de prova social.",
+    kind: "autoridade",
+    themes: ["dark", "minimal"],
+    suits: ["vendas", "workshop", "portfolio"],
+    file: "sections/autoridade-expert.html",
+    slots: ["nome", "especialidade badge", "bio paragrafo 1", "bio paragrafo 2", "credencial 1", "credencial 2", "credencial 3", "credencial 4", "stat 1 numero", "stat 1 label", "stat 2 numero", "stat 2 label", "stat 3 numero", "stat 3 label"],
+    hasSlots: true,
+    fonts: ["Montserrat", "DM Sans"],
+    accent: "#FF5C00",
+  },
+
+  /* ───────── PROCESSO ───────── */
+  {
+    id: "processo-steps",
+    label: "Processo · 4 Passos Horizontal Dark",
+    description: "Como funciona em 4 passos numerados com linha conectora e layout horizontal. Ideal para metodologias e cursos.",
+    kind: "processo",
+    themes: ["dark", "minimal"],
+    suits: ["vendas", "saas", "workshop"],
+    file: "sections/processo-steps.html",
+    slots: ["headline", "subtitulo", "passo 1 titulo", "passo 1 descricao", "passo 2 titulo", "passo 2 descricao", "passo 3 titulo", "passo 3 descricao", "passo 4 titulo", "passo 4 descricao"],
+    hasSlots: true,
+    fonts: ["Montserrat", "DM Sans"],
+    accent: "#FF5C00",
+  },
+
+  /* ───────── GARANTIA ───────── */
+  {
+    id: "garantia-section",
+    label: "Garantia · Risk-Reversal Dark",
+    description: "Seção de garantia com escudo SVG, headline, texto de risk-reversal e box de destaque. Compacta e persuasiva.",
+    kind: "garantia",
+    themes: ["dark", "vibrant"],
+    suits: ["vendas", "workshop"],
+    file: "sections/garantia-section.html",
+    slots: ["dias", "headline", "paragrafo", "resultado especifico", "dias no box"],
+    hasSlots: true,
+    fonts: ["Montserrat", "DM Sans"],
+    accent: "#FF5C00",
+  },
+
+  /* ───────── BÔNUS ───────── */
+  {
+    id: "bonus-stack",
+    label: "Bônus · Stack 3 Cards Dark",
+    description: "3 bônus em cards horizontais com número, título, descrição, valor riscado e total de bônus em destaque.",
+    kind: "bonus",
+    themes: ["dark", "vibrant"],
+    suits: ["vendas", "workshop"],
+    file: "sections/bonus-stack.html",
+    slots: ["headline", "bonus 1 titulo", "bonus 1 descricao", "bonus 1 valor", "bonus 2 titulo", "bonus 2 descricao", "bonus 2 valor", "bonus 3 titulo", "bonus 3 descricao", "bonus 3 valor", "valor total bonus"],
+    hasSlots: true,
+    fonts: ["Montserrat", "DM Sans"],
+    accent: "#FF5C00",
+  },
+
+  /* ───────── STATS ───────── */
+  {
+    id: "numeros-stats",
+    label: "Números · 4 Stats Dark",
+    description: "4 estatísticas de prova social em linha com números grandes em laranja e labels. Credibilidade imediata.",
+    kind: "stats",
+    themes: ["dark", "minimal"],
+    suits: ["vendas", "saas", "workshop", "captura"],
+    file: "sections/numeros-stats.html",
+    slots: ["stat 1 numero", "stat 1 label", "stat 2 numero", "stat 2 label", "stat 3 numero", "stat 3 label", "stat 4 numero", "stat 4 label"],
+    hasSlots: true,
+    fonts: ["Montserrat"],
+    accent: "#FF5C00",
+  },
+
+  /* ───────── CTA INTERMEDIÁRIO ───────── */
+  {
+    id: "cta-intermediario",
+    label: "CTA · Intermediário Dark",
+    description: "Seção CTA compacta de meio de página com headline, parágrafo e botão grande. Aumenta conversão antes do final.",
+    kind: "cta",
+    themes: ["dark", "vibrant"],
+    suits: ["vendas", "workshop", "saas"],
+    file: "sections/cta-intermediario.html",
+    slots: ["headline", "paragrafo", "texto CTA"],
+    hasSlots: true,
+    fonts: ["Montserrat", "DM Sans"],
+    accent: "#FF5C00",
+  },
+
   /* ───────── FAQ ───────── */
   {
     id: "faq-accordion",

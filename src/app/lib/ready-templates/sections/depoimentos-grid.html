@@ -1,62 +1,68 @@
 <style>
-.dep{padding:80px 0;background:#0C0C0C}
-.dep .container{max-width:1100px;margin:0 auto;padding:0 80px}
+.dep{padding:80px 0;background:#0C0C0C;position:relative;overflow:hidden}
+.dep .container{max-width:1100px;margin:0 auto;padding:0 80px;position:relative}
 .dep-badge{display:inline-flex;padding:6px 16px;border-radius:20px;background:rgba(255,204,0,0.12);border:1px solid rgba(255,204,0,0.2);margin-bottom:16px}
 .dep-badge span{font-size:12px;font-weight:600;color:#FFCC00;text-transform:uppercase;letter-spacing:0.06em}
-.dep h2{font-family:'Montserrat',sans-serif;font-size:28px;font-weight:700;color:#F5F5F5;line-height:1.2;margin-bottom:48px}
-.dep-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-.dep-card{background:#1E1E1E;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:28px;transition:all 0.2s ease}
-.dep-card:hover{border-color:rgba(255,92,0,0.3);transform:translateY(-2px)}
+.dep-headline-wrap{position:relative;display:inline-block}
+.dep-headline-wrap::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:400px;height:200px;background:radial-gradient(ellipse,rgba(255,92,0,0.08),transparent 70%);pointer-events:none}
+.dep h2{font-family:'Montserrat',sans-serif;font-size:28px;font-weight:700;color:#F5F5F5;line-height:1.2;margin-bottom:48px;position:relative}
+.dep-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.dep-card{background:#1E1E1E;border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:28px;transition:all 0.25s ease}
+.dep-card:hover{border-color:rgba(255,92,0,0.28);transform:translateY(-6px);box-shadow:0 0 28px rgba(255,92,0,0.18),0 12px 32px rgba(0,0,0,0.4)}
 .dep-stars{display:flex;gap:2px;margin-bottom:16px}
-.dep-star{width:16px;height:16px;color:#FFCC00}
+.dep-star{width:16px;height:16px;color:#FFCC00;filter:drop-shadow(0 0 3px rgba(234,179,8,0.6))}
 .dep-text{font-size:15px;color:#ccc;line-height:1.7;font-style:italic;margin-bottom:20px}
-.dep-author{display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06)}
-.dep-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#FF5C00,#E04E00);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0;overflow:hidden}
+.dep-author{display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08)}
+.dep-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#FF5C00,#E04E00);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0;overflow:hidden;box-shadow:0 0 16px rgba(255,92,0,0.3)}
 .dep-avatar img{width:100%;height:100%;object-fit:cover}
 .dep-name{font-size:14px;font-weight:600;color:#F5F5F5}
 .dep-role{font-size:12px;color:#999;margin-top:2px}
-.dep-result{display:inline-flex;padding:3px 10px;border-radius:12px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.2);font-size:11px;font-weight:600;color:#22C55E;margin-top:6px}
+.dep-result{display:inline-flex;padding:3px 10px;border-radius:12px;background:rgba(34,197,94,0.18);border:1px solid rgba(34,197,94,0.25);font-size:11px;font-weight:600;color:#22C55E;margin-top:6px}
 @media(max-width:768px){.dep .container{padding:0 20px}.dep{padding:56px 0}.dep-grid{grid-template-columns:1fr}.dep h2{font-size:22px}}
 </style>
 
 <section class="dep">
+  <!-- dot pattern sutil -->
+  <div style="position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.018) 1px,transparent 1px);background-size:28px 28px;pointer-events:none"></div>
   <div class="container">
     <div class="dep-badge"><span>Resultados reais</span></div>
-    <h2>[INSERIR: headline depoimentos]</h2>
+    <div class="dep-headline-wrap">
+      <h2>Resultados reais de alunos reais</h2>
+    </div>
     <div class="dep-grid">
       <div class="dep-card">
         <div class="dep-stars"><svg class="dep-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="dep-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="dep-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="dep-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="dep-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></div>
-        <p class="dep-text">"[INSERIR: depoimento 1 texto]"</p>
+        <p class="dep-text">"Em 47 dias apliquei o metodo e fechei minha primeira turma com 23 alunos. Nunca tinha vendido nada online antes. O passo a passo e cirurgico."</p>
         <div class="dep-author">
-          <div class="dep-avatar">[INSERIR: iniciais]</div>
+          <div class="dep-avatar">CM</div>
           <div>
-            <div class="dep-name">[INSERIR: nome 1]</div>
-            <div class="dep-role">[INSERIR: nicho/cargo 1]</div>
-            <div class="dep-result">[INSERIR: resultado 1]</div>
+            <div class="dep-name">Carlos Mendes</div>
+            <div class="dep-role">Consultor de TI</div>
+            <div class="dep-result">+R$ 11.500 no primeiro lancamento</div>
           </div>
         </div>
       </div>
       <div class="dep-card">
         <div class="dep-stars"><svg class="dep-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="dep-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="dep-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="dep-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="dep-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></div>
-        <p class="dep-text">"[INSERIR: depoimento 2 texto]"</p>
+        <p class="dep-text">"Tentei duas vezes antes sozinha e nao saiu nada. Com o Metodo Escala Digital vendi 40 vagas do meu curso em 10 dias usando so o WhatsApp e um grupo no Telegram."</p>
         <div class="dep-author">
-          <div class="dep-avatar">[INSERIR: iniciais]</div>
+          <div class="dep-avatar">AS</div>
           <div>
-            <div class="dep-name">[INSERIR: nome 2]</div>
-            <div class="dep-role">[INSERIR: nicho/cargo 2]</div>
-            <div class="dep-result">[INSERIR: resultado 2]</div>
+            <div class="dep-name">Aline Souza</div>
+            <div class="dep-role">Professora de ingles</div>
+            <div class="dep-result">40 alunos em 10 dias</div>
           </div>
         </div>
       </div>
       <div class="dep-card">
         <div class="dep-stars"><svg class="dep-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="dep-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="dep-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="dep-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="dep-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></div>
-        <p class="dep-text">"[INSERIR: depoimento 3 texto]"</p>
+        <p class="dep-text">"Sai de R$ 3.000/mes atendendo presencialmente para R$ 18.000/mes com meu curso online. O modulo de trafego organico foi o divisor de aguas pra mim."</p>
         <div class="dep-author">
-          <div class="dep-avatar">[INSERIR: iniciais]</div>
+          <div class="dep-avatar">RG</div>
           <div>
-            <div class="dep-name">[INSERIR: nome 3]</div>
-            <div class="dep-role">[INSERIR: nicho/cargo 3]</div>
-            <div class="dep-result">[INSERIR: resultado 3]</div>
+            <div class="dep-name">Rafael Gomes</div>
+            <div class="dep-role">Personal trainer</div>
+            <div class="dep-result">R$ 3k para R$ 18k/mes</div>
           </div>
         </div>
       </div>

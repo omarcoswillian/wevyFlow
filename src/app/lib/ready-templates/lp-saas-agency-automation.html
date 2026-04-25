@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>[INSERIR: Nome da Empresa]</title>
+<title>AgencyFlow — Automatize sua agência. Escale sem contratar.</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -18,8 +18,22 @@ html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;}
 body{font-family:var(--font);color:var(--text);background:var(--bg);line-height:1.6;}
 a{text-decoration:none;color:inherit;}
 .container{max-width:var(--container);margin:0 auto;padding:0 28px;}
-.btn-orange{display:inline-flex;align-items:center;justify-content:center;padding:10px 22px;background:var(--orange);color:#fff;border:none;border-radius:100px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;text-decoration:none;}
-.btn-orange:hover{background:var(--orange-hover);box-shadow:0 4px 16px rgba(232,93,42,0.3);}
+
+@keyframes brilho{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
+
+.btn-orange{
+  display:inline-flex;align-items:center;justify-content:center;padding:10px 22px;
+  background-image:linear-gradient(45deg,#d04f1f,#e85d2a,#d04f1f,#ff6b3d);
+  background-size:400% 200%;
+  animation:brilho 3.4s ease infinite;
+  color:#fff;border:none;border-radius:100px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:box-shadow 0.2s,transform 0.2s;text-decoration:none;
+  box-shadow:0 4px 16px rgba(232,93,42,0.30);
+}
+.btn-orange:hover{box-shadow:0 0 40px rgba(232,93,42,0.45),0 8px 24px rgba(232,93,42,0.2);transform:translateY(-1px);}
 
 /* ── NAV ── */
 .nav{position:fixed;top:0;left:0;width:100%;z-index:100;background:rgba(20,20,20,0.7);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);}
@@ -31,17 +45,19 @@ a{text-decoration:none;color:inherit;}
 .nav-links a{font-size:11px;font-weight:400;color:rgba(255,255,255,0.6);transition:color 0.2s;}
 .nav-links a:hover{color:#fff;}
 
-/* ── HERO (dark with photo bg) ── */
+/* ── HERO (dark) ── */
 .hero-agency{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;background:var(--bg-dark);}
 .hero-bg{position:absolute;inset:0;background:linear-gradient(135deg,#2a2a2a 0%,#1a1a1a 40%,#222 100%);z-index:0;}
-.hero-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.55);z-index:1;}
+/* Blur decorativo */
+.hero-bg::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:rgba(232,93,42,0.06);border-radius:50%;filter:blur(180px);pointer-events:none;}
+.hero-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.45);z-index:1;}
 .hero-content{position:relative;z-index:2;padding:80px 28px 48px;max-width:560px;}
 .hero-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);font-size:11px;color:rgba(255,255,255,0.7);margin-bottom:20px;}
 .hero-badge svg{width:12px;height:12px;color:#f59e0b;}
 .hero-agency h1{font-size:clamp(22px,2.8vw,34px);font-weight:600;color:#fff;letter-spacing:-0.03em;line-height:1.2;margin-bottom:14px;}
 .hero-agency .hero-sub{font-size:13px;color:rgba(255,255,255,0.45);max-width:440px;margin:0 auto 24px;line-height:1.55;}
 
-/* Logo cloud no hero */
+/* Logo cloud */
 .hero-logos{position:relative;z-index:2;padding:24px 0;border-top:1px solid rgba(255,255,255,0.06);}
 .hero-logos-inner{max-width:var(--container);margin:0 auto;padding:0 28px;display:flex;justify-content:center;gap:28px;align-items:center;opacity:0.25;}
 .hero-logos-inner span{font-size:12px;font-weight:600;color:#fff;white-space:nowrap;letter-spacing:-0.01em;}
@@ -71,7 +87,6 @@ a{text-decoration:none;color:inherit;}
 .process-text h3{font-size:24px;font-weight:700;color:var(--text);letter-spacing:-0.03em;margin-bottom:12px;}
 .process-text p{font-size:14px;color:var(--text-60);line-height:1.65;margin-bottom:24px;}
 .process-diagram{background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius);padding:32px;min-height:280px;display:flex;align-items:center;justify-content:center;}
-/* Workflow mock */
 .wf-grid{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;align-items:center;}
 .wf-node{display:flex;flex-direction:column;align-items:center;gap:6px;}
 .wf-node-icon{width:48px;height:48px;border-radius:12px;background:#fff;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
@@ -117,7 +132,6 @@ a{text-decoration:none;color:inherit;}
 .case-card-desc{font-size:13px;color:var(--text);line-height:1.45;margin-bottom:8px;}
 .case-card-link{font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:4px;}
 .case-card-link svg{width:12px;height:12px;}
-
 .cases-cta{text-align:center;margin-top:32px;}
 
 /* ── USE CASES ── */
@@ -133,7 +147,8 @@ a{text-decoration:none;color:inherit;}
 .uc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
 .uc-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:border-color 0.3s;}
 .uc-card:hover{border-color:#ccc;}
-.uc-card-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#fde8e0,#fcd5c8);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px;}
+.uc-card-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#fde8e0,#fcd5c8);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+.uc-card-icon svg{width:20px;height:20px;color:var(--orange);}
 .uc-card h3{font-size:14px;font-weight:600;color:var(--text);letter-spacing:-0.01em;margin-bottom:6px;}
 .uc-card p{font-size:12px;color:var(--text-60);line-height:1.5;margin-bottom:12px;}
 .uc-card-stat{font-size:11px;font-weight:600;color:var(--orange);}
@@ -158,7 +173,6 @@ a{text-decoration:none;color:inherit;}
 .footer-bottom p{font-size:11px;color:rgba(255,255,255,0.2);}
 .footer-bottom a{font-size:11px;color:rgba(255,255,255,0.2);text-decoration:none;margin-left:16px;}
 .footer-bottom a:hover{color:rgba(255,255,255,0.5);}
-/* Grande marca no fundo */
 .footer-brand-bg{padding:40px 0 20px;text-align:center;overflow:hidden;}
 .footer-brand-bg span{font-size:clamp(60px,12vw,140px);font-weight:800;color:rgba(255,255,255,0.03);letter-spacing:-0.05em;white-space:nowrap;}
 
@@ -180,10 +194,10 @@ a{text-decoration:none;color:inherit;}
 <nav class="nav"><div class="nav-inner">
   <a href="#" class="nav-logo">
     <div class="nav-logo-icon"><svg viewBox="0 0 24 24" fill="#fff" stroke="none"><rect x="6" y="10" width="12" height="3" rx="1.5"/><rect x="6" y="15" width="8" height="3" rx="1.5"/></svg></div>
-    [INSERIR: marca]
+    AgencyFlow
   </a>
-  <ul class="nav-links"><li><a href="#">Case Studies</a></li><li><a href="#">Resources</a></li><li><a href="#">Blog</a></li><li><a href="#">About us</a></li></ul>
-  <a href="#" class="btn-orange" style="font-size:12px;padding:8px 18px;">Book your consultation</a>
+  <ul class="nav-links"><li><a href="#">Cases</a></li><li><a href="#">Recursos</a></li><li><a href="#">Blog</a></li><li><a href="#">Sobre</a></li></ul>
+  <a href="#" class="btn-orange" style="font-size:12px;padding:8px 18px;">Agendar consultoria</a>
 </div></nav>
 
 <!-- ══════ HERO ══════ -->
@@ -191,13 +205,13 @@ a{text-decoration:none;color:inherit;}
   <div class="hero-bg"></div>
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <div class="hero-badge reveal"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> 4.8 stars all 10+ reviews</div>
-    <h1 class="reveal rd1">[INSERIR: Headline — ex: More time & revenue through smart automation and AI]</h1>
-    <p class="hero-sub reveal rd2">[INSERIR: Subtitulo — We analyze your processes, discover hidden potential and use modern AI tools to make your company grow faster, smarter and more profitably.]</p>
-    <div class="reveal rd3"><a href="#" class="btn-orange">Book your initial consultation</a></div>
+    <div class="hero-badge reveal"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> +47 agências parceiras — 4.9 estrelas</div>
+    <h1 class="reveal rd1">Mais tempo e mais faturamento com automação inteligente de IA</h1>
+    <p class="hero-sub reveal rd2">Analisamos seus processos, descobrimos o potencial escondido e usamos ferramentas modernas de IA para fazer sua agência crescer mais rápido, com menos operação manual.</p>
+    <div class="reveal rd3"><a href="#" class="btn-orange">Agendar consultoria inicial gratuita</a></div>
   </div>
   <div class="hero-logos"><div class="hero-logos-inner">
-    <span>[Logo 1]</span><span>[Logo 2]</span><span>[Logo 3]</span><span>[Logo 4]</span><span>[Logo 5]</span><span>[Logo 6]</span><span>[Logo 7]</span>
+    <span>Hotmart</span><span>ActiveCampaign</span><span>Make.com</span><span>n8n</span><span>OpenAI</span><span>Zapier</span><span>HubSpot</span>
   </div></div>
 </section>
 
@@ -205,14 +219,14 @@ a{text-decoration:none;color:inherit;}
 <section class="section-mission">
   <div class="container">
     <div class="mission-grid reveal">
-      <div class="mission-img">Imagem artistica / ilustracao</div>
+      <div class="mission-img">Imagem artística ou ilustração do time</div>
       <div class="mission-text">
-        <h3>[INSERIR: Headline missao — ex: What we're doing sounds easy. But it isn't.]</h3>
+        <h3>O que fazemos parece simples. Mas não é.</h3>
         <div class="mission-qa">
-          <p>[INSERIR: Pergunta 1]? <strong>[INSERIR: Resposta curta].</strong></p>
-          <p>[INSERIR: Pergunta 2]? <strong>[INSERIR: Resposta curta].</strong></p>
-          <p>[INSERIR: Pergunta 3]? <strong>[INSERIR: Resposta curta].</strong></p>
-          <p><strong>[INSERIR: Frase de impacto sobre a missao real da empresa — o que realmente importa.]</strong></p>
+          <p>Sua agência trava no operacional enquanto os concorrentes escalam? <strong>É um problema de processos, não de talento.</strong></p>
+          <p>Você perde horas em tarefas repetitivas que uma IA poderia fazer? <strong>Essas horas valem dinheiro que você está deixando na mesa.</strong></p>
+          <p>Tentou automatizar antes e não funcionou? <strong>Porque automação sem estratégia é só tecnologia cara.</strong></p>
+          <p><strong>Nossa missão real: transformar o tempo que você perde em receita que você ganha — de forma previsível e escalável.</strong></p>
         </div>
       </div>
     </div>
@@ -223,31 +237,29 @@ a{text-decoration:none;color:inherit;}
 <section class="section-process">
   <div class="container">
     <div class="process-header reveal">
-      <div class="process-badge">Our Process</div>
-      <h2>[INSERIR: Headline — All of our projects follow a clearly defined process]</h2>
+      <div class="process-badge">Nosso Processo</div>
+      <h2>Todos os nossos projetos seguem um processo claramente definido</h2>
     </div>
     <div class="process-tabs reveal rd1">
-      <button class="process-tab active">1. System Audit</button>
-      <button class="process-tab">2. Design Workflow</button>
-      <button class="process-tab">3. Design & Automation</button>
-      <button class="process-tab">4. Implementation</button>
-      <button class="process-tab">5. Monitoring</button>
+      <button class="process-tab active">1. Auditoria</button>
+      <button class="process-tab">2. Mapeamento</button>
+      <button class="process-tab">3. Design & IA</button>
+      <button class="process-tab">4. Implementação</button>
+      <button class="process-tab">5. Monitoramento</button>
     </div>
     <div class="process-content reveal rd2">
       <div class="process-text">
-        <h3>[INSERIR: Titulo da etapa ativa]</h3>
-        <p>[INSERIR: Descricao da etapa — o que acontece, como funciona, o que o cliente recebe]</p>
-        <a href="#" class="btn-orange">Book your initial consultation</a>
+        <h3>Auditoria de Processos</h3>
+        <p>Em 72 horas mapeamos todos os seus processos atuais, identificamos os gargalos que mais custam dinheiro e entregamos um diagnóstico completo com prioridades de automação rankeadas por ROI.</p>
+        <a href="#" class="btn-orange">Agendar consultoria inicial gratuita</a>
       </div>
       <div class="process-diagram">
         <div class="wf-grid">
-          <div class="wf-node"><div class="wf-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><span class="wf-node-label">Gmail Trigger</span></div>
+          <div class="wf-node"><div class="wf-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><span class="wf-node-label">Lead entra</span></div>
           <span class="wf-arrow">→</span>
-          <div class="wf-node"><div class="wf-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><span class="wf-node-label">Get Message</span></div>
+          <div class="wf-node"><div class="wf-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div><span class="wf-node-label">IA classifica</span></div>
           <span class="wf-arrow">→</span>
-          <div class="wf-node"><div class="wf-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div><span class="wf-node-label">AI Model</span></div>
-          <span class="wf-arrow">→</span>
-          <div class="wf-node"><div class="wf-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div><span class="wf-node-label">Switch Rules</span></div>
+          <div class="wf-node"><div class="wf-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div><span class="wf-node-label">CRM atualiza</span></div>
         </div>
       </div>
     </div>
@@ -257,21 +269,21 @@ a{text-decoration:none;color:inherit;}
 <!-- ══════ TESTIMONIAL (dark) ══════ -->
 <section class="section-testimonial">
   <div class="container testimonial-inner">
-    <div class="testimonial-header reveal"><h2>[INSERIR: Headline — We are shaping the future together with you.]</h2></div>
+    <div class="testimonial-header reveal"><h2>Estamos construindo o futuro junto com nossos clientes.</h2></div>
     <div class="testimonial-tabs reveal rd1">
-      <span class="testimonial-tab active">[INSERIR: Cliente 1]</span>
-      <span class="testimonial-tab">[INSERIR: Cliente 2]</span>
-      <span class="testimonial-tab">[INSERIR: Cliente 3]</span>
+      <span class="testimonial-tab active">Crescimento Digital BR</span>
+      <span class="testimonial-tab">Agência Vortex</span>
+      <span class="testimonial-tab">Studio Ação</span>
     </div>
     <div class="testimonial-card reveal rd2">
       <div class="tc-photo">Foto do cliente</div>
       <div class="tc-content">
-        <div class="tc-logo">[Logo empresa]</div>
-        <p class="tc-quote">"[INSERIR: Depoimento completo do cliente — 2-3 frases sobre resultado, parceria e impacto]"</p>
-        <div><div class="tc-author-name">[INSERIR: Nome]</div><div class="tc-author-role">[INSERIR: Cargo]</div></div>
+        <div class="tc-logo">Crescimento Digital BR</div>
+        <p class="tc-quote">"Em 60 dias a AgencyFlow automatizou 80% dos nossos processos de onboarding. Economizamos 40 horas/semana e aumentamos a capacidade de atender clientes em 3x sem contratar ninguém."</p>
+        <div><div class="tc-author-name">Rodrigo Farias</div><div class="tc-author-role">CEO, Crescimento Digital BR</div></div>
       </div>
     </div>
-    <div class="tc-nav reveal rd3"><button><</button><button>></button></div>
+    <div class="tc-nav reveal rd3"><button>&lt;</button><button>&gt;</button></div>
   </div>
 </section>
 
@@ -279,42 +291,42 @@ a{text-decoration:none;color:inherit;}
 <section class="section-cases">
   <div class="container">
     <div class="cases-header reveal">
-      <div class="cases-badge">Case Studies</div>
-      <h2>[INSERIR: Headline — Our customers' success stories]</h2>
+      <div class="cases-badge">Cases de Sucesso</div>
+      <h2>As histórias de sucesso dos nossos clientes</h2>
     </div>
     <div class="cases-grid">
       <div class="case-card reveal">
         <div class="case-card-img">
-          <div class="case-card-badge">[INSERIR: Categoria]</div>
-          <div class="case-card-logo" style="margin-top:auto;">[INSERIR: Logo]</div>
+          <div class="case-card-badge">Agência de Marketing</div>
+          <div class="case-card-logo" style="margin-top:auto;">Vortex</div>
         </div>
         <div class="case-card-info">
-          <p class="case-card-desc">[INSERIR: Descricao do case — resultado concreto do cliente]</p>
-          <span class="case-card-link">View Case Study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          <p class="case-card-desc">Automação do funil de prospecção reduziu o ciclo de vendas de 21 para 7 dias e triplicou a taxa de fechamento.</p>
+          <span class="case-card-link">Ver case completo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
         </div>
       </div>
       <div class="case-card reveal rd1">
         <div class="case-card-img" style="background:linear-gradient(145deg,#333,#222);">
-          <div class="case-card-badge">[INSERIR: Categoria]</div>
-          <div class="case-card-logo" style="margin-top:auto;">[INSERIR: Logo]</div>
+          <div class="case-card-badge">Infoprodutor</div>
+          <div class="case-card-logo" style="margin-top:auto;">EduScale</div>
         </div>
         <div class="case-card-info">
-          <p class="case-card-desc">[INSERIR: Descricao do case 2]</p>
-          <span class="case-card-link">View Case Study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          <p class="case-card-desc">Pipeline de vendas totalmente automatizado gerou R$420K em receita recorrente no primeiro trimestre pós-implementação.</p>
+          <span class="case-card-link">Ver case completo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
         </div>
       </div>
       <div class="case-card reveal rd2">
         <div class="case-card-img" style="background:linear-gradient(145deg,#3a3a3a,#252525);">
-          <div class="case-card-badge">[INSERIR: Categoria]</div>
-          <div class="case-card-logo" style="margin-top:auto;">[INSERIR: Logo]</div>
+          <div class="case-card-badge">E-commerce</div>
+          <div class="case-card-logo" style="margin-top:auto;">ModaBR</div>
         </div>
         <div class="case-card-info">
-          <p class="case-card-desc">[INSERIR: Descricao do case 3]</p>
-          <span class="case-card-link">View Case Study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          <p class="case-card-desc">Atendimento via IA resolveu 73% dos tickets sem intervenção humana, cortando custo de suporte em 60%.</p>
+          <span class="case-card-link">Ver case completo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
         </div>
       </div>
     </div>
-    <div class="cases-cta reveal"><a href="#" class="btn-orange">Book your initial consultation</a></div>
+    <div class="cases-cta reveal"><a href="#" class="btn-orange">Agendar consultoria inicial gratuita</a></div>
   </div>
 </section>
 
@@ -323,52 +335,52 @@ a{text-decoration:none;color:inherit;}
   <div class="container">
     <div class="uc-header reveal">
       <div class="uc-badge">Use Cases</div>
-      <h2>[INSERIR: Headline — Automation in practice]</h2>
-      <p>[INSERIR: Subtitulo — examples of projects successfully implemented]</p>
+      <h2>Automação na prática</h2>
+      <p>Exemplos de projetos implementados com sucesso nos últimos 12 meses</p>
     </div>
     <div class="uc-tabs reveal rd1">
-      <button class="uc-tab active">E-Commerce</button>
-      <button class="uc-tab">Others</button>
-      <button class="uc-tab">Consulting</button>
-      <button class="uc-tab">Tech Company</button>
-      <button class="uc-tab">Agency</button>
+      <button class="uc-tab active">Agências</button>
+      <button class="uc-tab">Infoprodutores</button>
+      <button class="uc-tab">Consultores</button>
+      <button class="uc-tab">Tech</button>
+      <button class="uc-tab">E-commerce</button>
     </div>
     <div class="uc-grid">
       <div class="uc-card reveal">
-        <div class="uc-card-icon">&#128640;</div>
-        <h3>[INSERIR: Use case 1 titulo]</h3>
-        <p>[INSERIR: Descricao curta do use case 1]</p>
-        <div class="uc-card-stat">[INSERIR: Resultado — ex: +17% less manual effort]</div>
+        <div class="uc-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+        <h3>Prospecção automatizada por e-mail</h3>
+        <p>Sequências personalizadas disparadas por comportamento com segmentação em tempo real por IA.</p>
+        <div class="uc-card-stat">-68% no tempo de prospecção manual</div>
       </div>
       <div class="uc-card reveal rd1">
-        <div class="uc-card-icon">&#128202;</div>
-        <h3>[INSERIR: Use case 2 titulo]</h3>
-        <p>[INSERIR: Descricao curta]</p>
-        <div class="uc-card-stat">[INSERIR: Resultado]</div>
+        <div class="uc-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg></div>
+        <h3>Relatórios de resultado automáticos</h3>
+        <p>Dashboard atualizado em tempo real e relatório de cliente gerado e enviado sem intervenção humana.</p>
+        <div class="uc-card-stat">+40h/mês economizadas por agência</div>
       </div>
       <div class="uc-card reveal rd2">
-        <div class="uc-card-icon">&#128260;</div>
-        <h3>[INSERIR: Use case 3 titulo]</h3>
-        <p>[INSERIR: Descricao curta]</p>
-        <div class="uc-card-stat">[INSERIR: Resultado]</div>
+        <div class="uc-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+        <h3>Onboarding de clientes sem fricção</h3>
+        <p>Fluxo de cadastro, contrato, briefing e acesso ao projeto 100% automático desde a assinatura.</p>
+        <div class="uc-card-stat">De 3 dias para 4 horas no onboarding</div>
       </div>
       <div class="uc-card reveal">
-        <div class="uc-card-icon">&#128247;</div>
-        <h3>[INSERIR: Use case 4 titulo]</h3>
-        <p>[INSERIR: Descricao curta]</p>
-        <div class="uc-card-stat">[INSERIR: Resultado]</div>
+        <div class="uc-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Qualificação de leads com IA</h3>
+        <p>Score automático de cada lead baseado em comportamento, perfil e intenção de compra detectada pela IA.</p>
+        <div class="uc-card-stat">+3x na taxa de conversão de leads</div>
       </div>
       <div class="uc-card reveal rd1">
-        <div class="uc-card-icon">&#128196;</div>
-        <h3>[INSERIR: Use case 5 titulo]</h3>
-        <p>[INSERIR: Descricao curta]</p>
-        <div class="uc-card-stat">[INSERIR: Resultado]</div>
+        <div class="uc-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+        <h3>Gestão de projetos sem planilha</h3>
+        <p>Integração entre CRM, ferramenta de projeto e comunicação — tudo sincronizado em tempo real.</p>
+        <div class="uc-card-stat">-52% no tempo de gestão por projeto</div>
       </div>
       <div class="uc-card reveal rd2">
-        <div class="uc-card-icon">&#129302;</div>
-        <h3>[INSERIR: Use case 6 titulo]</h3>
-        <p>[INSERIR: Descricao curta]</p>
-        <div class="uc-card-stat">[INSERIR: Resultado]</div>
+        <div class="uc-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M6.34 17.66l-1.41 1.41M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M12 2v2M12 20v2"/></svg></div>
+        <h3>Atendimento 24h com IA conversacional</h3>
+        <p>Bot treinado com seu conhecimento de negócio resolve 70%+ das demandas sem humano.</p>
+        <div class="uc-card-stat">-60% no custo de suporte ao cliente</div>
       </div>
     </div>
   </div>
@@ -381,30 +393,29 @@ a{text-decoration:none;color:inherit;}
       <div class="footer-logo-icon"><svg viewBox="0 0 24 24" fill="var(--orange)" stroke="none"><rect x="6" y="10" width="12" height="3" rx="1.5"/><rect x="6" y="15" width="8" height="3" rx="1.5"/></svg></div>
     </div>
     <div class="footer-grid">
-      <div class="footer-col"><div class="footer-col-title">Blog</div><ul><li><a href="#">[INSERIR: Link 1]</a></li><li><a href="#">[INSERIR: Link 2]</a></li><li><a href="#">[INSERIR: Link 3]</a></li></ul></div>
-      <div class="footer-col"><div class="footer-col-title">Resources</div><ul><li><a href="#">[INSERIR: Link 1]</a></li><li><a href="#">[INSERIR: Link 2]</a></li><li><a href="#">[INSERIR: Link 3]</a></li></ul></div>
-      <div class="footer-col"><div class="footer-col-title">Company</div><ul><li><a href="#">About us</a></li><li><a href="#">Schedule a meeting</a></li><li><a href="#">Carreer</a></li></ul></div>
+      <div class="footer-col"><div class="footer-col-title">Blog</div><ul><li><a href="#">Automação para agências</a></li><li><a href="#">IA no marketing digital</a></li><li><a href="#">Casos de uso</a></li></ul></div>
+      <div class="footer-col"><div class="footer-col-title">Recursos</div><ul><li><a href="#">Templates de automação</a></li><li><a href="#">Guia de implementação</a></li><li><a href="#">API Docs</a></li></ul></div>
+      <div class="footer-col"><div class="footer-col-title">Empresa</div><ul><li><a href="#">Sobre nós</a></li><li><a href="#">Agendar reunião</a></li><li><a href="#">Carreiras</a></li></ul></div>
       <div class="footer-col"><div class="footer-col-title">Social</div><ul><li><a href="#">LinkedIn</a></li><li><a href="#">YouTube</a></li><li><a href="#">Instagram</a></li></ul></div>
       <div class="footer-col">
         <div class="footer-newsletter-title">Newsletter</div>
         <div class="footer-newsletter">
-          <input class="footer-input" type="email" placeholder="Your email address">
-          <button class="btn-orange btn-orange-sm">Register</button>
+          <input class="footer-input" type="email" placeholder="Seu e-mail">
+          <button class="btn-orange btn-orange-sm">Assinar</button>
         </div>
       </div>
     </div>
     <div class="footer-bottom">
-      <p>[INSERIR: Razao social] — [INSERIR: Endereco]</p>
-      <p><a href="#">Privacy Policy</a><a href="#">Legal notice</a></p>
+      <p>AgencyFlow Tecnologia Ltda — Sao Paulo, SP</p>
+      <p><a href="#">Privacidade</a><a href="#">Termos</a></p>
     </div>
   </div>
-  <div class="footer-brand-bg"><span>[INSERIR: marca]</span></div>
+  <div class="footer-brand-bg"><span>AgencyFlow</span></div>
 </footer>
 
 <script>
 var ro=new IntersectionObserver(function(e){e.forEach(function(i){if(i.isIntersecting)i.target.classList.add('v');});},{threshold:0.05,rootMargin:'0px 0px -30px 0px'});
 document.querySelectorAll('.reveal').forEach(function(el){ro.observe(el);});
-// Tabs
 document.querySelectorAll('.process-tab').forEach(function(t){t.addEventListener('click',function(){document.querySelectorAll('.process-tab').forEach(function(b){b.classList.remove('active');});t.classList.add('active');});});
 document.querySelectorAll('.uc-tab').forEach(function(t){t.addEventListener('click',function(){document.querySelectorAll('.uc-tab').forEach(function(b){b.classList.remove('active');});t.classList.add('active');});});
 document.querySelectorAll('.testimonial-tab').forEach(function(t){t.addEventListener('click',function(){document.querySelectorAll('.testimonial-tab').forEach(function(b){b.classList.remove('active');});t.classList.add('active');});});

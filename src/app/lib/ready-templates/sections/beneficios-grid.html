@@ -1,0 +1,73 @@
+<style>
+.benef{padding:80px 0;background:#161616;position:relative;overflow:hidden}
+.benef::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background-image:radial-gradient(circle,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
+.benef .container{max-width:1100px;margin:0 auto;padding:0 80px;position:relative}
+.benef-head{text-align:center;margin-bottom:56px}
+.benef-badge{display:inline-flex;padding:6px 16px;border-radius:20px;background:rgba(255,92,0,0.12);border:1px solid rgba(255,92,0,0.2);margin-bottom:16px}
+.benef-badge span{font-size:12px;font-weight:600;color:#FF5C00;text-transform:uppercase;letter-spacing:0.06em}
+.benef h2{font-family:'Montserrat',sans-serif;font-size:clamp(24px,3.5vw,36px);font-weight:800;color:#F5F5F5;line-height:1.2;letter-spacing:-0.02em;margin-bottom:12px}
+.benef-sub{font-size:16px;color:#999;max-width:560px;margin:0 auto;line-height:1.7}
+.benef-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.benef-card{background:linear-gradient(135deg,rgba(255,92,0,0.04),transparent);background-color:#1E1E1E;border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:32px;transition:all 0.3s ease;position:relative;overflow:hidden}
+.benef-card::before{content:'';position:absolute;top:-60px;right:-60px;width:160px;height:160px;background:radial-gradient(circle,rgba(255,92,0,0.06),transparent 70%);pointer-events:none;transition:opacity 0.3s ease;opacity:0}
+.benef-card:hover{transform:translateY(-6px);border-color:rgba(255,92,0,0.30);box-shadow:0 0 32px rgba(255,92,0,0.20),0 12px 40px rgba(0,0,0,0.4);background:linear-gradient(135deg,rgba(255,92,0,0.08),transparent)}
+.benef-card:hover::before{opacity:1}
+.benef-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;flex-shrink:0;transition:all 0.3s ease}
+.benef-card h3{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:700;color:#F5F5F5;margin-bottom:8px}
+.benef-card p{font-size:14px;color:#999;line-height:1.7}
+@media(max-width:768px){.benef .container{padding:0 20px}.benef{padding:56px 0}.benef-grid{grid-template-columns:1fr;gap:16px}.benef h2{font-size:24px}}
+</style>
+
+<section class="benef">
+  <div class="container">
+    <div class="benef-head">
+      <div class="benef-badge"><span>O que voce vai dominar</span></div>
+      <h2>O que voce vai dominar com o Metodo Escala Digital</h2>
+      <p class="benef-sub">Cada modulo foi construido para voce implementar rapido e ver resultado real</p>
+    </div>
+    <div class="benef-grid">
+      <div class="benef-card">
+        <div class="benef-icon" style="background:rgba(255,92,0,0.20);box-shadow:0 0 16px rgba(255,92,0,0.20)">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#FF5C00" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <h3>Validacao Rapida</h3>
+        <p>Valide sua ideia de produto em 48 horas com tecnica de pre-venda sem precisar criar nada antes</p>
+      </div>
+      <div class="benef-card">
+        <div class="benef-icon" style="background:rgba(99,102,241,0.20);box-shadow:0 0 16px rgba(99,102,241,0.20)">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#6366F1" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        </div>
+        <h3>Produto Digital Lucrativo</h3>
+        <p>Crie seu curso, mentoria ou e-book com estrutura que converte — do planejamento a entrega</p>
+      </div>
+      <div class="benef-card">
+        <div class="benef-icon" style="background:rgba(34,197,94,0.20);box-shadow:0 0 16px rgba(34,197,94,0.20)">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#22C55E" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <h3>Pagina que Vende</h3>
+        <p>Monte sua landing page do zero usando os templates testados com mais de R$ 2M em vendas</p>
+      </div>
+      <div class="benef-card">
+        <div class="benef-icon" style="background:rgba(251,191,36,0.20);box-shadow:0 0 16px rgba(251,191,36,0.20)">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#FBBF24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        </div>
+        <h3>Trafego Organico</h3>
+        <p>Atraia compradores usando Instagram, WhatsApp e YouTube sem investir um centavo em anuncios</p>
+      </div>
+      <div class="benef-card">
+        <div class="benef-icon" style="background:rgba(236,72,153,0.20);box-shadow:0 0 16px rgba(236,72,153,0.20)">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#EC4899" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+        <h3>Lancamento Estruturado</h3>
+        <p>Execute seu primeiro lancamento com sequencia de e-mails, stories e ao vivos que geram urgencia real</p>
+      </div>
+      <div class="benef-card">
+        <div class="benef-icon" style="background:rgba(20,184,166,0.20);box-shadow:0 0 16px rgba(20,184,166,0.20)">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#14B8A6" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        </div>
+        <h3>Escala Automatizada</h3>
+        <p>Configure seu funil de vendas para trabalhar 24h por dia e gerar receita mesmo enquanto voce dorme</p>
+      </div>
+    </div>
+  </div>
+</section>

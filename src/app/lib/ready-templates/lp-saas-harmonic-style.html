@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>[INSERIR: Nome do Produto]</title>
+<title>HarmonicAI — Inteligência de mercado para investidores e founders que decidem mais rápido</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#fff;--bg-alt:#fafafa;--bg-dark:#111;--bg-dark-2:#1a1a1a;
   --text:#1d1d1f;--text-60:#6e6e73;--text-40:#999;
-  --blue:#0071e3;--border:#e5e5e7;--border-dark:rgba(255,255,255,0.1);
+  --violet:#8b5cf6;--violet-hover:#7c3aed;
+  --border:#e5e5e7;--border-dark:rgba(255,255,255,0.1);
   --font:'Inter',-apple-system,sans-serif;--container:1060px;--radius:16px;--radius-sm:10px;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -18,31 +19,54 @@ body{font-family:var(--font);color:var(--text);background:var(--bg);line-height:
 a{text-decoration:none;color:inherit;}
 .container{max-width:var(--container);margin:0 auto;padding:0 28px;}
 
+@keyframes brilho{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
+
 /* ── NAV ── */
 .nav{position:fixed;top:0;left:0;width:100%;z-index:100;background:rgba(255,255,255,0.85);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);}
 .nav-inner{max-width:var(--container);margin:0 auto;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;}
 .nav-logo{font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;}
 .nav-logo-dots{display:flex;gap:2px;}
-.nav-logo-dots span{width:6px;height:6px;border-radius:50%;background:#ff6b4a;}
+.nav-logo-dots span{width:6px;height:6px;border-radius:50%;}
+.nav-logo-dots span:nth-child(1){background:#8b5cf6;}
+.nav-logo-dots span:nth-child(2){background:#ec4899;}
 .nav-links{display:flex;gap:24px;list-style:none;}
 .nav-links a{font-size:13px;font-weight:400;color:var(--text-60);transition:color 0.2s;}
 .nav-links a:hover{color:var(--text);}
-.btn-dark{padding:8px 18px;font-size:12px;font-weight:600;color:#fff;background:var(--text);border:none;border-radius:100px;cursor:pointer;font-family:var(--font);transition:all 0.2s;}
-.btn-dark:hover{background:#333;}
+
+.btn-dark{
+  padding:8px 18px;font-size:12px;font-weight:600;color:#fff;
+  background-image:linear-gradient(45deg,#7c3aed,#8b5cf6,#7c3aed,#a78bfa);
+  background-size:400% 200%;
+  animation:brilho 3.4s ease infinite;
+  border:none;border-radius:100px;cursor:pointer;font-family:var(--font);
+  transition:box-shadow 0.2s,transform 0.2s;
+  box-shadow:0 4px 16px rgba(139,92,246,0.30);
+}
+.btn-dark:hover{box-shadow:0 0 36px rgba(139,92,246,0.45),0 8px 24px rgba(139,92,246,0.2);transform:translateY(-1px);}
 
 /* ── HERO ── */
 .hero{padding:120px 0 0;text-align:center;position:relative;}
 .hero-tagline{font-size:13px;color:var(--text-40);margin-bottom:24px;font-style:italic;}
 .hero h1{font-size:clamp(28px,4vw,46px);font-weight:500;color:var(--text);letter-spacing:-0.03em;line-height:1.2;max-width:700px;margin:0 auto 20px;}
 .hero .hero-body{font-size:clamp(16px,1.8vw,20px);font-weight:400;color:var(--text-60);max-width:620px;margin:0 auto 0;line-height:1.5;letter-spacing:-0.01em;}
-/* gradiente lilás sutil no fundo */
-.hero::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:120%;height:300px;background:radial-gradient(ellipse at 50% 100%,rgba(180,160,255,0.12),transparent 70%);pointer-events:none;z-index:0;}
+/* gradiente lilás sutil */
+.hero::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:120%;height:300px;background:radial-gradient(ellipse at 50% 100%,rgba(139,92,246,0.10),transparent 70%);pointer-events:none;z-index:0;}
 .hero>*{position:relative;z-index:1;}
 
 /* ── FLOATING BAR ── */
 .float-bar{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:90;background:var(--text);color:#fff;border-radius:100px;padding:8px 8px 8px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,0.2);font-size:12px;font-weight:400;}
 .float-bar .fb-label{color:rgba(255,255,255,0.5);}
-.float-bar .btn-float{padding:8px 18px;background:#fff;color:var(--text);border-radius:100px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:var(--font);}
+.float-bar .btn-float{
+  padding:8px 18px;
+  background-image:linear-gradient(45deg,#7c3aed,#8b5cf6,#7c3aed,#a78bfa);
+  background-size:400% 200%;
+  animation:brilho 3.4s ease infinite;
+  color:#fff;border-radius:100px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:var(--font);
+}
 
 /* ── LOGO CLOUD ── */
 .logos{padding:80px 0 64px;text-align:center;}
@@ -61,7 +85,6 @@ a{text-decoration:none;color:inherit;}
 .discover-card h3{font-size:16px;font-weight:600;color:var(--text);letter-spacing:-0.02em;margin-bottom:4px;}
 .discover-card .dc-sub{font-size:12px;color:var(--text-40);margin-bottom:16px;line-height:1.4;}
 .discover-card-mock{width:100%;aspect-ratio:4/3;background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
-/* Mockup interno simulando interface */
 .dc-mock-inner{width:90%;height:85%;border-radius:6px;background:#fff;border:1px solid var(--border);overflow:hidden;}
 .dc-mock-bar{height:28px;background:var(--bg-alt);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 10px;gap:4px;}
 .dc-mock-dot{width:5px;height:5px;border-radius:50%;background:#ddd;}
@@ -82,14 +105,13 @@ a{text-decoration:none;color:inherit;}
 .act-card h3{font-size:16px;font-weight:600;color:#fff;margin-bottom:4px;letter-spacing:-0.02em;}
 .act-card .ac-sub{font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:16px;}
 .act-card-mock{width:100%;aspect-ratio:16/10;background:#222;border:1px solid var(--border-dark);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;}
-/* White card floating inside dark mock */
 .act-white-card{width:85%;background:#fff;border-radius:10px;padding:16px;box-shadow:0 8px 32px rgba(0,0,0,0.3);}
 .awc-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-.awc-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;}
+.awc-dot{width:8px;height:8px;border-radius:50%;background:#8b5cf6;}
 .awc-title{font-size:12px;font-weight:600;color:var(--text);}
 .awc-meta{font-size:9px;color:var(--text-40);}
 .awc-line{height:6px;border-radius:3px;background:#f0f0f0;margin-bottom:5px;}
-.awc-avatars{display:flex;gap:-4px;}
+.awc-avatars{display:flex;}
 .awc-av{width:20px;height:20px;border-radius:50%;border:2px solid #fff;margin-left:-6px;}
 
 /* ── SECTION: DEVELOPER (DARK) ── */
@@ -114,6 +136,37 @@ a{text-decoration:none;color:inherit;}
 .code-tab:not(.active){background:none;color:rgba(255,255,255,0.25);}
 .code-body{padding:20px;font-family:'SF Mono','Fira Code',monospace;font-size:11px;line-height:1.9;color:rgba(255,255,255,0.5);overflow-x:auto;white-space:pre;}
 .code-body .kw{color:#c792ea;}.code-body .fn{color:#82aaff;}.code-body .str{color:#c3e88d;}.code-body .num{color:#f78c6c;}.code-body .br{color:rgba(255,255,255,0.2);}
+
+/* ── PRICING ── */
+.section-pricing{padding:80px 0;background:var(--bg-alt);}
+.pricing-header{text-align:center;margin-bottom:48px;}
+.pricing-header h2{font-size:clamp(24px,3vw,36px);font-weight:700;color:var(--text);letter-spacing:-0.03em;margin-bottom:8px;}
+.pricing-header p{font-size:14px;color:var(--text-60);}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:900px;margin:0 auto;}
+.pricing-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:32px;position:relative;}
+.pricing-card.featured{border-color:var(--violet);box-shadow:0 0 0 1px var(--violet),0 8px 32px rgba(139,92,246,0.12);}
+.pricing-badge-top{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--violet);color:#fff;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:4px 14px;border-radius:100px;white-space:nowrap;}
+.pricing-plan{font-size:12px;font-weight:600;color:var(--text-60);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
+.pricing-price{font-size:36px;font-weight:800;color:var(--text);letter-spacing:-0.03em;line-height:1;margin-bottom:4px;}
+.pricing-price span{font-size:16px;font-weight:400;color:var(--text-60);}
+.pricing-period{font-size:12px;color:var(--text-40);margin-bottom:20px;}
+.pricing-divider{height:1px;background:var(--border);margin-bottom:20px;}
+.pricing-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.pricing-features li{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-60);}
+.pricing-features li svg{width:14px;height:14px;color:var(--violet);flex-shrink:0;}
+
+.btn-pricing{
+  display:block;width:100%;padding:12px;text-align:center;
+  background-image:linear-gradient(45deg,#7c3aed,#8b5cf6,#7c3aed,#a78bfa);
+  background-size:400% 200%;
+  animation:brilho 3.4s ease infinite;
+  color:#fff;border:none;border-radius:100px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;
+  transition:box-shadow 0.2s,transform 0.2s;
+  box-shadow:0 4px 16px rgba(139,92,246,0.28);
+}
+.btn-pricing:hover{box-shadow:0 0 36px rgba(139,92,246,0.4);transform:translateY(-1px);}
+.btn-pricing-outline{display:block;width:100%;padding:12px;text-align:center;background:none;color:var(--text);border:1px solid var(--border);border-radius:100px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:border-color 0.2s;}
+.btn-pricing-outline:hover{border-color:#aaa;}
 
 /* ── SECTION: TESTIMONIALS ── */
 .section-test{padding:80px 0;background:var(--bg);}
@@ -142,7 +195,9 @@ a{text-decoration:none;color:inherit;}
 .footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:28px;margin-bottom:32px;}
 .footer-brand{font-size:14px;font-weight:700;color:#fff;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
 .footer-brand-dots{display:flex;gap:2px;}
-.footer-brand-dots span{width:5px;height:5px;border-radius:50%;background:#ff6b4a;}
+.footer-brand-dots span{width:5px;height:5px;border-radius:50%;}
+.footer-brand-dots span:nth-child(1){background:#8b5cf6;}
+.footer-brand-dots span:nth-child(2){background:#ec4899;}
 .footer-desc{font-size:11px;color:rgba(255,255,255,0.25);line-height:1.5;margin-bottom:12px;}
 .footer-badges{display:flex;gap:6px;}
 .footer-badge{padding:3px 8px;border-radius:4px;background:rgba(255,255,255,0.04);border:1px solid var(--border-dark);font-size:8px;font-weight:600;color:rgba(255,255,255,0.25);}
@@ -166,6 +221,7 @@ a{text-decoration:none;color:inherit;}
   .footer-grid{grid-template-columns:1fr 1fr;}
   .logo-pill{font-size:11px;padding:8px 14px;}
   .float-bar{display:none;}
+  .pricing-grid{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -173,43 +229,43 @@ a{text-decoration:none;color:inherit;}
 
 <!-- ══════ NAV ══════ -->
 <nav class="nav"><div class="nav-inner">
-  <a href="#" class="nav-logo"><div class="nav-logo-dots"><span></span><span></span></div>[INSERIR: Marca]</a>
-  <ul class="nav-links"><li><a href="#">Solutions</a></li><li><a href="#">Customer Stories</a></li><li><a href="#">For Founders</a></li><li><a href="#">Pricing</a></li><li><a href="#">Company</a></li></ul>
-  <button class="btn-dark">Book a demo</button>
+  <a href="#" class="nav-logo"><div class="nav-logo-dots"><span></span><span></span></div>HarmonicAI</a>
+  <ul class="nav-links"><li><a href="#">Soluções</a></li><li><a href="#">Casos de sucesso</a></li><li><a href="#">Para founders</a></li><li><a href="#">Preços</a></li><li><a href="#">Empresa</a></li></ul>
+  <button class="btn-dark">Agendar demo</button>
 </div></nav>
 
 <!-- ══════ HERO ══════ -->
 <section class="hero">
-  <p class="hero-tagline reveal">[INSERIR: tagline curta em italico]</p>
-  <h1 class="reveal rd1">Discover opportunities earlier, research them faster, and act with confidence.</h1>
-  <p class="hero-body reveal rd2">Proprietary data on millions of companies and the people behind them. Powered by AI that automates your workflow from discovery to decision.</p>
+  <p class="hero-tagline reveal">Inteligência de mercado em tempo real</p>
+  <h1 class="reveal rd1">Descubra oportunidades mais cedo, pesquise mais rápido e decida com confiança.</h1>
+  <p class="hero-body reveal rd2">Dados proprietários sobre milhões de empresas e as pessoas por trás delas. Alimentado por IA que automatiza seu fluxo de trabalho — da descoberta à decisão.</p>
 </section>
 
 <!-- ══════ LOGOS ══════ -->
 <section class="logos">
-  <p class="logos-label reveal">Trusted by the best</p>
+  <p class="logos-label reveal">Confiado pelos melhores</p>
   <div class="logos-grid reveal rd1">
-    <span class="logo-pill">Lightspeed</span><span class="logo-pill">Khosla Ventures</span><span class="logo-pill">Accel</span><span class="logo-pill">NEA</span><span class="logo-pill">Menlo Ventures</span><span class="logo-pill">Bessemer</span>
-    <span class="logo-pill">Kleiner Perkins</span><span class="logo-pill">First Round</span><span class="logo-pill">Thrive</span><span class="logo-pill">Coatue</span><span class="logo-pill">Forerunner</span>
-    <span class="logo-pill">Pear</span><span class="logo-pill">Firstmark</span><span class="logo-pill">Battery</span><span class="logo-pill">OpenAI</span><span class="logo-pill">HubSpot</span>
-    <span class="logo-pill">Goldman Sachs</span><span class="logo-pill">Anthropic</span><span class="logo-pill">Brex</span><span class="logo-pill">Notion</span><span class="logo-pill">Polymarket</span>
+    <span class="logo-pill">Softbank</span><span class="logo-pill">Kaszek</span><span class="logo-pill">Monashees</span><span class="logo-pill">Canary</span><span class="logo-pill">Valor Capital</span><span class="logo-pill">Astella</span>
+    <span class="logo-pill">Base10</span><span class="logo-pill">Pear VC</span><span class="logo-pill">Topia</span><span class="logo-pill">Nubank</span><span class="logo-pill">Nuvemshop</span>
+    <span class="logo-pill">Brex</span><span class="logo-pill">Notion</span><span class="logo-pill">Hotmart</span><span class="logo-pill">TOTVS</span><span class="logo-pill">Olist</span>
+    <span class="logo-pill">Loft</span><span class="logo-pill">QuintoAndar</span><span class="logo-pill">Creditas</span><span class="logo-pill">99</span><span class="logo-pill">iFood</span>
   </div>
 </section>
 
 <!-- ══════ DISCOVER ══════ -->
 <section class="section-discover">
   <div class="container">
-    <h2 class="section-title-lg reveal">Discover</h2>
-    <p class="section-sub reveal rd1">[INSERIR: subtitulo da secao Discover]</p>
+    <h2 class="section-title-lg reveal">Descubra</h2>
+    <p class="section-sub reveal rd1">Encontre empresas antes de todos — com sinais de crescimento em tempo real.</p>
     <div class="discover-grid">
       <div class="discover-card reveal">
-        <h3>[INSERIR: Feature 1 titulo]</h3>
-        <p class="dc-sub">[INSERIR: Feature 1 descricao curta]</p>
+        <h3>Busca por sinal de crescimento</h3>
+        <p class="dc-sub">Filtre por contratações, captações e mudanças de liderança que indicam momento de compra.</p>
         <div class="discover-card-mock">
           <div class="dc-mock-inner">
             <div class="dc-mock-bar"><div class="dc-mock-dot"></div><div class="dc-mock-dot"></div><div class="dc-mock-dot"></div></div>
             <div class="dc-mock-body">
-              <div class="dc-mock-row"><span class="dc-mock-pill">Search</span><span class="dc-mock-pill">Filter</span></div>
+              <div class="dc-mock-row"><span class="dc-mock-pill">Buscar</span><span class="dc-mock-pill">Filtrar</span></div>
               <div class="dc-mock-line" style="width:80%;"></div>
               <div class="dc-mock-line" style="width:60%;"></div>
               <div class="dc-mock-card"><div class="dc-mock-avatar"></div><div class="dc-mock-card-text"><div class="dc-mock-line" style="width:70px;height:5px;"></div><div class="dc-mock-line" style="width:50px;height:4px;background:#f0f0f0;"></div></div></div>
@@ -219,8 +275,8 @@ a{text-decoration:none;color:inherit;}
         </div>
       </div>
       <div class="discover-card reveal rd1">
-        <h3>[INSERIR: Feature 2 titulo]</h3>
-        <p class="dc-sub">[INSERIR: Feature 2 descricao]</p>
+        <h3>Perfil 360 de qualquer empresa</h3>
+        <p class="dc-sub">Financiamento, headcount, tecnologia usada, notícias e contatos dos decisores — tudo em uma tela.</p>
         <div class="discover-card-mock">
           <div class="dc-mock-inner">
             <div class="dc-mock-bar"><div class="dc-mock-dot"></div><div class="dc-mock-dot"></div><div class="dc-mock-dot"></div></div>
@@ -234,8 +290,8 @@ a{text-decoration:none;color:inherit;}
         </div>
       </div>
       <div class="discover-card reveal rd2">
-        <h3>[INSERIR: Feature 3 titulo]</h3>
-        <p class="dc-sub">[INSERIR: Feature 3 descricao]</p>
+        <h3>Alertas de mercado em tempo real</h3>
+        <p class="dc-sub">Receba notificações instantâneas quando uma empresa-alvo faz uma contratação estratégica ou levanta capital.</p>
         <div class="discover-card-mock">
           <div class="dc-mock-inner">
             <div class="dc-mock-bar"><div class="dc-mock-dot"></div><div class="dc-mock-dot"></div><div class="dc-mock-dot"></div></div>
@@ -256,15 +312,15 @@ a{text-decoration:none;color:inherit;}
 <!-- ══════ ACT (DARK) ══════ -->
 <section class="section-act">
   <div class="container">
-    <h2 class="section-title-lg reveal">Act</h2>
-    <p class="section-sub reveal rd1">[INSERIR: subtitulo da secao Act]</p>
+    <h2 class="section-title-lg reveal">Aja</h2>
+    <p class="section-sub reveal rd1">Organize seu pipeline e acesse nossos dados onde você já trabalha.</p>
     <div class="act-grid">
       <div class="act-card reveal">
-        <h3>[INSERIR: Organize your workflow]</h3>
-        <p class="ac-sub">[INSERIR: descricao curta]</p>
+        <h3>Organize seu fluxo de trabalho</h3>
+        <p class="ac-sub">Pipeline de deals sincronizado com seus dados de mercado em tempo real.</p>
         <div class="act-card-mock">
           <div class="act-white-card">
-            <div class="awc-row"><div class="awc-dot"></div><div class="awc-title">[INSERIR: Empresa] AI</div><div class="awc-meta" style="margin-left:auto;">$18M</div></div>
+            <div class="awc-row"><div class="awc-dot"></div><div class="awc-title">HarmonicAI</div><div class="awc-meta" style="margin-left:auto;">Série A</div></div>
             <div class="awc-line" style="width:90%;"></div>
             <div class="awc-line" style="width:70%;"></div>
             <div class="awc-row" style="margin-top:8px;gap:0;">
@@ -276,15 +332,15 @@ a{text-decoration:none;color:inherit;}
         </div>
       </div>
       <div class="act-card reveal rd1">
-        <h3>[INSERIR: Our data everywhere]</h3>
-        <p class="ac-sub">[INSERIR: descricao curta]</p>
+        <h3>Nossos dados em qualquer lugar</h3>
+        <p class="ac-sub">Extensão para Chrome e integração nativa com Salesforce, HubSpot e Pipedrive.</p>
         <div class="act-card-mock">
           <div class="act-white-card">
-            <div class="awc-row"><div class="awc-title" style="font-size:10px;">Chrome Extension</div></div>
+            <div class="awc-row"><div class="awc-title" style="font-size:10px;">Extensão Chrome</div></div>
             <div class="awc-line" style="width:100%;"></div>
             <div class="awc-line" style="width:80%;"></div>
             <div class="awc-line" style="width:60%;margin-bottom:8px;"></div>
-            <div class="awc-row"><span style="font-size:9px;color:#999;">San Francisco, CA</span></div>
+            <div class="awc-row"><span style="font-size:9px;color:#999;">Sao Paulo, SP — 120 funcionarios</span></div>
           </div>
         </div>
       </div>
@@ -296,43 +352,44 @@ a{text-decoration:none;color:inherit;}
 <section class="section-dev">
   <div class="container">
     <div class="dev-header reveal">
-      <p class="dev-label">Developer-centric</p>
-      <h2>Integrate your way</h2>
+      <p class="dev-label">Developer-first</p>
+      <h2>Integre do seu jeito</h2>
     </div>
     <div class="dev-cta reveal rd1">
-      <button class="btn-outline-light">Read the docs</button>
+      <button class="btn-outline-light">Ler a documentação</button>
     </div>
     <div class="dev-grid reveal rd2">
       <div class="dev-features">
         <div class="dev-feature">
           <div class="dev-feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
           <div>
-            <h4>[INSERIR: API feature 1]</h4>
-            <p>[INSERIR: descricao da API feature 1]</p>
+            <h4>API REST e GraphQL</h4>
+            <p>Acesse todos os dados da plataforma via API com autenticação segura por token e rate limit generoso.</p>
           </div>
         </div>
         <div class="dev-feature">
           <div class="dev-feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
           <div>
-            <h4>[INSERIR: API feature 2]</h4>
-            <p>[INSERIR: descricao da API feature 2]</p>
+            <h4>Webhooks em tempo real</h4>
+            <p>Receba notificações instantâneas no seu sistema sempre que um evento relevante ocorrer nas empresas monitoradas.</p>
           </div>
         </div>
       </div>
       <div class="code-wrap">
         <div class="code-tabs"><button class="code-tab active">GraphQL</button><button class="code-tab">REST</button></div>
         <div class="code-body"><span class="kw">query</span> {
-  <span class="fn">searchCompanies</span>(
-    stage: <span class="str">"Series A"</span>
+  <span class="fn">buscarEmpresas</span>(
+    estagio: <span class="str">"Serie A"</span>
     headcount: { min: <span class="num">50</span> }
+    pais: <span class="str">"Brasil"</span>
   ) <span class="br">{</span>
-    name
+    nome
     headcount
-    fundingTotal
-    foundedYear
-    contactInfo <span class="br">{</span>
-      type
-      value
+    totalCaptado
+    fundadoEm
+    contato <span class="br">{</span>
+      tipo
+      valor
     <span class="br">}</span>
   <span class="br">}</span>
 }</div>
@@ -341,34 +398,88 @@ a{text-decoration:none;color:inherit;}
   </div>
 </section>
 
+<!-- ══════ PRICING ══════ -->
+<section class="section-pricing">
+  <div class="container">
+    <div class="pricing-header reveal">
+      <h2>Comece grátis. Escale quando quiser.</h2>
+      <p>7 dias grátis em qualquer plano — sem cartão de crédito.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card reveal">
+        <div class="pricing-plan">Starter</div>
+        <div class="pricing-price">R$97<span>/mês</span></div>
+        <div class="pricing-period">ou R$970/ano — economize 17%</div>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>500 buscas/mês</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Perfis completos de empresas</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Extensão Chrome</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Export CSV</li>
+        </ul>
+        <button class="btn-pricing-outline">Começar grátis</button>
+      </div>
+      <div class="pricing-card featured reveal rd1">
+        <div class="pricing-badge-top">Mais popular</div>
+        <div class="pricing-plan">Pro</div>
+        <div class="pricing-price">R$247<span>/mês</span></div>
+        <div class="pricing-period">ou R$2.470/ano — economize 17%</div>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Buscas ilimitadas</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Alertas em tempo real</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Integração CRM nativa</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>API 10k calls/mês</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Suporte prioritário</li>
+        </ul>
+        <button class="btn-pricing">Começar 7 dias grátis</button>
+      </div>
+      <div class="pricing-card reveal rd2">
+        <div class="pricing-plan">Enterprise</div>
+        <div class="pricing-price">R$597<span>/mês</span></div>
+        <div class="pricing-period">ou R$5.970/ano — economize 17%</div>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Tudo do Pro incluído</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>API ilimitada + Webhooks</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Usuários ilimitados</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>CSM dedicado</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>SLA 99.9% uptime</li>
+        </ul>
+        <button class="btn-pricing-outline">Falar com vendas</button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ══════ TESTIMONIALS ══════ -->
 <section class="section-test">
   <div class="container">
-    <h2 class="reveal">Visionary investors run on [INSERIR: Marca]</h2>
+    <h2 class="reveal">Investidores e founders que rodam na HarmonicAI</h2>
     <div class="test-grid reveal rd1">
       <div class="test-cell">
-        <p class="test-quote">[INSERIR: Depoimento 1]</p>
-        <div class="test-author"><div class="test-avatar">MM</div><div><div class="test-name">[INSERIR: Nome]</div><div class="test-role">[INSERIR: Cargo, Empresa]</div></div></div>
+        <p class="test-quote">A HarmonicAI reduziu de 3 dias para 3 horas o tempo que levamos para mapear um setor completo antes de uma tese de investimento.</p>
+        <div class="test-author"><div class="test-avatar">MF</div><div><div class="test-name">Marina Figueiredo</div><div class="test-role">Partner, Kaszek Ventures</div></div></div>
       </div>
       <div class="test-cell">
-        <p class="test-quote">[INSERIR: Depoimento 2]</p>
-        <div class="test-author"><div class="test-avatar">AN</div><div><div class="test-name">Anonymous</div><div class="test-role">[INSERIR: Empresa]</div></div></div>
+        <p class="test-quote">Descobrimos nossa melhor conta do ano porque a HarmonicAI nos alertou sobre uma contratação de CDO em uma empresa que monitorávamos há meses.</p>
+        <div class="test-author"><div class="test-avatar">RP</div><div><div class="test-name">Rafael Porto</div><div class="test-role">Head de Vendas, Nuvemshop</div></div></div>
       </div>
       <div class="test-cell">
-        <p class="test-quote">[INSERIR: Depoimento 3]</p>
-        <div class="test-author"><div class="test-avatar">FW</div><div><div class="test-name">[INSERIR: Nome]</div><div class="test-role">[INSERIR: Cargo]</div></div></div>
+        <p class="test-quote">Usei para mapear o mercado antes do nosso roadshow Série B. Os dados eram tão precisos que os investidores perguntaram de onde tirávamos as informações.</p>
+        <div class="test-author"><div class="test-avatar">CS</div><div><div class="test-name">Camila Souza</div><div class="test-role">CEO, FinTech Startup</div></div></div>
       </div>
       <div class="test-cell">
-        <p class="test-quote">[INSERIR: Depoimento 4]</p>
-        <div class="test-author"><div class="test-avatar">BC</div><div><div class="test-name">[INSERIR: Nome]</div><div class="test-role">[INSERIR: Cargo]</div></div></div>
+        <p class="test-quote">Substituímos 3 ferramentas por uma só. O ROI foi imediato — economizamos R$4.800/mês em assinaturas e ainda temos dados muito mais ricos.</p>
+        <div class="test-author"><div class="test-avatar">BC</div><div><div class="test-name">Bruno Carvalho</div><div class="test-role">CRO, Agência Crescimento</div></div></div>
       </div>
       <div class="test-cell">
-        <p class="test-quote">[INSERIR: Depoimento 5]</p>
-        <div class="test-author"><div class="test-avatar">BK</div><div><div class="test-name">[INSERIR: Nome]</div><div class="test-role">[INSERIR: Cargo]</div></div></div>
+        <p class="test-quote">O recurso de alertas em tempo real é o que mais usamos. Sabemos de uma captação antes de qualquer newsletter do setor. Isso vale ouro.</p>
+        <div class="test-author"><div class="test-avatar">TL</div><div><div class="test-name">Thaísa Lima</div><div class="test-role">Investment Analyst, Monashees</div></div></div>
       </div>
       <div class="test-cell">
-        <p class="test-quote">[INSERIR: Depoimento 6]</p>
-        <div class="test-author"><div class="test-avatar">ZR</div><div><div class="test-name">[INSERIR: Nome]</div><div class="test-role">[INSERIR: Cargo]</div></div></div>
+        <p class="test-quote">Onboarding em 20 minutos e já estava prospectando. A IA que escreve o primeiro e-mail personalizado com base no perfil da empresa fechou 4 deals no primeiro mês.</p>
+        <div class="test-author"><div class="test-avatar">ZR</div><div><div class="test-name">Zeca Rodrigues</div><div class="test-role">Founder, SaaS B2B</div></div></div>
       </div>
     </div>
   </div>
@@ -377,10 +488,10 @@ a{text-decoration:none;color:inherit;}
 <!-- ══════ CTA ══════ -->
 <section class="section-cta">
   <div class="container">
-    <h2 class="reveal">[INSERIR: CTA headline]</h2>
+    <h2 class="reveal">Comece a descobrir oportunidades hoje</h2>
     <div class="cta-input-wrap reveal rd1">
-      <input class="cta-input" type="email" placeholder="Enter your work email">
-      <button class="btn-dark" style="border-radius:100px;">Book a demo</button>
+      <input class="cta-input" type="email" placeholder="Seu email de trabalho">
+      <button class="btn-dark" style="border-radius:100px;animation:brilho 3.4s ease infinite;">Agendar demo</button>
     </div>
   </div>
 </section>
@@ -389,22 +500,22 @@ a{text-decoration:none;color:inherit;}
 <footer class="footer"><div class="container">
   <div class="footer-grid">
     <div class="footer-col">
-      <div class="footer-brand"><div class="footer-brand-dots"><span></span><span></span></div>[INSERIR: Marca]</div>
-      <p class="footer-desc">[INSERIR: Descricao curta]</p>
+      <div class="footer-brand"><div class="footer-brand-dots"><span></span><span></span></div>HarmonicAI</div>
+      <p class="footer-desc">Inteligência de mercado em tempo real para investidores e founders que decidem mais rápido.</p>
       <div class="footer-badges"><span class="footer-badge">SOC 2</span><span class="footer-badge">ISO 27001</span></div>
     </div>
-    <div class="footer-col"><div class="footer-col-title">Company</div><ul><li><a href="#">About</a></li><li><a href="#">Careers</a></li><li><a href="#">Team</a></li></ul></div>
-    <div class="footer-col"><div class="footer-col-title">Resources</div><ul><li><a href="#">Pricing</a></li><li><a href="#">Blog</a></li><li><a href="#">API Docs</a></li><li><a href="#">Support</a></li></ul></div>
-    <div class="footer-col"><div class="footer-col-title">Legal</div><ul><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li></ul></div>
+    <div class="footer-col"><div class="footer-col-title">Empresa</div><ul><li><a href="#">Sobre</a></li><li><a href="#">Carreiras</a></li><li><a href="#">Time</a></li></ul></div>
+    <div class="footer-col"><div class="footer-col-title">Recursos</div><ul><li><a href="#">Precos</a></li><li><a href="#">Blog</a></li><li><a href="#">API Docs</a></li><li><a href="#">Suporte</a></li></ul></div>
+    <div class="footer-col"><div class="footer-col-title">Legal</div><ul><li><a href="#">Privacidade</a></li><li><a href="#">Termos</a></li></ul></div>
   </div>
-  <div class="footer-bottom"><p>&copy; 2026 [INSERIR: Marca]</p><p><a href="#">Privacy</a><a href="#">Terms</a></p></div>
+  <div class="footer-bottom"><p>&copy; 2026 HarmonicAI</p><p><a href="#">Privacidade</a><a href="#">Termos</a></p></div>
 </div></footer>
 
 <!-- ══════ FLOATING BAR ══════ -->
 <div class="float-bar">
-  <span class="fb-label">[INSERIR: tagline] ·</span>
+  <span class="fb-label">Inteligencia de mercado em tempo real ·</span>
   <span>startups</span>
-  <button class="btn-float">Book a demo</button>
+  <button class="btn-float">Agendar demo</button>
 </div>
 
 <script>

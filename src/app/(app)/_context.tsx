@@ -17,6 +17,7 @@ import { NewProjectModal } from "../components/NewProjectModal";
 export type AppView =
   | "home"
   | "resources"
+  | "criativos"
   | "projects-all"
   | "projects-starred"
   | "projects-mine"
@@ -28,6 +29,7 @@ export function viewToPath(view: AppView, projectId?: string): string {
   switch (view) {
     case "home": return "/";
     case "resources": return "/resources";
+    case "criativos": return "/criativos";
     case "projects-all": return "/projects";
     case "projects-starred": return "/projects/starred";
     case "projects-mine": return "/projects/mine";

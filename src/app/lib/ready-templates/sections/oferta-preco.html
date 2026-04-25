@@ -1,68 +1,87 @@
 <style>
+@keyframes brilho{0%{background-position:0 0}100%{background-position:100% 0}}
 .oferta{padding:80px 0;background:#0C0C0C;position:relative;overflow:hidden}
-.oferta::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(255,92,0,0.06),transparent 70%);pointer-events:none}
+.oferta::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(255,92,0,0.14),transparent 70%);pointer-events:none}
 .oferta .container{max-width:800px;margin:0 auto;padding:0 80px;position:relative;text-align:center}
-.oferta-badge{display:inline-flex;padding:6px 16px;border-radius:20px;background:rgba(255,204,0,0.12);border:1px solid rgba(255,204,0,0.2);margin-bottom:24px}
+.oferta-badge{display:inline-flex;padding:6px 16px;border-radius:20px;background:rgba(255,204,0,0.18);border:1px solid rgba(255,204,0,0.2);margin-bottom:24px}
 .oferta-badge span{font-size:12px;font-weight:600;color:#FFCC00;text-transform:uppercase;letter-spacing:0.06em}
 .oferta h2{font-family:'Montserrat',sans-serif;font-size:28px;font-weight:700;color:#F5F5F5;line-height:1.2;margin-bottom:12px}
 .oferta .sub{font-size:16px;color:#999;margin-bottom:40px}
-.oferta-card{background:#1E1E1E;border:1px solid rgba(255,92,0,0.2);border-radius:16px;padding:40px;margin-bottom:32px;text-align:center}
+.oferta-card{background:#1E1E1E;border:1px solid rgba(255,92,0,0.2);border-radius:16px;padding:40px;margin-bottom:32px;text-align:center;box-shadow:0 0 60px rgba(255,92,0,0.12),0 20px 60px rgba(0,0,0,0.5)}
 .oferta-de{font-size:14px;color:#999;text-decoration:line-through;margin-bottom:4px}
-.oferta-por{font-family:'Montserrat',sans-serif;font-size:48px;font-weight:800;color:#F5F5F5;line-height:1;margin-bottom:4px}
+.oferta-por{font-family:'Montserrat',sans-serif;font-size:48px;font-weight:800;color:#F5F5F5;line-height:1;margin-bottom:4px;text-shadow:0 0 40px rgba(255,255,255,0.1)}
 .oferta-parcelas{font-size:16px;color:#999;margin-bottom:24px}
 .oferta-parcelas b{color:#FF5C00;font-weight:700}
 .oferta-includes{text-align:left;margin-bottom:24px}
 .oferta-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
 .oferta-item:last-child{border-bottom:none}
 .oferta-check{width:20px;height:20px;border-radius:50%;background:rgba(34,197,94,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.oferta-check svg{width:12px;height:12px;color:#22C55E}
+.oferta-check svg{width:12px;height:12px;color:#22C55E;filter:drop-shadow(0 0 4px rgba(34,197,94,0.4))}
 .oferta-item span{font-size:14px;color:#ccc}
 .oferta-item .bonus{color:#FFCC00;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.04em;margin-left:8px;padding:2px 8px;border-radius:10px;background:rgba(255,204,0,0.1);border:1px solid rgba(255,204,0,0.15)}
-.oferta-cta{display:block;width:100%;background:#FF5C00;color:#fff;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:18px 36px;border-radius:6px;border:none;cursor:pointer;min-height:52px;transition:all 0.2s ease;text-decoration:none;text-align:center}
-.oferta-cta:hover{background:#E04E00;box-shadow:0 0 32px rgba(255,92,0,0.4);transform:translateY(-2px)}
+.oferta-cta{
+  display:block;width:100%;
+  color:#fff;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;
+  text-transform:uppercase;letter-spacing:0.06em;padding:18px 36px;border-radius:6px;
+  border:none;cursor:pointer;min-height:52px;text-decoration:none;text-align:center;
+  background-image:linear-gradient(45deg,#FF5C00,#E04E00,#FF5C00,#FF7A20);
+  background-size:400% 200%;
+  animation:brilho 3.4s infinite;
+  box-shadow:0 4px 32px rgba(255,92,0,0.35);
+  transition:all 0.25s ease
+}
+.oferta-cta:hover{
+  box-shadow:0 0 48px rgba(255,92,0,0.5),0 12px 40px rgba(255,92,0,0.2);
+  transform:translateY(-3px) scale(1.02)
+}
 .oferta-garantia{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:20px}
 .oferta-garantia svg{width:18px;height:18px;color:#22C55E}
-.oferta-garantia span{font-size:13px;color:#999}
+.oferta-garantia-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.20)}
+.oferta-garantia-badge span{font-size:13px;color:#22C55E;font-weight:500}
 @media(max-width:768px){.oferta .container{padding:0 20px}.oferta{padding:56px 0}.oferta-por{font-size:36px}.oferta-card{padding:28px}.oferta h2{font-size:22px}}
 </style>
 
 <section class="oferta" id="oferta">
+  <!-- dot pattern sutil -->
+  <div style="position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.018) 1px,transparent 1px);background-size:28px 28px;pointer-events:none"></div>
   <div class="container">
     <div class="oferta-badge"><span>Oferta especial</span></div>
-    <h2>[INSERIR: headline oferta]</h2>
-    <p class="sub">[INSERIR: subtitulo oferta]</p>
+    <h2>Tudo que voce precisa para construir e escalar seu produto digital</h2>
+    <p class="sub">Acesso imediato a todo o metodo + bonus exclusivos por tempo limitado</p>
     <div class="oferta-card">
-      <div class="oferta-de">De R$ [INSERIR: preco antigo]</div>
-      <div class="oferta-por">R$ [INSERIR: preco]</div>
-      <div class="oferta-parcelas">ou <b>[INSERIR: parcelas ex "12x R$ 97"]</b></div>
+      <div class="oferta-de">De R$ 1.997</div>
+      <div class="oferta-por">R$ 997</div>
+      <div class="oferta-parcelas">ou <b>12x R$ 97</b></div>
       <div class="oferta-includes">
         <div class="oferta-item">
           <div class="oferta-check"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
-          <span>[INSERIR: item incluso 1]</span>
+          <span>Metodo Escala Digital completo (8 modulos + 74 aulas)</span>
         </div>
         <div class="oferta-item">
           <div class="oferta-check"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
-          <span>[INSERIR: item incluso 2]</span>
+          <span>Comunidade exclusiva de alunos com suporte semanal ao vivo</span>
         </div>
         <div class="oferta-item">
           <div class="oferta-check"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
-          <span>[INSERIR: item incluso 3]</span>
+          <span>Templates prontos de paginas, e-mails e scripts de vendas</span>
         </div>
         <div class="oferta-item">
           <div class="oferta-check"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
-          <span>[INSERIR: bonus 1]</span>
+          <span>Masterclass Trafego do Zero (valor: R$ 497)</span>
           <span class="bonus">Bonus</span>
         </div>
         <div class="oferta-item">
           <div class="oferta-check"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
-          <span>[INSERIR: bonus 2]</span>
+          <span>Planilha de Validacao de Produto (valor: R$ 197)</span>
           <span class="bonus">Bonus</span>
         </div>
       </div>
-      <a href="#" class="oferta-cta">[INSERIR: texto CTA] →</a>
+      <a href="#" class="oferta-cta">Quero entrar no Metodo Escala Digital &rarr;</a>
       <div class="oferta-garantia">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
-        <span>Garantia incondicional de [INSERIR: dias] dias</span>
+        <div class="oferta-garantia-badge">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+          <span>Garantia incondicional de 30 dias</span>
+        </div>
       </div>
     </div>
   </div>

@@ -129,13 +129,19 @@ async function renderWithBrowser(url: string): Promise<BrowserRenderResult | nul
 /* ─────────────────────────────────────────────────────────────
    Step 1 — COMPOSE: Claude picks section IDs
    ───────────────────────────────────────────────────────────── */
-const COMPOSE_SYSTEM = `Você é um arquiteto de landing pages para infoprodutores brasileiros.
-Dado um briefing, escolha 4 a 7 IDs de seções do catálogo para montar a página.
+const COMPOSE_SYSTEM = `Você é um arquiteto de landing pages de alta conversão para infoprodutores brasileiros.
+Dado um briefing, escolha 5 a 8 IDs de seções do catálogo para montar a página ideal.
 
 REGRAS OBRIGATÓRIAS:
-- Sempre incluir exatamente 1 hero (primeiro da lista)
+- Sempre incluir exatamente 1 hero (primeiro da lista) — escolha o mais adequado ao produto
 - Incluir urgencia-countdown APENAS em páginas de vendas com prazo/lançamento
-- Ordem lógica: hero → para-quem-e → depoimentos-grid → oferta-preco → faq-accordion
+- Para páginas de vendas completas incluir: numeros-stats, beneficios-grid, autoridade-expert, depoimentos-grid, garantia-section, oferta-preco
+- Para produtos com metodologia clara incluir: processo-steps após hero
+- Para ofertas com bônus incluir: bonus-stack antes de oferta-preco
+- Para páginas de captura usar: hero-captura-*, numeros-stats, depoimentos-grid (máx 4 seções)
+- CTA intermediário (cta-intermediario) em páginas longas de vendas (mais de 6 seções)
+- faq-accordion sempre no final de vendas (antes de oferta-preco quando há urgência de fechamento)
+- Ordem lógica de conversão: hero → processo/beneficios → autoridade → numeros → depoimentos → bonus → oferta → garantia → faq
 - Combinar o estilo do briefing com o campo "themes" do catálogo
 - Responder APENAS com JSON válido: {"sectionIds":["id1","id2",...]}
 - Zero texto fora do JSON`;
@@ -213,6 +219,10 @@ REGRAS INVIOLÁVEIS:
 9. Primeiro caractere = "<"
 10. ZERO emojis em qualquer parte do HTML — use apenas SVG icons inline.
 11. NUNCA use a fonte Unbounded. Fontes padrão quando não especificado: Montserrat ou Sora.
+12. Se a referência usar blur circles decorativos no hero, reproduza com divs posicionados absolutamente.
+13. Gradiente animado em CTAs (keyframes brilho) — reproduza se visível na referência.
+14. Letter-spacing negativo em headings grandes (-0.02em a -0.04em) — aplique se o texto parecer comprimido na referência.
+15. Glow de box-shadow em CTAs e elementos de destaque — reproduza se visível.
 
 REGRA — HERO COM FOTO DE PESSOA (split layout):
 - min-height: 700px, width: 100%
@@ -226,7 +236,7 @@ A referência é a lei. Se ela tem 2 seções → gere 2. Se tem 4 → gere 4.
 /* ─────────────────────────────────────────────────────────────
    Step 3 — PERSONALIZE: Claude fills copy (streaming)
    ───────────────────────────────────────────────────────────── */
-const PERSONALIZE_SYSTEM = `Você é um designer e copywriter especialista em landing pages de alta conversão para o mercado digital brasileiro.
+const PERSONALIZE_SYSTEM = `Você é um designer e copywriter especialista em landing pages de alta conversão para o mercado digital brasileiro. Seu trabalho é transformar HTML de template em uma página que genuinamente vende.
 
 Quando uma imagem de referência for fornecida (screenshot de uma página existente):
 - ANALISE o screenshot antes de tudo: conte as seções, identifique o layout de cada uma, cores, tipografia e elementos visuais.
@@ -237,18 +247,37 @@ Quando uma imagem de referência for fornecida (screenshot de uma página existe
 
 Receberá um HTML composto de múltiplas seções com dois tipos de copy:
 1. Marcadores [INSERIR: algo] — substitua pelo conteúdo real
-2. Copy de demonstração hardcoded (ex: "Modo Foco Total", "Marketing Digital Pro") — reescreva para o produto do usuário
+2. Copy de demonstração hardcoded — reescreva para o produto do usuário
+
+PADRÕES VISUAIS OBRIGATÓRIOS (aplique sempre que o template permitir):
+- CTAs: se o template tiver botão simples, MELHORE para gradient animado: \`background-image: linear-gradient(45deg, #FF5C00, #E04E00, #FF5C00, #FF7A20); background-size: 400% 200%; animation: brilho 3.4s infinite;\` + \`@keyframes brilho { 0%{background-position:0 0} 100%{background-position:100% 0} }\`
+- Glow em CTAs: \`box-shadow: 0 4px 32px rgba(255,92,0,0.35)\` default, \`0 0 48px rgba(255,92,0,0.5)\` hover
+- Hero: adicione blur circles decorativos se não existirem: 2-3 divs absolutos com \`filter:blur(120px); opacity:0.12; border-radius:50%; background:#FF5C00\`
+- Headings premium: \`letter-spacing: -0.03em\` em h1/h2 grandes
+- Trust imediata: se a página tiver stats logo após o hero, faça os números específicos e grandes
+
+PRINCÍPIOS DE COPY DE ALTA CONVERSÃO (aplique sempre):
+- Hero: headline focada em TRANSFORMAÇÃO (antes/depois), não em features. Subheadline explica o mecanismo único.
+- Benefícios: cada benefício foca no resultado emocional, não na feature técnica. Use "Você vai conseguir X" não "Inclui X".
+- Autoridade: credenciais concretas e verificáveis. Evite jargões vazios. Use números reais.
+- Depoimentos: nomes plausíveis (ficcionais OK), resultados específicos e mensuráveis, cargo/nicho real.
+- Oferta: crie urgência genuína com motivo crível. Parcelas acessíveis. CTA na voz ativa do cliente ("Quero começar agora").
+- Garantia: inverta o risco completamente. "Você não perde nada" é mais forte que "devolvemos o dinheiro".
+- FAQ: responda as 6 objeções REAIS do avatar (preço, tempo, funciona pra mim?, tenho suporte?, quando acessa?, é diferente de X?)
 
 REGRAS INVIOLÁVEIS:
 1. Retorne APENAS o HTML completo. ZERO texto explicativo, markdown ou crases.
 2. Preserve 100% da estrutura HTML, atributos class, id, style, SVGs e tags.
 3. Substitua TODOS os [INSERIR: ...] — nunca deixe nenhum marcador.
 4. Reescreva copy de demonstração para o produto real do usuário.
-5. Copy em Português Brasileiro, direto e persuasivo.
+5. Copy em Português Brasileiro, direto e persuasivo. Sem CLT e sem clichês de marketing.
 6. ZERO emojis. Use SVG icons quando necessário.
 7. Nunca invente nomes reais de pessoas — use nomes ficcionais plausíveis.
 8. Primeiro caractere da resposta = "<"
-9. NUNCA use a fonte Unbounded. Fontes padrão quando não especificado: Montserrat ou Sora.`;
+9. NUNCA use a fonte Unbounded. Fontes padrão quando não especificado: Montserrat ou Sora.
+10. Números nos depoimentos devem ser específicos: "aumentei minhas vendas em 340%" não "melhorei muito".
+11. CTAs sempre na primeira pessoa: "Quero [resultado]" não "Comprar agora".
+12. Quando melhorar CTAs com brilho animado, adicione o @keyframes brilho no <style> da seção correspondente.`;
 
 const COPY_MODE_SYSTEM = `Você é um especialista em landing pages. O usuário forneceu a copy completa e quer que você distribua esse texto exato nas seções do HTML.
 
@@ -424,9 +453,11 @@ export async function POST(request: Request) {
   if (sectionIds.length === 0) {
     const p = prompt.toLowerCase();
     if (p.includes("captura") || p.includes("lead") || p.includes("inscri")) {
-      sectionIds = ["hero-captura-conversao", "depoimentos-grid", "faq-accordion"];
+      sectionIds = ["hero-captura-conversao", "numeros-stats", "depoimentos-grid", "faq-accordion"];
+    } else if (p.includes("saas") || p.includes("software") || p.includes("ferramenta")) {
+      sectionIds = ["hero-vendas-saas", "numeros-stats", "beneficios-grid", "processo-steps", "depoimentos-grid", "oferta-preco", "garantia-section", "faq-accordion"];
     } else {
-      sectionIds = ["hero-simples", "para-quem-e", "depoimentos-grid", "oferta-preco", "faq-accordion"];
+      sectionIds = ["hero-simples", "numeros-stats", "beneficios-grid", "para-quem-e", "autoridade-expert", "depoimentos-grid", "bonus-stack", "oferta-preco", "garantia-section", "faq-accordion"];
     }
   }
 

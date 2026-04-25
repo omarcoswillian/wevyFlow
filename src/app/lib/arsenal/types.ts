@@ -16,12 +16,21 @@ export type SectionKind =
   | "oferta"         // price + stack of value
   | "faq"            // questions & answers
   | "cta-final"      // closing call-to-action
+  | "cta"            // inline / mid-page CTA
   | "features"       // benefits / what-you-get grid
+  | "beneficios"     // benefits grid (alternative)
   | "steps"          // 3/N step process
+  | "processo"       // process / method steps
   | "bonus"          // bonuses stack
   | "mentor"         // author / instructor intro
+  | "autoridade"     // authority / credentials
   | "garantia"       // guarantee / risk-reversal
   | "social-proof"   // stats / logos / credentials
+  | "stats"          // numbers / metrics
+  | "pilares"        // pillars / core principles
+  | "results"        // results showcase
+  | "modules"        // course modules / curriculum
+  | "upgrade"        // upsell / upgrade block
   | "manifesto";     // narrative / belief section
 
 export type SectionTheme =

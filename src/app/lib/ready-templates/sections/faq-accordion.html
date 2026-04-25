@@ -1,25 +1,31 @@
 <style>
-.faq{padding:80px 0;background:#161616}
-.faq .container{max-width:1100px;margin:0 auto;padding:0 80px;display:grid;grid-template-columns:1fr 1.5fr;gap:60px;align-items:start}
+.faq{padding:80px 0;background:#161616;position:relative;overflow:hidden}
+.faq .container{max-width:1100px;margin:0 auto;padding:0 80px;display:grid;grid-template-columns:1fr 1.5fr;gap:60px;align-items:start;position:relative}
 .faq-left{}
 .faq-badge{display:inline-flex;padding:6px 16px;border-radius:20px;background:rgba(255,92,0,0.12);border:1px solid rgba(255,92,0,0.2);margin-bottom:16px}
 .faq-badge span{font-size:12px;font-weight:600;color:#FF5C00;text-transform:uppercase;letter-spacing:0.06em}
-.faq h2{font-family:'Montserrat',sans-serif;font-size:28px;font-weight:700;color:#F5F5F5;line-height:1.2;margin-bottom:16px}
+.faq h2{font-family:'Montserrat',sans-serif;font-size:28px;font-weight:700;color:#F5F5F5;line-height:1.2;margin-bottom:16px;text-shadow:0 0 60px rgba(255,92,0,0.12)}
 .faq .sub{font-size:15px;color:#999;line-height:1.7;margin-bottom:24px}
 .faq-contact{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:#FF5C00;font-weight:600;text-decoration:none;transition:opacity 0.2s}
 .faq-contact:hover{opacity:0.8}
 .faq-contact svg{width:16px;height:16px}
 .faq-list{display:flex;flex-direction:column}
-.faq-item{border-bottom:1px solid rgba(255,255,255,0.06);padding:20px 0}
+.faq-item{border-bottom:1px solid rgba(255,255,255,0.10);padding:20px 0;transition:all 0.2s ease}
 .faq-item:first-child{padding-top:0}
 .faq-item:last-child{border-bottom:none}
-.faq-q{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:#F5F5F5;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.faq-item:hover{border-bottom-color:rgba(255,92,0,0.20);background:rgba(255,92,0,0.04);padding-left:8px;border-radius:4px}
+.faq-q{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:#F5F5F5;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:12px;transition:color 0.2s}
+.faq-q:hover{color:#FF5C00}
+.faq-q-inner{display:flex;align-items:center;gap:10px}
+.faq-num{font-size:12px;font-weight:700;color:rgba(255,92,0,0.4);font-family:'Montserrat',sans-serif;min-width:18px}
 .faq-q svg{width:16px;height:16px;color:#999;flex-shrink:0}
-.faq-a{font-size:14px;color:#999;line-height:1.7}
+.faq-a{font-size:14px;color:#999;line-height:1.7;padding-left:28px}
 @media(max-width:768px){.faq .container{padding:0 20px;grid-template-columns:1fr;gap:32px}.faq{padding:56px 0}.faq h2{font-size:22px}}
 </style>
 
 <section class="faq" id="faq">
+  <!-- dot pattern sutil -->
+  <div style="position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.02) 1px,transparent 1px);background-size:24px 24px;pointer-events:none"></div>
   <div class="container">
     <div class="faq-left">
       <div class="faq-badge"><span>FAQ</span></div>
@@ -32,28 +38,46 @@
     </div>
     <div class="faq-list">
       <div class="faq-item">
-        <div class="faq-q">[INSERIR: pergunta 1] <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg></div>
-        <div class="faq-a">[INSERIR: resposta 1]</div>
+        <div class="faq-q">
+          <div class="faq-q-inner"><span class="faq-num">01</span>Funciona mesmo para quem nunca vendeu nada online?</div>
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+        </div>
+        <div class="faq-a">Sim. Mais de 60% dos nossos alunos entraram sem nenhuma experiencia em vendas ou marketing digital. O metodo foi desenhado especificamente para quem esta comecando do zero, com cada passo explicado em detalhe.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q">[INSERIR: pergunta 2] <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg></div>
-        <div class="faq-a">[INSERIR: resposta 2]</div>
+        <div class="faq-q">
+          <div class="faq-q-inner"><span class="faq-num">02</span>Preciso ter um nicho definido antes de comecar?</div>
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+        </div>
+        <div class="faq-a">Nao. O Modulo 1 do metodo e justamente a validacao de nicho e ideia. Voce vai sair dele com o nicho definido, o produto validado e o avatar mapeado — sem achismos.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q">[INSERIR: pergunta 3] <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg></div>
-        <div class="faq-a">[INSERIR: resposta 3]</div>
+        <div class="faq-q">
+          <div class="faq-q-inner"><span class="faq-num">03</span>Quanto tempo leva para ver os primeiros resultados?</div>
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+        </div>
+        <div class="faq-a">A maioria dos alunos que aplica o metodo consistentemente faz o primeiro lancamento entre 30 e 60 dias. Temos alunos que faturaram na primeira semana com o modulo de pre-venda.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q">[INSERIR: pergunta 4] <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg></div>
-        <div class="faq-a">[INSERIR: resposta 4]</div>
+        <div class="faq-q">
+          <div class="faq-q-inner"><span class="faq-num">04</span>Precisa investir em trafego pago?</div>
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+        </div>
+        <div class="faq-a">Nao obrigatoriamente. O modulo de organico mostra como usar WhatsApp, Instagram e YouTube sem pagar por anuncios. O pago acelera os resultados, mas nao e pre-requisito.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q">[INSERIR: pergunta 5] <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg></div>
-        <div class="faq-a">[INSERIR: resposta 5]</div>
+        <div class="faq-q">
+          <div class="faq-q-inner"><span class="faq-num">05</span>Por quanto tempo tenho acesso ao conteudo?</div>
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+        </div>
+        <div class="faq-a">Acesso vitalicio. Voce pode acessar quando quiser, no seu ritmo, pelo computador ou celular. E todas as atualizacoes futuras do metodo tambem sao gratuitas para alunos.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q">[INSERIR: pergunta 6] <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg></div>
-        <div class="faq-a">[INSERIR: resposta 6]</div>
+        <div class="faq-q">
+          <div class="faq-q-inner"><span class="faq-num">06</span>E se eu nao gostar? Como funciona a garantia?</div>
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+        </div>
+        <div class="faq-a">Voce tem 30 dias de garantia incondicional. Se por qualquer motivo nao gostar, e so mandar um e-mail e devolvemos 100% do seu investimento. Sem perguntas, sem burocracia.</div>
       </div>
     </div>
   </div>

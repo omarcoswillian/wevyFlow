@@ -1,0 +1,92 @@
+<style>
+.expert{padding:80px 0;background:#0C0C0C;position:relative;overflow:hidden}
+.expert::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background-image:radial-gradient(circle,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
+.expert .container{max-width:1100px;margin:0 auto;padding:0 80px;position:relative}
+.expert-layout{display:grid;grid-template-columns:360px 1fr;gap:72px;align-items:center}
+.expert-photo{position:relative}
+.expert-photo-wrap{aspect-ratio:1/1;border-radius:20px;overflow:hidden;background:linear-gradient(135deg,rgba(255,92,0,0.25) 0%,rgba(14,14,14,0.8) 100%);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;box-shadow:0 0 60px rgba(255,92,0,0.20)}
+.expert-photo-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.expert-photo-placeholder{width:100%;aspect-ratio:1/1;background:linear-gradient(135deg,#1E1E1E 0%,#161616 100%);display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+.expert-photo-placeholder svg{width:70%;height:auto;opacity:0.18}
+.expert-content .expert-badge{display:inline-flex;padding:6px 16px;border-radius:20px;background:rgba(255,92,0,0.12);border:1px solid rgba(255,92,0,0.2);margin-bottom:20px}
+.expert-content .expert-badge span{font-size:12px;font-weight:600;color:#FF5C00;text-transform:uppercase;letter-spacing:0.06em}
+.expert-name{font-family:'Montserrat',sans-serif;font-size:clamp(28px,3.5vw,42px);font-weight:800;color:#F5F5F5;line-height:1.1;letter-spacing:-0.02em;margin-bottom:8px}
+.expert-role{font-size:15px;color:#FF5C00;font-weight:600;margin-bottom:24px}
+.expert-bio{font-size:15px;color:#ccc;line-height:1.8;margin-bottom:12px}
+.expert-bio:last-of-type{margin-bottom:28px}
+.expert-creds{list-style:none;margin-bottom:40px;display:flex;flex-direction:column;gap:10px}
+.expert-cred{display:flex;align-items:flex-start;gap:10px}
+.expert-cred-icon{width:22px;height:22px;border-radius:50%;background:rgba(255,92,0,0.20);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;box-shadow:0 0 10px rgba(255,92,0,0.15)}
+.expert-cred span{font-size:14px;color:#ccc;line-height:1.5}
+.expert-stats{display:flex;gap:0;border-top:1px solid rgba(255,255,255,0.08);padding-top:32px}
+.expert-stat{flex:1;text-align:center;padding:0 20px;border-right:1px solid rgba(255,255,255,0.08)}
+.expert-stat:first-child{padding-left:0}
+.expert-stat:last-child{border-right:none}
+.expert-stat-num{font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;color:#FF5C00;line-height:1;margin-bottom:4px;text-shadow:0 0 16px rgba(255,92,0,0.3)}
+.expert-stat-label{font-size:12px;color:#999;text-transform:uppercase;letter-spacing:0.06em}
+@media(max-width:768px){
+  .expert .container{padding:0 20px}
+  .expert{padding:56px 0}
+  .expert-layout{grid-template-columns:1fr;gap:40px}
+  .expert-photo{max-width:280px;margin:0 auto}
+  .expert-stats{flex-wrap:wrap;gap:24px}
+  .expert-stat{border-right:none;flex:0 0 calc(50% - 12px);text-align:left;padding:0}
+  .expert-name{font-size:28px}
+}
+</style>
+
+<section class="expert">
+  <div class="container">
+    <div class="expert-layout">
+      <div class="expert-photo">
+        <div class="expert-photo-wrap">
+          <div class="expert-photo-placeholder">
+            <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="100" cy="80" rx="48" ry="48" fill="#F5F5F5"/>
+              <ellipse cx="100" cy="200" rx="90" ry="70" fill="#F5F5F5"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="expert-content">
+        <div class="expert-badge"><span>Especialista em Lancamentos Digitais</span></div>
+        <div class="expert-name">Lucas Ferreira</div>
+        <div class="expert-role">Especialista em Lancamentos Digitais</div>
+        <p class="expert-bio">Ha 9 anos no mercado digital, Lucas construiu do zero um negocio que hoje fatura mais de R$ 4 milhoes por ano. Antes disso, era analista de TI ganhando R$ 3.800/mes e sem nocao alguma de como ganhar dinheiro na internet.</p>
+        <p class="expert-bio">Depois de testar dezenas de estrategias e perder tempo com o que nao funciona, criou o Metodo Escala Digital: um sistema replicavel que qualquer pessoa pode seguir, independente do nicho ou do ponto de partida.</p>
+        <ul class="expert-creds">
+          <li class="expert-cred">
+            <div class="expert-cred-icon"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#FF5C00" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
+            <span>Mais de 4.200 alunos em 18 meses de metodo ativo</span>
+          </li>
+          <li class="expert-cred">
+            <div class="expert-cred-icon"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#FF5C00" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
+            <span>R$ 4M+ faturados no proprio negocio digital</span>
+          </li>
+          <li class="expert-cred">
+            <div class="expert-cred-icon"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#FF5C00" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
+            <span>Palestrante em eventos como RD Summit e Afiliados Brasil</span>
+          </li>
+          <li class="expert-cred">
+            <div class="expert-cred-icon"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#FF5C00" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
+            <span>Mentor de lancamento para infoprodutores em 11 paises</span>
+          </li>
+        </ul>
+        <div class="expert-stats">
+          <div class="expert-stat">
+            <div class="expert-stat-num">4.200+</div>
+            <div class="expert-stat-label">alunos formados</div>
+          </div>
+          <div class="expert-stat">
+            <div class="expert-stat-num">R$ 4M+</div>
+            <div class="expert-stat-label">faturados no digital</div>
+          </div>
+          <div class="expert-stat">
+            <div class="expert-stat-num">9 anos</div>
+            <div class="expert-stat-label">de mercado digital</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

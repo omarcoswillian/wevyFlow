@@ -1,0 +1,34 @@
+<style>
+.garantia{padding:72px 0;background:#161616;position:relative;overflow:hidden}
+.garantia::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background-image:radial-gradient(circle,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
+.garantia .container{max-width:680px;margin:0 auto;padding:0 80px;position:relative}
+.garantia-card{background:#1E1E1E;border:1px solid rgba(255,92,0,0.20);border-radius:20px;padding:52px 48px;text-align:center;position:relative;overflow:hidden}
+.garantia-card::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:480px;height:360px;background:radial-gradient(circle,rgba(255,92,0,0.12),transparent 70%);pointer-events:none}
+.garantia-card::after{content:'';position:absolute;bottom:-80px;left:50%;transform:translateX(-50%);width:320px;height:240px;background:radial-gradient(circle,rgba(255,92,0,0.06),transparent 70%);pointer-events:none}
+.garantia-shield{width:80px;height:80px;margin:0 auto 24px;display:flex;align-items:center;justify-content:center;background:rgba(255,92,0,0.18);border-radius:50%;border:1px solid rgba(255,92,0,0.30);position:relative;box-shadow:0 0 32px rgba(255,92,0,0.18)}
+.garantia h2{font-family:'Montserrat',sans-serif;font-size:clamp(22px,3vw,30px);font-weight:800;color:#F5F5F5;line-height:1.2;letter-spacing:-0.02em;margin-bottom:16px;position:relative}
+.garantia-p{font-size:15px;color:#999;line-height:1.8;margin-bottom:28px;max-width:520px;margin-left:auto;margin-right:auto;position:relative}
+.garantia-box{background:radial-gradient(ellipse at 50% 0%,rgba(255,92,0,0.08),transparent 70%),rgba(255,92,0,0.04);border:1px solid rgba(255,92,0,0.25);border-radius:12px;padding:20px 24px;font-size:15px;color:#F5F5F5;line-height:1.6;margin-bottom:0;position:relative}
+.garantia-box strong{color:#FF5C00;font-weight:700}
+@media(max-width:768px){
+  .garantia .container{padding:0 20px}
+  .garantia{padding:48px 0}
+  .garantia-card{padding:36px 24px}
+  .garantia h2{font-size:22px}
+}
+</style>
+
+<section class="garantia">
+  <div class="container">
+    <div class="garantia-card">
+      <div class="garantia-shield">
+        <svg width="38" height="38" fill="none" viewBox="0 0 24 24" stroke="#FF5C00" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+      </div>
+      <h2>Garantia de 30 dias — risco zero para voce</h2>
+      <p class="garantia-p">Compramos o problema de voce. Se em 30 dias voce aplicar o metodo e nao ver valor nenhum, devolvemos 100% do seu investimento sem fazer uma unica pergunta. Nossa confianca no metodo e total — e a prova disso e essa garantia sem asterisco.</p>
+      <div class="garantia-box">
+        Se em <strong>30 dias</strong> voce nao ver valor no metodo, devolvemos <strong>100% do seu investimento</strong> — sem burocracia, sem perguntas.
+      </div>
+    </div>
+  </div>
+</section>

@@ -20,6 +20,7 @@ import {
   CheckCircle,
   FileText,
   X,
+  Paintbrush,
 } from "lucide-react";
 import { Platform } from "../lib/types";
 import { ApiKeyModal } from "./ApiKeyModal";
@@ -192,6 +193,7 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
           <SidebarItem icon={<Home className="w-4 h-4" />} label="Home" active={!activeNav || activeNav === "home"} collapsed={sidebarCollapsed} onClick={() => nav("home")} />
           <SidebarItem icon={<Search className="w-4 h-4" />} label="Search" collapsed={sidebarCollapsed} shortcut="⌘K" onClick={onOpenSearch} />
           <SidebarItem icon={<BookOpen className="w-4 h-4" />} label="Resources" active={activeNav === "resources"} collapsed={sidebarCollapsed} onClick={() => nav("resources")} />
+          <SidebarItem icon={<Paintbrush className="w-4 h-4" />} label="Creatives" active={activeNav === "criativos"} collapsed={sidebarCollapsed} onClick={() => nav("criativos")} />
 
           {!sidebarCollapsed && (
             <div className="pt-4 pb-2">

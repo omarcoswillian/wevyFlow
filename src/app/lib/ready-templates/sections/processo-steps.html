@@ -1,0 +1,70 @@
+<style>
+.steps{padding:80px 0;background:#161616;position:relative;overflow:hidden}
+.steps::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background-image:radial-gradient(circle,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
+.steps .container{max-width:1100px;margin:0 auto;padding:0 80px;position:relative}
+.steps-head{text-align:center;margin-bottom:64px}
+.steps-badge{display:inline-flex;padding:6px 16px;border-radius:20px;background:rgba(255,92,0,0.12);border:1px solid rgba(255,92,0,0.2);margin-bottom:16px}
+.steps-badge span{font-size:12px;font-weight:600;color:#FF5C00;text-transform:uppercase;letter-spacing:0.06em}
+.steps h2{font-family:'Montserrat',sans-serif;font-size:clamp(24px,3.5vw,36px);font-weight:800;color:#F5F5F5;line-height:1.2;letter-spacing:-0.02em;margin-bottom:12px}
+.steps-sub{font-size:16px;color:#999;max-width:520px;margin:0 auto;line-height:1.7}
+.steps-track{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+.steps-connector{position:absolute;top:28px;left:calc(12.5% + 28px);right:calc(12.5% + 28px);height:1px;background:repeating-linear-gradient(90deg,rgba(255,92,0,0.4) 0px,rgba(255,92,0,0.4) 6px,transparent 6px,transparent 12px)}
+.steps-item{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 20px;position:relative;z-index:1}
+.steps-num{width:56px;height:56px;border-radius:50%;background:#0C0C0C;border:2px solid rgba(255,92,0,0.5);display:flex;align-items:center;justify-content:center;margin-bottom:24px;flex-shrink:0;position:relative;box-shadow:0 0 24px rgba(255,92,0,0.18)}
+.steps-num::before{content:'';position:absolute;inset:-6px;border-radius:50%;background:rgba(255,92,0,0.10)}
+.steps-num span{font-family:'Montserrat',sans-serif;font-size:20px;font-weight:800;color:#FF5C00;line-height:1}
+.steps-item h3{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;color:#F5F5F5;margin-bottom:8px}
+.steps-item p{font-size:14px;color:#999;line-height:1.7}
+@media(max-width:768px){
+  .steps .container{padding:0 20px}
+  .steps{padding:56px 0}
+  .steps-track{grid-template-columns:1fr;gap:0}
+  .steps-connector{display:none}
+  .steps-item{flex-direction:row;text-align:left;align-items:flex-start;padding:0 0 32px 0;border-left:2px dashed rgba(255,92,0,0.30);margin-left:27px;padding-left:32px}
+  .steps-item:last-child{border-left:2px solid transparent;padding-bottom:0}
+  .steps-num{margin-bottom:0;margin-right:0;flex-shrink:0;margin-left:-29px}
+  .steps-item-text{padding-top:6px}
+  .steps h2{font-size:24px}
+}
+</style>
+
+<section class="steps">
+  <div class="container">
+    <div class="steps-head">
+      <div class="steps-badge"><span>Como funciona</span></div>
+      <h2>Como o Metodo Escala Digital funciona</h2>
+      <p class="steps-sub">4 fases simples e sequenciais — voce sabe exatamente o que fazer em cada etapa</p>
+    </div>
+    <div class="steps-track">
+      <div class="steps-connector"></div>
+      <div class="steps-item">
+        <div class="steps-num"><span>01</span></div>
+        <div class="steps-item-text">
+          <h3>Valide antes de criar</h3>
+          <p>Encontre o nicho certo, mapeie o avatar e valide a ideia com pre-venda antes de produzir qualquer conteudo</p>
+        </div>
+      </div>
+      <div class="steps-item">
+        <div class="steps-num"><span>02</span></div>
+        <div class="steps-item-text">
+          <h3>Construa com metodo</h3>
+          <p>Produza seu produto digital usando os frameworks testados — curso, mentoria ou e-book — com estrutura que gera transformacao</p>
+        </div>
+      </div>
+      <div class="steps-item">
+        <div class="steps-num"><span>03</span></div>
+        <div class="steps-item-text">
+          <h3>Lance com estrategia</h3>
+          <p>Execute seu primeiro lancamento com sequencia de aquecimento, ao vivos de impacto e fechamento com urgencia real</p>
+        </div>
+      </div>
+      <div class="steps-item">
+        <div class="steps-num"><span>04</span></div>
+        <div class="steps-item-text">
+          <h3>Automatize e escale</h3>
+          <p>Configure o funil perpetuo, ative trafego pago no momento certo e escale para R$ 10k/mes de forma previsivel</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

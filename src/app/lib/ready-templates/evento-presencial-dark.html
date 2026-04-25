@@ -19,8 +19,19 @@ ul{list-style:none}
 @media(max-width:768px){.container{padding:0 20px}}
 
 /* CTA */
-.btn-cta{display:inline-flex;align-items:center;justify-content:center;background:var(--accent);color:#fff;font-family:'Poppins',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;padding:18px 48px;border-radius:4px;cursor:pointer;border:none;transition:background 0.2s,transform 0.15s;line-height:1}
-.btn-cta:hover{background:var(--accent-hover);transform:translateY(-2px)}
+@keyframes brilho-ev{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
+.btn-cta{display:inline-flex;align-items:center;justify-content:center;
+  background-image:linear-gradient(45deg,#c9241a,#EC2C1F,#c9241a,#f84336);
+  background-size:400% 200%;
+  animation:brilho-ev 3.4s ease infinite;
+  color:#fff;font-family:'Poppins',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;padding:18px 48px;border-radius:4px;cursor:pointer;border:none;transition:box-shadow 0.2s,transform 0.15s;line-height:1;
+  box-shadow:0 4px 24px rgba(236,44,31,0.4);
+}
+.btn-cta:hover{box-shadow:0 0 48px rgba(236,44,31,0.55),0 12px 32px rgba(236,44,31,0.25);transform:translateY(-2px)}
 
 /* ────── HERO ────── */
 .ev-hero{background:var(--bg);padding:60px 0 70px;position:relative;overflow:hidden}
@@ -204,29 +215,29 @@ ul{list-style:none}
 ══════════════════════════════════════ -->
 <section class="ev-hero">
   <div class="container">
-    <div class="ev-hero-logo">SUMMIT<span>.</span>PRO</div>
+    <div class="ev-hero-logo">SUMMIT<span>.</span>INFOPRODUTORES</div>
 
     <div class="ev-hero-datlocal">
       <div class="data-badge">
-        14, 15 e 16 de novembro de 2026
-        <strong>Sexta, sábado e domingo</strong>
+        15, 16 e 17 de agosto de 2026
+        <strong>Sabado, domingo e segunda</strong>
       </div>
       <div class="ev-hero-divider"></div>
       <div class="local-badge">
-        São Paulo, SP
-        <strong>Vibra São Paulo</strong>
+        Sao Paulo, SP
+        <strong>Expo Center Norte</strong>
       </div>
     </div>
 
-    <span class="ev-hero-lote">Lote 1 Liberado: Garanta sua vaga pelo menor preço</span>
+    <span class="ev-hero-lote">Lote 1 Liberado — Garanta sua vaga pelo menor preco</span>
 
-    <h1>Garanta seu ingresso para o maior evento de negócios e marketing digital do Brasil</h1>
+    <h1>O maior evento presencial de infoprodutores do Brasil</h1>
 
-    <p class="ev-hero" style="font-size:17px;color:var(--muted);max-width:640px;line-height:1.6;text-align:center">Viva 3 dias intensos que vão transformar sua mentalidade, expandir sua rede e destravar o próximo nível do seu negócio.</p>
+    <p class="ev-hero" style="font-size:17px;color:var(--muted);max-width:640px;line-height:1.6;text-align:center">3 dias intensos de imersao com os maiores nomes do mercado digital. Clareza, conexoes e um plano de acao para o proximo nivel do seu negocio.</p>
 
-    <a href="#ingressos" class="btn-cta">GARANTIR O MENOR PREÇO</a>
+    <a href="#ingressos" class="btn-cta">GARANTIR O MENOR PRECO</a>
 
-    <span class="ev-hero-local-final">São Paulo, SP</span>
+    <span class="ev-hero-local-final">Sao Paulo, SP — 15, 16 e 17 de agosto de 2026</span>
   </div>
 </section>
 
@@ -268,7 +279,7 @@ ul{list-style:none}
       </div>
     </div>
 
-    <h2 class="ev-prova-headline">JUNTE-SE A <b>12.000 PESSOAS</b> NO MAIOR CONGRESSO DE MARKETING DIGITAL DO BRASIL</h2>
+    <h2 class="ev-prova-headline">JUNTE-SE A <b>8.000 INFOPRODUTORES</b> NO MAIOR EVENTO DO SEGMENTO NO BRASIL</h2>
 
     <div class="ev-video-wrapper">
       <div class="ev-video-placeholder">
@@ -286,7 +297,7 @@ ul{list-style:none}
 ══════════════════════════════════════ -->
 <section class="ev-depo">
   <div class="container">
-    <h2>SÓ QUEM VIVEU <b>"SUMMIT.PRO"</b></h2>
+    <h2>SO QUEM VIVEU O <b>SUMMIT INFOPRODUTORES</b></h2>
 
     <div class="ev-depo-list">
       <div class="ev-depo-card">
@@ -396,12 +407,12 @@ ul{list-style:none}
 <section class="ev-local">
   <div class="container">
     <div class="ev-local-date">
-      14, 15 E 16 DE NOVEMBRO DE 2026
-      <b>SEXTA, SÁBADO E DOMINGO</b>
+      15, 16 E 17 DE AGOSTO DE 2026
+      <b>SABADO, DOMINGO E SEGUNDA</b>
     </div>
     <div class="ev-local-venue">
-      VIBRA SÃO PAULO
-      <b>SÃO PAULO, SP</b>
+      EXPO CENTER NORTE
+      <b>SAO PAULO, SP</b>
     </div>
   </div>
 </section>
@@ -411,8 +422,8 @@ ul{list-style:none}
 ══════════════════════════════════════ -->
 <section class="ev-mundial">
   <div class="container">
-    <h2>TODOS OS CAMINHOS LEVAM AO SUMMIT</h2>
-    <p>Participantes de mais de 18 países já estiveram em nossas edições anteriores. O Summit.Pro reúne os melhores talentos do marketing digital falando português.</p>
+    <h2>TODOS OS CAMINHOS LEVAM AO SUMMIT INFOPRODUTORES</h2>
+    <p>Participantes de mais de 12 paises ja estiveram em nossas edicoes anteriores. O Summit Infoprodutores reune os maiores nomes do mercado digital em lingua portuguesa.</p>
     <div class="ev-mundial-flags">🇧🇷 🇵🇹 🇺🇸 🇦🇷 🇨🇴 🇲🇽 🇵🇦 🇨🇱 🇩🇪 🇪🇸</div>
     <div class="ev-depo-photos">
       <div class="ev-depo-photo-card"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
@@ -436,13 +447,13 @@ ul{list-style:none}
         <div class="ev-tier-lote">lote 1</div>
         <h3>START</h3>
         <div class="ev-progress">
-          <div class="ev-progress-label"><span>Disponibilidade</span><span>68%</span></div>
-          <div class="ev-progress-bar"><div class="ev-progress-fill" style="width:68%"></div></div>
+          <div class="ev-progress-label"><span>Disponibilidade</span><span>72%</span></div>
+          <div class="ev-progress-bar"><div class="ev-progress-fill" style="width:72%"></div></div>
         </div>
         <div class="ev-tier-pricing">
-          <div class="ev-tier-old">de <s>R$ 2.997</s></div>
-          <div class="ev-tier-install">por 12x de <i>R$ 147</i></div>
-          <div class="ev-tier-avista">ou R$ 1.497 à vista</div>
+          <div class="ev-tier-old">de <s>R$ 997</s></div>
+          <div class="ev-tier-install">por 12x de <i>R$ 46</i></div>
+          <div class="ev-tier-avista">ou R$ 497 a vista</div>
         </div>
         <div class="ev-tier-features">
           <div class="ev-tier-feature"><div class="ev-tier-feature-icon ok"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#22C55E" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Acesso aos 3 dias de evento</div>
@@ -464,9 +475,9 @@ ul{list-style:none}
           <div class="ev-progress-bar"><div class="ev-progress-fill" style="width:52%"></div></div>
         </div>
         <div class="ev-tier-pricing">
-          <div class="ev-tier-old">de <s>R$ 4.997</s></div>
-          <div class="ev-tier-install">por 12x de <i>R$ 247</i></div>
-          <div class="ev-tier-avista">ou R$ 2.497 à vista</div>
+          <div class="ev-tier-old">de <s>R$ 1.497</s></div>
+          <div class="ev-tier-install">por 12x de <i>R$ 74</i></div>
+          <div class="ev-tier-avista">ou R$ 797 a vista</div>
         </div>
         <div class="ev-tier-features">
           <div class="ev-tier-feature"><div class="ev-tier-feature-icon ok"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#22C55E" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Acesso aos 3 dias de evento</div>
@@ -483,9 +494,9 @@ ul{list-style:none}
         <div class="ev-tier-lote">lote 1</div>
         <h3>BLACK</h3>
         <div class="ev-tier-pricing">
-          <div class="ev-tier-old">de <s>R$ 9.997</s></div>
-          <div class="ev-tier-install">por <i>R$ 6.997</i></div>
-          <div class="ev-tier-avista">em até 12x no cartão de crédito</div>
+          <div class="ev-tier-old">de <s>R$ 3.997</s></div>
+          <div class="ev-tier-install">por <i>R$ 1.997</i></div>
+          <div class="ev-tier-avista">em ate 12x no cartao de credito</div>
         </div>
         <div class="ev-tier-features">
           <div class="ev-tier-feature"><div class="ev-tier-feature-icon ok"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#22C55E" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Tudo do Premium incluído</div>
@@ -508,8 +519,8 @@ ul{list-style:none}
     <h2>Perguntas Frequentes</h2>
 
     <details class="ev-faq-item" open>
-      <summary>Quando e onde acontece o Summit.Pro 2026?</summary>
-      <p>O Summit.Pro 2026 acontece nos dias 14, 15 e 16 de novembro de 2026 na Vibra São Paulo, em São Paulo, SP. As portas abrem às 8h e o conteúdo vai até às 22h em cada um dos três dias.</p>
+      <summary>Quando e onde acontece o Summit Infoprodutores 2026?</summary>
+      <p>O Summit Infoprodutores 2026 acontece nos dias 15, 16 e 17 de agosto de 2026 na Expo Center Norte, em São Paulo, SP. As portas abrem às 8h e o conteúdo vai até às 22h em cada um dos três dias.</p>
     </details>
     <details class="ev-faq-item">
       <summary>Posso transferir meu ingresso para outra pessoa?</summary>
@@ -517,7 +528,7 @@ ul{list-style:none}
     </details>
     <details class="ev-faq-item">
       <summary>O evento é presencial ou tem opção online?</summary>
-      <p>O Summit.Pro é 100% presencial. Toda a experiência foi desenhada para acontecer ao vivo, com networking real, energia única e conexões que você só faz olho no olho. Não há transmissão online nem gravação disponível para compra.</p>
+      <p>O Summit Infoprodutores é 100% presencial. Toda a experiência foi desenhada para acontecer ao vivo, com networking real, energia única e conexões que você só faz olho no olho. Não há transmissão online nem gravação disponível para compra.</p>
     </details>
     <details class="ev-faq-item">
       <summary>Os ingressos são parcelados?</summary>
@@ -536,14 +547,14 @@ ul{list-style:none}
 <section class="ev-manifesto">
   <div class="container">
     <div>
-      <p class="ev-manifesto-pretitle">Por que o Summit.Pro existe</p>
+      <p class="ev-manifesto-pretitle">Por que o Summit Infoprodutores existe</p>
       <h2 class="ev-manifesto-title">A única coisa entre você</h2>
       <h2 class="ev-manifesto-subtitle">e o próximo nível é o ambiente certo</h2>
       <div class="ev-manifesto-body">
         <h3>Eu já estive onde você está.</h3>
         <p>Você aplica, você estuda, você executa. E ainda assim sente que está correndo em círculos. Parece que todos ao redor estão avançando enquanto você continua no mesmo degrau, fazendo mais do que nunca e chegando no mesmo lugar.</p>
         <p><span class="destaque">"Mas isso não é falta de capacidade. É falta de contexto."</span></p>
-        <p>O Summit.Pro existe para te colocar no ambiente onde as regras do jogo são diferentes. Onde as conversas certas acontecem, os padrões certos são instalados e as decisões que você precisava tomar ficam óbvias. Três dias que comprimem anos de aprendizado.</p>
+        <p>O Summit Infoprodutores existe para te colocar no ambiente onde as regras do jogo são diferentes. Onde as conversas certas acontecem, os padrões certos são instalados e as decisões que você precisava tomar ficam óbvias. Três dias que comprimem anos de aprendizado.</p>
       </div>
       <div class="ev-manifesto-pontos">
         <div class="ev-manifesto-ponto">FATURAMENTO</div>
@@ -564,9 +575,9 @@ ul{list-style:none}
 ══════════════════════════════════════ -->
 <section class="ev-cta-final">
   <div class="container">
-    <h2>NÃO DEIXE PARA DEPOIS.<br><b>O LOTE 1 TEM VAGAS LIMITADAS.</b></h2>
-    <p>Cada dia que passa, os preços sobem e as vagas diminuem. Garanta agora pelo menor valor antes que o lote esgote de vez.</p>
+    <h2>NAO DEIXE PARA DEPOIS.<br><b>O LOTE 1 TEM VAGAS LIMITADAS.</b></h2>
+    <p>Cada dia que passa, os precos sobem e as vagas diminuem. Garanta agora pelo menor valor antes que o lote esgote de vez.</p>
     <a href="#ingressos" class="btn-cta" style="font-size:17px;padding:20px 64px">GARANTIR MEU INGRESSO AGORA</a>
-    <span style="font-size:12px;color:rgba(255,255,255,0.2);letter-spacing:0.1em;text-transform:uppercase">SÃO PAULO, SP · 14, 15 E 16 DE NOVEMBRO DE 2026</span>
+    <span style="font-size:12px;color:rgba(255,255,255,0.2);letter-spacing:0.1em;text-transform:uppercase">SAO PAULO, SP &middot; 15, 16 E 17 DE AGOSTO DE 2026</span>
   </div>
 </section>

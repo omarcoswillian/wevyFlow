@@ -1,0 +1,28 @@
+<style>
+@keyframes brilho{
+  0%{background-position:0 0}
+  100%{background-position:100% 0}
+}
+.ctamid{padding:64px 0;background:#161616;position:relative;overflow:hidden}
+.ctamid::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(255,92,0,0.12),transparent 70%);pointer-events:none}
+.ctamid::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background-image:radial-gradient(circle,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
+.ctamid .container{max-width:680px;margin:0 auto;padding:0 80px;text-align:center;position:relative;z-index:1}
+.ctamid h2{font-family:'Montserrat',sans-serif;font-size:clamp(22px,3vw,30px);font-weight:800;color:#F5F5F5;line-height:1.2;letter-spacing:-0.02em;margin-bottom:12px}
+.ctamid-p{font-size:15px;color:#999;line-height:1.7;margin-bottom:32px}
+.ctamid-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background-image:linear-gradient(45deg,#FF5C00,#E04E00,#FF5C00,#FF7A20);background-size:400% 200%;animation:brilho 3.4s infinite;color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:16px 44px;border-radius:6px;text-decoration:none;min-height:52px;border:none;box-shadow:0 4px 32px rgba(255,92,0,0.35);transition:all 0.3s ease;cursor:pointer}
+.ctamid-btn:hover{box-shadow:0 0 48px rgba(255,92,0,0.5),0 12px 40px rgba(255,92,0,0.2);transform:translateY(-3px) scale(1.02)}
+@media(max-width:768px){
+  .ctamid .container{padding:0 20px}
+  .ctamid{padding:48px 0}
+  .ctamid h2{font-size:22px}
+  .ctamid-btn{width:100%;justify-content:center}
+}
+</style>
+
+<section class="ctamid">
+  <div class="container">
+    <h2>Pronto para construir seu negocio digital do jeito certo?</h2>
+    <p class="ctamid-p">Mais de 4.200 pessoas ja estao aplicando o metodo. A sua vez e agora.</p>
+    <a href="#oferta" class="ctamid-btn">Quero entrar no Metodo Escala Digital →</a>
+  </div>
+</section>

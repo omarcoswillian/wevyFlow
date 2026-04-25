@@ -138,6 +138,8 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
       text: mainText ? mainText.textContent : null,
       href: el.getAttribute ? (el.getAttribute('href') || '') : '',
       target: el.getAttribute ? (el.getAttribute('target') || '') : '',
+      src: el.getAttribute ? (el.getAttribute('src') || '') : '',
+      alt: el.getAttribute ? (el.getAttribute('alt') || '') : '',
       innerHTML: el.innerHTML,
       fontSize: el.style.fontSize || cs.fontSize,
       fontWeight: el.style.fontWeight || cs.fontWeight,
@@ -195,6 +197,15 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
       backgroundSize: cs.backgroundSize,
       backgroundPosition: cs.backgroundPosition,
       filter: cs.filter,
+      objectFit: el.style.objectFit || cs.objectFit,
+      objectPosition: el.style.objectPosition || cs.objectPosition,
+      textShadow: el.style.textShadow || (cs.textShadow !== 'none' ? cs.textShadow : ''),
+      gridTemplateColumns: el.style.gridTemplateColumns || (cs.gridTemplateColumns !== 'none' ? cs.gridTemplateColumns : ''),
+      gridTemplateRows: el.style.gridTemplateRows || (cs.gridTemplateRows !== 'none' ? cs.gridTemplateRows : ''),
+      justifyItems: cs.justifyItems !== 'normal' ? cs.justifyItems : '',
+      cursor: cs.cursor !== 'auto' ? cs.cursor : 'auto',
+      aspectRatio: el.style.aspectRatio || (cs.aspectRatio && cs.aspectRatio !== 'auto' ? cs.aspectRatio : ''),
+      pointerEvents: cs.pointerEvents !== 'auto' ? cs.pointerEvents : 'auto',
     };
   }
 
@@ -883,6 +894,50 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
     dropTarget = null;
     dropPosition = null;
   });
+
+  // Inline text editing on double-click
+  document.addEventListener('dblclick', function(e) {
+    if (!editMode) return;
+    var el = e.target;
+    if (el.closest && el.closest('[id^="__wf"]')) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Only allow inline editing on elements that have direct text content
+    var hasDirectText = false;
+    for (var ni = 0; ni < el.childNodes.length; ni++) {
+      var n = el.childNodes[ni];
+      if (n.nodeType === 3 && n.textContent.trim()) { hasDirectText = true; break; }
+    }
+    if (!hasDirectText && el.children && el.children.length > 0) return; // skip containers
+
+    var original = el.innerHTML;
+    el.contentEditable = 'true';
+    el.focus();
+    el.style.outline = '2px solid #a855f7';
+    el.style.outlineOffset = '2px';
+
+    function finishInline() {
+      el.contentEditable = 'false';
+      el.style.outline = '';
+      el.style.outlineOffset = '';
+      window.parent.postMessage({ type: 'wf-apply-text-raw', id: ensureId(el), html: el.innerHTML }, '*');
+      postCodeUpdated();
+    }
+
+    el.addEventListener('blur', finishInline, { once: true });
+    el.addEventListener('keydown', function(ke) {
+      if (ke.key === 'Escape') {
+        el.innerHTML = original;
+        el.contentEditable = 'false';
+        el.style.outline = '';
+        el.style.outlineOffset = '';
+      }
+      if (ke.key === 'Enter' && (ke.metaKey || ke.ctrlKey)) {
+        el.blur();
+      }
+    });
+  }, true);
 
   // Update overlays on scroll/resize
   function updateOverlays() {

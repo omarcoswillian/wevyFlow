@@ -1,0 +1,83 @@
+<style>
+.bonus{padding:80px 0;background:#0C0C0C;position:relative;overflow:hidden}
+.bonus::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background-image:radial-gradient(circle,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
+.bonus .container{max-width:800px;margin:0 auto;padding:0 80px;position:relative}
+.bonus-head{text-align:center;margin-bottom:48px}
+.bonus-badge{display:inline-flex;padding:6px 16px;border-radius:20px;background:rgba(255,204,0,0.12);border:1px solid rgba(255,204,0,0.2);margin-bottom:16px}
+.bonus-badge span{font-size:12px;font-weight:600;color:#FFCC00;text-transform:uppercase;letter-spacing:0.06em}
+.bonus h2{font-family:'Montserrat',sans-serif;font-size:clamp(22px,3vw,30px);font-weight:800;color:#F5F5F5;line-height:1.2;letter-spacing:-0.02em}
+.bonus-list{display:flex;flex-direction:column;gap:16px;margin-bottom:32px}
+.bonus-card{background:#1A1A1A;border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:24px 28px;display:flex;align-items:flex-start;gap:24px;transition:all 0.3s ease}
+.bonus-card:hover{border-color:rgba(255,204,0,0.30);box-shadow:0 0 28px rgba(255,204,0,0.12),0 8px 32px rgba(0,0,0,0.4);transform:translateY(-4px)}
+.bonus-num-wrap{width:52px;height:52px;border-radius:14px;background:rgba(255,204,0,0.14);border:1px solid rgba(255,204,0,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 16px rgba(255,204,0,0.12)}
+.bonus-num-wrap span{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:800;color:#FFCC00;text-shadow:0 0 20px rgba(255,204,0,0.4)}
+.bonus-content{flex:1;min-width:0}
+.bonus-content h3{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;color:#F5F5F5;margin-bottom:6px}
+.bonus-content p{font-size:14px;color:#999;line-height:1.6;margin-bottom:10px}
+.bonus-valor{display:inline-flex;align-items:center;gap:6px;font-size:13px}
+.bonus-valor-label{color:#666;font-size:12px;text-transform:uppercase;letter-spacing:0.04em}
+.bonus-valor-price{color:#999;text-decoration:line-through;font-weight:600}
+.bonus-total{background:radial-gradient(ellipse at 50% 0%,rgba(255,92,0,0.08),transparent 70%),#1A1A1A;border:1px solid rgba(255,92,0,0.25);border-radius:14px;padding:24px 28px;display:flex;justify-content:space-between;align-items:center}
+.bonus-total-label{font-size:14px;color:#999;text-transform:uppercase;letter-spacing:0.06em;font-weight:600}
+.bonus-total-value{font-family:'Montserrat',sans-serif;font-size:24px;font-weight:800;color:#FFCC00;text-decoration:line-through;text-shadow:0 0 20px rgba(255,204,0,0.3)}
+.bonus-total-sub{font-size:12px;color:#666;margin-top:2px;text-align:right}
+@media(max-width:768px){
+  .bonus .container{padding:0 20px}
+  .bonus{padding:56px 0}
+  .bonus-card{flex-direction:column;gap:16px}
+  .bonus-total{flex-direction:column;align-items:flex-start;gap:8px}
+  .bonus-total-sub{text-align:left}
+  .bonus h2{font-size:22px}
+}
+</style>
+
+<section class="bonus">
+  <div class="container">
+    <div class="bonus-head">
+      <div class="bonus-badge"><span>Bonus exclusivos</span></div>
+      <h2>Voce ainda leva esses bonus exclusivos:</h2>
+    </div>
+    <div class="bonus-list">
+      <div class="bonus-card">
+        <div class="bonus-num-wrap"><span>01</span></div>
+        <div class="bonus-content">
+          <h3>Masterclass Trafego do Zero</h3>
+          <p>Como ir de 0 a 100 compradores por dia usando Instagram Organico, YouTube e grupos de WhatsApp — sem pagar por anuncios</p>
+          <div class="bonus-valor">
+            <span class="bonus-valor-label">Valor:</span>
+            <span class="bonus-valor-price">R$ 497</span>
+          </div>
+        </div>
+      </div>
+      <div class="bonus-card">
+        <div class="bonus-num-wrap"><span>02</span></div>
+        <div class="bonus-content">
+          <h3>Planilha de Lancamento Completa</h3>
+          <p>Cronograma, scripts de e-mail, roteiro de ao vivos e checklist de 47 pontos para seu lancamento sair perfeito da primeira vez</p>
+          <div class="bonus-valor">
+            <span class="bonus-valor-label">Valor:</span>
+            <span class="bonus-valor-price">R$ 197</span>
+          </div>
+        </div>
+      </div>
+      <div class="bonus-card">
+        <div class="bonus-num-wrap"><span>03</span></div>
+        <div class="bonus-content">
+          <h3>Comunidade Escala Digital VIP</h3>
+          <p>Acesso a comunidade fechada com +4.200 alunos ativos, mentorias semanais ao vivo e revisao de copy e pagina</p>
+          <div class="bonus-valor">
+            <span class="bonus-valor-label">Valor:</span>
+            <span class="bonus-valor-price">R$ 697</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bonus-total">
+      <span class="bonus-total-label">Total em bonus</span>
+      <div>
+        <div class="bonus-total-value">R$ 1.391 em bonus</div>
+        <div class="bonus-total-sub">Inclusos sem custo adicional</div>
+      </div>
+    </div>
+  </div>
+</section>

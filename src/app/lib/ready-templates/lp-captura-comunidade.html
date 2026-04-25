@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>[INSERIR: Nome do Projeto]</title>
+<title>Comunidade Infoprodutores BR — Entre no maior grupo de infoprodutores do Brasil</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -21,9 +21,18 @@ body{font-family:var(--font);color:var(--text);background:var(--bg);line-height:
 a{text-decoration:none;color:inherit;}
 .container{max-width:var(--container);margin:0 auto;padding:0 24px;}
 
+@keyframes brilho{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
+
 /* ── HERO DARK + FOTO ── */
 .hero-com{position:relative;background:var(--bg-dark);overflow:hidden;}
-.hero-inner{max-width:var(--container);margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 1fr;min-height:auto;align-items:center;}
+/* Blur circles decorativos */
+.hero-com::before{content:'';position:absolute;top:-100px;left:-120px;width:500px;height:500px;background:rgba(124,58,237,0.10);border-radius:50%;filter:blur(180px);pointer-events:none;opacity:0.10;z-index:0;}
+.hero-com::after{content:'';position:absolute;bottom:-80px;right:-80px;width:400px;height:400px;background:rgba(139,92,246,0.12);border-radius:50%;filter:blur(180px);pointer-events:none;opacity:0.12;z-index:0;}
+.hero-inner{max-width:var(--container);margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 1fr;min-height:auto;align-items:center;position:relative;z-index:1;}
 
 /* Coluna esquerda */
 .hero-left{padding:64px 0 64px;position:relative;z-index:2;}
@@ -42,22 +51,28 @@ a{text-decoration:none;color:inherit;}
 .hero-badge-item{display:flex;align-items:center;gap:6px;font-size:10px;color:rgba(255,255,255,0.5);}
 .hero-badge-item svg{width:12px;height:12px;color:var(--purple);}
 
-/* Formulario inline */
+/* Formulário inline */
 .hero-form{display:flex;flex-direction:column;gap:8px;max-width:360px;}
 .hero-form input{width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;background:rgba(255,255,255,0.04);color:#fff;font-family:var(--font);font-size:12px;outline:none;transition:border-color 0.2s;}
 .hero-form input::placeholder{color:rgba(255,255,255,0.25);}
 .hero-form input:focus{border-color:var(--purple);}
-.btn-green{display:block;width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:8px;font-family:var(--font);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;cursor:pointer;transition:all 0.2s;text-align:center;}
-.btn-green:hover{background:var(--green-dark);box-shadow:0 4px 16px rgba(34,197,94,0.3);}
+
+.btn-green{
+  display:block;width:100%;padding:13px;
+  background-image:linear-gradient(45deg,#05811A,#08D23E,#05811A,#0AE844);
+  background-size:400% 200%;
+  animation:brilho 3.4s ease infinite;
+  color:#fff;border:none;border-radius:8px;font-family:var(--font);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;cursor:pointer;transition:box-shadow 0.2s,transform 0.2s;text-align:center;
+  box-shadow:0 4px 24px rgba(8,210,62,0.35);
+}
+.btn-green:hover{box-shadow:0 0 48px rgba(8,210,62,0.5),0 12px 40px rgba(8,210,62,0.2);transform:translateY(-2px) scale(1.01);}
 
 /* Coluna direita — foto */
 .hero-right{position:relative;display:flex;align-items:flex-end;justify-content:center;z-index:1;}
 .hero-photo-area{width:100%;height:100%;min-height:420px;position:relative;display:flex;align-items:flex-end;justify-content:center;}
 .hero-photo-placeholder{width:100%;height:100%;background:linear-gradient(180deg,var(--bg-dark) 0%,var(--bg-dark-2) 100%);display:flex;align-items:center;justify-content:center;font-size:11px;color:rgba(255,255,255,0.15);}
-/* Glow purple atras da foto */
-.hero-right::before{content:'';position:absolute;top:20%;right:10%;width:300px;height:300px;background:radial-gradient(circle,rgba(124,58,237,0.15),transparent 70%);pointer-events:none;z-index:0;}
-/* Letras grandes de fundo */
-.hero-right::after{content:attr(data-bg-text);position:absolute;top:50%;right:-20px;transform:translateY(-50%);font-size:clamp(80px,14vw,160px);font-weight:900;color:rgba(255,255,255,0.02);letter-spacing:-0.05em;white-space:nowrap;pointer-events:none;z-index:0;}
+.hero-right-glow{content:'';position:absolute;top:20%;right:10%;width:300px;height:300px;background:radial-gradient(circle,rgba(124,58,237,0.15),transparent 70%);pointer-events:none;z-index:0;}
+.hero-bg-text{position:absolute;top:50%;right:-20px;transform:translateY(-50%);font-size:clamp(80px,14vw,160px);font-weight:900;color:rgba(255,255,255,0.02);letter-spacing:-0.05em;white-space:nowrap;pointer-events:none;z-index:0;}
 
 /* ── PILARES (light) ── */
 .section-pilares{padding:56px 0;background:var(--bg);}
@@ -76,28 +91,45 @@ a{text-decoration:none;color:inherit;}
 /* ── CTA COMUNIDADE ── */
 .section-cta-com{padding:56px 0;background:var(--bg-alt);}
 .cta-com-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:center;}
-.cta-com-visual{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:40px;display:flex;align-items:center;justify-content:center;min-height:300px;position:relative;overflow:hidden;}
-/* Circulos concentricos */
+.cta-com-visual{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:40px;display:flex;align-items:center;justify-content:center;min-height:300px;position:relative;overflow:hidden;box-shadow:0 0 24px rgba(124,58,237,0.07);}
+/* Círculos concêntricos */
 .cta-circles{position:relative;width:220px;height:220px;}
 .cta-circle{position:absolute;border-radius:50%;border:1px solid rgba(0,0,0,0.06);}
 .cta-circle-1{inset:0;}
 .cta-circle-2{inset:25px;}
 .cta-circle-3{inset:50px;}
 .cta-circle-4{inset:75px;}
-/* Avatares nos circulos */
+/* Avatares */
 .cta-avatar{position:absolute;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#ddd,#c8c8c8);border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
 .cta-av-1{top:10px;left:20px;}
 .cta-av-2{top:5px;right:30px;}
 .cta-av-3{bottom:40px;left:10px;}
 .cta-av-4{bottom:10px;right:15px;}
-/* Icone central */
-.cta-center-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:24px;}
+/* Ícone central */
+.cta-center-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;background:var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.cta-center-icon svg{width:22px;height:22px;color:#fff;}
 
 .cta-com-text h2{font-size:clamp(28px,3.5vw,42px);font-weight:800;color:var(--text);letter-spacing:-0.04em;line-height:1.1;margin-bottom:12px;}
 .cta-com-text h2 .highlight{background:linear-gradient(to right,var(--purple),var(--purple));background-position:0 85%;background-size:100% 8px;background-repeat:no-repeat;padding-bottom:2px;}
 .cta-com-text p{font-size:14px;color:var(--text-60);line-height:1.6;margin-bottom:20px;max-width:380px;}
-.btn-green-lg{display:inline-block;padding:14px 32px;background:var(--green);color:#fff;border:none;border-radius:100px;font-family:var(--font);font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;cursor:pointer;transition:all 0.2s;text-decoration:none;}
-.btn-green-lg:hover{background:var(--green-dark);box-shadow:0 4px 20px rgba(34,197,94,0.3);}
+
+.btn-green-lg{
+  display:inline-block;padding:14px 32px;
+  background-image:linear-gradient(45deg,#05811A,#08D23E,#05811A,#0AE844);
+  background-size:400% 200%;
+  animation:brilho 3.4s ease infinite;
+  color:#fff;border:none;border-radius:100px;font-family:var(--font);font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;cursor:pointer;transition:box-shadow 0.2s,transform 0.2s;text-decoration:none;
+  box-shadow:0 4px 20px rgba(8,210,62,0.3);
+}
+.btn-green-lg:hover{box-shadow:0 4px 36px rgba(8,210,62,0.5);transform:translateY(-2px);}
+
+/* ── STATS ── */
+.section-stats{padding:40px 0;background:var(--bg-dark);border-top:1px solid var(--border-dark);}
+.stats-row{display:flex;justify-content:center;gap:48px;flex-wrap:wrap;}
+.stat-item{text-align:center;}
+.stat-num{font-size:clamp(24px,3vw,32px);font-weight:800;color:#fff;letter-spacing:-0.03em;line-height:1;}
+.stat-num .accent{color:var(--purple);}
+.stat-label{font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;font-weight:500;}
 
 /* ── FOOTER ── */
 .footer-com{padding:20px 24px;text-align:center;border-top:1px solid var(--border);}
@@ -115,6 +147,7 @@ a{text-decoration:none;color:inherit;}
   .hero-photo-area{min-height:280px;}.hero-left{padding:32px 0 48px;}
   .pilares-grid,.cta-com-grid{grid-template-columns:1fr;}
   .cta-com-visual{order:-1;}
+  .stats-row{gap:28px;}
 }
 </style>
 </head>
@@ -127,30 +160,56 @@ a{text-decoration:none;color:inherit;}
       <!-- Logo -->
       <div class="hero-logo reveal">
         <div class="hero-logo-icon"><svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="14" stroke="var(--purple)" stroke-width="2" opacity="0.3"/><path d="M16 8c-1 4-4 7-8 8 4 1 7 4 8 8 1-4 4-7 8-8-4-1-7-4-8-8z" fill="var(--purple)"/></svg></div>
-        <div class="hero-logo-text">[INSERIR: Marca]<span>[INSERIR: Tagline]</span></div>
+        <div class="hero-logo-text">Infoprodutores BR<span>Comunidade Oficial</span></div>
       </div>
 
       <h1 class="reveal rd1">
-        [INSERIR: Headline pre] <span class="accent">[INSERIR: palavra destaque]</span> [INSERIR: Headline pos].
+        Entre no <span class="accent">maior grupo</span> de infoprodutores do Brasil e saia do isolamento de vez.
       </h1>
-      <p class="hero-sub reveal rd2">[INSERIR: Subtitulo — descricao do movimento/comunidade em 2 linhas]</p>
+      <p class="hero-sub reveal rd2">Acesso exclusivo a mentorias ao vivo, conteúdo premium, networking estratégico e uma comunidade que cresce junto — 100% gratuito para entrar.</p>
 
       <div class="hero-badges reveal rd2">
-        <div class="hero-badge-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/></svg> Disponivel no app</div>
-        <div class="hero-badge-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Vagas abertas ate [DATA]</div>
+        <div class="hero-badge-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/></svg> Disponível no app</div>
+        <div class="hero-badge-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Vagas abertas — gratuito</div>
       </div>
 
       <form class="hero-form reveal rd3" onsubmit="event.preventDefault();">
-        <input type="email" placeholder="Seu email" required>
-        <input type="text" placeholder="Seu nome" required>
-        <input type="tel" placeholder="WhatsApp" required>
-        <button type="submit" class="btn-green">Quero fazer parte do movimento</button>
+        <input type="email" placeholder="Seu melhor e-mail" required>
+        <input type="text" placeholder="Seu nome completo" required>
+        <input type="tel" placeholder="WhatsApp com DDD" required>
+        <button type="submit" class="btn-green">Quero entrar na comunidade</button>
       </form>
     </div>
 
-    <div class="hero-right" data-bg-text="[M]">
+    <div class="hero-right">
+      <span class="hero-bg-text">INFOPRO</span>
+      <div class="hero-right-glow"></div>
       <div class="hero-photo-area">
-        <div class="hero-photo-placeholder">Foto do especialista (recortada ou com fundo)</div>
+        <div class="hero-photo-placeholder">Foto do especialista ou da comunidade em ação</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ STATS ══════ -->
+<section class="section-stats">
+  <div class="container">
+    <div class="stats-row">
+      <div class="stat-item reveal">
+        <div class="stat-num"><span class="accent">+18.400</span></div>
+        <div class="stat-label">membros ativos</div>
+      </div>
+      <div class="stat-item reveal rd1">
+        <div class="stat-num">4,9</div>
+        <div class="stat-label">avaliação média</div>
+      </div>
+      <div class="stat-item reveal rd2">
+        <div class="stat-num"><span class="accent">3</span> anos</div>
+        <div class="stat-label">de comunidade ativa</div>
+      </div>
+      <div class="stat-item reveal rd3">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">gratuito para entrar</div>
       </div>
     </div>
   </div>
@@ -160,26 +219,26 @@ a{text-decoration:none;color:inherit;}
 <section class="section-pilares">
   <div class="container">
     <div class="pilares-header reveal">
-      <h2>[INSERIR: Headline] <span class="accent">[INSERIR: numero] pilares essenciais</span></h2>
-      <p>[INSERIR: Subtitulo — contexto sobre os pilares]</p>
+      <h2>Tudo que você precisa <span class="accent">em um só lugar</span></h2>
+      <p>A Comunidade Infoprodutores BR reúne 3 pilares essenciais para quem quer crescer no digital sem perder tempo.</p>
     </div>
     <div class="pilares-grid">
       <div class="pilares-list">
         <div class="pilar-item reveal">
-          <h3>[INSERIR: Pilar 1 — titulo]:</h3>
-          <p>[INSERIR: Descricao do pilar 1 — 2 linhas]</p>
+          <h3>Conteúdo exclusivo toda semana:</h3>
+          <p>Aulas, checklists e frameworks que não estão no YouTube. Produzidos por especialistas que já faturaram mais de R$1M no digital.</p>
         </div>
         <div class="pilar-item reveal rd1">
-          <h3>[INSERIR: Pilar 2 — titulo]:</h3>
-          <p>[INSERIR: Descricao do pilar 2]</p>
+          <h3>Mentorias ao vivo com especialistas:</h3>
+          <p>Sessões mensais de perguntas e respostas com referências do mercado. Tire suas dúvidas em tempo real e aplique no seu negócio no mesmo dia.</p>
         </div>
         <div class="pilar-item reveal rd2">
-          <h3>[INSERIR: Pilar 3 — titulo]:</h3>
-          <p>[INSERIR: Descricao do pilar 3]</p>
+          <h3>Networking estratégico com outros infoprodutores:</h3>
+          <p>Conecte-se com pessoas que falam a mesma língua que você. Parcerias, colaborações e amizades que valem mais do que qualquer curso.</p>
         </div>
       </div>
       <div class="reveal rd3">
-        <div class="pilares-img">Imagem de apoio (foto, mockup ou ilustracao)</div>
+        <div class="pilares-img">Imagem da comunidade em ação (screenshot, mockup ou foto)</div>
       </div>
     </div>
   </div>
@@ -199,13 +258,15 @@ a{text-decoration:none;color:inherit;}
           <div class="cta-avatar cta-av-2"></div>
           <div class="cta-avatar cta-av-3"></div>
           <div class="cta-avatar cta-av-4"></div>
-          <div class="cta-center-icon">&#9730;</div>
+          <div class="cta-center-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
         </div>
       </div>
       <div class="cta-com-text reveal rd1">
-        <h2><span class="highlight">Inscreva-se</span></h2>
-        <p>[INSERIR: Frase de comunidade — Esteja com pessoas que estao debaixo do mesmo proposito que voce.]</p>
-        <a href="#" class="btn-green-lg">Quero fazer parte do clube</a>
+        <h2><span class="highlight">Inscreva-se</span> agora</h2>
+        <p>Esteja cercado de pessoas que estão debaixo do mesmo propósito que você. Crescimento em comunidade é mais rápido, mais leve e mais duradouro.</p>
+        <a href="#" class="btn-green-lg">Quero entrar na comunidade</a>
       </div>
     </div>
   </div>
@@ -213,7 +274,7 @@ a{text-decoration:none;color:inherit;}
 
 <!-- ══════ FOOTER ══════ -->
 <footer class="footer-com">
-  <p>Copyright 2026 &copy; [INSERIR: Nome] | Powered By <strong>[INSERIR: Empresa]</strong></p>
+  <p>Copyright 2026 &copy; Infoprodutores BR | Powered By <strong>Escala Digital</strong></p>
 </footer>
 
 <script>

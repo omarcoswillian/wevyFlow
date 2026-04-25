@@ -1,4 +1,4 @@
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════
    MÉTODO SPE — Premium Landing Page
@@ -18,8 +18,8 @@
   --slate-100: #f1f5f9;
   --slate-50: #f8fafc;
   --white: #ffffff;
-  --font-heading: 'Sora', system-ui, sans-serif;
-  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-heading: 'Montserrat', system-ui, sans-serif;
+  --font-body: 'Montserrat', system-ui, sans-serif;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -261,6 +261,11 @@ body {
   padding-right: 40px;
 }
 
+@keyframes brilho-spe{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
 /* ── CTA BUTTON ── */
 .btn-cta {
   display: block;
@@ -269,7 +274,9 @@ body {
   margin-top: 8px;
   border: none;
   border-radius: 11px;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  background-image: linear-gradient(45deg,#E04E00,#FF5C00,#E04E00,#FF7A20);
+  background-size: 400% 200%;
+  animation: brilho-spe 3.4s ease infinite;
   color: white;
   font-family: var(--font-heading);
   font-size: 13px;
@@ -279,22 +286,12 @@ body {
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: all 0.35s var(--ease-out-expo);
-}
-.btn-cta::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, transparent, rgba(255,255,255,0.1), transparent);
-  transform: translateX(-100%);
-  transition: transform 0.6s ease;
+  transition: box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 4px 32px rgba(255,92,0,0.35);
 }
 .btn-cta:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px var(--orange-glow), 0 2px 6px rgba(0,0,0,0.08);
-}
-.btn-cta:hover::before {
-  transform: translateX(100%);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 0 48px rgba(255,92,0,0.50), 0 12px 40px rgba(255,92,0,0.20);
 }
 .btn-cta:active {
   transform: translateY(0);
@@ -1042,4 +1039,224 @@ body {
             <div class="mc-dot mc-dot--y"></div>
             <div class="mc-dot mc-dot--g"></div>
           </div>
+          <div class="mc-metrics">
+            <div class="mc-metric"><div class="mc-metric-value orange">+347%</div><div class="mc-metric-label">Alcance orgânico</div></div>
+            <div class="mc-metric"><div class="mc-metric-value blue">R$18K</div><div class="mc-metric-label">Vendas via Stories</div></div>
+            <div class="mc-metric"><div class="mc-metric-value">4.200</div><div class="mc-metric-label">Seguidores novos</div></div>
+            <div class="mc-metric"><div class="mc-metric-value orange">92%</div><div class="mc-metric-label">Taxa de retenção</div></div>
+          </div>
+        </div>
+      </div>
+      <!-- Notification Card -->
+      <div class="mockup-card mc-notification">
+        <div class="mc-inner">
+          <div class="mc-notif-row">
+            <div class="mc-avatar"></div>
+            <div><div class="mc-notif-name">Nova venda!</div><div class="mc-notif-desc">R$ 697 via Stories</div></div>
+          </div>
+          <div class="mc-bar"></div>
+          <div class="mc-bar" style="width:60%;margin-top:5px;"></div>
+        </div>
+      </div>
+      <!-- Chart Card -->
+      <div class="mockup-card mc-chart">
+        <div class="mc-inner">
+          <div class="mc-chart-title">Vendas por dia</div>
+          <div class="mc-bars">
+            <div style="height:30%;background:#ffe5d9;"></div>
+            <div style="height:50%;background:#fcd3c0;"></div>
+            <div style="height:40%;background:#ffe5d9;"></div>
+            <div style="height:80%;background:var(--color-primary);"></div>
+            <div style="height:65%;background:#fcd3c0;"></div>
+            <div style="height:90%;background:var(--color-primary);"></div>
+            <div style="height:75%;background:#fcd3c0;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STATS BAR ═══ -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat"><div class="stat-num">6.800+</div><div class="stat-label">alunos formados</div></div>
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">fases do método</div></div>
+    <div class="stat"><div class="stat-num">4,9</div><div class="stat-label">avaliação média</div></div>
+    <div class="stat"><div class="stat-num">97%</div><div class="stat-label">recomendam o SPE</div></div>
+  </div>
+</div>
+
+<!-- ═══ O MÉTODO ═══ -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <h2 class="section-title">As 6 Fases do Método SPE</h2>
+      <p class="section-subtitle">Do zero à máquina de vendas em Stories — um método sequencial testado com mais de 6.800 alunos.</p>
+    </div>
+    <div class="cards-grid">
+      <div class="card reveal">
+        <div class="card-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+        <div class="card-title">Fase 1 — Posicionamento</div>
+        <div class="card-desc">Defina quem você é nos Stories, para quem você fala e qual é a mensagem que atrai o cliente certo — mesmo com poucos seguidores.</div>
+      </div>
+      <div class="card reveal reveal-d1">
+        <div class="card-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.069A1 1 0 0121 8.845V14.5a1 1 0 01-.868.99L15 16M3 8h12v8H3a1 1 0 01-1-1V9a1 1 0 011-1z"/></svg></div>
+        <div class="card-title">Fase 2 — Roteiro de Conteúdo</div>
+        <div class="card-desc">O sistema de 5 tipos de Stories que geram desejo, criam conexão e conduzem naturalmente para a compra — sem ser invasivo.</div>
+      </div>
+      <div class="card reveal reveal-d2">
+        <div class="card-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+        <div class="card-title">Fase 3 — Gatilhos de Conversão</div>
+        <div class="card-desc">Os gatilhos mentais que funcionam em 24h de Stories — urgência, prova social, identidade e reciprocidade aplicados de forma ética.</div>
+      </div>
+      <div class="card reveal reveal-d3">
+        <div class="card-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg></div>
+        <div class="card-title">Fase 4 — CTA e Oferta</div>
+        <div class="card-desc">Como apresentar sua oferta nos Stories sem parecer vendedor — o método de CTA que converte visualização em mensagem no WhatsApp.</div>
+      </div>
+      <div class="card reveal">
+        <div class="card-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div>
+        <div class="card-title">Fase 5 — Frequência e Consistência</div>
+        <div class="card-desc">O sistema de produção de Stories em bloco que garante presença diária em menos de 30 minutos por semana de planejamento.</div>
+      </div>
+      <div class="card reveal reveal-d1">
+        <div class="card-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+        <div class="card-title">Fase 6 — Escala e Automação</div>
+        <div class="card-desc">Como escalar suas vendas via Stories com links automáticos, respostas inteligentes no Direct e integração com página de vendas.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DEPOIMENTOS ═══ -->
+<section class="section" style="background:var(--slate-50);">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <h2 class="section-title">O que dizem os alunos do SPE</h2>
+      <p class="section-subtitle">Resultados reais de infoprodutores que aplicaram o método.</p>
+    </div>
+    <div class="cards-grid">
+      <div class="testimonial reveal">
+        <p class="testimonial-quote">Apliquei a Fase 3 do SPE numa quinta-feira e na sexta de manhã já tinha 3 pedidos no WhatsApp. Sem tráfego pago, sem anúncio. Só Stories.</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar"></div>
+          <div><div class="testimonial-name">Carla Mendes</div><div class="testimonial-role">Coach de Carreira — SP</div></div>
+        </div>
+      </div>
+      <div class="testimonial reveal reveal-d1">
+        <p class="testimonial-quote">Fui de 2 vendas por mês para 11 vendas em 3 semanas. E o mais incrível: meu Instagram tem menos de 2.000 seguidores. O SPE mudou minha relação com os Stories.</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar"></div>
+          <div><div class="testimonial-name">Lucas Ribeiro</div><div class="testimonial-role">Designer e Infoprodutor — RJ</div></div>
+        </div>
+      </div>
+      <div class="testimonial reveal reveal-d2">
+        <p class="testimonial-quote">Já tinha comprado 4 cursos de Instagram. O SPE foi o primeiro que me deu um sistema claro para seguir. Bati R$12K em vendas no meu primeiro mês de aplicação.</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar"></div>
+          <div><div class="testimonial-name">Patricia Gomes</div><div class="testimonial-role">Nutricionista — MG</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PRICING ═══ -->
+<section class="section pricing">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <h2 class="section-title">Investimento único</h2>
+      <p class="section-subtitle">Acesso completo ao Método SPE — Stories para Enriquecer.</p>
+    </div>
+    <div class="pricing-card reveal">
+      <div class="pricing-badge">Mais vendido</div>
+      <div class="pricing-value">R$697</div>
+      <div class="pricing-installment">ou 12x de R$72 no cartao de credito</div>
+      <div class="bonus-list">
+        <div class="bonus-item"><div class="bonus-check"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>6 fases completas do Metodo SPE</div>
+        <div class="bonus-item"><div class="bonus-check"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Templates de Stories prontos para usar</div>
+        <div class="bonus-item"><div class="bonus-check"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Acesso ao grupo exclusivo de alunos</div>
+        <div class="bonus-item"><div class="bonus-check"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Atualizacoes vitalicas do conteudo</div>
+        <div class="bonus-item"><div class="bonus-check"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Bonus: Script de Vendas pelo Direct</div>
+        <div class="bonus-item"><div class="bonus-check"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>Bonus: Calendario de Conteudo 30 dias</div>
+      </div>
+      <button class="btn-cta">Quero Acessar o Metodo SPE</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ GARANTIA ═══ -->
+<section class="section">
+  <div class="section-inner">
+    <div class="guarantee-card reveal">
+      <div class="guarantee-badge">Garantia</div>
+      <h2 class="guarantee-title">7 dias de garantia incondicional</h2>
+      <p class="guarantee-desc">Se em 7 dias voce nao estiver satisfeito por qualquer motivo, devolvemos 100% do seu dinheiro sem perguntas. O risco e nosso — o resultado e seu.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FAQ ═══ -->
+<section class="section" style="background:var(--slate-50);">
+  <div class="section-inner" style="max-width:720px;">
+    <div class="section-header reveal">
+      <h2 class="section-title">Perguntas frequentes</h2>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-question" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">
+        Para quem e o Metodo SPE?
+        <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="faq-answer">Para infoprodutores, coaches, mentores, consultores e qualquer prestador de servico que queira usar o Instagram Stories para vender todos os dias sem depender de trafego pago ou ter uma conta com milhares de seguidores.</div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-question" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">
+        Funciona para conta com poucos seguidores?
+        <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="faq-answer">Sim. O SPE foi desenvolvido especialmente para quem nao tem uma grande audiencia. O metodo foca em engajamento qualificado — seguidores que compram — e nao em metricas de vaidade.</div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-question" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">
+        Por quanto tempo tenho acesso ao curso?
+        <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="faq-answer">O acesso e vitalicio. Voce tambem recebe todas as atualizacoes futuras sem custo adicional — incluindo novos modulos e materiais que forem adicionados ao metodo.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-links">
+      <a href="#" class="footer-link">Sobre Marina Costa</a>
+      <a href="#" class="footer-link">Politica de Privacidade</a>
+      <a href="#" class="footer-link">Termos de Uso</a>
+      <a href="#" class="footer-link">Contato</a>
+    </div>
+    <div class="footer-divider"></div>
+    <p class="footer-legal">Copyright 2026 &copy; Metodo SPE — Marina Costa. Todos os direitos reservados.<br>Este produto e disponibilizado pela plataforma Hotmart. Ao adquirir voce concorda com os termos de uso.</p>
+  </div>
+</footer>
+
+<script>
+var observer = new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('is-visible');});},{threshold:0.05,rootMargin:'0px 0px -20px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){observer.observe(el);});
+
+// Countdown
+(function(){
+  var h=18,m=35,s=42;
+  function pad(n){return n<10?'0'+n:n;}
+  function tick(){
+    if(s>0){s--;}else if(m>0){m--;s=59;}else if(h>0){h--;m=59;s=59;}
+    var blocks=document.querySelectorAll('.countdown-num');
+    if(blocks[1])blocks[1].textContent=pad(h);
+    if(blocks[2])blocks[2].textContent=pad(m);
+    if(blocks[3])blocks[3].textContent=pad(s);
+  }
+  setInterval(tick,1000);
+})();
+</script>
           <div class
