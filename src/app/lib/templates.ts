@@ -39,9 +39,9 @@ export const TEMPLATES: TemplateItem[] = [
   {
     id: "ready-spe-light",
     label: "LP Vendas SPE · Light Personal Brand (Pronto)",
-    description: "Página de vendas light estilo personal brand para cursos de conteúdo/stories. Headline colorida pink+orange+purple, VSL vermelho, before/after com X e check, galeria de prints de resultado, carrossel dark de depoimentos e seção de hook com mensagens de DM.",
+    description: "Página de vendas light SPE — Story para Enriquecer. Logo pink+black, hero branco, VSL terracotta, dor/transformação com pills X/check, seção estratégias com mockups de story e contadores de views, currículo em accordion, depoimentos, bio Luana Carolina, pricing e garantia.",
     category: "vendas",
-    tags: ["pronto", "vendas", "light", "branco", "personal brand", "stories", "before after", "depoimentos", "spe"],
+    tags: ["pronto", "vendas", "light", "branco", "personal brand", "stories", "before after", "depoimentos", "spe", "pink", "vsl"],
     prompt: "READY:ready-spe-light",
   },
   {
