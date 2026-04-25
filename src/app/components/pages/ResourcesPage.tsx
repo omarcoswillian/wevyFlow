@@ -13,7 +13,7 @@ interface ResourcesPageProps {
 const TEMPLATE_VISUALS: Record<string, { gradient: string; mockupType: "hero-photo" | "saas" | "cards" | "form" | "blog" | "portfolio" | "minimal"; ready?: boolean }> = {
   "ready-metodo-rmx": { gradient: "from-[#080808] via-violet-950/40 to-[#080808]", mockupType: "saas", ready: true },
   "ready-metodo-rmx-light": { gradient: "from-[#F3EEFF] via-white to-[#EAE0FF]", mockupType: "cards", ready: true },
-  "ready-spe-light": { gradient: "from-white via-pink-50 to-orange-50", mockupType: "cards", ready: true },
+  "ready-spe-light": { gradient: "from-[#FFFFFF] via-pink-50 to-[#FFF5F0]", mockupType: "spe-light" as any, ready: true },
   "ready-stories10x-dark": { gradient: "from-[#0C0C0C] via-pink-950/30 to-[#0C0C0C]", mockupType: "hero-photo", ready: true },
   "ready-novomercado-dark": { gradient: "from-[#0A0A14] via-pink-950/20 to-[#0A0A14]", mockupType: "saas", ready: true },
   "ready-quiz-funnel": { gradient: "from-violet-900 via-purple-800 to-fuchsia-900", mockupType: "cards", ready: true },
@@ -169,6 +169,22 @@ function MockupOverlay({ type }: { type: string }) {
           <div className="w-1/2 h-2.5 bg-white/70 rounded" />
           <div className="w-1/3 h-1.5 bg-white/30 rounded" />
           <div className="w-16 h-5 bg-white/15 border border-white/20 rounded-full mt-1" />
+        </div>
+      );
+    case "spe-light":
+      return (
+        <div className="absolute inset-0 flex flex-col justify-center p-5 gap-3">
+          {/* eyebrow badge */}
+          <div className="w-32 h-4 rounded-full bg-[#E8176A]/15 border border-[#E8176A]/20" />
+          {/* big headline bars */}
+          <div className="w-full h-5 bg-[#111]/80 rounded" />
+          <div className="w-3/4 h-5 bg-[#E8176A]/80 rounded" />
+          {/* sub */}
+          <div className="w-2/3 h-2 bg-[#111]/15 rounded mt-1" />
+          {/* CTA */}
+          <div className="w-28 h-7 bg-[#E8176A] rounded mt-1" />
+          {/* micro proof */}
+          <div className="w-1/2 h-1.5 bg-[#111]/10 rounded" />
         </div>
       );
     default:
