@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #111114;
+    color: #fff;
+    padding: 20px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .logo { font-size: 15px; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 2px; }
+  .logo span { color: #8b5cf6; }
+  .sub { color: rgba(255,255,255,0.35); font-size: 11px; margin-bottom: 18px; }
+
+  .steps {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    color: rgba(255,255,255,0.5);
+    font-size: 11.5px;
+  }
+  .steps ol { padding-left: 16px; }
+  .steps li { margin-bottom: 5px; }
+  .steps strong { color: rgba(255,255,255,0.75); }
+  .steps code { background: rgba(255,255,255,0.07); padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+
+  .note {
+    background: rgba(139,92,246,0.08);
+    border: 1px solid rgba(139,92,246,0.2);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+  }
+  .note strong { color: rgba(139,92,246,0.9); }
+
+  .btn {
+    display: block; width: 100%; padding: 11px;
+    border-radius: 10px; border: none;
+    font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .btn-primary { background: #7c3aed; color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: #6d28d9; }
+  .btn-primary:disabled { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.2); cursor: default; }
+  .btn-dl {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.7);
+    margin-top: 10px;
+  }
+  .btn-dl:hover { background: rgba(255,255,255,0.09); }
+
+  .spinner {
+    display: inline-block;
+    width: 13px; height: 13px;
+    border: 2px solid rgba(255,255,255,0.15);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .status { display: none; margin-top: 12px; font-size: 12px; color: rgba(255,255,255,0.45); text-align: center; }
+
+  .success-box {
+    display: none; margin-top: 12px;
+    background: rgba(34,197,94,0.08);
+    border: 1px solid rgba(34,197,94,0.2);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .success-box .fname { color: #86efac; font-weight: 600; font-size: 12px; }
+  .success-box .finfo { color: rgba(255,255,255,0.35); font-size: 11px; margin-top: 2px; }
+
+  .error-box {
+    display: none; margin-top: 12px;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 11.5px;
+    color: #fca5a5;
+  }
+</style>
+</head>
+<body>
+
+<p class="logo">Wevy<span>flow</span></p>
+<p class="sub">Exportar frame como template editável</p>
+
+<div class="steps">
+  <ol>
+    <li><strong>Selecione um Frame</strong> na tela do Figma</li>
+    <li>Clique em <strong>Exportar frame selecionado</strong></li>
+    <li>Baixe o arquivo <code>.wevyflow.json</code></li>
+    <li>No WevyFlow → Criativos → Biblioteca → <strong>"Importar do Figma"</strong></li>
+  </ol>
+</div>
+
+<div class="note">
+  <strong>Fundo:</strong> PNG perfeito do Figma — foto, vetores, sombras, blur e efeitos, tudo incluso.<br>
+  <strong>Textos:</strong> exportados como camadas editáveis separadas.
+</div>
+
+<button class="btn btn-primary" id="btn-exp" onclick="doExport()">
+  Exportar frame selecionado
+</button>
+
+<div class="status" id="status">
+  <span class="spinner"></span> Exportando (imagens podem demorar alguns segundos)…
+</div>
+
+<div class="success-box" id="success-box">
+  <div class="fname" id="fname"></div>
+  <div class="finfo" id="finfo"></div>
+  <button class="btn btn-dl" onclick="doDownload()">Baixar JSON</button>
+</div>
+
+<div class="error-box" id="error-box"></div>
+
+<script>
+var _blob = null;
+var _filename = "template.wevyflow.json";
+
+function doExport() {
+  hide("success-box"); hide("error-box");
+  show("status");
+  disable("btn-exp");
+  parent.postMessage({ pluginMessage: { type: "export" } }, "*");
+}
+
+function doDownload() {
+  if (!_blob) return;
+  var url = URL.createObjectURL(_blob);
+  var a = document.createElement("a");
+  a.href = url; a.download = _filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+window.onmessage = function(e) {
+  var msg = e.data && e.data.pluginMessage;
+  if (!msg) return;
+
+  if (msg.type === "loading") { show("status"); return; }
+
+  hide("status");
+  enable("btn-exp");
+
+  if (msg.type === "done") {
+    _blob = new Blob([msg.json], { type: "application/json" });
+    _filename = safeFilename(msg.name) + ".wevyflow.json";
+    var parsed = JSON.parse(msg.json);
+    var objCount = (parsed.canvas && parsed.canvas.objects) ? parsed.canvas.objects.length : 0;
+    setText("fname", _filename);
+    setText("finfo", parsed.w + " × " + parsed.h + "px  ·  " + objCount + " elementos exportados");
+    show("success-box");
+  }
+
+  if (msg.type === "error") {
+    setText("error-box", msg.text);
+    show("error-box");
+  }
+};
+
+function safeFilename(s) { return (s || "template").replace(/[^a-zA-Z0-9\-_\s]/g, "").replace(/\s+/g, "_").slice(0, 60); }
+function show(id) { document.getElementById(id).style.display = "block"; }
+function hide(id) { document.getElementById(id).style.display = "none"; }
+function setText(id, t) { document.getElementById(id).textContent = t; }
+function disable(id) { document.getElementById(id).disabled = true; }
+function enable(id) { document.getElementById(id).disabled = false; }
+</script>
+</body>
+</html>

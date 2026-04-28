@@ -1,0 +1,8 @@
+{
+  "name": "WevyFlow Export",
+  "id": "wevyflow-figma-export-v1",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"]
+}
