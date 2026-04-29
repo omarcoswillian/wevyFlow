@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Summit Digital — O Evento que vai mudar sua forma de fazer lancamentos</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0A0A0A;
+  --bg-2: #111111;
+  --bg-3: #1A1A1A;
+  --border: rgba(255,255,255,0.08);
+  --border-2: rgba(255,255,255,0.14);
+  --ink: #FFFFFF;
+  --ink-2: #F5F5F5;
+  --muted: #A3A3A3;
+  --subtle: #6B6B6B;
+  --accent: #D4A017;
+  --accent-light: rgba(212,160,23,0.12);
+  --accent-border: rgba(212,160,23,0.3);
+  --cta: #D4A017;
+  --cta-text: #000000;
+  --font: 'Sora', -apple-system, sans-serif;
+  --container: 1200px;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font); color: var(--ink); background: var(--bg); line-height: 1.6; }
+a { text-decoration: none; color: inherit; }
+
+.container { max-width: var(--container); margin: 0 auto; padding: 0 32px; }
+
+/* ---------- NAV ---------- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+  gap: 24px;
+}
+
+.nav-logo {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.nav-logo span { color: var(--accent); }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.nav-date {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.nav-badge-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: rgba(239,68,68,0.12);
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #EF4444;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.nav-badge-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #EF4444;
+  animation: pulse-red 1.5s infinite;
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.btn-nav-inscricao {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 22px;
+  background: var(--cta);
+  color: var(--cta-text);
+  border-radius: 7px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.btn-nav-inscricao:hover {
+  background: #C49015;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(212,160,23,0.3);
+}
+
+/* ---------- HERO ---------- */
+.hero {
+  padding: 96px 0 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 600px;
+  background: radial-gradient(ellipse, rgba(212,160,23,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 80px;
+  align-items: start;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--accent-light);
+  border: 1px solid var(--accent-border);
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+
+.hero h1 {
+  font-size: clamp(34px, 4.5vw, 62px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+
+.hero h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.hero-sub {
+  font-size: 17px;
+  color: var(--muted);
+  line-height: 1.65;
+  margin-bottom: 36px;
+  max-width: 520px;
+}
+
+.hero-event-info {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.event-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.event-info-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--subtle);
+}
+
+.event-info-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* Form box flutuante */
+.hero-form-box {
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: 16px;
+  padding: 36px 32px;
+  position: sticky;
+  top: 88px;
+}
+
+.form-box-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+
+.form-box-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.form-field-dark {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--bg-3);
+  border: 1px solid var(--border-2);
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s ease;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.form-field-dark::placeholder { color: var(--subtle); }
+.form-field-dark:focus { border-color: var(--accent-border); }
+
+.btn-cta-gold {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px;
+  background: var(--cta);
+  color: var(--cta-text);
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 12px;
+  text-decoration: none;
+}
+
+.btn-cta-gold:hover {
+  background: #C49015;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(212,160,23,0.35);
+}
+
+.form-privacy {
+  font-size: 11px;
+  color: var(--subtle);
+  text-align: center;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.form-vagas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  padding: 10px;
+  background: rgba(212,160,23,0.08);
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+}
+
+.vagas-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse-gold 2s infinite;
+}
+
+@keyframes pulse-gold {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.vagas-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* ---------- COUNTDOWN ---------- */
+.countdown-section {
+  padding: 72px 0;
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.countdown-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--subtle);
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.countdown-boxes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.countdown-box {
+  background: var(--bg-3);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  padding: 28px 36px;
+  text-align: center;
+  min-width: 100px;
+}
+
+.countdown-num {
+  font-size: 52px;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.countdown-unit {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--subtle);
+}
+
+.countdown-sep {
+  font-size: 40px;
+  font-weight: 300;
+  color: var(--border-2);
+  margin-top: -12px;
+}
+
+/* ---------- SECOES GERAIS ---------- */
+.section {
+  padding: 96px 0;
+}
+
+.section-alt {
+  padding: 96px 0;
+  background: var(--bg-2);
+}
+
+.section-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+
+.section-h2 {
+  font-size: clamp(26px, 3.5vw, 44px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+
+.section-lead {
+  font-size: 17px;
+  color: var(--muted);
+  line-height: 1.65;
+  max-width: 580px;
+}
+
+.centered { text-align: center; }
+.centered .section-lead { margin: 0 auto; }
+
+/* ---------- APRESENTADOR ---------- */
+.apresentador-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 80px;
+  align-items: center;
+  margin-top: 64px;
+}
+
+.apresentador-photo {
+  aspect-ratio: 1;
+  background: var(--bg-3);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.apresentador-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 60%, rgba(212,160,23,0.06));
+}
+
+.apresentador-initial {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  border: 2px solid var(--accent-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.apresentador-name {
+  font-size: clamp(22px, 3vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.apresentador-title {
+  font-size: 14px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.apresentador-bio {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.75;
+  margin-bottom: 32px;
+}
+
+.apresentador-creds {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cred-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.cred-line {
+  width: 20px;
+  height: 1px;
+  background: var(--accent);
+  margin-top: 10px;
+  flex-shrink: 0;
+}
+
+.cred-text {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+/* ---------- O QUE VAI APRENDER ---------- */
+.aprender-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 64px;
+}
+
+.aprender-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 24px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.2s ease;
+}
+
+.aprender-item:hover {
+  border-color: var(--accent-border);
+}
+
+.aprender-icon {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 8px;
+  background: var(--accent-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aprender-icon-inner {
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+}
+
+.aprender-text {
+  font-size: 14px;
+  color: var(--ink-2);
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* ---------- PARA QUEM ---------- */
+.para-quem-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: 64px;
+}
+
+.pq-card {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  transition: all 0.2s ease;
+}
+
+.pq-card:hover {
+  border-color: var(--accent-border);
+  background: rgba(212,160,23,0.04);
+}
+
+.pq-card-num {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: var(--accent-light);
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.pq-card-num span { color: var(--accent); }
+
+.pq-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
+}
+
+.pq-card-text {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ---------- DEPOIMENTOS ---------- */
+.testi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 64px;
+}
+
+.testi-card {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  transition: border-color 0.2s ease;
+}
+
+.testi-card:hover { border-color: var(--border-2); }
+
+.testi-stars {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 16px;
+}
+
+.star { color: var(--accent); font-size: 14px; }
+
+.testi-text {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.testi-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.testi-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  border: 1px solid var(--accent-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.testi-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.testi-role {
+  font-size: 12px;
+  color: var(--subtle);
+}
+
+/* ---------- AGENDA ---------- */
+.agenda-timeline {
+  max-width: 700px;
+  margin: 64px auto 0;
+  position: relative;
+}
+
+.agenda-timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 24px;
+  width: 1px;
+  background: var(--border-2);
+}
+
+.agenda-item {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  padding-bottom: 40px;
+  position: relative;
+}
+
+.agenda-item:last-child { padding-bottom: 0; }
+
+.agenda-dot {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  border: 2px solid var(--accent-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--accent);
+  z-index: 1;
+}
+
+.agenda-content {
+  padding-top: 10px;
+}
+
+.agenda-horario {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.agenda-titulo {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.agenda-desc {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+/* ---------- FAQ ---------- */
+.faq-list {
+  max-width: 700px;
+  margin: 64px auto 0;
+}
+
+.faq-item {
+  border-bottom: 1px solid var(--border);
+}
+
+.faq-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 0;
+  cursor: pointer;
+  gap: 16px;
+  user-select: none;
+}
+
+.faq-q-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.faq-arrow {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-3);
+  border: 1px solid var(--border-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.faq-arrow::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--muted);
+  border-bottom: 1.5px solid var(--muted);
+  transform: rotate(45deg);
+  margin-top: -4px;
+  display: block;
+}
+
+.faq-item.open .faq-arrow {
+  transform: rotate(180deg);
+  background: var(--accent-light);
+  border-color: var(--accent-border);
+}
+
+.faq-item.open .faq-arrow::after {
+  border-color: var(--accent);
+}
+
+.faq-answer {
+  display: none;
+  padding-bottom: 22px;
+}
+
+.faq-item.open .faq-answer { display: block; }
+
+.faq-a-text {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+/* ---------- CTA FINAL ---------- */
+.cta-final {
+  padding: 96px 0;
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-final::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(212,160,23,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.cta-final-inner {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.cta-final-h2 {
+  font-size: clamp(26px, 4vw, 50px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+
+.cta-final-sub {
+  font-size: 17px;
+  color: var(--muted);
+  line-height: 1.65;
+  margin-bottom: 40px;
+}
+
+.cta-final-form {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.cta-final-urgencia {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ---------- FOOTER ---------- */
+.footer {
+  padding: 40px 0;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer-logo {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+
+.footer-logo span { color: var(--accent); }
+
+.footer-copy {
+  font-size: 12px;
+  color: var(--subtle);
+}
+
+.footer-links {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-links a {
+  font-size: 12px;
+  color: var(--subtle);
+  transition: color 0.2s ease;
+}
+
+.footer-links a:hover { color: var(--muted); }
+
+/* ---------- THANKS ---------- */
+#wf-thanks, #wf-thanks-final {
+  display: none;
+  text-align: center;
+  padding: 24px;
+  background: rgba(212,160,23,0.08);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius);
+  margin-top: 0;
+}
+
+#wf-thanks p, #wf-thanks-final p {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+  .container { padding: 0 20px; }
+
+  .nav-date { display: none; }
+  .nav-badge-live { display: none; }
+
+  .hero { padding: 64px 0 56px; }
+  .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+  .hero-form-box { position: static; }
+
+  .countdown-boxes { gap: 10px; }
+  .countdown-box { padding: 20px 24px; min-width: 70px; }
+  .countdown-num { font-size: 36px; }
+  .countdown-sep { font-size: 28px; }
+
+  .section { padding: 64px 0; }
+  .section-alt { padding: 64px 0; }
+  .cta-final { padding: 64px 0; }
+
+  .apresentador-grid { grid-template-columns: 1fr; gap: 40px; }
+  .apresentador-photo { max-width: 220px; margin: 0 auto; }
+
+  .aprender-grid { grid-template-columns: 1fr; }
+  .para-quem-cards { grid-template-columns: 1fr 1fr; }
+  .testi-grid { grid-template-columns: 1fr; }
+
+  .agenda-timeline::before { left: 20px; }
+  .agenda-dot { width: 40px; height: 40px; min-width: 40px; }
+
+  .footer-inner { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 480px) {
+  .para-quem-cards { grid-template-columns: 1fr; }
+  .hero-event-info { flex-direction: column; gap: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="container">
+    <div class="nav-inner">
+      <div class="nav-logo">Summit<span>Digital</span></div>
+      <div class="nav-right">
+        <div class="nav-badge-live">
+          <span class="nav-badge-live-dot"></span>
+          Ao vivo
+        </div>
+        <span class="nav-date">15 de maio de 2025 — 20h00</span>
+        <a href="#inscricao" class="btn-nav-inscricao">Inscrever-se</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-eyebrow">Evento gratuito ao vivo</div>
+        <h1>Como estruturar seu proximo lancamento para <em>faturar R$50.000</em> em 7 dias</h1>
+        <p class="hero-sub">
+          Nesta masterclass gratuita ao vivo voce vai descobrir o sistema que ja gerou mais de R$12 milhoes
+          em lancamentos digitais no Brasil — aplicavel independente do tamanho da sua audiencia.
+        </p>
+        <div class="hero-event-info">
+          <div class="event-info-item">
+            <span class="event-info-label">Data</span>
+            <span class="event-info-value">15 de maio de 2025</span>
+          </div>
+          <div class="event-info-item">
+            <span class="event-info-label">Horario</span>
+            <span class="event-info-value">20h00 (horario de Brasilia)</span>
+          </div>
+          <div class="event-info-item">
+            <span class="event-info-label">Formato</span>
+            <span class="event-info-value">100% Online e Gratuito</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form box -->
+      <div class="hero-form-box" id="inscricao">
+        <div class="form-box-title">Reserve sua vaga gratuita</div>
+        <p class="form-box-sub">Preencha abaixo e garanta seu acesso ao evento antes que as vagas acabem.</p>
+        <form onsubmit="handleHeroSubmit(event)">
+          <input type="text" class="form-field-dark" placeholder="Seu nome completo" name="nome" required>
+          <input type="email" class="form-field-dark" placeholder="Seu melhor e-mail" name="email" required>
+          <button type="submit" class="btn-cta-gold">Garantir minha vaga gratuita</button>
+          <p class="form-privacy">Sem spam. Seus dados estao protegidos. Cancelamento facil.</p>
+          <div class="form-vagas">
+            <div class="vagas-dot"></div>
+            <span class="vagas-text">Apenas 312 vagas restantes</span>
+          </div>
+        </form>
+        <div id="wf-thanks">
+          <p>Perfeito! Sua vaga esta garantida. Voce vai receber o link de acesso no e-mail cadastrado.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- COUNTDOWN -->
+<section class="countdown-section">
+  <div class="container">
+    <p class="countdown-label">O evento comeca em</p>
+    <div class="countdown-boxes">
+      <div class="countdown-box">
+        <div class="countdown-num" id="cd-dias">17</div>
+        <div class="countdown-unit">Dias</div>
+      </div>
+      <div class="countdown-sep">:</div>
+      <div class="countdown-box">
+        <div class="countdown-num" id="cd-horas">08</div>
+        <div class="countdown-unit">Horas</div>
+      </div>
+      <div class="countdown-sep">:</div>
+      <div class="countdown-box">
+        <div class="countdown-num" id="cd-minutos">34</div>
+        <div class="countdown-unit">Minutos</div>
+      </div>
+      <div class="countdown-sep">:</div>
+      <div class="countdown-box">
+        <div class="countdown-num" id="cd-segundos">52</div>
+        <div class="countdown-unit">Segundos</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- APRESENTADOR -->
+<section class="section">
+  <div class="container">
+    <p class="section-tag">Quem vai apresentar</p>
+    <div class="apresentador-grid">
+      <div class="apresentador-photo">
+        <div class="apresentador-initial">A</div>
+      </div>
+      <div>
+        <h2 class="apresentador-name">Alexandre Ramos</h2>
+        <p class="apresentador-title">Estrategista de Lancamentos Digitais</p>
+        <p class="apresentador-bio">
+          Alexandre e especialista em lancamentos digitais com mais de oito anos de experiencia no mercado brasileiro.
+          Nos ultimos quatro anos coordenou campanhass que movimentaram mais de R$12 milhoes, ajudando empreendedores
+          a construir sistemas de vendas previsíveis sem depender de trafego pago ou de lancamentos de alto risco.
+          Palestrante confirmado nos maiores eventos de marketing digital do Brasil.
+        </p>
+        <div class="apresentador-creds">
+          <div class="cred-item">
+            <div class="cred-line"></div>
+            <p class="cred-text">Mais de R$12 milhoes em lancamentos coordenados com equipes pequenas</p>
+          </div>
+          <div class="cred-item">
+            <div class="cred-line"></div>
+            <p class="cred-text">Mentor de mais de 1.800 empreendedores no Brasil e Portugal</p>
+          </div>
+          <div class="cred-item">
+            <div class="cred-line"></div>
+            <p class="cred-text">Palestrante confirmado no Summit Digital 2024 e BSMD 2023</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- O QUE VAI APRENDER -->
+<section class="section-alt">
+  <div class="container">
+    <div class="centered">
+      <p class="section-tag">Conteudo do evento</p>
+      <h2 class="section-h2">O que voce vai aprender nesta masterclass</h2>
+      <p class="section-lead">
+        Uma aula densa e pratica sem enrolacao. Voce sai com um plano de acao que pode implementar ainda nesta semana.
+      </p>
+    </div>
+    <div class="aprender-grid">
+      <div class="aprender-item">
+        <div class="aprender-icon"><div class="aprender-icon-inner"></div></div>
+        <p class="aprender-text">Por que a maioria dos lancamentos falha nos primeiros tres dias e o que fazer de diferente antes de abrir o carrinho</p>
+      </div>
+      <div class="aprender-item">
+        <div class="aprender-icon"><div class="aprender-icon-inner"></div></div>
+        <p class="aprender-text">O framework de pre-lancamento que aquece a audiencia e gera lista pronta para comprar antes da abertura oficial</p>
+      </div>
+      <div class="aprender-item">
+        <div class="aprender-icon"><div class="aprender-icon-inner"></div></div>
+        <p class="aprender-text">Como estruturar uma oferta que vende sem precisar de desconto agressivo ou urgencia artificial</p>
+      </div>
+      <div class="aprender-item">
+        <div class="aprender-icon"><div class="aprender-icon-inner"></div></div>
+        <p class="aprender-text">O roteiro exato de emails que converte lista fria em compradores ativos nos primeiros dias do lancamento</p>
+      </div>
+      <div class="aprender-item">
+        <div class="aprender-icon"><div class="aprender-icon-inner"></div></div>
+        <p class="aprender-text">Metricas que realmente importam em um lancamento e como usar os dados para otimizar em tempo real</p>
+      </div>
+      <div class="aprender-item">
+        <div class="aprender-icon"><div class="aprender-icon-inner"></div></div>
+        <p class="aprender-text">Como escalar os resultados do primeiro lancamento sem aumentar proporcionalmente o tempo ou o investimento</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARA QUEM -->
+<section class="section">
+  <div class="container">
+    <div class="centered">
+      <p class="section-tag">Compatibilidade</p>
+      <h2 class="section-h2">Este evento foi feito para voce que...</h2>
+    </div>
+    <div class="para-quem-cards">
+      <div class="pq-card">
+        <div class="pq-card-num"><span>01</span></div>
+        <div class="pq-card-title">Empreendedor Digital Iniciante</div>
+        <p class="pq-card-text">Quer fazer o primeiro lancamento com estrutura profissional e nao sabe por onde comecar de forma pratica</p>
+      </div>
+      <div class="pq-card">
+        <div class="pq-card-num"><span>02</span></div>
+        <div class="pq-card-title">Criador de Cursos Online</div>
+        <p class="pq-card-text">Ja tem produto mas os lancamentos sao imprevisíveis — quer um sistema que replique resultados a cada ciclo</p>
+      </div>
+      <div class="pq-card">
+        <div class="pq-card-num"><span>03</span></div>
+        <div class="pq-card-title">Consultor ou Coach</div>
+        <p class="pq-card-text">Quer lancar um programa de mentoria ou grupo mastermind e precisa de uma estrutura que gere demanda de forma organica</p>
+      </div>
+      <div class="pq-card">
+        <div class="pq-card-num"><span>04</span></div>
+        <div class="pq-card-title">Profissional Liberal</div>
+        <p class="pq-card-text">Quer digitalizar seu servico, criar uma oferta escalavel e parar de trocar horas por dinheiro de forma linear</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEPOIMENTOS DE EVENTOS ANTERIORES -->
+<section class="section-alt">
+  <div class="container">
+    <div class="centered">
+      <p class="section-tag">Quem ja participou</p>
+      <h2 class="section-h2">O que dizem os participantes das edicoes anteriores</h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-stars">
+          <span class="star">&#9733;</span>
+          <span class="star">&#9733;</span>
+          <span class="star">&#9733;</span>
+          <span class="star">&#9733;</span>
+          <span class="star">&#9733;</span>
+        </div>
+        <p class="testi-text">
+          "Participei da edicao passada sem grandes expectativas e saí com um plano de acao completo.
+          Dois meses depois lancei meu primeiro curso e faturei R$23.000 aplicando exatamente o que aprendi na masterclass."
+        </p>
+        <div class="testi-footer">
+          <div class="testi-avatar">J</div>
+          <div>
+            <div class="testi-name">Juliana Rocha</div>
+            <div class="testi-role">Psicóloga e Criadora de Conteudo</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">
+          <span class="star">&#9733;</span>
+          <span class="star">&#9733;</span>
+          <span class="star">&#9733;</span>
+          <span class="star">&#9733;</span>
+          <span class="star">&#9733;</span>
+        </div>
+        <p class="testi-text">
+          "A aula foi densa e pratica, sem conteudo de enchimento. O Alexandre passou frameworks que jamais teria
+          acesso de graca em lugar nenhum. Recomendo para qualquer pessoa que queira fazer seu primeiro lancamento certo."
+        </p>
+        <div class="testi-footer">
+          <div class="testi-avatar">F</div>
+          <div>
+            <div class="testi-name">Felipe Andrade</div>
+            <div class="testi-role">Designer e Produtor de Infoprodutos</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">
+          <span class="star">&#9733;</span>
+          <span class="star">&#9733;</span>
+          <span class="star">&#9733;</span>
+          <span class="star">&#9733;</span>
+          <span class="star">&#9733;</span>
+        </div>
+        <p class="testi-text">
+          "Estava tao cansada de ver conteudo gratuito raso que mal fui com esperanca. Me surpreendi demais.
+          Em tres horas aprendi mais sobre lancamento do que em seis meses de cursos pagos. Evento obrigatorio."
+        </p>
+        <div class="testi-footer">
+          <div class="testi-avatar">V</div>
+          <div>
+            <div class="testi-name">Viviane Lopes</div>
+            <div class="testi-role">Nutricionista e Mentora de Saude</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AGENDA -->
+<section class="section">
+  <div class="container">
+    <div class="centered">
+      <p class="section-tag">Programacao do evento</p>
+      <h2 class="section-h2">O que vai acontecer durante a masterclass</h2>
+    </div>
+    <div class="agenda-timeline">
+      <div class="agenda-item">
+        <div class="agenda-dot">1</div>
+        <div class="agenda-content">
+          <p class="agenda-horario">20h00 — Abertura</p>
+          <h3 class="agenda-titulo">Boas-vindas e diagnostico ao vivo</h3>
+          <p class="agenda-desc">
+            Comecamos com um diagnostico rapido ao vivo para identificar onde voce esta agora e qual o seu maior
+            gargalo de crescimento — seja posicionamento, audiencia, oferta ou comunicacao.
+          </p>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-dot">2</div>
+        <div class="agenda-content">
+          <p class="agenda-horario">20h30 — Bloco principal</p>
+          <h3 class="agenda-titulo">O sistema completo de lancamento em 3 etapas</h3>
+          <p class="agenda-desc">
+            A parte mais densa do evento. Alexandre vai destrinchar as tres etapas do sistema — pre-lancamento,
+            abertura e recuperacao — com exemplos reais e numeros concretos de lancamentos que coordenou.
+          </p>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-dot">3</div>
+        <div class="agenda-content">
+          <p class="agenda-horario">21h30 — Aplicacao pratica</p>
+          <h3 class="agenda-titulo">Workshop ao vivo: monte seu plano de lancamento</h3>
+          <p class="agenda-desc">
+            Voce vai montar ao vivo, com orientacao, o esqueleto do seu proximo lancamento. Ao final deste bloco
+            voce sai com um plano de acao personalizado, nao apenas com teoria.
+          </p>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-dot">4</div>
+        <div class="agenda-content">
+          <p class="agenda-horario">22h15 — Encerramento</p>
+          <h3 class="agenda-titulo">Perguntas ao vivo e proximos passos</h3>
+          <p class="agenda-desc">
+            Sessao aberta de perguntas e respostas. Alexandre responde as duvidas mais relevantes ao vivo
+            e apresenta os proximos passos para quem quiser ir mais fundo no sistema apos o evento.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section-alt">
+  <div class="container">
+    <div class="centered">
+      <p class="section-tag">Duvidas comuns</p>
+      <h2 class="section-h2">Perguntas frequentes sobre o evento</h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span class="faq-q-text">O evento e realmente gratuito? Existe alguma pegadinha?</span>
+          <div class="faq-arrow"></div>
+        </div>
+        <div class="faq-answer">
+          <p class="faq-a-text">Sim, a masterclass e 100% gratuita. Nao existe pegadinha. Voce vai aprender conteudo de verdade ao longo de aproximadamente duas horas. Ao final do evento haverá uma apresentacao de uma oferta para quem quiser continuar, mas a participacao no evento nao tem custo algum.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span class="faq-q-text">O evento vai ficar gravado para assistir depois?</span>
+          <div class="faq-arrow"></div>
+        </div>
+        <div class="faq-answer">
+          <p class="faq-a-text">O evento e ao vivo e nao garante gravacao disponivel para todos. Quem se inscreve recebe o link de acesso por e-mail e pode participar ao vivo. Em casos excepcionais, um replay pode ser disponibilizado por 24 horas para inscritos, mas nao e garantido. Recomendamos fortemente participar ao vivo para aproveitar a sessao de perguntas e respostas.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span class="faq-q-text">Preciso ter um produto pronto para participar?</span>
+          <div class="faq-arrow"></div>
+        </div>
+        <div class="faq-answer">
+          <p class="faq-a-text">Nao. O conteudo foi desenhado tanto para quem ja tem um produto digital pronto quanto para quem ainda esta na fase de ideacao. O sistema ensinado se aplica a diferentes estagios e o workshop pratico vai te ajudar a avancar independente de onde voce esta agora.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span class="faq-q-text">Quais sao os requisitos tecnicos para participar?</span>
+          <div class="faq-arrow"></div>
+        </div>
+        <div class="faq-answer">
+          <p class="faq-a-text">Voce so precisa de um dispositivo com acesso a internet — computador, celular ou tablet. O evento acontece em uma plataforma de videoconferencia padrao e o link e enviado por e-mail apos a inscricao. Nao e necessario instalar nenhum software adicional.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-final">
+  <div class="container">
+    <div class="cta-final-inner">
+      <p class="section-tag">Ultima chamada</p>
+      <h2 class="cta-final-h2">As vagas estao acabando. Garanta a sua agora.</h2>
+      <p class="cta-final-sub">
+        O evento e gratuito, ao vivo e com vagas limitadas. Nao existe motivo para adiar.
+        Reserve seu lugar agora e receba o link de acesso no e-mail.
+      </p>
+      <div class="cta-final-form">
+        <form onsubmit="handleFinalSubmit(event)">
+          <input type="text" class="form-field-dark" placeholder="Seu nome completo" name="nome" required>
+          <input type="email" class="form-field-dark" placeholder="Seu melhor e-mail" name="email" required>
+          <button type="submit" class="btn-cta-gold">Garantir minha vaga gratuita</button>
+          <p class="form-privacy">Sem spam. Cancelamento facil a qualquer momento.</p>
+          <div class="form-vagas">
+            <div class="vagas-dot"></div>
+            <span class="vagas-text">Apenas 312 vagas restantes</span>
+          </div>
+        </form>
+        <div id="wf-thanks-final">
+          <p>Perfeito! Sua vaga esta garantida. Voce vai receber o link de acesso no e-mail cadastrado.</p>
+        </div>
+        <div class="cta-final-urgencia">
+          O evento comeca em 17 dias — nao deixe para depois
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-logo">Summit<span>Digital</span></div>
+      <p class="footer-copy">2025 SummitDigital. Todos os direitos reservados.</p>
+      <div class="footer-links">
+        <a href="#">Privacidade</a>
+        <a href="#">Termos</a>
+        <a href="#">Contato</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// FAQ toggle
+function toggleFaq(el) {
+  var item = el.parentElement;
+  item.classList.toggle('open');
+}
+
+// Countdown
+(function() {
+  var eventDate = new Date();
+  eventDate.setDate(eventDate.getDate() + 17);
+  eventDate.setHours(20, 0, 0, 0);
+
+  function pad(n) { return n < 10 ? '0' + n : String(n); }
+
+  function update() {
+    var now = new Date();
+    var diff = eventDate - now;
+    if (diff <= 0) {
+      document.getElementById('cd-dias').textContent = '00';
+      document.getElementById('cd-horas').textContent = '00';
+      document.getElementById('cd-minutos').textContent = '00';
+      document.getElementById('cd-segundos').textContent = '00';
+      return;
+    }
+    var dias = Math.floor(diff / 86400000);
+    var horas = Math.floor((diff % 86400000) / 3600000);
+    var minutos = Math.floor((diff % 3600000) / 60000);
+    var segundos = Math.floor((diff % 60000) / 1000);
+    document.getElementById('cd-dias').textContent = pad(dias);
+    document.getElementById('cd-horas').textContent = pad(horas);
+    document.getElementById('cd-minutos').textContent = pad(minutos);
+    document.getElementById('cd-segundos').textContent = pad(segundos);
+  }
+
+  update();
+  setInterval(update, 1000);
+})();
+
+// Hero form
+function handleHeroSubmit(e) {
+  e.preventDefault();
+  e.target.style.display = 'none';
+  document.getElementById('wf-thanks').style.display = 'block';
+}
+
+// Final form
+function handleFinalSubmit(e) {
+  e.preventDefault();
+  e.target.style.display = 'none';
+  var thanks = document.getElementById('wf-thanks-final');
+  thanks.style.display = 'block';
+}
+</script>
+</body>
+</html>

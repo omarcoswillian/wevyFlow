@@ -1,0 +1,2585 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vantagem Consultoria — Estratégia e Execução de Alto Impacto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* =============================================
+       RESET & BASE
+    ============================================= */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #111111;
+      background-color: #FAFAF8;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+    }
+
+    input, select, textarea {
+      font-family: inherit;
+    }
+
+    /* =============================================
+       TYPOGRAPHY HELPERS
+    ============================================= */
+    .font-sora {
+      font-family: 'Sora', sans-serif;
+    }
+
+    /* =============================================
+       LAYOUT HELPERS
+    ============================================= */
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .container--wide {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* =============================================
+       SECTION SPACING
+    ============================================= */
+    .section {
+      padding: 100px 0;
+    }
+
+    .section--sm {
+      padding: 60px 0;
+    }
+
+    .section--dark {
+      background-color: #111111;
+    }
+
+    .section--white {
+      background-color: #FFFFFF;
+    }
+
+    .section--green {
+      background-color: #1B4332;
+    }
+
+    .section--off {
+      background-color: #FAFAF8;
+    }
+
+    /* =============================================
+       NAV STICKY
+    ============================================= */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background-color: #FAFAF8;
+      border-bottom: 1px solid rgba(17, 17, 17, 0.08);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .nav__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+    }
+
+    .nav__logo {
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: #111111;
+      letter-spacing: -0.3px;
+    }
+
+    .nav__logo span {
+      color: #1B4332;
+    }
+
+    .nav__links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+    }
+
+    .nav__links a {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: #6B6B6B;
+      transition: color 0.2s ease;
+    }
+
+    .nav__links a:hover {
+      color: #111111;
+    }
+
+    .nav__cta {
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #111111;
+      border: 1.5px solid #111111;
+      padding: 10px 22px;
+      border-radius: 6px;
+      transition: background-color 0.22s ease, color 0.22s ease;
+      letter-spacing: 0.01em;
+    }
+
+    .nav__cta:hover {
+      background-color: #111111;
+      color: #FAFAF8;
+    }
+
+    .nav__mobile-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .nav__mobile-toggle span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background-color: #111111;
+      border-radius: 2px;
+      transition: all 0.25s ease;
+    }
+
+    .nav__mobile-menu {
+      display: none;
+      flex-direction: column;
+      gap: 0;
+      border-top: 1px solid rgba(17, 17, 17, 0.08);
+      background-color: #FAFAF8;
+      padding: 16px 24px 24px;
+    }
+
+    .nav__mobile-menu a {
+      font-size: 15px;
+      font-weight: 500;
+      color: #111111;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(17, 17, 17, 0.06);
+    }
+
+    .nav__mobile-cta {
+      margin-top: 16px;
+      display: inline-block;
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #FAFAF8;
+      background-color: #111111;
+      padding: 12px 24px;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    /* =============================================
+       HERO
+    ============================================= */
+    .hero {
+      background-color: #FAFAF8;
+      padding: 90px 0 100px;
+      overflow: hidden;
+    }
+
+    .hero__grid {
+      display: grid;
+      grid-template-columns: 55% 45%;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .hero__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #1B4332;
+      background-color: #D1FAE5;
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+    }
+
+    .hero__headline {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(36px, 4.5vw, 60px);
+      font-weight: 800;
+      color: #111111;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+    }
+
+    .hero__sub {
+      font-size: 18px;
+      font-weight: 400;
+      color: #6B6B6B;
+      line-height: 1.65;
+      max-width: 480px;
+      margin-bottom: 40px;
+    }
+
+    .hero__ctas {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 56px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #FAFAF8;
+      background-color: #1B4332;
+      padding: 16px 32px;
+      border-radius: 8px;
+      transition: background-color 0.22s ease, transform 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-primary:hover {
+      background-color: #14332A;
+      transform: translateY(-1px);
+    }
+
+    .btn-link {
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: #111111;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: gap 0.2s ease;
+    }
+
+    .btn-link:hover {
+      gap: 10px;
+    }
+
+    .hero__stats {
+      display: flex;
+      gap: 36px;
+      flex-wrap: wrap;
+    }
+
+    .hero__stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .hero__stat-value {
+      font-family: 'Sora', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: #111111;
+      letter-spacing: -0.02em;
+    }
+
+    .hero__stat-label {
+      font-size: 12px;
+      color: #6B6B6B;
+      font-weight: 400;
+    }
+
+    .hero__stat + .hero__stat {
+      padding-left: 36px;
+      border-left: 1px solid rgba(17, 17, 17, 0.12);
+    }
+
+    /* HERO CARD COLUMN */
+    .hero__visual {
+      position: relative;
+    }
+
+    .hero__card-main {
+      border: 2px solid #1B4332;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #111111;
+      aspect-ratio: 4/5;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .hero__card-image {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(145deg, #1B4332 0%, #0a2018 50%, #111111 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero__card-image-inner {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .hero__card-label {
+      position: relative;
+      z-index: 2;
+      padding: 24px;
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+    }
+
+    .hero__card-label p {
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+
+    .hero__card-label strong {
+      font-family: 'Sora', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+
+    /* Floating cards */
+    .hero__float-card {
+      position: absolute;
+      background: #FFFFFF;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 160px;
+    }
+
+    .hero__float-card--1 {
+      top: 28px;
+      right: -20px;
+    }
+
+    .hero__float-card--2 {
+      bottom: 48px;
+      left: -24px;
+    }
+
+    .hero__float-card__label {
+      font-size: 11px;
+      font-weight: 500;
+      color: #6B6B6B;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .hero__float-card__value {
+      font-family: 'Sora', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: #1B4332;
+      letter-spacing: -0.02em;
+    }
+
+    .hero__float-card__sub {
+      font-size: 11px;
+      color: #6B6B6B;
+      font-weight: 400;
+    }
+
+    /* =============================================
+       CLIENTS STRIP
+    ============================================= */
+    .clients {
+      background-color: #FFFFFF;
+      padding: 52px 0;
+      border-top: 1px solid rgba(17, 17, 17, 0.06);
+      border-bottom: 1px solid rgba(17, 17, 17, 0.06);
+    }
+
+    .clients__label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #6B6B6B;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .clients__logos {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 52px;
+      flex-wrap: wrap;
+    }
+
+    .clients__logo {
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #111111;
+      opacity: 0.3;
+      transition: opacity 0.22s ease;
+    }
+
+    .clients__logo:hover {
+      opacity: 0.6;
+    }
+
+    /* =============================================
+       PROBLEMA (DARK)
+    ============================================= */
+    .problema__headline {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(28px, 3.2vw, 46px);
+      font-weight: 800;
+      color: #FFFFFF;
+      line-height: 1.15;
+      letter-spacing: -0.025em;
+      max-width: 600px;
+      margin-bottom: 16px;
+    }
+
+    .problema__sub {
+      font-size: 17px;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.65;
+      max-width: 520px;
+      margin-bottom: 56px;
+    }
+
+    .problema__cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+
+    .problema__card {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 40px 36px;
+      background-color: rgba(255, 255, 255, 0.02);
+      transition: background-color 0.22s ease;
+    }
+
+    .problema__card:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .problema__card:first-child {
+      border-radius: 12px 0 0 12px;
+    }
+
+    .problema__card:last-child {
+      border-radius: 0 12px 12px 0;
+    }
+
+    .problema__card-number {
+      font-family: 'Sora', sans-serif;
+      font-size: 52px;
+      font-weight: 800;
+      color: #B45309;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      margin-bottom: 16px;
+    }
+
+    .problema__card-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 12px;
+    }
+
+    .problema__card-text {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.55);
+      line-height: 1.65;
+    }
+
+    /* =============================================
+       SERVICOS
+    ============================================= */
+    .servicos__header {
+      text-align: center;
+      max-width: 640px;
+      margin: 0 auto 64px;
+    }
+
+    .section-eyebrow {
+      display: inline-block;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #1B4332;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(26px, 3vw, 42px);
+      font-weight: 800;
+      color: #111111;
+      line-height: 1.15;
+      letter-spacing: -0.025em;
+      margin-bottom: 16px;
+    }
+
+    .section-title--white {
+      color: #FFFFFF;
+    }
+
+    .section-sub {
+      font-size: 17px;
+      color: #6B6B6B;
+      line-height: 1.65;
+    }
+
+    .section-sub--white {
+      color: rgba(255, 255, 255, 0.65);
+    }
+
+    .servicos__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .servico-card {
+      background-color: #FFFFFF;
+      border: 1px solid rgba(17, 17, 17, 0.08);
+      border-radius: 16px;
+      padding: 40px 36px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .servico-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: #1B4332;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .servico-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 48px rgba(17, 17, 17, 0.1);
+      border-color: rgba(27, 67, 50, 0.25);
+    }
+
+    .servico-card:hover::before {
+      opacity: 1;
+    }
+
+    .servico-card__icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 24px;
+      color: #1B4332;
+    }
+
+    .servico-card__badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #1B4332;
+      background-color: #D1FAE5;
+      padding: 4px 10px;
+      border-radius: 100px;
+      margin-bottom: 20px;
+    }
+
+    .servico-card__title {
+      font-family: 'Sora', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #111111;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .servico-card__desc {
+      font-size: 14px;
+      color: #6B6B6B;
+      line-height: 1.65;
+      margin-bottom: 28px;
+    }
+
+    .servico-card__list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .servico-card__item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: #111111;
+      line-height: 1.5;
+    }
+
+    .servico-card__check {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      color: #1B4332;
+      margin-top: 1px;
+    }
+
+    /* =============================================
+       PROCESSO
+    ============================================= */
+    .processo__header {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto 72px;
+    }
+
+    .processo__timeline {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+    }
+
+    .processo__timeline::before {
+      content: '';
+      position: absolute;
+      top: 40px;
+      left: 12.5%;
+      right: 12.5%;
+      height: 1px;
+      background: linear-gradient(90deg, #1B4332, rgba(27, 67, 50, 0.3));
+    }
+
+    .processo__step {
+      padding: 0 24px 0 0;
+      position: relative;
+    }
+
+    .processo__step-number {
+      width: 80px;
+      height: 80px;
+      background-color: #1B4332;
+      color: #FFFFFF;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Sora', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 28px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .processo__step:nth-child(2) .processo__step-number,
+    .processo__step:nth-child(3) .processo__step-number,
+    .processo__step:nth-child(4) .processo__step-number {
+      background-color: rgba(27, 67, 50, 0.12);
+      color: #1B4332;
+    }
+
+    .processo__step-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #111111;
+      margin-bottom: 10px;
+      letter-spacing: -0.015em;
+    }
+
+    .processo__step-text {
+      font-size: 14px;
+      color: #6B6B6B;
+      line-height: 1.65;
+    }
+
+    /* =============================================
+       CASES (DARK)
+    ============================================= */
+    .cases__header {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto 64px;
+    }
+
+    .cases__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+
+    .case-card {
+      background-color: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 40px 36px;
+      transition: background-color 0.22s ease;
+    }
+
+    .case-card:first-child {
+      border-radius: 12px 0 0 12px;
+    }
+
+    .case-card:last-child {
+      border-radius: 0 12px 12px 0;
+    }
+
+    .case-card:hover {
+      background-color: rgba(255, 255, 255, 0.06);
+    }
+
+    .case-card__empresa {
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 8px;
+    }
+
+    .case-card__badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 3px 10px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+    }
+
+    .case-card__resultado {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(36px, 4vw, 52px);
+      font-weight: 800;
+      color: #B45309;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      margin-bottom: 8px;
+    }
+
+    .case-card__prazo {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.45);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+    }
+
+    .case-card__desc {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.55);
+      line-height: 1.65;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      padding-top: 20px;
+    }
+
+    /* =============================================
+       ESPECIALISTA
+    ============================================= */
+    .especialista__grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .especialista__photo {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      aspect-ratio: 3/4;
+      background: linear-gradient(145deg, #1B4332 0%, #0a2018 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .especialista__photo-inner {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .especialista__badge {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      background: #FFFFFF;
+      border-radius: 10px;
+      padding: 12px 18px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .especialista__badge p {
+      font-size: 11px;
+      color: #6B6B6B;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 2px;
+    }
+
+    .especialista__badge strong {
+      font-family: 'Sora', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: #1B4332;
+    }
+
+    .especialista__eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #1B4332;
+      margin-bottom: 16px;
+    }
+
+    .especialista__headline {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(26px, 2.8vw, 38px);
+      font-weight: 800;
+      color: #111111;
+      line-height: 1.15;
+      letter-spacing: -0.025em;
+      margin-bottom: 10px;
+    }
+
+    .especialista__name {
+      font-family: 'Sora', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #111111;
+      margin-bottom: 4px;
+    }
+
+    .especialista__role {
+      font-size: 14px;
+      color: #6B6B6B;
+      margin-bottom: 28px;
+    }
+
+    .especialista__bio {
+      font-size: 15px;
+      color: #6B6B6B;
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+
+    .especialista__bio p + p {
+      margin-top: 14px;
+    }
+
+    .especialista__credentials {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .especialista__credential {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: #111111;
+      font-weight: 500;
+    }
+
+    .especialista__credential-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #1B4332;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* =============================================
+       DEPOIMENTOS
+    ============================================= */
+    .depoimentos__header {
+      text-align: center;
+      max-width: 560px;
+      margin: 0 auto 64px;
+    }
+
+    .depoimentos__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .depo-card {
+      background-color: #FAFAF8;
+      border: 1px solid rgba(17, 17, 17, 0.08);
+      border-radius: 16px;
+      padding: 40px 36px;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .depo-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(17, 17, 17, 0.08);
+    }
+
+    .depo-card--featured {
+      transform: translateY(-12px);
+      box-shadow: 0 16px 40px rgba(17, 17, 17, 0.1);
+      border-color: rgba(27, 67, 50, 0.2);
+    }
+
+    .depo-card--featured:hover {
+      transform: translateY(-16px);
+    }
+
+    .depo-card__quote-mark {
+      font-family: 'Sora', sans-serif;
+      font-size: 72px;
+      line-height: 0.7;
+      color: #D1FAE5;
+      font-weight: 800;
+      margin-bottom: 20px;
+      display: block;
+      color: #1B4332;
+      opacity: 0.25;
+    }
+
+    .depo-card__text {
+      font-size: 15px;
+      color: #6B6B6B;
+      line-height: 1.7;
+      font-style: italic;
+      margin-bottom: 28px;
+    }
+
+    .depo-card__divider {
+      height: 1px;
+      background-color: rgba(17, 17, 17, 0.08);
+      margin-bottom: 24px;
+    }
+
+    .depo-card__author {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .depo-card__avatar {
+      width: 44px;
+      height: 44px;
+      background-color: #1B4332;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #FFFFFF;
+      flex-shrink: 0;
+    }
+
+    .depo-card__author-info strong {
+      display: block;
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #111111;
+      margin-bottom: 2px;
+    }
+
+    .depo-card__author-info span {
+      font-size: 13px;
+      color: #6B6B6B;
+    }
+
+    /* =============================================
+       INVESTIMENTO / CTA CONTATO
+    ============================================= */
+    .cta-form__inner {
+      max-width: 860px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .cta-form__headline {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(28px, 3.5vw, 48px);
+      font-weight: 800;
+      color: #FFFFFF;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+      margin-bottom: 16px;
+    }
+
+    .cta-form__sub {
+      font-size: 17px;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.65;
+      margin-bottom: 48px;
+    }
+
+    .cta-form__form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      text-align: left;
+      margin-bottom: 24px;
+    }
+
+    .cta-form__field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .cta-form__field--full {
+      grid-column: 1 / -1;
+    }
+
+    .cta-form__label {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.65);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .cta-form__input,
+    .cta-form__select {
+      width: 100%;
+      padding: 14px 16px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      font-size: 15px;
+      color: #FFFFFF;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .cta-form__input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .cta-form__input:focus,
+    .cta-form__select:focus {
+      border-color: rgba(255, 255, 255, 0.5);
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .cta-form__select option {
+      color: #111111;
+      background-color: #FFFFFF;
+    }
+
+    .cta-form__btn {
+      width: 100%;
+      padding: 18px 32px;
+      background-color: #FFFFFF;
+      color: #1B4332;
+      font-family: 'Sora', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.22s ease, transform 0.18s ease;
+      letter-spacing: 0.01em;
+    }
+
+    .cta-form__btn:hover {
+      background-color: #F0FDF4;
+      transform: translateY(-1px);
+    }
+
+    .cta-form__note {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-top: 16px;
+    }
+
+    /* =============================================
+       GARANTIA
+    ============================================= */
+    .garantia {
+      background-color: #FAFAF8;
+      padding: 80px 0;
+    }
+
+    .garantia__inner {
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .garantia__icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 28px;
+      color: #1B4332;
+    }
+
+    .garantia__title {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(22px, 2.5vw, 32px);
+      font-weight: 800;
+      color: #111111;
+      letter-spacing: -0.025em;
+      margin-bottom: 16px;
+    }
+
+    .garantia__text {
+      font-size: 16px;
+      color: #6B6B6B;
+      line-height: 1.7;
+    }
+
+    /* =============================================
+       FAQ
+    ============================================= */
+    .faq__header {
+      text-align: center;
+      max-width: 560px;
+      margin: 0 auto 56px;
+    }
+
+    .faq__list {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .faq__item {
+      border-bottom: 1px solid rgba(17, 17, 17, 0.1);
+    }
+
+    .faq__item:first-child {
+      border-top: 1px solid rgba(17, 17, 17, 0.1);
+    }
+
+    .faq__question {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 0;
+      text-align: left;
+      cursor: pointer;
+      background: none;
+      border: none;
+      gap: 20px;
+    }
+
+    .faq__question-text {
+      font-family: 'Sora', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: #111111;
+      line-height: 1.4;
+    }
+
+    .faq__chevron {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      color: #1B4332;
+      transition: transform 0.3s ease;
+    }
+
+    .faq__item.is-open .faq__chevron {
+      transform: rotate(180deg);
+    }
+
+    .faq__answer {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.35s ease;
+    }
+
+    .faq__answer-inner {
+      padding: 0 0 22px;
+      font-size: 15px;
+      color: #6B6B6B;
+      line-height: 1.7;
+    }
+
+    /* =============================================
+       FOOTER
+    ============================================= */
+    .footer {
+      background-color: #111111;
+      padding: 72px 0 40px;
+    }
+
+    .footer__top {
+      display: grid;
+      grid-template-columns: 280px 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 56px;
+    }
+
+    .footer__logo {
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: #FFFFFF;
+      margin-bottom: 16px;
+    }
+
+    .footer__logo span {
+      color: #6EE7B7;
+    }
+
+    .footer__tagline {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.45);
+      line-height: 1.65;
+      max-width: 220px;
+    }
+
+    .footer__col-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 20px;
+    }
+
+    .footer__links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer__link {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+      transition: color 0.2s ease;
+    }
+
+    .footer__link:hover {
+      color: #FFFFFF;
+    }
+
+    .footer__bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      padding-top: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer__copyright {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.35);
+    }
+
+    .footer__cnpj {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.25);
+    }
+
+    /* =============================================
+       RESPONSIVE — TABLET
+    ============================================= */
+    @media (max-width: 1024px) {
+      .hero__grid {
+        grid-template-columns: 1fr;
+        gap: 56px;
+      }
+
+      .hero__visual {
+        max-width: 480px;
+        margin: 0 auto;
+      }
+
+      .especialista__grid {
+        grid-template-columns: 320px 1fr;
+        gap: 48px;
+      }
+
+      .footer__top {
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+      }
+    }
+
+    /* =============================================
+       RESPONSIVE — MOBILE
+    ============================================= */
+    @media (max-width: 768px) {
+      .section {
+        padding: 72px 0;
+      }
+
+      /* NAV */
+      .nav__links,
+      .nav__cta {
+        display: none;
+      }
+
+      .nav__mobile-toggle {
+        display: flex;
+      }
+
+      .nav__mobile-menu.is-open {
+        display: flex;
+      }
+
+      /* HERO */
+      .hero {
+        padding: 60px 0 72px;
+      }
+
+      .hero__sub {
+        font-size: 16px;
+      }
+
+      .hero__ctas {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero__stats {
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .hero__stat + .hero__stat {
+        padding-left: 0;
+        border-left: none;
+        border-top: 1px solid rgba(17, 17, 17, 0.12);
+        padding-top: 20px;
+      }
+
+      .hero__float-card--1 {
+        top: 16px;
+        right: -8px;
+      }
+
+      .hero__float-card--2 {
+        bottom: 32px;
+        left: -8px;
+      }
+
+      /* CLIENTS */
+      .clients__logos {
+        gap: 28px;
+      }
+
+      .clients__logo {
+        font-size: 13px;
+      }
+
+      /* PROBLEMA */
+      .problema__cards {
+        grid-template-columns: 1fr;
+        gap: 2px;
+      }
+
+      .problema__card:first-child {
+        border-radius: 12px 12px 0 0;
+      }
+
+      .problema__card:last-child {
+        border-radius: 0 0 12px 12px;
+      }
+
+      /* SERVICOS */
+      .servicos__grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      /* PROCESSO */
+      .processo__timeline {
+        grid-template-columns: 1fr;
+        gap: 36px;
+      }
+
+      .processo__timeline::before {
+        display: none;
+      }
+
+      .processo__step {
+        display: flex;
+        gap: 24px;
+        align-items: flex-start;
+        padding: 0;
+      }
+
+      .processo__step-number {
+        width: 60px;
+        height: 60px;
+        font-size: 15px;
+        flex-shrink: 0;
+        margin-bottom: 0;
+      }
+
+      /* CASES */
+      .cases__grid {
+        grid-template-columns: 1fr;
+        gap: 2px;
+      }
+
+      .case-card:first-child {
+        border-radius: 12px 12px 0 0;
+      }
+
+      .case-card:last-child {
+        border-radius: 0 0 12px 12px;
+      }
+
+      /* ESPECIALISTA */
+      .especialista__grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .especialista__photo {
+        max-width: 320px;
+        margin: 0 auto;
+      }
+
+      /* DEPOIMENTOS */
+      .depoimentos__grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .depo-card--featured {
+        transform: none;
+      }
+
+      .depo-card--featured:hover {
+        transform: translateY(-4px);
+      }
+
+      /* CTA FORM */
+      .cta-form__form {
+        grid-template-columns: 1fr;
+      }
+
+      /* FOOTER */
+      .footer__top {
+        grid-template-columns: 1fr;
+        gap: 36px;
+      }
+
+      .footer__bottom {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 0 16px;
+      }
+
+      .hero__float-card {
+        min-width: 130px;
+      }
+
+      .hero__float-card__value {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =============================================
+       1. NAV STICKY
+  ============================================= -->
+  <header class="nav">
+    <div class="container">
+      <nav class="nav__inner">
+        <a href="#" class="nav__logo">Vantagem<span>.</span>Consultoria</a>
+
+        <ul class="nav__links">
+          <li><a href="#servicos">Servicos</a></li>
+          <li><a href="#processo">Processo</a></li>
+          <li><a href="#cases">Cases</a></li>
+          <li><a href="#sobre">Sobre</a></li>
+        </ul>
+
+        <a href="#contato" class="nav__cta">Solicitar proposta</a>
+
+        <button class="nav__mobile-toggle" id="navToggle" aria-label="Abrir menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </nav>
+
+      <div class="nav__mobile-menu" id="navMenu">
+        <a href="#servicos">Servicos</a>
+        <a href="#processo">Processo</a>
+        <a href="#cases">Cases</a>
+        <a href="#sobre">Sobre</a>
+        <a href="#contato" class="nav__mobile-cta">Solicitar proposta</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- =============================================
+       2. HERO 2COL
+  ============================================= -->
+  <section class="hero section--off">
+    <div class="container">
+      <div class="hero__grid">
+
+        <!-- COL ESQ -->
+        <div class="hero__left">
+          <span class="hero__eyebrow">Consultoria Estrategica de Alto Impacto</span>
+
+          <h1 class="hero__headline">
+            Transformamos negócios com estratégia e execução
+          </h1>
+
+          <p class="hero__sub">
+            Unimos diagnóstico preciso, metodologia comprovada e execução rigorosa para entregar resultados reais — não apenas relatórios. Para empresas que levam crescimento a sério.
+          </p>
+
+          <div class="hero__ctas">
+            <a href="#contato" class="btn-primary">
+              Solicitar diagnóstico gratuito
+            </a>
+            <a href="#cases" class="btn-link">
+              Ver nossos cases
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+
+          <div class="hero__stats">
+            <div class="hero__stat">
+              <span class="hero__stat-value">R$180M</span>
+              <span class="hero__stat-label">em resultados entregues</span>
+            </div>
+            <div class="hero__stat">
+              <span class="hero__stat-value">+140</span>
+              <span class="hero__stat-label">empresas atendidas</span>
+            </div>
+            <div class="hero__stat">
+              <span class="hero__stat-value">98%</span>
+              <span class="hero__stat-label">indice de satisfacao</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- COL DIR -->
+        <div class="hero__visual">
+          <div class="hero__card-main">
+            <div class="hero__card-image">
+              <div class="hero__card-image-inner"></div>
+            </div>
+            <div class="hero__card-label">
+              <p>Empresa atendida</p>
+              <strong>Grupo Meridiano — Expansao Nacional</strong>
+            </div>
+          </div>
+
+          <!-- Floating card 1 -->
+          <div class="hero__float-card hero__float-card--1">
+            <span class="hero__float-card__label">Crescimento</span>
+            <span class="hero__float-card__value">+47%</span>
+            <span class="hero__float-card__sub">receita em 6 meses</span>
+          </div>
+
+          <!-- Floating card 2 -->
+          <div class="hero__float-card hero__float-card--2">
+            <span class="hero__float-card__label">ROI confirmado</span>
+            <span class="hero__float-card__value">90 dias</span>
+            <span class="hero__float-card__sub">retorno sobre investimento</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       3. CLIENTES STRIP
+  ============================================= -->
+  <section class="clients">
+    <div class="container">
+      <p class="clients__label">Empresas que confiam no nosso trabalho</p>
+      <div class="clients__logos">
+        <span class="clients__logo">Vivo</span>
+        <span class="clients__logo">Bradesco</span>
+        <span class="clients__logo">Magazine Luiza</span>
+        <span class="clients__logo">Ambev</span>
+        <span class="clients__logo">Natura</span>
+        <span class="clients__logo">Embraer</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       4. PROBLEMA (DARK)
+  ============================================= -->
+  <section class="section section--dark">
+    <div class="container">
+      <h2 class="problema__headline">
+        Voce esta deixando receita na mesa
+      </h2>
+      <p class="problema__sub">
+        A maioria das empresas tem potencial para crescer 2 ou 3 vezes mais. O problema nao e a falta de mercado — e a falta de clareza estrategica e execucao disciplinada.
+      </p>
+
+      <div class="problema__cards">
+        <div class="problema__card">
+          <div class="problema__card-number">01</div>
+          <h3 class="problema__card-title">Processos ineficientes</h3>
+          <p class="problema__card-text">
+            Equipes trabalhando em silos, retrabalho constante e ausencia de indicadores confiaveis que permitem decisoes ageis. O operacional sufoca o estrategico.
+          </p>
+        </div>
+        <div class="problema__card">
+          <div class="problema__card-number">02</div>
+          <h3 class="problema__card-title">Time sem direcao estrategica</h3>
+          <p class="problema__card-text">
+            Lideres talentosos presos no dia a dia sem roadmap claro. Metas vagas, priorizacao confusa e energia desperdicada em iniciativas sem impacto real no resultado.
+          </p>
+        </div>
+        <div class="problema__card">
+          <div class="problema__card-number">03</div>
+          <h3 class="problema__card-title">Crescimento estagnado</h3>
+          <p class="problema__card-text">
+            Receita estavel nao e sinônimo de saude empresarial. Custos crescem, margem corroi e a empresa perde velocidade frente a concorrentes mais ageis.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       5. SERVICOS
+  ============================================= -->
+  <section class="section section--off" id="servicos">
+    <div class="container">
+      <div class="servicos__header">
+        <span class="section-eyebrow">O que entregamos</span>
+        <h2 class="section-title">Servicos desenhados para impacto real</h2>
+        <p class="section-sub">
+          Nao vendemos horas de consultoria. Vendemos transformacao mensuravel — com começo, meio e resultado documentado.
+        </p>
+      </div>
+
+      <div class="servicos__grid">
+
+        <!-- CARD 1 -->
+        <div class="servico-card">
+          <svg class="servico-card__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="6" width="36" height="36" rx="8" stroke="currentColor" stroke-width="2"/>
+            <path d="M16 24L22 30L32 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="servico-card__badge">2 a 4 semanas</span>
+          <h3 class="servico-card__title">Diagnostico Estrategico</h3>
+          <p class="servico-card__desc">
+            Mapeamos com precisao onde esta o maior gap de resultado na sua empresa — processos, time, posicionamento, modelo comercial ou estrutura financeira.
+          </p>
+          <ul class="servico-card__list">
+            <li class="servico-card__item">
+              <svg class="servico-card__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5.5 9L8 11.5L12.5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Analise 360 de gaps operacionais e estrategicos
+            </li>
+            <li class="servico-card__item">
+              <svg class="servico-card__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5.5 9L8 11.5L12.5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Benchmark setorial com dados reais do mercado
+            </li>
+            <li class="servico-card__item">
+              <svg class="servico-card__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5.5 9L8 11.5L12.5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Mapa de prioridades com impacto financeiro estimado
+            </li>
+            <li class="servico-card__item">
+              <svg class="servico-card__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5.5 9L8 11.5L12.5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Relatorio executivo com roadmap de 90 dias
+            </li>
+          </ul>
+        </div>
+
+        <!-- CARD 2 -->
+        <div class="servico-card">
+          <svg class="servico-card__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 40V24L24 8L40 24V40H28V30H20V40H8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+          <span class="servico-card__badge">3 a 6 meses</span>
+          <h3 class="servico-card__title">Implementacao e Execucao</h3>
+          <p class="servico-card__desc">
+            Nao ficamos apenas no plano. Colocamos squads dedicados dentro da operacao para implementar as mudancas com rigor e velocidade.
+          </p>
+          <ul class="servico-card__list">
+            <li class="servico-card__item">
+              <svg class="servico-card__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5.5 9L8 11.5L12.5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Squad dedicado embarcado na operacao da empresa
+            </li>
+            <li class="servico-card__item">
+              <svg class="servico-card__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5.5 9L8 11.5L12.5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Gestao de mudanca e capacitacao de liderancas
+            </li>
+            <li class="servico-card__item">
+              <svg class="servico-card__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5.5 9L8 11.5L12.5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Revisao semanal com KPIs e ajustes em tempo real
+            </li>
+            <li class="servico-card__item">
+              <svg class="servico-card__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5.5 9L8 11.5L12.5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Entrega documentada e transferencia de know-how
+            </li>
+          </ul>
+        </div>
+
+        <!-- CARD 3 -->
+        <div class="servico-card">
+          <svg class="servico-card__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 32L20 20L28 28L40 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M32 12H40V20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="servico-card__badge">6 a 18 meses</span>
+          <h3 class="servico-card__title">Scale e Expansao</h3>
+          <p class="servico-card__desc">
+            Para empresas com base solida que buscam acelerar crescimento, abrir novos mercados e construir vantagem competitiva sustentavel.
+          </p>
+          <ul class="servico-card__list">
+            <li class="servico-card__item">
+              <svg class="servico-card__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5.5 9L8 11.5L12.5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Estrategia de expansao geografica e por segmento
+            </li>
+            <li class="servico-card__item">
+              <svg class="servico-card__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5.5 9L8 11.5L12.5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Modelagem de novos canais e parceiros estrategicos
+            </li>
+            <li class="servico-card__item">
+              <svg class="servico-card__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5.5 9L8 11.5L12.5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Estruturacao de times de alta performance
+            </li>
+            <li class="servico-card__item">
+              <svg class="servico-card__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5.5 9L8 11.5L12.5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Governance, financas e preparo para M&amp;A ou investimento
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       6. PROCESSO
+  ============================================= -->
+  <section class="section section--white" id="processo">
+    <div class="container">
+      <div class="processo__header">
+        <span class="section-eyebrow">Nossa metodologia</span>
+        <h2 class="section-title">Quatro etapas para transformar resultados</h2>
+        <p class="section-sub">
+          Um processo estruturado e replicavel que elimina surpresas e garante previsibilidade em cada fase do engajamento.
+        </p>
+      </div>
+
+      <div class="processo__timeline">
+        <div class="processo__step">
+          <div class="processo__step-number">01</div>
+          <div>
+            <h3 class="processo__step-title">Diagnostico</h3>
+            <p class="processo__step-text">
+              Imersao profunda na operacao, financas, time e posicionamento para mapear com precisao onde estao as alavancas de resultado.
+            </p>
+          </div>
+        </div>
+
+        <div class="processo__step">
+          <div class="processo__step-number">02</div>
+          <div>
+            <h3 class="processo__step-title">Estrategia</h3>
+            <p class="processo__step-text">
+              Construcao do plano com metas quantificadas, iniciativas priorizadas por impacto e responsaveis definidos para cada entrega.
+            </p>
+          </div>
+        </div>
+
+        <div class="processo__step">
+          <div class="processo__step-number">03</div>
+          <div>
+            <h3 class="processo__step-title">Execucao</h3>
+            <p class="processo__step-text">
+              Implementacao das iniciativas com rigor metodologico, gestao de mudanca e acompanhamento semanal de KPIs e desvios.
+            </p>
+          </div>
+        </div>
+
+        <div class="processo__step">
+          <div class="processo__step-number">04</div>
+          <div>
+            <h3 class="processo__step-title">Resultados</h3>
+            <p class="processo__step-text">
+              Medicao e documentacao dos resultados entregues, transferencia de capacidade interna e plano de sustentabilidade.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       7. CASES / RESULTADOS (DARK)
+  ============================================= -->
+  <section class="section section--dark" id="cases">
+    <div class="container">
+      <div class="cases__header">
+        <span class="section-eyebrow" style="color: #6EE7B7;">Resultados</span>
+        <h2 class="section-title section-title--white">Resultados que falam por si</h2>
+        <p class="section-sub section-sub--white">
+          Numeros reais de empresas reais. Sem projecoes — apenas o que foi entregue e medido.
+        </p>
+      </div>
+
+      <div class="cases__grid">
+        <div class="case-card">
+          <div class="case-card__empresa">Grupo Meridiano</div>
+          <span class="case-card__badge">Varejo — Multicanal</span>
+          <div class="case-card__resultado">+312%</div>
+          <div class="case-card__prazo">Resultado em 8 meses</div>
+          <p class="case-card__desc">
+            Reestruturacao completa da operacao comercial, implementacao de CRM e formacao de squad de vendas corporativas resultaram em triplicar a receita bruta.
+          </p>
+        </div>
+
+        <div class="case-card">
+          <div class="case-card__empresa">Farma Nativa</div>
+          <span class="case-card__badge">Saude — Distribuicao</span>
+          <div class="case-card__resultado">R$28M</div>
+          <div class="case-card__prazo">Receita incremental em 12 meses</div>
+          <p class="case-card__desc">
+            Expansao para 3 novos estados atraves de modelo de parceiros regionais estruturado pela Vantagem, com playbook de entrada e treinamento de equipe local.
+          </p>
+        </div>
+
+        <div class="case-card">
+          <div class="case-card__empresa">TechBras Solucoes</div>
+          <span class="case-card__badge">Tecnologia — SaaS B2B</span>
+          <div class="case-card__resultado">-41%</div>
+          <div class="case-card__prazo">Reducao de churn em 4 meses</div>
+          <p class="case-card__desc">
+            Redesenho da jornada do cliente, implementacao de customer success estruturado e repricing estrategico que recuperou margem e retencao simultaneamente.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       8. ESPECIALISTA
+  ============================================= -->
+  <section class="section section--off" id="sobre">
+    <div class="container">
+      <div class="especialista__grid">
+
+        <!-- FOTO -->
+        <div class="especialista__photo">
+          <div class="especialista__photo-inner"></div>
+          <div class="especialista__badge">
+            <p>Experiencia comprovada</p>
+            <strong>15 anos no mercado</strong>
+          </div>
+        </div>
+
+        <!-- CONTEUDO -->
+        <div class="especialista__content">
+          <p class="especialista__eyebrow">Quem lidera sua transformacao</p>
+          <h2 class="especialista__headline">Carlos Mendes</h2>
+          <p class="especialista__name" style="display:none">Carlos Mendes</p>
+          <p class="especialista__role">Fundador e CEO — Vantagem Consultoria</p>
+
+          <div class="especialista__bio">
+            <p>
+              Carlos passou 8 anos em grandes firmas de estrategia antes de fundar a Vantagem em 2014 com uma premissa simples: consultoria que entrega resultado — e nao apenas diagnostico.
+            </p>
+            <p>
+              Ao longo de 15 anos, liderou pessoalmente mais de 80 projetos de transformacao em empresas de R$20M a R$2B de faturamento, nos setores de varejo, tecnologia, saude, agro e servicos financeiros.
+            </p>
+            <p>
+              Sua abordagem combina rigor analitico com capacidade de execucao — algo raro no mercado de consultoria nacional. Cada projeto tem Carlos como responsavel direto pelos resultados, nao apenas como sponsor.
+            </p>
+          </div>
+
+          <div class="especialista__credentials">
+            <div class="especialista__credential">
+              <div class="especialista__credential-dot"></div>
+              Ex-consultor senior McKinsey &amp; Company (Brasil e EUA)
+            </div>
+            <div class="especialista__credential">
+              <div class="especialista__credential-dot"></div>
+              MBA pela Harvard Business School — concentracao em Strategy
+            </div>
+            <div class="especialista__credential">
+              <div class="especialista__credential-dot"></div>
+              Mais de 140 empresas atendidas — R$180M em resultados documentados
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       9. DEPOIMENTOS
+  ============================================= -->
+  <section class="section section--white">
+    <div class="container">
+      <div class="depoimentos__header">
+        <span class="section-eyebrow">Depoimentos</span>
+        <h2 class="section-title">O que nossos clientes dizem</h2>
+        <p class="section-sub">
+          Relatos de quem passou pela transformacao e pode falar com propriedade sobre o que foi entregue.
+        </p>
+      </div>
+
+      <div class="depoimentos__grid">
+
+        <div class="depo-card">
+          <span class="depo-card__quote-mark">"</span>
+          <p class="depo-card__text">
+            A Vantagem nao e uma consultoria comum. Eles entram na sua empresa, entendem a fundo e executam junto. Em 6 meses, reformulamos nosso modelo comercial e triplicamos a taxa de conversao de enterprise. Resultado real, nao projecao de planilha.
+          </p>
+          <div class="depo-card__divider"></div>
+          <div class="depo-card__author">
+            <div class="depo-card__avatar">RP</div>
+            <div class="depo-card__author-info">
+              <strong>Ricardo Pinheiro</strong>
+              <span>CEO — Grupo Meridiano</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="depo-card depo-card--featured">
+          <span class="depo-card__quote-mark">"</span>
+          <p class="depo-card__text">
+            Ja tinhamos tentado outras consultorias antes. A diferenca da Vantagem e que o Carlos e o time estavam presentes, cobrando e ajustando toda semana. Nao e so plano — e execucao de verdade. Crescemos 28 milhoes em receita nova em um ano.
+          </p>
+          <div class="depo-card__divider"></div>
+          <div class="depo-card__author">
+            <div class="depo-card__avatar">AM</div>
+            <div class="depo-card__author-info">
+              <strong>Ana Moura</strong>
+              <span>Diretora Comercial — Farma Nativa</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="depo-card">
+          <span class="depo-card__quote-mark">"</span>
+          <p class="depo-card__text">
+            Tinhamos um problema serio de churn que ameacava o negocio. Em 4 meses a Vantagem ajudou a redesenhar toda a jornada do cliente, treinar o time de CS e implementar um modelo de pricing que funcionou. Hoje somos uma empresa diferente.
+          </p>
+          <div class="depo-card__divider"></div>
+          <div class="depo-card__author">
+            <div class="depo-card__avatar">FL</div>
+            <div class="depo-card__author-info">
+              <strong>Felipe Lima</strong>
+              <span>Fundador — TechBras Solucoes</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       10. INVESTIMENTO / CTA CONTATO
+  ============================================= -->
+  <section class="section section--green" id="contato">
+    <div class="container">
+      <div class="cta-form__inner">
+        <h2 class="cta-form__headline">
+          Pronto para transformar seu negocio?
+        </h2>
+        <p class="cta-form__sub">
+          Solicite um diagnostico gratuito de 60 minutos com um dos nossos consultores seniors. Sem compromisso. Sem apresentacao generica.
+        </p>
+
+        <form class="cta-form__form" id="contactForm" novalidate>
+          <div class="cta-form__field">
+            <label class="cta-form__label" for="field-nome">Seu nome</label>
+            <input
+              class="cta-form__input"
+              type="text"
+              id="field-nome"
+              name="nome"
+              placeholder="João Silva"
+              required
+            />
+          </div>
+
+          <div class="cta-form__field">
+            <label class="cta-form__label" for="field-email">E-mail corporativo</label>
+            <input
+              class="cta-form__input"
+              type="email"
+              id="field-email"
+              name="email"
+              placeholder="joao@empresa.com.br"
+              required
+            />
+          </div>
+
+          <div class="cta-form__field">
+            <label class="cta-form__label" for="field-whatsapp">WhatsApp</label>
+            <input
+              class="cta-form__input"
+              type="tel"
+              id="field-whatsapp"
+              name="whatsapp"
+              placeholder="(11) 99999-9999"
+              required
+            />
+          </div>
+
+          <div class="cta-form__field">
+            <label class="cta-form__label" for="field-empresa">Empresa</label>
+            <input
+              class="cta-form__input"
+              type="text"
+              id="field-empresa"
+              name="empresa"
+              placeholder="Nome da sua empresa"
+              required
+            />
+          </div>
+
+          <div class="cta-form__field cta-form__field--full">
+            <label class="cta-form__label" for="field-faturamento">Faturamento anual aproximado</label>
+            <select
+              class="cta-form__select"
+              id="field-faturamento"
+              name="faturamento"
+              required
+            >
+              <option value="" disabled selected>Selecione uma faixa</option>
+              <option value="ate-5m">Ate R$5 milhoes</option>
+              <option value="5-20m">R$5M a R$20 milhoes</option>
+              <option value="20-50m">R$20M a R$50 milhoes</option>
+              <option value="50-200m">R$50M a R$200 milhoes</option>
+              <option value="acima-200m">Acima de R$200 milhoes</option>
+            </select>
+          </div>
+
+          <div class="cta-form__field cta-form__field--full">
+            <button type="submit" class="cta-form__btn">
+              Solicitar diagnostico gratuito
+            </button>
+          </div>
+        </form>
+
+        <p class="cta-form__note">Resposta em ate 24 horas uteis. Seus dados sao protegidos e nao serao compartilhados.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       11. GARANTIA
+  ============================================= -->
+  <section class="garantia section--off">
+    <div class="container">
+      <div class="garantia__inner">
+        <svg class="garantia__icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 4L8 14V34C8 47 18.5 58.5 32 62C45.5 58.5 56 47 56 34V14L32 4Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M22 32L29 39L42 26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h2 class="garantia__title">Compromisso de Resultado</h2>
+        <p class="garantia__text">
+          Cada projeto e iniciado com metas quantificadas e acordadas. Nao entregamos relatorios — entregamos resultados documentados. Se ao final do periodo de engajamento as metas nao forem atingidas por razoes sob nossa responsabilidade, extendemos o projeto sem custo adicional ate que sejam. Nossa reputacao e construida sobre o que entregamos, nao sobre o que prometemos.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       12. FAQ
+  ============================================= -->
+  <section class="section section--white">
+    <div class="container">
+      <div class="faq__header">
+        <span class="section-eyebrow">Duvidas frequentes</span>
+        <h2 class="section-title">Perguntas que recebemos</h2>
+        <p class="section-sub">
+          Respostas diretas para quem esta avaliando se a Vantagem e o parceiro certo para o seu momento.
+        </p>
+      </div>
+
+      <div class="faq__list" id="faqList">
+
+        <div class="faq__item">
+          <button class="faq__question" aria-expanded="false">
+            <span class="faq__question-text">Qual e o perfil de empresa que voces atendem?</span>
+            <svg class="faq__chevron" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="faq__answer">
+            <div class="faq__answer-inner">
+              Atendemos empresas com faturamento a partir de R$5 milhoes anuais nos setores de varejo, tecnologia, saude, agro, educacao e servicos B2B. O criterio mais importante nao e o tamanho — e a disposicao da lideranca em fazer mudancas reais. Empresas que buscam apenas validacao do que ja fazem nao sao nosso perfil de cliente.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq__item">
+          <button class="faq__question" aria-expanded="false">
+            <span class="faq__question-text">Como funciona o diagnostico gratuito?</span>
+            <svg class="faq__chevron" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="faq__answer">
+            <div class="faq__answer-inner">
+              E uma sessao de 60 minutos — presencial ou por videoconferencia — conduzida por um dos nossos consultores seniors. Nao e uma apresentacao de vendas. E uma conversa estruturada sobre seu negocio, seus desafios prioritarios e onde voce quer chegar. Ao final, voce sai com perspectivas praticas independentemente de contratar ou nao.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq__item">
+          <button class="faq__question" aria-expanded="false">
+            <span class="faq__question-text">Quanto custa um projeto de consultoria?</span>
+            <svg class="faq__chevron" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="faq__answer">
+            <div class="faq__answer-inner">
+              O investimento varia conforme o escopo, o tamanho da empresa e a complexidade do projeto. Um diagnostico estrategico começa em R$28.000. Projetos de implementacao e execucao tem investimento mensal entre R$25.000 e R$120.000. Nao trabalhamos com propostas padrao — cada proposta e construida sob medida apos o diagnostico inicial.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq__item">
+          <button class="faq__question" aria-expanded="false">
+            <span class="faq__question-text">Voces trabalham com quais setores?</span>
+            <svg class="faq__chevron" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="faq__answer">
+            <div class="faq__answer-inner">
+              Temos experiencia documentada em varejo fisco e digital, tecnologia (SaaS e servicos), saude e farma, agronegocio, educacao e servicos financeiros. A metodologia e aplicavel a qualquer setor — o que varia e a profundidade de conhecimento setorial que trazemos para cada projeto. Em alguns segmentos, temos parceiros especialistas que integram o squad.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq__item">
+          <button class="faq__question" aria-expanded="false">
+            <span class="faq__question-text">Em quanto tempo posso esperar ver resultados?</span>
+            <svg class="faq__chevron" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="faq__answer">
+            <div class="faq__answer-inner">
+              Depende do tipo de resultado e do escopo do projeto. Em projetos de implementacao, entregamos quick wins mensuravelmente relevantes nos primeiros 60 a 90 dias — o suficiente para validar a direcao e sustentar o investimento internamente. Resultados estruturais de maior escala geralmente materializam entre 6 e 12 meses. Nao prometemos o que nao podemos garantir.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq__item">
+          <button class="faq__question" aria-expanded="false">
+            <span class="faq__question-text">Como e a rotina de trabalho durante um projeto?</span>
+            <svg class="faq__chevron" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="faq__answer">
+            <div class="faq__answer-inner">
+              Cada projeto tem um gerente dedicado e reunioes semanais de acompanhamento com o squad. Trabalhamos com um board executivo mensal com os fundadores ou diretores da empresa para revisao de estrategia e decisoes de ajuste. Toda a comunicacao e documentada em plataforma compartilhada. O cliente tern visibilidade total do que esta sendo feito e por que.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq__item">
+          <button class="faq__question" aria-expanded="false">
+            <span class="faq__question-text">Voces assinam NDA e tem politica de confidencialidade?</span>
+            <svg class="faq__chevron" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="faq__answer">
+            <div class="faq__answer-inner">
+              Sim. Todo projeto e precedido por um acordo de confidencialidade bilateral. Nao compartilhamos dados, estrategias ou informacoes de clientes com terceiros, nem usamos informacoes de um projeto para beneficiar outro cliente no mesmo setor. Nosso modelo de negocio e baseado em relacionamentos de longo prazo — a confianca e inegociavel.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq__item">
+          <button class="faq__question" aria-expanded="false">
+            <span class="faq__question-text">O que diferencia a Vantagem de outras consultorias?</span>
+            <svg class="faq__chevron" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="faq__answer">
+            <div class="faq__answer-inner">
+              Tres coisas. Primeiro, executamos — nao apenas diagnosticamos. Segundo, Carlos Mendes e pessoalmente responsavel pelos resultados de cada projeto, nao delega para juniores. Terceiro, trabalhamos com metas contratadas — se nao entregamos, seguimos sem custo adicional. A maioria das consultorias entrega um relatorio. Nos entregamos resultado ou continuamos ate entregar.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       13. FOOTER
+  ============================================= -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__top">
+        <div>
+          <div class="footer__logo">Vantagem<span>.</span>Consultoria</div>
+          <p class="footer__tagline">
+            Estrategia e execucao de alto impacto para empresas que levam crescimento a serio.
+          </p>
+        </div>
+
+        <div>
+          <div class="footer__col-title">Servicos</div>
+          <ul class="footer__links">
+            <li><a href="#servicos" class="footer__link">Diagnostico Estrategico</a></li>
+            <li><a href="#servicos" class="footer__link">Implementacao e Execucao</a></li>
+            <li><a href="#servicos" class="footer__link">Scale e Expansao</a></li>
+            <li><a href="#processo" class="footer__link">Nossa Metodologia</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer__col-title">Empresa</div>
+          <ul class="footer__links">
+            <li><a href="#sobre" class="footer__link">Sobre nos</a></li>
+            <li><a href="#cases" class="footer__link">Cases e Resultados</a></li>
+            <li><a href="#" class="footer__link">Blog e Insights</a></li>
+            <li><a href="#" class="footer__link">Carreira</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer__col-title">Contato</div>
+          <ul class="footer__links">
+            <li><a href="mailto:contato@vantagemconsultoria.com.br" class="footer__link">contato@vantagemconsultoria.com.br</a></li>
+            <li><a href="tel:+551130000000" class="footer__link">(11) 3000-0000</a></li>
+            <li><a href="#contato" class="footer__link">Solicitar proposta</a></li>
+            <li><a href="#" class="footer__link">LinkedIn</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <p class="footer__copyright">
+          2024 Vantagem Consultoria. Todos os direitos reservados.
+        </p>
+        <p class="footer__cnpj">CNPJ: 00.000.000/0001-00</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =============================================
+       JAVASCRIPT
+  ============================================= -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* ---- NAV MOBILE TOGGLE ---- */
+      var navToggle = document.getElementById('navToggle');
+      var navMenu = document.getElementById('navMenu');
+
+      if (navToggle && navMenu) {
+        navToggle.addEventListener('click', function () {
+          var isOpen = navMenu.classList.toggle('is-open');
+          navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+
+        // Close menu when a link is clicked
+        var mobileLinks = navMenu.querySelectorAll('a');
+        mobileLinks.forEach(function (link) {
+          link.addEventListener('click', function () {
+            navMenu.classList.remove('is-open');
+            navToggle.setAttribute('aria-expanded', 'false');
+          });
+        });
+      }
+
+      /* ---- FAQ ACCORDION ---- */
+      var faqItems = document.querySelectorAll('.faq__item');
+
+      faqItems.forEach(function (item) {
+        var question = item.querySelector('.faq__question');
+        var answer = item.querySelector('.faq__answer');
+
+        if (!question || !answer) return;
+
+        // Pre-calculate answer height when open
+        function getAnswerHeight() {
+          answer.style.maxHeight = 'none';
+          var h = answer.scrollHeight;
+          answer.style.maxHeight = item.classList.contains('is-open') ? h + 'px' : '0px';
+          return h;
+        }
+
+        question.addEventListener('click', function () {
+          var isOpen = item.classList.contains('is-open');
+
+          // Close all other items
+          faqItems.forEach(function (other) {
+            if (other !== item && other.classList.contains('is-open')) {
+              other.classList.remove('is-open');
+              var otherQuestion = other.querySelector('.faq__question');
+              var otherAnswer = other.querySelector('.faq__answer');
+              if (otherQuestion) otherQuestion.setAttribute('aria-expanded', 'false');
+              if (otherAnswer) otherAnswer.style.maxHeight = '0px';
+            }
+          });
+
+          // Toggle current item
+          if (isOpen) {
+            item.classList.remove('is-open');
+            question.setAttribute('aria-expanded', 'false');
+            answer.style.maxHeight = '0px';
+          } else {
+            item.classList.add('is-open');
+            question.setAttribute('aria-expanded', 'true');
+            answer.style.maxHeight = answer.scrollHeight + 'px';
+          }
+        });
+      });
+
+      /* ---- FORM SUBMIT ---- */
+      var form = document.getElementById('contactForm');
+
+      if (form) {
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+
+          var nome = form.querySelector('#field-nome');
+          var email = form.querySelector('#field-email');
+          var empresa = form.querySelector('#field-empresa');
+          var faturamento = form.querySelector('#field-faturamento');
+
+          var hasError = false;
+
+          [nome, email, empresa, faturamento].forEach(function (field) {
+            if (!field) return;
+            if (!field.value || field.value.trim() === '' || field.value === '') {
+              field.style.borderColor = 'rgba(239, 68, 68, 0.6)';
+              hasError = true;
+            } else {
+              field.style.borderColor = '';
+            }
+          });
+
+          if (hasError) return;
+
+          // Success state
+          var btn = form.querySelector('.cta-form__btn');
+          if (btn) {
+            btn.textContent = 'Solicitacao enviada! Retornamos em ate 24h.';
+            btn.style.backgroundColor = '#D1FAE5';
+            btn.style.color = '#1B4332';
+            btn.disabled = true;
+          }
+
+          form.reset();
+        });
+
+        // Clear error styles on input
+        var inputs = form.querySelectorAll('.cta-form__input, .cta-form__select');
+        inputs.forEach(function (input) {
+          input.addEventListener('input', function () {
+            this.style.borderColor = '';
+          });
+        });
+      }
+
+      /* ---- SMOOTH NAV HIGHLIGHT ---- */
+      var navLinks = document.querySelectorAll('.nav__links a');
+      var sections = [];
+
+      navLinks.forEach(function (link) {
+        var href = link.getAttribute('href');
+        if (href && href.startsWith('#')) {
+          var target = document.querySelector(href);
+          if (target) sections.push({ link: link, target: target });
+        }
+      });
+
+      if (sections.length > 0) {
+        function updateActiveLink() {
+          var scrollY = window.scrollY + 100;
+          var active = null;
+
+          sections.forEach(function (s) {
+            if (s.target.offsetTop <= scrollY) {
+              active = s;
+            }
+          });
+
+          navLinks.forEach(function (l) {
+            l.style.color = '';
+          });
+
+          if (active) {
+            active.link.style.color = '#111111';
+          }
+        }
+
+        window.addEventListener('scroll', updateActiveLink, { passive: true });
+        updateActiveLink();
+      }
+
+      /* ---- WHATSAPP MASK ---- */
+      var whatsappField = document.getElementById('field-whatsapp');
+      if (whatsappField) {
+        whatsappField.addEventListener('input', function () {
+          var v = this.value.replace(/\D/g, '');
+          if (v.length <= 10) {
+            v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+          } else {
+            v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+          }
+          this.value = v;
+        });
+      }
+
+    })();
+  </script>
+
+</body>
+</html>

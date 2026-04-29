@@ -5,6 +5,7 @@ export const TEMPLATE_CATEGORIES = [
   { id: "captura" as const, label: "Captura de Leads" },
   { id: "evento" as const, label: "Evento / Workshop" },
   { id: "saas" as const, label: "SaaS / Produto" },
+  { id: "servico" as const, label: "Serviço / Consultoria" },
   { id: "blog" as const, label: "Blog / Conteúdo" },
   { id: "portfolio" as const, label: "Portfolio" },
   { id: "sections" as const, label: "Seções" },
@@ -12,6 +13,22 @@ export const TEMPLATE_CATEGORIES = [
 
 export const TEMPLATES: TemplateItem[] = [
   // ━━━ PÁGINA DE VENDAS ━━━
+  {
+    id: "ready-produto-fisico",
+    label: "LP Produto Físico · D2C Premium Terracota (Pronto)",
+    description: "Página de produto físico D2C completa. Hero com galeria interativa (4 thumbnails clicáveis + imagem principal), detalhes de compra, trust strip, benefícios, ingredientes, como usar, avaliações com rating breakdown, mais produtos, FAQ e CTA final. Sticky CTA no mobile. Paleta branca + terracota #C4581A, estilo Apple Store.",
+    category: "vendas",
+    tags: ["pronto", "produto físico", "d2c", "ecommerce", "terracota", "galeria", "avaliações", "mobile", "skincare"],
+    prompt: "READY:ready-produto-fisico",
+  },
+  {
+    id: "ready-vendas-premium-completa",
+    label: "LP Vendas Premium Completa · Âmbar (Pronto)",
+    description: "Página de vendas de alto nível com 15 seções: Nav sticky, Hero 2col com VSL, Prova Social, Problema, Transformação, 6 Módulos em grid, Para Quem, Depoimentos, Bônus, Pricing dark com CTA, Garantia, FAQ accordion, CTA Final e Footer. Paleta âmbar/marrom com fundos alternados branco e cinza.",
+    category: "vendas",
+    tags: ["pronto", "vendas", "premium", "completa", "âmbar", "curso", "infoproduto", "15 seções", "vsl", "accordion", "garantia"],
+    prompt: "READY:ready-vendas-premium-completa",
+  },
   {
     id: "ready-metodo-rmx",
     label: "Método RMX 5.0 · Dark Purple Premium (Pronto)",
@@ -35,14 +52,6 @@ export const TEMPLATES: TemplateItem[] = [
     category: "vendas",
     tags: ["pronto", "vendas", "dark", "pink", "vsl", "stories", "instagram", "social media", "rosa", "roxo"],
     prompt: "READY:ready-stories10x-dark",
-  },
-  {
-    id: "ready-spe-light",
-    label: "LP Vendas SPE · Light Personal Brand (Pronto)",
-    description: "Página de vendas light SPE — Story para Enriquecer. Logo pink+black, hero branco, VSL terracotta, dor/transformação com pills X/check, seção estratégias com mockups de story e contadores de views, currículo em accordion, depoimentos, bio Luana Carolina, pricing e garantia.",
-    category: "vendas",
-    tags: ["pronto", "vendas", "light", "branco", "personal brand", "stories", "before after", "depoimentos", "spe", "pink", "vsl"],
-    prompt: "READY:ready-spe-light",
   },
   {
     id: "ready-novomercado-dark",
@@ -127,6 +136,14 @@ export const TEMPLATES: TemplateItem[] = [
   },
 
   // ━━━ CAPTURA DE LEADS ━━━
+  {
+    id: "ready-captura-minimal-premium",
+    label: "LP Captura Minimal Premium · Azul-Petróleo (Pronto)",
+    description: "Página de captura premium e limpa com 8 seções: Nav sticky com CTA, Hero com badge + H1 + form inline, Logos strip de confiança, Problema em 3 cards, Benefícios com ícones, Steps numerados, Depoimentos e CTA dark final. Paleta azul-petróleo #0A2540 sobre fundo branco. Design clean e profissional.",
+    category: "captura",
+    tags: ["pronto", "captura", "premium", "azul", "petróleo", "minimal", "clean", "formulário", "infoproduto", "lançamento"],
+    prompt: "READY:ready-captura-minimal-premium",
+  },
   {
     id: "ready-captura-comunidade",
     label: "Captura Comunidade / Clube (Pronto)",
@@ -295,6 +312,14 @@ Tipografia Sora. Mínimo de elementos. Máximo de impacto.`,
 
   // ━━━ EVENTO / WORKSHOP ━━━
   {
+    id: "ready-evento-premium",
+    label: "LP Evento / Webinar Premium · Dark Dourado (Pronto)",
+    description: "Página completa para evento online ou webinar premium. 10 seções: Nav com badge 'Ao vivo', Hero 2col com form + data/local, Countdown timer JS em tempo real, Apresentador com credenciais, O que vai aprender, Para quem é, Depoimentos, Agenda com timeline, FAQ accordion e CTA final dark. Paleta escura #0A0A0A com accent dourado #D4A017.",
+    category: "evento",
+    tags: ["pronto", "evento", "webinar", "dark", "dourado", "countdown", "formulário", "agenda", "timeline", "lançamento"],
+    prompt: "READY:ready-evento-premium",
+  },
+  {
     id: "ready-evento-presencial-dark",
     label: "Evento Presencial · Dark Red (Pronto)",
     description: "Página completa para congresso/evento presencial. Hero com data/local/lote, marquee vermelho, prova social + vídeo, depoimentos de quem viveu, carrossel de palestrantes auto-scroll, features da experiência, seção de data/venue em destaque, alcance mundial com bandeiras, 3 tiers de ingresso (com barra de disponibilidade e estado esgotado), FAQ, manifesto do mentor e CTA final. Dark #131313 com accent vermelho intenso — inspirado no Subido ao Vivo.",
@@ -303,6 +328,14 @@ Tipografia Sora. Mínimo de elementos. Máximo de impacto.`,
     prompt: "READY:evento-presencial-dark",
   },
   // ━━━ SaaS / PRODUTO ━━━
+  {
+    id: "ready-saas-premium-lp",
+    label: "LP SaaS Premium · Azul Elétrico (Pronto)",
+    description: "Landing page SaaS completa estilo Stripe/Linear. Hero dark com dashboard mockup em CSS puro, logo cloud, 3 features alternadas com mockups, como funciona em 3 steps, stats em fundo azul, depoimentos, pricing 3 tiers com toggle mensal/anual (JS), FAQ accordion e CTA final com formulário. Fundo off-white + dark #0B1121 + accent azul #2563EB.",
+    category: "saas",
+    tags: ["pronto", "saas", "azul", "dashboard", "pricing", "toggle", "accordion", "premium", "stripe", "linear"],
+    prompt: "READY:ready-saas-premium-lp",
+  },
   {
     id: "saas-dashboard",
     label: "SaaS com Dashboard",
@@ -336,6 +369,16 @@ Fundo: creme #f5f5f0. Tipografia: Inter ou Sora. Preto puro para textos. Zero gr
 6. CTA com glow.
 
 Cores: roxo (#8b5cf6) como acento, fundo escuro, glassmorphism nos cards.`,
+  },
+
+  // ━━━ SERVIÇO / CONSULTORIA ━━━
+  {
+    id: "ready-servico-premium",
+    label: "LP Serviço Premium · Verde Consultoria (Pronto)",
+    description: "Landing page de consultoria/serviço de alto ticket com 13 seções: Nav, Hero 2col com floating cards de resultados, Logo strip, Problema em dark, Serviços com entregáveis, Processo em timeline, Cases com resultados reais, Especialista, Depoimentos, Formulário de proposta, Garantia, FAQ e Footer. Paleta off-white #FAFAF8 + verde escuro #1B4332 + dourado para resultados.",
+    category: "servico",
+    tags: ["pronto", "serviço", "consultoria", "alto ticket", "verde", "premium", "formulário", "cases", "timeline", "processo"],
+    prompt: "READY:ready-servico-premium",
   },
 
   // ━━━ BLOG / CONTEÚDO ━━━

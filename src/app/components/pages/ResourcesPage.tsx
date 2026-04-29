@@ -13,8 +13,7 @@ interface ResourcesPageProps {
 const TEMPLATE_VISUALS: Record<string, { gradient: string; mockupType: "hero-photo" | "saas" | "cards" | "form" | "blog" | "portfolio" | "minimal"; ready?: boolean }> = {
   "ready-metodo-rmx": { gradient: "from-[#080808] via-violet-950/40 to-[#080808]", mockupType: "saas", ready: true },
   "ready-metodo-rmx-light": { gradient: "from-[#F3EEFF] via-white to-[#EAE0FF]", mockupType: "cards", ready: true },
-  "ready-spe-light": { gradient: "from-[#FFFFFF] via-pink-50 to-[#FFF5F0]", mockupType: "spe-light" as any, ready: true },
-  "ready-stories10x-dark": { gradient: "from-[#0C0C0C] via-pink-950/30 to-[#0C0C0C]", mockupType: "hero-photo", ready: true },
+"ready-stories10x-dark": { gradient: "from-[#0C0C0C] via-pink-950/30 to-[#0C0C0C]", mockupType: "hero-photo", ready: true },
   "ready-novomercado-dark": { gradient: "from-[#0A0A14] via-pink-950/20 to-[#0A0A14]", mockupType: "saas", ready: true },
   "ready-quiz-funnel": { gradient: "from-violet-900 via-purple-800 to-fuchsia-900", mockupType: "cards", ready: true },
   "ready-vendas-black-boutique": { gradient: "from-purple-950 via-gray-900 to-purple-950/80", mockupType: "hero-photo", ready: true },
@@ -66,6 +65,13 @@ const TEMPLATE_VISUALS: Record<string, { gradient: string; mockupType: "hero-pho
   "ready-blog-premium": { gradient: "from-white via-gray-50 to-white", mockupType: "blog", ready: true },
   "ready-captura-light": { gradient: "from-stone-100 via-white to-stone-50", mockupType: "hero-photo", ready: true },
   "ready-captura-dark": { gradient: "from-gray-950 via-amber-950/10 to-gray-950", mockupType: "hero-photo", ready: true },
+  // Templates Premium 2026
+  "ready-vendas-premium-completa": { gradient: "from-[#1C0A00] via-amber-900/50 to-[#1C0A00]", mockupType: "saas", ready: true },
+  "ready-captura-minimal-premium": { gradient: "from-[#0A2540] via-blue-900/30 to-[#0A2540]", mockupType: "form", ready: true },
+  "ready-evento-premium": { gradient: "from-[#0A0A0A] via-yellow-900/20 to-[#0A0A0A]", mockupType: "cards", ready: true },
+  "ready-saas-premium-lp": { gradient: "from-[#0B1121] via-blue-900/40 to-[#0B1121]", mockupType: "saas", ready: true },
+  "ready-servico-premium": { gradient: "from-[#FAFAF8] via-emerald-50 to-[#F0F4F0]", mockupType: "cards", ready: true },
+  "ready-produto-fisico": { gradient: "from-[#FFF5F0] via-orange-50 to-[#FEF0E8]", mockupType: "cards", ready: true },
 };
 
 function MockupOverlay({ type }: { type: string }) {
@@ -198,8 +204,8 @@ export function ResourcesPage({ onSelectTemplate }: ResourcesPageProps) {
 
   return (
     <div className="p-8 max-w-[1100px] mx-auto">
-      <h1 className="text-2xl font-semibold text-white mb-1">Resources</h1>
-      <p className="text-sm text-white/40 mb-8">Comece a partir de um template para construir seu próximo projeto</p>
+      <h1 className="text-2xl font-semibold text-white mb-1">Landing Pages</h1>
+      <p className="text-sm text-white/40 mb-8">Comece a partir de um template pronto e personalize para o seu lançamento</p>
 
       <div className="flex gap-2 mb-6 flex-wrap">
         {TEMPLATE_CATEGORIES.map((c) => (

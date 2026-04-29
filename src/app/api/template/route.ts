@@ -35,13 +35,19 @@ const TEMPLATE_MAP: Record<string, string> = {
   "ready-vendas-white-boutique": "lp-vendas-white-boutique.html",
   // Replicas inspiradas em referências reais
   "ready-stories10x-dark": "lp-vendas-stories10x-dark.html",
-  "ready-spe-light": "lp-vendas-spe-light.html",
-  "ready-novomercado-dark": "lp-vendas-novomercado-dark.html",
+"ready-novomercado-dark": "lp-vendas-novomercado-dark.html",
   // Evento / Workshop
   "evento-presencial-dark": "evento-presencial-dark.html",
   // Método RMX
   "ready-metodo-rmx": "lp-vendas-metodo-rmx.html",
   "ready-metodo-rmx-light": "lp-vendas-metodo-rmx-light.html",
+  // Templates Premium 2026
+  "ready-captura-minimal-premium": "lp-captura-minimal-premium.html",
+  "ready-vendas-premium-completa": "lp-vendas-premium-completa.html",
+  "ready-evento-premium": "lp-evento-premium.html",
+  "ready-saas-premium-lp": "lp-saas-premium-lp.html",
+  "ready-servico-premium": "lp-servico-premium.html",
+  "ready-produto-fisico": "lp-produto-fisico.html",
 };
 
 export async function GET(request: Request) {

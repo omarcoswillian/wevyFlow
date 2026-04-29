@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista de Espera — Metodo de Posicionamento Digital</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FFFFFF;
+  --bg-2: #F8F8F6;
+  --ink: #111111;
+  --ink-2: #333333;
+  --muted: #717171;
+  --subtle: #AEAEAD;
+  --border: #E8E8E6;
+  --accent: #0A2540;
+  --accent-mid: #1E4D8C;
+  --cta: #111111;
+  --cta-text: #FFFFFF;
+  --highlight: #2E7D32;
+  --font: 'Sora', -apple-system, sans-serif;
+  --container: 1200px;
+  --text-container: 700px;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font); color: var(--ink); background: var(--bg); line-height: 1.6; }
+a { text-decoration: none; color: inherit; }
+img { display: block; max-width: 100%; }
+
+.container {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.text-container {
+  max-width: var(--text-container);
+  margin: 0 auto;
+}
+
+/* ---------- NAV ---------- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.nav-logo {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--accent);
+}
+
+.nav-logo span {
+  color: var(--ink);
+}
+
+.btn-outline-sm {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-outline-sm:hover {
+  background: var(--ink);
+  color: var(--cta-text);
+}
+
+/* ---------- HERO ---------- */
+.hero {
+  padding: 96px 0 80px;
+  text-align: center;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 32px;
+}
+
+.hero-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--highlight);
+}
+
+.hero h1 {
+  font-size: clamp(36px, 5.5vw, 72px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+  color: var(--ink);
+  max-width: 820px;
+  margin: 0 auto 24px;
+}
+
+.hero h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.hero-sub {
+  font-size: clamp(16px, 1.8vw, 19px);
+  color: var(--muted);
+  max-width: 560px;
+  margin: 0 auto 48px;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* Form inline */
+.hero-form {
+  display: flex;
+  gap: 10px;
+  max-width: 600px;
+  margin: 0 auto 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.form-field {
+  flex: 1;
+  min-width: 180px;
+  padding: 14px 18px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--bg);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.form-field::placeholder { color: var(--subtle); }
+.form-field:focus { border-color: var(--accent); }
+
+.btn-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 28px;
+  background: var(--cta);
+  color: var(--cta-text);
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.btn-cta:hover {
+  background: #222;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.hero-privacy {
+  font-size: 12px;
+  color: var(--subtle);
+  margin-bottom: 48px;
+}
+
+/* Social proof avatars */
+.hero-social-proof {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.avatar-stack {
+  display: flex;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  margin-left: -10px;
+}
+
+.avatar:first-child { margin-left: 0; }
+.avatar-a { background: #0A2540; }
+.avatar-b { background: #1E4D8C; }
+.avatar-c { background: #2E7D32; }
+.avatar-d { background: #6B4F3A; }
+
+.social-proof-text {
+  font-size: 13px;
+  color: var(--muted);
+  text-align: left;
+}
+
+.social-proof-text strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* ---------- LOGOS STRIP ---------- */
+.logos-strip {
+  padding: 56px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
+
+.logos-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--subtle);
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.logos-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+
+.logo-name {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--subtle);
+  transition: color 0.2s ease;
+}
+
+.logo-name:hover { color: var(--muted); }
+
+/* ---------- PROBLEMA ---------- */
+.section-problema {
+  padding: 96px 0;
+}
+
+.section-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.section-h2 {
+  font-size: clamp(26px, 3.5vw, 42px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+  color: var(--ink);
+  margin-bottom: 20px;
+}
+
+.section-lead {
+  font-size: 17px;
+  color: var(--muted);
+  max-width: 540px;
+  margin-bottom: 48px;
+  line-height: 1.65;
+}
+
+.bullets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 560px;
+}
+
+.bullet-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.bullet-icon {
+  width: 10px;
+  height: 10px;
+  min-width: 10px;
+  background: var(--accent);
+  margin-top: 6px;
+}
+
+.bullet-text {
+  font-size: 16px;
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+
+.bullet-text strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* ---------- BENEFICIOS ---------- */
+.section-beneficios {
+  padding: 96px 0;
+  background: var(--bg-2);
+}
+
+.section-header-centered {
+  text-align: center;
+  margin-bottom: 64px;
+}
+
+.cards-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.card-beneficio {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px 32px;
+  transition: all 0.2s ease;
+}
+
+.card-beneficio:hover {
+  border-color: var(--accent);
+  box-shadow: 0 8px 32px rgba(10,37,64,0.08);
+  transform: translateY(-2px);
+}
+
+.card-num {
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
+}
+
+.card-desc {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+/* ---------- COMO FUNCIONA ---------- */
+.section-como {
+  padding: 96px 0;
+}
+
+.steps-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  position: relative;
+  margin-top: 64px;
+}
+
+.steps-row::before {
+  content: '';
+  position: absolute;
+  top: 28px;
+  left: calc(16.66% + 16px);
+  right: calc(16.66% + 16px);
+  height: 1px;
+  background: var(--border);
+}
+
+.step-item {
+  padding: 0 24px;
+  text-align: center;
+}
+
+.step-num {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.step-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
+}
+
+.step-desc {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+/* ---------- DEPOIMENTOS ---------- */
+.section-depoimentos {
+  padding: 96px 0;
+  background: var(--bg-2);
+}
+
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 64px;
+}
+
+.testimonial-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  transition: box-shadow 0.2s ease;
+}
+
+.testimonial-card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+}
+
+.testimonial-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.testimonial-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.ta-blue { background: var(--accent); }
+.ta-mid { background: var(--accent-mid); }
+.ta-green { background: var(--highlight); }
+
+.testimonial-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+
+.testimonial-role {
+  font-size: 12px;
+  color: var(--subtle);
+}
+
+.testimonial-text {
+  font-size: 15px;
+  color: var(--ink-2);
+  line-height: 1.7;
+}
+
+/* ---------- AUTOR ---------- */
+.section-autor {
+  padding: 96px 0;
+}
+
+.autor-inner {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.autor-photo {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.autor-photo-inner {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.autor-name {
+  font-size: clamp(24px, 3vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.autor-title {
+  font-size: 14px;
+  color: var(--accent-mid);
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.autor-bio {
+  font-size: 16px;
+  color: var(--muted);
+  line-height: 1.75;
+  margin-bottom: 32px;
+}
+
+.credenciais-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.credencial-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.credencial-dot {
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  background: var(--accent);
+  margin-top: 7px;
+}
+
+.credencial-text {
+  font-size: 14px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+/* ---------- CTA FINAL ---------- */
+.section-cta-final {
+  padding: 96px 0;
+  background: var(--accent);
+}
+
+.cta-final-inner {
+  text-align: center;
+}
+
+.cta-final-h2 {
+  font-size: clamp(28px, 4vw, 52px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  color: #fff;
+  max-width: 700px;
+  margin: 0 auto 16px;
+}
+
+.cta-final-sub {
+  font-size: 17px;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 48px;
+}
+
+.hero-form-light {
+  display: flex;
+  gap: 10px;
+  max-width: 580px;
+  margin: 0 auto 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.form-field-light {
+  flex: 1;
+  min-width: 180px;
+  padding: 14px 18px;
+  border: 1.5px solid rgba(255,255,255,0.25);
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 14px;
+  color: #fff;
+  background: rgba(255,255,255,0.1);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.form-field-light::placeholder { color: rgba(255,255,255,0.5); }
+.form-field-light:focus { border-color: rgba(255,255,255,0.6); }
+
+.btn-cta-white {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 28px;
+  background: #fff;
+  color: var(--accent);
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-cta-white:hover {
+  background: #f0f0f0;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+
+.cta-final-privacy {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+}
+
+/* ---------- FOOTER ---------- */
+.footer {
+  padding: 40px 0;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-logo {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+}
+
+.footer-copy {
+  font-size: 12px;
+  color: var(--subtle);
+}
+
+.footer-links {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-links a {
+  font-size: 12px;
+  color: var(--subtle);
+  transition: color 0.2s ease;
+}
+
+.footer-links a:hover { color: var(--ink); }
+
+/* ---------- THANKS ---------- */
+#wf-thanks {
+  display: none;
+  text-align: center;
+  padding: 24px 32px;
+  background: rgba(46,125,50,0.08);
+  border: 1px solid rgba(46,125,50,0.25);
+  border-radius: var(--radius);
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+#wf-thanks p {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--highlight);
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+  .container { padding: 0 20px; }
+
+  .hero { padding: 64px 0 56px; }
+  .hero h1 { font-size: clamp(30px, 8vw, 44px); }
+  .hero-form { flex-direction: column; align-items: stretch; }
+  .form-field { min-width: 0; }
+  .btn-cta { width: 100%; }
+
+  .logos-row { gap: 28px; }
+  .logo-name { font-size: 13px; }
+
+  .section-problema { padding: 64px 0; }
+  .section-beneficios { padding: 64px 0; }
+  .section-como { padding: 64px 0; }
+  .section-depoimentos { padding: 64px 0; }
+  .section-autor { padding: 64px 0; }
+  .section-cta-final { padding: 64px 0; }
+
+  .cards-3 { grid-template-columns: 1fr; }
+  .steps-row { grid-template-columns: 1fr; gap: 40px; }
+  .steps-row::before { display: none; }
+  .testimonials-grid { grid-template-columns: 1fr; }
+
+  .autor-inner { grid-template-columns: 1fr; gap: 40px; }
+  .autor-photo { max-width: 240px; margin: 0 auto; }
+
+  .hero-form-light { flex-direction: column; align-items: stretch; }
+  .form-field-light { min-width: 0; }
+  .btn-cta-white { width: 100%; }
+
+  .footer-inner { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="container">
+    <div class="nav-inner">
+      <div class="nav-logo">Metodo<span>Digital</span></div>
+      <a href="#hero-form" class="btn-outline-sm">Entrar na lista</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="text-container" style="text-align:center;">
+
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Lista de espera aberta
+      </div>
+
+      <h1>
+        Aprenda a atrair clientes<br>
+        <em>todos os dias</em> sem depender<br>de trafego pago
+      </h1>
+
+      <p class="hero-sub">
+        Um metodo direto ao ponto para empreendedores digitais que querem construir
+        uma audiencia qualificada e vender com consistencia — sem complexidade.
+      </p>
+
+      <form id="hero-form" class="hero-form" onsubmit="handleSubmit(event)">
+        <input type="text" class="form-field" placeholder="Seu nome" name="nome" required>
+        <input type="email" class="form-field" placeholder="Seu melhor e-mail" name="email" required>
+        <button type="submit" class="btn-cta">Quero minha vaga</button>
+      </form>
+
+      <div id="wf-thanks">
+        <p>Perfeito! Voce esta na lista de espera. Em breve entraremos em contato.</p>
+      </div>
+
+      <p class="hero-privacy">Sem spam. Seus dados estao protegidos e nunca sao compartilhados.</p>
+
+      <div class="hero-social-proof">
+        <div class="avatar-stack">
+          <div class="avatar avatar-a">R</div>
+          <div class="avatar avatar-b">M</div>
+          <div class="avatar avatar-c">T</div>
+          <div class="avatar avatar-d">A</div>
+        </div>
+        <div class="social-proof-text">
+          <strong>+2.400 empreendedores</strong><br>
+          ja estao na lista de espera
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- LOGOS STRIP -->
+<section class="logos-strip">
+  <div class="container">
+    <p class="logos-label">Ja aprenderam com este metodo</p>
+    <div class="logos-row">
+      <span class="logo-name">Resultados Digitais</span>
+      <span class="logo-name">Hotmart</span>
+      <span class="logo-name">Kiwify</span>
+      <span class="logo-name">RD Station</span>
+      <span class="logo-name">Eduzz</span>
+      <span class="logo-name">Sympla</span>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEMA -->
+<section class="section-problema">
+  <div class="container">
+    <div style="max-width:640px;">
+      <p class="section-tag">O problema que nos vemos todo dia</p>
+      <h2 class="section-h2">Voce produz conteudo, investe em anuncios e ainda assim as vendas nao vem</h2>
+      <p class="section-lead">
+        A maioria dos empreendedores digitais cai nas mesmas armadilhas. Nao e falta de esforco.
+        E falta de metodo.
+      </p>
+      <div class="bullets-list">
+        <div class="bullet-item">
+          <div class="bullet-icon"></div>
+          <p class="bullet-text">
+            <strong>Audiencia que nao compra:</strong> voce tem seguidores, mas quando abre uma oferta, o silencio e ensurdecedor. Engajamento sem conversao e custo sem retorno.
+          </p>
+        </div>
+        <div class="bullet-item">
+          <div class="bullet-icon"></div>
+          <p class="bullet-text">
+            <strong>Dependencia total do trafego pago:</strong> quando o budget de anuncios acaba, as vendas param. Voce nao tem ativo de audiencia — tem apenas aluguel de atencao.
+          </p>
+        </div>
+        <div class="bullet-item">
+          <div class="bullet-icon"></div>
+          <p class="bullet-text">
+            <strong>Posicionamento generico:</strong> voce fala sobre o mesmo assunto que duzentas outras pessoas e o mercado nao ve razao para te escolher em vez de qualquer outro.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFICIOS -->
+<section class="section-beneficios">
+  <div class="container">
+    <div class="section-header-centered">
+      <p class="section-tag">O que voce vai construir</p>
+      <h2 class="section-h2">Tres pilares para vender todos os dias</h2>
+      <p class="section-lead" style="margin:0 auto;text-align:center;">
+        O metodo e estruturado em tres etapas que se complementam e constroem um sistema de vendas previsivel.
+      </p>
+    </div>
+    <div class="cards-3">
+      <div class="card-beneficio">
+        <div class="card-num">01</div>
+        <div class="card-title">Posicionamento Cirurgico</div>
+        <p class="card-desc">
+          Defina com precisao para quem voce fala, qual problema resolve e por que sua solucao e a unica escolha logica.
+          Sem posicionamento claro, todo o resto e desperdicio.
+        </p>
+      </div>
+      <div class="card-beneficio">
+        <div class="card-num">02</div>
+        <div class="card-title">Audiencia Qualificada</div>
+        <p class="card-desc">
+          Construa uma base de contatos que ja chegam prontos para comprar — sem depender exclusivamente de plataformas de terceiros que mudam suas regras do dia para a noite.
+        </p>
+      </div>
+      <div class="card-beneficio">
+        <div class="card-num">03</div>
+        <div class="card-title">Oferta Irresistivel</div>
+        <p class="card-desc">
+          Crie e comunique sua oferta de forma que o cliente se sinta idiota em nao aceitar. Aprenda a estruturar valor antes de falar em preco.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMO FUNCIONA -->
+<section class="section-como">
+  <div class="container">
+    <div class="section-header-centered">
+      <p class="section-tag">O caminho</p>
+      <h2 class="section-h2">Como o metodo funciona na pratica</h2>
+    </div>
+    <div class="steps-row">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-title">Diagnostico e Clareza</div>
+        <p class="step-desc">
+          Mapeamos seu negocio atual, identificamos gargalos de posicionamento e definimos a direcao estrategica com base no que ja funciona para voce.
+        </p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-title">Construcao do Sistema</div>
+        <p class="step-desc">
+          Implementamos os canais de captacao, a sequencia de relacionamento e a estrutura de oferta que sustenta vendas de forma organica e consistente.
+        </p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-title">Escala com Controle</div>
+        <p class="step-desc">
+          Com o sistema validado, voce aprende a amplificar resultados sem aumentar na mesma proporcao o seu tempo ou investimento em anuncios.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEPOIMENTOS -->
+<section class="section-depoimentos">
+  <div class="container">
+    <div class="section-header-centered">
+      <p class="section-tag">Resultados reais</p>
+      <h2 class="section-h2">O que dizem quem ja passou pelo metodo</h2>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-header">
+          <div class="testimonial-avatar ta-blue">R</div>
+          <div>
+            <div class="testimonial-name">Rafael Moreira</div>
+            <div class="testimonial-role">Consultor de Negocios Digitais</div>
+          </div>
+        </div>
+        <p class="testimonial-text">
+          "Em tres meses apliquei o metodo e minha lista saiu de zero para quase quatro mil contatos qualificados.
+          O primeiro lancamento gerou R$47.000 para uma lista organica sem nenhum real em anuncio."
+        </p>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-header">
+          <div class="testimonial-avatar ta-mid">M</div>
+          <div>
+            <div class="testimonial-name">Mariana Teles</div>
+            <div class="testimonial-role">Nutricionista e Produtora de Conteudo</div>
+          </div>
+        </div>
+        <p class="testimonial-text">
+          "Eu postava todo dia e vendia quase nada. Depois de rever meu posicionamento e aplicar a sequencia de email correta,
+          minhas vendas mensais triplicaram em dois meses. Parece simples, mas muda tudo."
+        </p>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-header">
+          <div class="testimonial-avatar ta-green">T</div>
+          <div>
+            <div class="testimonial-name">Thiago Albuquerque</div>
+            <div class="testimonial-role">Coach de Carreira e LinkedIn</div>
+          </div>
+        </div>
+        <p class="testimonial-text">
+          "O que me impressionou foi a objetividade. Sem enrolacao, sem teoria que nao aplica.
+          Implementei em duas semanas e ja no primeiro mes fechei cinco novos contratos de mentoria."
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AUTOR -->
+<section class="section-autor">
+  <div class="container">
+    <div class="autor-inner">
+      <div class="autor-photo">
+        <div class="autor-photo-inner">A</div>
+      </div>
+      <div>
+        <p class="section-tag">Quem esta por tras do metodo</p>
+        <h2 class="autor-name">Alexandre Ramos</h2>
+        <p class="autor-title">Estrategista de Lancamentos Digitais</p>
+        <p class="autor-bio">
+          Nos ultimos oito anos, Alexandre ajudou mais de 1.200 empreendedores a construir negocioss digitais
+          lucrativos sem depender exclusivamente de trafego pago. Antes disso, trabalhou com estrategia de
+          crescimento em empresas de tecnologia e foi responsavel por campanhas que movimentaram mais de
+          R$12 milhoes em lancamentos digitais.
+        </p>
+        <div class="credenciais-list">
+          <div class="credencial-item">
+            <div class="credencial-dot"></div>
+            <p class="credencial-text">Mais de R$12 milhoes em lancamentos coordenados nos ultimos quatro anos</p>
+          </div>
+          <div class="credencial-item">
+            <div class="credencial-dot"></div>
+            <p class="credencial-text">Palestrante no maior evento de marketing digital da America Latina</p>
+          </div>
+          <div class="credencial-item">
+            <div class="credencial-dot"></div>
+            <p class="credencial-text">Mentor certificado com mais de 1.200 alunos formados no metodo</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="section-cta-final">
+  <div class="container">
+    <div class="cta-final-inner">
+      <p class="section-tag" style="color:rgba(255,255,255,0.6);">Ultima chamada</p>
+      <h2 class="cta-final-h2">Reserve seu lugar antes que as vagas acabem</h2>
+      <p class="cta-final-sub">As vagas sao limitadas e a lista fecha assim que atingirmos o limite de participantes.</p>
+      <form class="hero-form-light" onsubmit="handleSubmitFinal(event)">
+        <input type="text" class="form-field-light" placeholder="Seu nome" name="nome" required>
+        <input type="email" class="form-field-light" placeholder="Seu melhor e-mail" name="email" required>
+        <button type="submit" class="btn-cta-white">Garantir minha vaga</button>
+      </form>
+      <p class="cta-final-privacy">Sem spam. Cancelamento com um clique. Privacidade garantida.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-logo">MetodoDigital</div>
+      <p class="footer-copy">2024 MetodoDigital. Todos os direitos reservados.</p>
+      <div class="footer-links">
+        <a href="#">Privacidade</a>
+        <a href="#">Termos</a>
+        <a href="#">Contato</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+function handleSubmit(e) {
+  e.preventDefault();
+  var form = e.target;
+  form.style.display = 'none';
+  document.getElementById('wf-thanks').style.display = 'block';
+}
+function handleSubmitFinal(e) {
+  e.preventDefault();
+  var form = e.target;
+  form.innerHTML = '<p style="color:#fff;font-size:16px;font-weight:600;">Perfeito! Voce esta na lista. Em breve entraremos em contato.</p>';
+}
+</script>
+</body>
+</html>
