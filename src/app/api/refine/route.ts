@@ -1,5 +1,6 @@
 import { resolveConfig, iterableToReadable, parseApiError, startStream } from "../../lib/ai-client";
 import { DESIGN_TOKENS_PROMPT } from "../../lib/design-tokens";
+import { createClient } from "@/lib/supabase/server";
 
 export const maxDuration = 300;
 
@@ -59,6 +60,13 @@ export async function POST(request: Request) {
     const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
     if (!checkRateLimit(ip)) {
       return Response.json({ error: "Muitas requisicoes. Aguarde um minuto e tente novamente." }, { status: 429 });
+    }
+
+    // Auth required — refinements use server AI key
+    const supabase = await createClient();
+    const { data: { user }, error: authErr } = await supabase.auth.getUser();
+    if (authErr || !user) {
+      return Response.json({ error: "Faça login para refinar layouts." }, { status: 401 });
     }
 
     const { originalCode, refinementRequest, platform, images, designContext, apiKey, aiProvider, aiModel } = await request.json();

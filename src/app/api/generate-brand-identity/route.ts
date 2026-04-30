@@ -1,5 +1,5 @@
 import { resolveConfig, callOnce, parseApiError } from "../../lib/ai-client";
-import { checkAndDeductCredit, isCreditError, limitReachedResponse } from "../../lib/credits";
+import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
 import type { BrandInfo, BrandIdentity, BrandLogo } from "../../lib/types-kit";
 
 export const maxDuration = 90;
@@ -174,6 +174,7 @@ export async function POST(request: Request) {
   if (!creditResult.allowed) {
     return limitReachedResponse(creditResult);
   }
+  const generationId = creditResult.generationId;
 
   const aiConfig = resolveConfig(undefined, undefined, undefined);
 
@@ -210,10 +211,12 @@ export async function POST(request: Request) {
       if (svgMatch) identity.svgLogo = sanitizeSvg(svgMatch[0]);
     } catch { /* non-blocking — CSS fallback still works */ }
 
+    await finalizeGeneration(generationId, true);
     return Response.json(identity);
   } catch (e: unknown) {
     console.error("[brand-identity] error:", e);
     const { status, message } = parseApiError(e, aiConfig.provider);
+    await finalizeGeneration(generationId, false, message);
     return Response.json({ error: message }, { status });
   }
 }

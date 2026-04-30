@@ -1,5 +1,5 @@
 import { resolveConfig, startStream, iterableToReadable, parseApiError } from "../../lib/ai-client";
-import { createClient } from "@/lib/supabase/server";
+import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
 
 export const maxDuration = 120;
 
@@ -102,15 +102,17 @@ export async function POST(req: Request) {
     return Response.json({ error: "Formato inválido." }, { status: 400 });
   }
 
-  if (!apiKey) {
-    try {
-      const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return Response.json({ error: "Faça login para gerar criativos." }, { status: 401 });
-    } catch { /* non-blocking */ }
+  // Credit check — required for server-side AI calls (BYOK bypass not permitted)
+  const creditResult = await checkAndDeductCredit("criativo_html", headline || produto || "");
+  if (isCreditError(creditResult)) {
+    return Response.json({ error: creditResult.error }, { status: creditResult.status });
   }
+  if (!creditResult.allowed) {
+    return limitReachedResponse(creditResult);
+  }
+  const generationId = creditResult.generationId;
 
-  const aiConfig = resolveConfig(apiKey, aiProvider, aiModel);
+  const aiConfig = resolveConfig(undefined, undefined, undefined);
 
   const system = buildSystem(dims.w, dims.h);
   const userMsg = buildPrompt(
@@ -124,9 +126,11 @@ export async function POST(req: Request) {
     gen = await startStream(aiConfig, system, userMsg, 8192);
   } catch (e: unknown) {
     const { status, message } = parseApiError(e, aiConfig.provider);
+    await finalizeGeneration(generationId, false, message);
     return Response.json({ error: message }, { status });
   }
 
+  void finalizeGeneration(generationId, true);
   return new Response(iterableToReadable(gen), {
     headers: { "Content-Type": "text/html; charset=utf-8" },
   });

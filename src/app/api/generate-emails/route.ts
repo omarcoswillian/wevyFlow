@@ -1,5 +1,5 @@
 import { resolveConfig, callOnce, parseApiError } from "../../lib/ai-client";
-import { checkAndDeductCredit, isCreditError, limitReachedResponse } from "../../lib/credits";
+import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
 
 export const maxDuration = 60;
 
@@ -205,6 +205,7 @@ export async function POST(request: Request) {
   if (!creditResult.allowed) {
     return limitReachedResponse(creditResult);
   }
+  const generationId = creditResult.generationId;
 
   const aiConfig = resolveConfig(undefined, undefined, undefined);
 
@@ -237,9 +238,11 @@ Gere exatamente ${cfg.count} emails. Para cada email, siga a arquitetura complet
     if (!Array.isArray(parsed.emails) || parsed.emails.length === 0) {
       throw new Error("Nenhum email gerado");
     }
+    await finalizeGeneration(generationId, true);
     return Response.json({ emails: parsed.emails.slice(0, cfg.count) });
   } catch (e: unknown) {
     const { status, message } = parseApiError(e, aiConfig.provider);
+    await finalizeGeneration(generationId, false, message);
     return Response.json({ error: message }, { status });
   }
 }

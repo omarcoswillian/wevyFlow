@@ -16,21 +16,22 @@ export async function GET() {
         .from("user_profiles")
         .select("plan")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
       if (profile?.plan && profile.plan in PLANS) planId = profile.plan as PlanId;
     } catch { /* default */ }
 
     const plan = PLANS[planId];
     const creditsLimit = plan.credits;
 
-    // Count this month's generations
+    // Count this month's non-refunded generations
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
     const { count } = await supabase
       .from("generation_history")
       .select("id", { count: "exact", head: true })
       .eq("user_id", user.id)
-      .gte("created_at", monthStart);
+      .gte("created_at", monthStart)
+      .in("status", ["pending", "success"]);
 
     const creditsUsed = count ?? 0;
 

@@ -1,7 +1,7 @@
 import { SECTIONS } from "../../lib/arsenal/sections";
 import { assembleSections } from "../../lib/arsenal/loader";
 import { resolveConfig, callOnce, startStream, iterableToReadable, parseApiError, AICallConfig } from "../../lib/ai-client";
-import { checkAndDeductCredit, isCreditError, limitReachedResponse } from "../../lib/credits";
+import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
 
 export const maxDuration = 300;
 
@@ -429,6 +429,10 @@ export async function POST(request: Request) {
   } = await request.json();
 
   // Credit check — all users go through quota system
+  if (!prompt && !copyDocument) {
+    return Response.json({ error: "Prompt ou documento de copy é obrigatório" }, { status: 400 });
+  }
+
   const creditResult = await checkAndDeductCredit("landing_page", prompt || "");
   if (isCreditError(creditResult)) {
     return Response.json({ error: creditResult.error }, { status: creditResult.status });
@@ -436,12 +440,9 @@ export async function POST(request: Request) {
   if (!creditResult.allowed) {
     return limitReachedResponse(creditResult);
   }
+  const generationId = creditResult.generationId;
 
   const aiConfig = resolveConfig(undefined, undefined, undefined);
-
-  if (!prompt && !copyDocument) {
-    return Response.json({ error: "Prompt ou documento de copy é obrigatório" }, { status: 400 });
-  }
 
   // Fetch reference URL — browser service (full JS render) or fallback
   let referenceContext = "";
@@ -518,9 +519,12 @@ export async function POST(request: Request) {
     } catch (e: unknown) {
       console.error("[replicate] API error:", e);
       const { status, message } = parseApiError(e, aiConfig.provider);
+      await finalizeGeneration(generationId, false, message);
       return Response.json({ error: message }, { status });
     }
 
+    // Stream started successfully — finalize as success
+    void finalizeGeneration(generationId, true);
     return new Response(iterableToReadable(replicateGen), {
       headers: { "Content-Type": "text/html; charset=utf-8" },
     });
@@ -641,9 +645,12 @@ export async function POST(request: Request) {
   } catch (e: unknown) {
     console.error("[personalize] API error:", e);
     const { status, message } = parseApiError(e, aiConfig.provider);
+    await finalizeGeneration(generationId, false, message);
     return Response.json({ error: message }, { status });
   }
 
+  // Stream started successfully — finalize as success
+  void finalizeGeneration(generationId, true);
   return new Response(iterableToReadable(gen), {
     headers: { "Content-Type": "text/html; charset=utf-8" },
   });

@@ -222,13 +222,44 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["published_pages"]["Insert"]>;
         Relationships: [];
       };
+      brand_kits: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          logo_url: string;
+          colors: Record<string, string>;
+          fonts: Record<string, string>;
+          voice_tone: string;
+          photos: string[];
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name?: string;
+          logo_url?: string;
+          colors?: Record<string, string>;
+          fonts?: Record<string, string>;
+          voice_tone?: string;
+          photos?: string[];
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["brand_kits"]["Insert"]>;
+        Relationships: [];
+      };
       generation_history: {
         Row: {
           id: string;
           user_id: string;
           prompt: string;
           platform: Platform;
+          gen_type: string;
           code: string;
+          status: "pending" | "success" | "failed_refunded";
+          error_message: string | null;
           created_at: string;
         };
         Insert: {
@@ -236,7 +267,10 @@ export type Database = {
           user_id: string;
           prompt: string;
           platform?: Platform;
+          gen_type?: string;
           code?: string;
+          status?: "pending" | "success" | "failed_refunded";
+          error_message?: string | null;
           created_at?: string;
         };
         Update: {
@@ -244,7 +278,10 @@ export type Database = {
           user_id?: string;
           prompt?: string;
           platform?: Platform;
+          gen_type?: string;
           code?: string;
+          status?: "pending" | "success" | "failed_refunded";
+          error_message?: string | null;
           created_at?: string;
         };
         Relationships: [];
@@ -274,7 +311,26 @@ export type Database = {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      claim_generation_credit: {
+        Args: {
+          p_user_id: string;
+          p_gen_type: string;
+          p_prompt: string;
+          p_limit: number;
+        };
+        Returns: {
+          allowed: boolean;
+          generation_id?: string;
+          used: number;
+          limit: number;
+        };
+      };
+      finalize_generation: {
+        Args: { p_id: string; p_success: boolean; p_error?: string | null };
+        Returns: void;
+      };
+    };
     Enums: Record<string, never>;
   };
 };
