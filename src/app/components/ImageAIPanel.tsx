@@ -35,13 +35,14 @@ const QUALITIES = [
   { id: "low",    label: "Baixa" },
 ] as const;
 
-function getOpenAIKey(): string | undefined {
+function getImageConfig(): { apiKey?: string; imageProvider: string; imageModel?: string } {
   try {
-    const key = localStorage.getItem("wevyflow_byok_key");
-    const provider = localStorage.getItem("wevyflow_byok_provider");
-    if (key && provider === "openai") return key;
+    const key = localStorage.getItem("wf_img_key") || undefined;
+    const provider = localStorage.getItem("wf_img_provider") || "openai";
+    const model = localStorage.getItem("wf_img_model") || undefined;
+    return { apiKey: key, imageProvider: provider, imageModel: model };
   } catch { /* no localStorage */ }
-  return undefined;
+  return { imageProvider: "openai" };
 }
 
 async function dataUrlToFile(dataUrl: string, filename: string): Promise<File> {
@@ -104,7 +105,7 @@ export function ImageAIPanel({ selectedElementTagName, onInsertImage }: ImageAIP
       const res = await fetch("/api/generate-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: createPrompt.trim(), size, quality, apiKey: getOpenAIKey() }),
+        body: JSON.stringify({ prompt: createPrompt.trim(), size, quality, ...getImageConfig() }),
       });
       const data = await res.json();
       if (!res.ok) { setCreateError(data.error ?? "Erro ao gerar imagem."); return; }
@@ -137,7 +138,7 @@ export function ImageAIPanel({ selectedElementTagName, onInsertImage }: ImageAIP
       const res = await fetch("/api/edit-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: editPrompt.trim(), imageBase64: refPreview, size, quality, apiKey: getOpenAIKey() }),
+        body: JSON.stringify({ prompt: editPrompt.trim(), imageBase64: refPreview, size, quality, ...getImageConfig() }),
       });
       const data = await res.json();
       if (!res.ok) { setEditError(data.error ?? "Erro ao editar imagem."); return; }

@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import {
   Sparkles, Download, Trash2, Loader2, AlertCircle, Check, RefreshCw,
   ImageIcon, Bot, User, Send, ImagePlus, X, MessageSquare, FileText,
-  Library, Wand2, Upload, Pencil,
+  Library, Wand2, Upload, Pencil, Code2,
 } from "lucide-react";
 import type { CriativoFormat } from "../api/generate-criativo/route";
 import { CANVAS_TEMPLATES, type CanvasTemplate } from "../lib/canvas-templates";
@@ -101,13 +101,14 @@ const FASES    = [{ id: "aquecimento", label: "Aquecimento" }, { id: "lancamento
 const ESTILOS  = [{ id: "bold", label: "Bold" }, { id: "minimal", label: "Minimal" }, { id: "professional", label: "Profissional" }, { id: "colorful", label: "Colorido" }];
 
 /* ─── Helpers ────────────────────────────────────────────── */
-function getOpenAIKey(): string | undefined {
+function getImageConfig(): { apiKey?: string; imageProvider: string; imageModel?: string } {
   try {
-    const key = localStorage.getItem("wevyflow_byok_key");
-    const provider = localStorage.getItem("wevyflow_byok_provider");
-    if (key && provider === "openai") return key;
+    const key = localStorage.getItem("wf_img_key") || undefined;
+    const provider = localStorage.getItem("wf_img_provider") || "openai";
+    const model = localStorage.getItem("wf_img_model") || undefined;
+    return { apiKey: key, imageProvider: provider, imageModel: model };
   } catch { /* no localStorage */ }
-  return undefined;
+  return { imageProvider: "openai" };
 }
 async function dataUrlToFile(dataUrl: string, filename: string): Promise<File> {
   const res = await fetch(dataUrl);
@@ -142,6 +143,11 @@ export function CriativosView() {
   const [estilo, setEstilo] = useState("bold");
   const [fase, setFase] = useState("lancamento");
   const [quality, setQuality] = useState<"high" | "medium" | "low">("high");
+
+  // Modo de geração: Claude HTML ou GPT-Images-2
+  const [gerarMode, setGerarMode] = useState<"claude" | "gpt">("claude");
+  const [htmlPreview, setHtmlPreview] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -237,7 +243,120 @@ export function CriativosView() {
   const fmt = FORMATS.find((f) => f.id === selectedFormat)!;
   const canGenerate = (headline.trim() || produto.trim()) && !loading;
 
-  /* ─── Generate ─ */
+  /* ─── Generate Claude HTML ─ */
+  async function callGenerateClaude(opts: { chatInstruction?: string }) {
+    setLoading(true);
+    setError(null);
+    setHtmlPreview(null);
+
+    try {
+      const res = await fetch("/api/generate-criativo-html", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          format: selectedFormat, produto, headline, cta, cor, estilo, fase,
+          chatInstruction: opts.chatInstruction ?? null,
+        }),
+        signal: AbortSignal.timeout(120_000),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: "Erro ao gerar." }));
+        throw new Error(data.error ?? "Erro ao gerar.");
+      }
+
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error("Stream indisponível.");
+
+      const decoder = new TextDecoder();
+      let html = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        html += decoder.decode(value, { stream: true });
+        setHtmlPreview(html); // live preview à medida que chega
+      }
+      html += decoder.decode();
+      setHtmlPreview(html);
+      return true;
+    } catch (e: unknown) {
+      setError(String((e as Error)?.message ?? "Falha na conexão."));
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /* ─── Export HTML criativo como PNG ─ */
+  async function handleExportHtml() {
+    if (!htmlPreview) return;
+    const fmtDef = FORMATS.find((f) => f.id === selectedFormat)!;
+    setExporting(true);
+    try {
+      const { toPng } = await import("html-to-image");
+
+      // Parsear o documento HTML gerado
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlPreview, "text/html");
+
+      // Injetar Google Fonts no documento principal (para pré-carregar)
+      const fontLinks = Array.from(doc.querySelectorAll('link[href*="fonts.googleapis"]'));
+      fontLinks.forEach((link) => {
+        const id = `injected-${(link as HTMLLinkElement).href}`;
+        if (!document.querySelector(`link[data-cid="${id}"]`)) {
+          const clone = link.cloneNode(true) as HTMLLinkElement;
+          clone.dataset.cid = id;
+          document.head.appendChild(clone);
+        }
+      });
+
+      // Criar container off-screen com dimensões reais
+      const container = document.createElement("div");
+      container.style.cssText = `
+        position:fixed;left:-${fmtDef.w + 200}px;top:0;
+        width:${fmtDef.w}px;height:${fmtDef.h}px;
+        overflow:hidden;background:#000;
+      `;
+
+      // Injetar estilos + conteúdo do body
+      const styles = Array.from(doc.querySelectorAll("style")).map((s) => s.outerHTML).join("\n");
+      const bodyHtml = doc.body.innerHTML;
+      container.innerHTML = styles + bodyHtml;
+      document.body.appendChild(container);
+
+      // Aguardar fontes e renderização
+      try { await document.fonts.ready; } catch { /* ok */ }
+      await new Promise((r) => setTimeout(r, 700));
+
+      const dataUrl = await toPng(container, {
+        width: fmtDef.w,
+        height: fmtDef.h,
+        pixelRatio: 1,
+        cacheBust: true,
+      });
+
+      document.body.removeChild(container);
+
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `criativo-${selectedFormat}-${Date.now()}.png`;
+      a.click();
+    } catch (e) {
+      console.error("[export-html]", e);
+      // Fallback: baixar o HTML diretamente
+      const blob = new Blob([htmlPreview], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `criativo-${selectedFormat}-${Date.now()}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  /* ─── Generate GPT ─ */
   async function callGenerate(opts: { chatInstruction?: string; referenceBase64?: string | null }) {
     setLoading(true);
     setError(null);
@@ -245,7 +364,7 @@ export function CriativosView() {
       const res = await fetch("/api/generate-criativo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ format: selectedFormat, produto, headline, cta, cor, estilo, fase, quality, apiKey: getOpenAIKey(), referenceBase64: opts.referenceBase64 ?? null, chatInstruction: opts.chatInstruction ?? null }),
+        body: JSON.stringify({ format: selectedFormat, produto, headline, cta, cor, estilo, fase, quality, ...getImageConfig(), referenceBase64: opts.referenceBase64 ?? null, chatInstruction: opts.chatInstruction ?? null }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erro ao gerar.");
@@ -259,8 +378,14 @@ export function CriativosView() {
 
   async function handleGenerate() {
     if (!canGenerate) return;
-    setPreview(null);
-    await callGenerate({ referenceBase64: referenceImage });
+    if (gerarMode === "claude") {
+      setPreview(null);
+      await callGenerateClaude({});
+    } else {
+      setPreview(null);
+      setHtmlPreview(null);
+      await callGenerate({ referenceBase64: referenceImage });
+    }
   }
 
   /* ─── Chat ─ */
@@ -272,13 +397,25 @@ export function CriativosView() {
     const content = text || "Analise a referência e gere o criativo";
     setChatMessages((prev) => [...prev, { role: "user", content, images: imgs.length > 0 ? imgs : undefined }]);
     setChatInput(""); setChatImages([]);
+
+    if (gerarMode === "claude") {
+      setChatMessages((prev) => [...prev, { role: "assistant", content: "Gerando..." }]);
+      const ok = await callGenerateClaude({ chatInstruction: content });
+      setChatMessages((prev) => {
+        const next = [...prev];
+        next[next.length - 1] = { role: "assistant", content: ok ? "Criativo gerado! Veja no preview ao lado. O que quer ajustar?" : "Erro ao gerar. Tente novamente." };
+        return next;
+      });
+      return;
+    }
+
     const refBase64 = imgs[0] ?? (preview ? preview.dataUrl : null);
     setLoading(true); setError(null);
     try {
       const res = await fetch("/api/generate-criativo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ format: selectedFormat, produto, headline, cta, cor, estilo, fase, quality, apiKey: getOpenAIKey(), chatInstruction: content, referenceBase64: refBase64 }),
+        body: JSON.stringify({ format: selectedFormat, produto, headline, cta, cor, estilo, fase, quality, ...getImageConfig(), chatInstruction: content, referenceBase64: refBase64 }),
       });
       const data = await res.json();
       if (!res.ok) { setChatMessages((prev) => [...prev, { role: "assistant", content: data.error ?? "Erro ao gerar." }]); return; }
@@ -378,7 +515,14 @@ export function CriativosView() {
         <div>
           <div className="flex items-center gap-3 mb-0.5">
             <h1 className="text-[26px] font-bold text-white tracking-tight">Design</h1>
-            <span className="px-2 py-0.5 rounded-full border border-white/10 bg-white/[0.04] text-[10px] text-white/35 font-mono">gpt-image-2</span>
+            <span className={cn(
+              "px-2 py-0.5 rounded-full border text-[10px] font-mono",
+              gerarMode === "claude"
+                ? "border-purple-500/30 bg-purple-500/10 text-purple-400"
+                : "border-white/10 bg-white/[0.04] text-white/35"
+            )}>
+              {gerarMode === "claude" ? "Claude HTML" : "gpt-image-2"}
+            </span>
           </div>
           <p className="text-[13px] text-white/30">Criativos profissionais para cada fase do seu lançamento.</p>
         </div>
@@ -439,17 +583,38 @@ export function CriativosView() {
           {/* Col 2: Brief / Chat */}
           <div className="w-[320px] shrink-0 flex flex-col overflow-hidden">
             <div className="flex-1 bg-white/[0.02] border border-white/[0.07] rounded-2xl overflow-hidden flex flex-col">
-              <div className="px-4 py-2.5 border-b border-white/[0.06] shrink-0 flex items-center gap-1">
-                {([
-                  { id: "brief", label: "Brief", icon: <FileText className="w-3 h-3" /> },
-                  { id: "chat",  label: "Chat",  icon: <MessageSquare className="w-3 h-3" /> },
-                ] as const).map((t) => (
-                  <button key={t.id} onClick={() => setBriefTab(t.id)}
-                    className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer",
-                      briefTab === t.id ? "bg-purple-600/20 text-purple-300" : "text-white/30 hover:text-white/60")}>
-                    {t.icon} {t.label}
+              <div className="px-4 py-2.5 border-b border-white/[0.06] shrink-0 space-y-2.5">
+                {/* Modo: Claude vs GPT */}
+                <div className="flex items-center gap-1 p-0.5 bg-white/[0.03] border border-white/[0.06] rounded-xl">
+                  <button
+                    onClick={() => { setGerarMode("claude"); setPreview(null); setError(null); }}
+                    className={cn("flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer",
+                      gerarMode === "claude" ? "bg-purple-600/25 text-purple-300" : "text-white/30 hover:text-white/55")}
+                  >
+                    <Code2 className="w-3 h-3" /> Claude HTML
                   </button>
-                ))}
+                  <button
+                    onClick={() => { setGerarMode("gpt"); setHtmlPreview(null); setError(null); }}
+                    className={cn("flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer",
+                      gerarMode === "gpt" ? "bg-white/[0.08] text-white/70" : "text-white/30 hover:text-white/55")}
+                  >
+                    <ImageIcon className="w-3 h-3" /> GPT-Images-2
+                  </button>
+                </div>
+
+                {/* Brief / Chat tabs */}
+                <div className="flex items-center gap-1">
+                  {([
+                    { id: "brief", label: "Brief", icon: <FileText className="w-3 h-3" /> },
+                    { id: "chat",  label: "Chat",  icon: <MessageSquare className="w-3 h-3" /> },
+                  ] as const).map((t) => (
+                    <button key={t.id} onClick={() => setBriefTab(t.id)}
+                      className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer",
+                        briefTab === t.id ? "bg-purple-600/20 text-purple-300" : "text-white/30 hover:text-white/60")}>
+                      {t.icon} {t.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* ── Brief tab ── */}
@@ -659,45 +824,126 @@ export function CriativosView() {
           </div>
 
           {/* Col 3: Preview */}
-          <div className="flex-1 flex flex-col gap-4 min-w-0">
-            <div className="flex-1 rounded-2xl border border-white/[0.07] bg-[#0d0d10] flex items-center justify-center overflow-hidden relative min-h-0">
-              <div className="relative" style={{ aspectRatio: String(fmt.w / fmt.h), maxWidth: "100%", maxHeight: "100%", width: fmt.w >= fmt.h ? "90%" : undefined, height: fmt.w < fmt.h ? "90%" : undefined }}>
-                {loading && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-white/[0.02] rounded-xl border border-white/[0.06]">
-                    <div className="relative w-10 h-10">
-                      <div className="absolute inset-0 rounded-full border-2 border-purple-500/20 border-t-purple-500 animate-spin" />
-                      <div className="absolute inset-0 flex items-center justify-center"><Sparkles className="w-4 h-4 text-purple-400/60" /></div>
+          {(() => {
+            // Dimensões reais do formato selecionado
+            const fW = fmt.w; const fH = fmt.h;
+            // Calcular escala para caber no container (aprox 500px de altura máx para vertical, 400px para horizontal)
+            const maxH = fH > fW ? 520 : 400;
+            const maxW = 700;
+            const scaleH = maxH / fH;
+            const scaleW = maxW / fW;
+            const scale = Math.min(scaleH, scaleW, 1);
+            const pW = Math.round(fW * scale);
+            const pH = Math.round(fH * scale);
+
+            const hasHtml = !!htmlPreview;
+            const hasGpt = !!preview;
+            const hasAny = hasHtml || hasGpt;
+
+            return (
+              <div className="flex-1 flex flex-col gap-4 min-w-0">
+                <div className="flex-1 rounded-2xl border border-white/[0.07] bg-[#0d0d10] flex items-center justify-center overflow-hidden relative min-h-0">
+
+                  {/* Loading */}
+                  {loading && !hasHtml && (
+                    <div className="flex flex-col items-center justify-center gap-4">
+                      <div className="relative w-10 h-10">
+                        <div className="absolute inset-0 rounded-full border-2 border-purple-500/20 border-t-purple-500 animate-spin" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          {gerarMode === "claude" ? <Code2 className="w-4 h-4 text-purple-400/60" /> : <Sparkles className="w-4 h-4 text-purple-400/60" />}
+                        </div>
+                      </div>
+                      <div className="text-center space-y-1">
+                        <p className="text-[13px] text-white/50 font-medium">
+                          {gerarMode === "claude" ? "Gerando com Claude..." : "Gerando com gpt-image-2"}
+                        </p>
+                        <p className="text-[11px] text-white/20 font-mono">{fmt.platform} · {fmt.size}</p>
+                      </div>
                     </div>
-                    <div className="text-center space-y-1">
-                      <p className="text-[13px] text-white/50 font-medium">Gerando com gpt-image-2</p>
-                      <p className="text-[11px] text-white/20 font-mono">{fmt.platform} · {fmt.size}</p>
+                  )}
+
+                  {/* Empty */}
+                  {!loading && !hasAny && (
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <ImageIcon className="w-8 h-8 text-white/10" />
+                      <div className="text-center">
+                        <p className="text-[13px] text-white/20">Preview aparece aqui</p>
+                        <p className="text-[11px] text-white/10 mt-0.5 font-mono">{fmt.platform} · {fmt.size}</p>
+                      </div>
                     </div>
-                  </div>
-                )}
-                {!loading && !preview && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-white/[0.08]">
-                    <ImageIcon className="w-8 h-8 text-white/10" />
-                    <div className="text-center"><p className="text-[13px] text-white/20">Preview aparece aqui</p><p className="text-[11px] text-white/10 mt-0.5 font-mono">{fmt.platform} · {fmt.size}</p></div>
-                  </div>
-                )}
-                {preview && !loading && (
-                  <div className="absolute inset-0 rounded-xl overflow-hidden">
-                    <img src={preview.dataUrl} alt="Criativo" className="w-full h-full object-contain" />
-                    <div className="absolute top-3 left-3 px-2 py-1 rounded-lg bg-black/50 backdrop-blur-sm border border-white/10 text-[10px] text-white/60 font-mono">{fmt.platform} · {fmt.size}</div>
+                  )}
+
+                  {/* Claude HTML preview — iframe live */}
+                  {hasHtml && (
+                    <div className="relative" style={{ width: pW, height: pH, overflow: "hidden", borderRadius: 8 }}>
+                      <div style={{ transform: `scale(${scale})`, transformOrigin: "top left", width: fW, height: fH }}>
+                        <iframe
+                          srcDoc={htmlPreview}
+                          title="preview"
+                          style={{ border: "none", display: "block", width: fW, height: fH }}
+                          sandbox="allow-same-origin"
+                        />
+                      </div>
+                      {/* Loading overlay com progresso parcial */}
+                      {loading && (
+                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center rounded-lg">
+                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-black/70 border border-white/10">
+                            <Loader2 className="w-3.5 h-3.5 text-purple-400 animate-spin" />
+                            <span className="text-[11px] text-white/60">Gerando...</span>
+                          </div>
+                        </div>
+                      )}
+                      <div className="absolute top-2 left-2 px-2 py-1 rounded-lg bg-black/50 backdrop-blur-sm border border-white/10 text-[10px] text-purple-300 font-mono">Claude HTML</div>
+                    </div>
+                  )}
+
+                  {/* GPT image preview */}
+                  {!hasHtml && hasGpt && (
+                    <div style={{ width: pW, height: pH, borderRadius: 8, overflow: "hidden", position: "relative" }}>
+                      <img src={preview!.dataUrl} alt="Criativo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                      <div className="absolute top-2 left-2 px-2 py-1 rounded-lg bg-black/50 backdrop-blur-sm border border-white/10 text-[10px] text-white/60 font-mono">{fmt.platform}</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                {hasAny && !loading && (
+                  <div className="flex gap-2 shrink-0">
+                    {/* Regenerar */}
+                    <button
+                      onClick={() => gerarMode === "claude" ? callGenerateClaude({}) : callGenerate({ referenceBase64: referenceImage })}
+                      className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-white/[0.08] text-[12px] text-white/50 hover:text-white hover:border-white/20 cursor-pointer transition-all"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" /> Outra versão
+                    </button>
+
+                    {/* Download */}
+                    {hasHtml ? (
+                      <button
+                        onClick={handleExportHtml}
+                        disabled={exporting}
+                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-white/[0.08] text-[12px] text-white/50 hover:text-white hover:border-white/20 cursor-pointer transition-all disabled:opacity-40"
+                      >
+                        {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                        {exporting ? "Exportando..." : "Baixar PNG"}
+                      </button>
+                    ) : (
+                      <button onClick={() => downloadDataUrl(preview!.dataUrl, `criativo-${selectedFormat}.png`)} className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-white/[0.08] text-[12px] text-white/50 hover:text-white hover:border-white/20 cursor-pointer transition-all">
+                        <Download className="w-3.5 h-3.5" /> Baixar
+                      </button>
+                    )}
+
+                    {/* Salvar (só GPT tem persistência na galeria por ora) */}
+                    {!hasHtml && (
+                      <button onClick={handleSave} disabled={saving} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-[12px] font-bold text-white cursor-pointer transition-all disabled:opacity-60">
+                        {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Salvar na galeria
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
-            </div>
-            {preview && !loading && (
-              <div className="flex gap-2 shrink-0">
-                <button onClick={() => { setPreview(null); callGenerate({ referenceBase64: referenceImage }); }} className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-white/[0.08] text-[12px] text-white/50 hover:text-white hover:border-white/20 cursor-pointer transition-all"><RefreshCw className="w-3.5 h-3.5" /> Outra versão</button>
-                <button onClick={() => downloadDataUrl(preview.dataUrl, `criativo-${selectedFormat}.png`)} className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-white/[0.08] text-[12px] text-white/50 hover:text-white hover:border-white/20 cursor-pointer transition-all"><Download className="w-3.5 h-3.5" /> Baixar</button>
-                <button onClick={handleSave} disabled={saving} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-[12px] font-bold text-white cursor-pointer transition-all disabled:opacity-60">
-                  {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Salvar na galeria
-                </button>
-              </div>
-            )}
-          </div>
+            );
+          })()}
         </div>
       )}
 

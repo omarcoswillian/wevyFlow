@@ -8,7 +8,10 @@ import { useProjects, Project, ProjectPage } from "../lib/projects";
 import { compactStorage, aggressiveCleanup, formatBytes } from "../lib/storage-compact";
 import { GenerateData } from "../components/HomeView";
 import { AIProvider, DEFAULT_MODELS, STORAGE_KEY_KEY, STORAGE_PROVIDER_KEY, STORAGE_MODEL_KEY } from "../lib/ai-provider";
+import { ImageProvider, DEFAULT_IMAGE_MODELS, IMAGE_STORAGE_KEY, IMAGE_STORAGE_PROVIDER, IMAGE_STORAGE_MODEL } from "../lib/image-ai-provider";
 import { NewProjectModal } from "../components/NewProjectModal";
+import type { LaunchKit } from "../lib/types-kit";
+import { optimizeHtml } from "../lib/html-optimizer";
 
 /* ───────────────────────────────────────────────────────────
    View / Path mapping
@@ -18,6 +21,10 @@ export type AppView =
   | "home"
   | "resources"
   | "criativos"
+  | "lancamentos"
+  | "emails"
+  | "leads"
+  | "paginas"
   | "projects-all"
   | "projects-starred"
   | "projects-mine"
@@ -30,6 +37,10 @@ export function viewToPath(view: AppView, projectId?: string): string {
     case "home": return "/";
     case "resources": return "/resources";
     case "criativos": return "/criativos";
+    case "lancamentos": return "/lancamentos";
+    case "emails": return "/emails";
+    case "leads": return "/leads";
+    case "paginas": return "/paginas";
     case "projects-all": return "/projects";
     case "projects-starred": return "/projects/starred";
     case "projects-mine": return "/projects/mine";
@@ -70,16 +81,36 @@ interface AppContextValue {
   currentPrompt: string;
   activePageId: string | null;
 
-  // BYOK
+  // BYOK — text AI
   apiKey: string;
   aiProvider: AIProvider;
   aiModel: string;
   saveApiKey: (key: string, provider: AIProvider, model: string) => void;
   clearApiKey: () => void;
 
+  // BYOK — image AI
+  imageApiKey: string;
+  imageProvider: ImageProvider;
+  imageModel: string;
+  saveImageApiKey: (key: string, provider: ImageProvider, model: string) => void;
+  clearImageApiKey: () => void;
+
   // command palette
   commandPaletteOpen: boolean;
   setCommandPaletteOpen: (open: boolean) => void;
+
+  // launch kits
+  launchKits: LaunchKit[];
+  activeLaunchKit: LaunchKit | null;
+  showLaunchWizard: boolean;
+  setShowLaunchWizard: (open: boolean) => void;
+  setActiveLaunchKit: (kit: LaunchKit | null) => void;
+  saveLaunchKit: (kit: LaunchKit) => void;
+  deleteLaunchKit: (id: string) => void;
+
+  // integrations
+  webhookUrl: string;
+  setWebhookUrl: (url: string) => void;
 
   // actions
   navigate: (view: AppView, projectId?: string) => void;
@@ -91,6 +122,7 @@ interface AppContextValue {
   handleCreateProject: () => void;
   handleCreatePage: () => void;
   handleTemplateFromResources: (prompt: string) => Promise<void>;
+  openCodeInWorkspace: (code: string, prompt?: string) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -119,15 +151,60 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [newProjectModalOpen, setNewProjectModalOpen] = useState(false);
 
-  // BYOK — provider + key + model stored in localStorage
+  // integrations
+  const [webhookUrl, setWebhookUrlState] = useState("");
+  const setWebhookUrl = useCallback((url: string) => {
+    try { localStorage.setItem("wf_webhook_url", url); } catch {}
+    setWebhookUrlState(url);
+  }, []);
+
+  // launch kits — persisted to localStorage
+  const [launchKits, setLaunchKits] = useState<LaunchKit[]>([]);
+  const [activeLaunchKit, setActiveLaunchKit] = useState<LaunchKit | null>(null);
+  const [showLaunchWizard, setShowLaunchWizard] = useState(false);
+
+  const saveLaunchKit = useCallback((kit: LaunchKit) => {
+    setLaunchKits((prev) => {
+      const idx = prev.findIndex((k) => k.id === kit.id);
+      const next = idx >= 0
+        ? [...prev.slice(0, idx), kit, ...prev.slice(idx + 1)]
+        : [...prev, kit];
+      try { localStorage.setItem("wf_launch_kits", JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }, []);
+
+  const deleteLaunchKit = useCallback((id: string) => {
+    setLaunchKits((prev) => {
+      const next = prev.filter((k) => k.id !== id);
+      try { localStorage.setItem("wf_launch_kits", JSON.stringify(next)); } catch {}
+      return next;
+    });
+    setActiveLaunchKit((prev) => (prev?.id === id ? null : prev));
+  }, []);
+
+  // BYOK — text AI (provider + key + model stored in localStorage)
   const [apiKey, setApiKeyState] = useState<string>("");
   const [aiProvider, setAiProviderState] = useState<AIProvider>("anthropic");
   const [aiModel, setAiModelState] = useState<string>("claude-sonnet-4-6");
+
+  // BYOK — image AI
+  const [imageApiKey, setImageApiKeyState] = useState<string>("");
+  const [imageProvider, setImageProviderState] = useState<ImageProvider>("openai");
+  const [imageModel, setImageModelState] = useState<string>("gpt-image-2");
+
+  useEffect(() => {
+    try { setLaunchKits(JSON.parse(localStorage.getItem("wf_launch_kits") || "[]")); } catch {}
+  }, []);
 
   useEffect(() => {
     setApiKeyState(localStorage.getItem(STORAGE_KEY_KEY) ?? "");
     setAiProviderState((localStorage.getItem(STORAGE_PROVIDER_KEY) as AIProvider) ?? "anthropic");
     setAiModelState(localStorage.getItem(STORAGE_MODEL_KEY) ?? "claude-sonnet-4-6");
+    setImageApiKeyState(localStorage.getItem(IMAGE_STORAGE_KEY) ?? "");
+    setImageProviderState((localStorage.getItem(IMAGE_STORAGE_PROVIDER) as ImageProvider) ?? "openai");
+    setImageModelState(localStorage.getItem(IMAGE_STORAGE_MODEL) ?? "gpt-image-2");
+    setWebhookUrlState(localStorage.getItem("wf_webhook_url") ?? "");
   }, []);
 
   const saveApiKey = useCallback((key: string, provider: AIProvider, model: string) => {
@@ -146,6 +223,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setApiKeyState("");
     setAiProviderState("anthropic");
     setAiModelState("claude-sonnet-4-6");
+  }, []);
+
+  const saveImageApiKey = useCallback((key: string, provider: ImageProvider, model: string) => {
+    localStorage.setItem(IMAGE_STORAGE_KEY, key);
+    localStorage.setItem(IMAGE_STORAGE_PROVIDER, provider);
+    localStorage.setItem(IMAGE_STORAGE_MODEL, model || DEFAULT_IMAGE_MODELS[provider]);
+    setImageApiKeyState(key);
+    setImageProviderState(provider);
+    setImageModelState(model || DEFAULT_IMAGE_MODELS[provider]);
+  }, []);
+
+  const clearImageApiKey = useCallback(() => {
+    localStorage.removeItem(IMAGE_STORAGE_KEY);
+    localStorage.removeItem(IMAGE_STORAGE_PROVIDER);
+    localStorage.removeItem(IMAGE_STORAGE_MODEL);
+    setImageApiKeyState("");
+    setImageProviderState("openai");
+    setImageModelState("gpt-image-2");
   }, []);
 
   const { addEntry } = useHistory();
@@ -203,7 +298,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(120000),
+        signal: AbortSignal.timeout(290000), // 290s — just under server maxDuration=300
       });
       if (!res.ok) {
         let msg = "Erro ao processar";
@@ -215,19 +310,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const decoder = new TextDecoder();
       let fullCode = "";
       let lastUpdate = 0;
-      const UPDATE_INTERVAL = 80; // ms — throttle re-renders during streaming
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        fullCode += decoder.decode(value, { stream: true });
-        const now = Date.now();
-        if (now - lastUpdate >= UPDATE_INTERVAL) {
-          lastUpdate = now;
-          const snapshot = fullCode;
-          startTransition(() => setGeneratedCode(snapshot));
+      const UPDATE_INTERVAL = 80;
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          fullCode += decoder.decode(value, { stream: true });
+          const now = Date.now();
+          if (now - lastUpdate >= UPDATE_INTERVAL) {
+            lastUpdate = now;
+            const snapshot = fullCode;
+            startTransition(() => setGeneratedCode(snapshot));
+          }
         }
+      } catch {
+        // Stream aborted mid-way — if meaningful content was generated, use it
+        if (fullCode.length > 500) {
+          startTransition(() => setGeneratedCode(fullCode));
+          setError("Geração parcial — a IA demorou mais que o esperado. O conteúdo foi salvo. Refine via chat ou regenere.");
+          return fullCode;
+        }
+        throw new Error("A geração falhou antes de produzir conteúdo suficiente. Tente novamente.");
       }
-      // Always flush final complete code
+      // Final flush
       startTransition(() => setGeneratedCode(fullCode));
       return fullCode;
     },
@@ -258,7 +363,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const templateId = data.prompt.replace("READY:", "");
           const res = await fetch(`/api/template?id=${templateId}`);
           if (!res.ok) throw new Error("Template nao encontrado");
-          const html = await res.text();
+          const rawHtml = await res.text();
+          const html = optimizeHtml(rawHtml, { webhookUrl: webhookUrl || undefined });
           setGeneratedCode(html);
           addEntry({ id: crypto.randomUUID(), prompt: "Template: " + templateId, platform: data.platform, code: html, createdAt: Date.now() });
           if (activeProjectId) {
@@ -267,14 +373,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        const code = await streamFromAPI("/api/generate", {
+        const rawCode = await streamFromAPI("/api/generate", {
           ...data,
           copyDocument: data.copyDocument || undefined,
           apiKey: apiKey || undefined,
           aiProvider: apiKey ? aiProvider : undefined,
           aiModel: apiKey ? aiModel : undefined,
         });
-        if (code) {
+        // rawCode may be partial (stream aborted but content was salvaged)
+        if (rawCode && rawCode.length > 100) {
+          const code = optimizeHtml(rawCode, { webhookUrl: webhookUrl || undefined });
+          if (code !== rawCode) startTransition(() => setGeneratedCode(code));
           addEntry({ id: crypto.randomUUID(), prompt: data.prompt, platform: data.platform, code, createdAt: Date.now() });
           if (activeProjectId) {
             addPageToProject(activeProjectId, { name: data.prompt.slice(0, 50), code, platform: data.platform });
@@ -294,7 +403,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!generatedCode || isRefining) return;
       setIsRefining(true);
       try {
-        const code = await streamFromAPI("/api/refine", {
+        const rawCode = await streamFromAPI("/api/refine", {
           originalCode: generatedCode,
           refinementRequest,
           platform: currentPlatform,
@@ -304,7 +413,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           aiProvider: apiKey ? aiProvider : undefined,
           aiModel: apiKey ? aiModel : undefined,
         });
-        if (code) {
+        if (rawCode) {
+          const code = optimizeHtml(rawCode, { webhookUrl: webhookUrl || undefined });
+          if (code !== rawCode) startTransition(() => setGeneratedCode(code));
           addEntry({ id: crypto.randomUUID(), prompt: `Refinamento: ${refinementRequest}`, platform: currentPlatform, code, createdAt: Date.now() });
           if (activeProjectId && activePageId) {
             updatePageCode(activeProjectId, activePageId, code);
@@ -356,6 +467,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     router.push("/");
   }, [router]);
 
+  const openCodeInWorkspace = useCallback((code: string, prompt?: string) => {
+    setGeneratedCode(code);
+    setCurrentPrompt(prompt || "");
+    setCurrentPlatform("html");
+    router.push("/workspace");
+  }, [router]);
+
   const handleTemplateFromResources = useCallback(async (prompt: string) => {
     if (prompt.startsWith("READY:")) {
       const templateId = prompt.replace("READY:", "");
@@ -366,7 +484,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       try {
         const res = await fetch(`/api/template?id=${templateId}`);
         if (!res.ok) throw new Error("Template nao encontrado");
-        const html = await res.text();
+        const rawHtml = await res.text();
+        const html = optimizeHtml(rawHtml, { webhookUrl: webhookUrl || undefined });
         setGeneratedCode(html);
         addEntry({ id: crypto.randomUUID(), prompt: "Template: " + templateId, platform: "html", code: html, createdAt: Date.now() });
       } catch (err) {
@@ -419,21 +538,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     toggleStar, deleteProject, deletePageFromProject, updateCoverImage,
     generatedCode, isLoading, isRefining, error, currentPlatform, currentPrompt, activePageId,
     apiKey, aiProvider, aiModel, saveApiKey, clearApiKey,
+    imageApiKey, imageProvider, imageModel, saveImageApiKey, clearImageApiKey,
     commandPaletteOpen, setCommandPaletteOpen,
+    launchKits, activeLaunchKit, showLaunchWizard, setShowLaunchWizard,
+    setActiveLaunchKit, saveLaunchKit, deleteLaunchKit,
+    webhookUrl, setWebhookUrl,
     navigate,
     handleGenerate, handleRefine, handleBack,
     handleOpenProject, handleOpenPage, handleCreateProject, handleCreatePage,
-    handleTemplateFromResources,
+    handleTemplateFromResources, openCodeInWorkspace,
   }), [
     projects, saveError, createProject, addPageToProject, updatePageCode,
     toggleStar, deleteProject, deletePageFromProject, updateCoverImage,
     generatedCode, isLoading, isRefining, error, currentPlatform, currentPrompt, activePageId,
     apiKey, aiProvider, aiModel, saveApiKey, clearApiKey,
+    imageApiKey, imageProvider, imageModel, saveImageApiKey, clearImageApiKey,
     commandPaletteOpen,
+    launchKits, activeLaunchKit, showLaunchWizard,
+    saveLaunchKit, deleteLaunchKit,
+    webhookUrl, setWebhookUrl,
     navigate,
     handleGenerate, handleRefine, handleBack,
     handleOpenProject, handleOpenPage, handleCreateProject, handleCreatePage,
-    handleTemplateFromResources, handleCreateProjectConfirm,
+    handleTemplateFromResources, openCodeInWorkspace,
   ]);
 
   const storageToastIsError = storageToast?.toLowerCase().includes("cheio") || storageToast?.toLowerCase().includes("erro");

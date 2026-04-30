@@ -37,13 +37,14 @@ export function ImageGeneratorModal({ onInsert, onClose }: ImageGeneratorModalPr
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
-  function getOpenAIKey(): string | undefined {
+  function getImageConfig(): { apiKey?: string; imageProvider: string; imageModel?: string } {
     try {
-      const key = localStorage.getItem("wevyflow_byok_key");
-      const provider = localStorage.getItem("wevyflow_byok_provider");
-      if (key && provider === "openai") return key;
+      const key = localStorage.getItem("wf_img_key") || undefined;
+      const provider = localStorage.getItem("wf_img_provider") || "openai";
+      const model = localStorage.getItem("wf_img_model") || undefined;
+      return { apiKey: key, imageProvider: provider, imageModel: model };
     } catch { /* no localStorage */ }
-    return undefined;
+    return { imageProvider: "openai" };
   }
 
   async function handleGenerate() {
@@ -53,10 +54,11 @@ export function ImageGeneratorModal({ onInsert, onClose }: ImageGeneratorModalPr
     setPreview(null);
 
     try {
+      const imgConfig = getImageConfig();
       const res = await fetch("/api/generate-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: prompt.trim(), size, quality, apiKey: getOpenAIKey() }),
+        body: JSON.stringify({ prompt: prompt.trim(), size, quality, ...imgConfig }),
       });
 
       const data = await res.json();
