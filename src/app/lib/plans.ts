@@ -1,19 +1,18 @@
-export type PlanId = "free" | "pro" | "scale";
+export type PlanId = "free" | "starter" | "pro" | "scale";
 
 export interface Plan {
   label: string;
-  pages: number; // monthly page generation limit (999 = unlimited display)
-  kits: number;
+  credits: number; // generations per month
+  price: number;   // R$/month
 }
 
 export const PLANS: Record<PlanId, Plan> = {
-  free:  { label: "Free",  pages: 5,   kits: 1   },
-  pro:   { label: "Pro",   pages: 50,  kits: 10  },
-  scale: { label: "Scale", pages: 999, kits: 999 },
+  free:    { label: "Free",    credits: 5,   price: 0   },
+  starter: { label: "Starter", credits: 20,  price: 97  },
+  pro:     { label: "Pro",     credits: 60,  price: 197 },
+  scale:   { label: "Scale",   credits: 150, price: 397 },
 };
 
 export const DEFAULT_PLAN: PlanId = "free";
 
-export function isUnlimited(pages: number): boolean {
-  return pages >= 999;
-}
+export const PLAN_IDS: PlanId[] = ["free", "starter", "pro", "scale"];

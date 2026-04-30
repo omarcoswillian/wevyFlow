@@ -1,8 +1,81 @@
 import { resolveConfig, callOnce, parseApiError } from "../../lib/ai-client";
-import { createClient } from "@/lib/supabase/server";
+import { checkAndDeductCredit, isCreditError, limitReachedResponse } from "../../lib/credits";
 import type { BrandInfo, BrandIdentity, BrandLogo } from "../../lib/types-kit";
 
-export const maxDuration = 60;
+export const maxDuration = 90;
+
+const SVG_SYSTEM = `You are a professional SVG logo designer. Generate ONLY valid SVG code — no markdown, no code fences, no explanations. The first character must be "<".`;
+
+function buildSvgPrompt(b: BrandInfo, identity: BrandIdentity): string {
+  const primary = identity.colors.find(c => c.usage === "primary")?.hex || b.primaryColor || "#a78bfa";
+  const accent  = identity.colors.find(c => c.usage === "accent")?.hex  || primary;
+  const dark    = identity.colors.find(c => c.usage === "dark")?.hex    || "#0a0a0a";
+  const display = identity.fonts.find(f => f.usage === "display");
+  const body    = identity.fonts.find(f => f.usage === "body");
+  const fontName = display?.name || "Sora";
+  const bodyFont = body?.name || "Inter";
+  const googleParam = [
+    display?.googleFont || `${fontName.replace(/ /g,"+")}:wght@400;700`,
+    body?.googleFont    || `${bodyFont.replace(/ /g,"+")}:wght@300;400`,
+  ].join("&family=");
+  const { logo } = identity;
+  const subtext = logo.subtext || "";
+  const style   = b.stylePreset || "dark-premium";
+  const onDark  = style !== "light-clean";
+  const textColor   = onDark ? "#ffffff" : dark;
+  const accentColor = accent;
+
+  const logoInstructions: Record<string, string> = {
+    "wordmark": `Display the full name "${logo.text}" as a single bold text element. Use font-weight 700, letter-spacing around -0.02em to -0.04em. One color only: ${textColor}.`,
+    "wordmark-accent": `Split the name into two visual parts. Part 1 "${logo.text.replace(logo.accentText || "", "").trim()}" in bold font-weight 700, color ${textColor}. Part 2 "${logo.accentText || ""}" in light font-weight 300 or italic, color ${accentColor}. Both on the same baseline or slightly offset.`,
+    "lettermark": `Show only the initials of "${logo.text}" in very large type (font-size 80-100). Bold, centered, with a subtle geometric frame or underline in ${accentColor}.`,
+  };
+  const logoInst = logoInstructions[logo.type] || logoInstructions["wordmark"];
+
+  const styleHint: Record<string, string> = {
+    "dark-premium": "Refined, minimal. Use thin decorative lines (1-2px) in the accent color as flanking elements. Spacing is generous.",
+    "light-clean": "Airy and clean. Minimal decoration. Let the typography breathe.",
+    "luxury": "Ultra-refined. Optional thin horizontal rule below the name in gold/accent. Generous letter-spacing.",
+    "neon-tech": "Digital precision. Optional small geometric square or hexagon element in accent color.",
+    "glassmorphism": "Modern geometric. Optional small abstract dot cluster or grid pattern in accent.",
+    "brutalist": "Maximum impact. Consider ALL CAPS with very wide or very tight tracking. Bold shapes.",
+  };
+  const hint = styleHint[style] || styleHint["dark-premium"];
+
+  return `Create a professional SVG wordmark logo.
+
+BRAND: ${b.productName}
+STYLE: ${style} — ${hint}
+LOGO TYPE: ${logoInst}
+${subtext ? `TAGLINE: Display "${subtext}" below the name in uppercase, font-size 10-12, letter-spacing 0.2em, color ${textColor} at 40% opacity (add opacity="0.4" to the element).` : "NO tagline needed."}
+
+REQUIRED SVG STRUCTURE:
+<svg width="480" height="200" viewBox="0 0 480 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>@import url('https://fonts.googleapis.com/css2?family=${googleParam}&display=swap');</style>
+  </defs>
+  <!-- ALL text elements use text-anchor="middle" x="240" -->
+  <!-- Main name: y around 95-105 depending on whether tagline exists -->
+  <!-- Tagline: y around 125-135 -->
+  <!-- Decorative elements: max 2 simple shapes (line, circle, rect) -->
+</svg>
+
+RULES:
+— Background: none (transparent)
+— All text: text-anchor="middle" x="240"
+— Font families: "${fontName}, sans-serif" for headings, "${bodyFont}, sans-serif" for tagline
+— Font sizes: main name 48-64px, tagline 10px
+— No external images, no <image> tags, no complex paths
+— Max 12 total SVG child elements
+— Output ONLY the SVG, nothing else`;
+}
+
+function sanitizeSvg(raw: string): string {
+  return raw
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/\son\w+\s*=/gi, " data-removed=")
+    .replace(/javascript:/gi, "");
+}
 
 const SYSTEM = `You are a senior brand strategist and visual identity designer specializing in premium digital brands for the Brazilian market.
 
@@ -88,26 +161,21 @@ function fallbackLogo(productName: string, primaryColor: string): BrandLogo {
 }
 
 export async function POST(request: Request) {
-  const { brandInfo, apiKey, aiProvider, aiModel } = await request.json() as {
-    brandInfo: BrandInfo;
-    apiKey?: string;
-    aiProvider?: string;
-    aiModel?: string;
-  };
+  const { brandInfo } = await request.json() as { brandInfo: BrandInfo };
 
   if (!brandInfo?.productName) {
     return Response.json({ error: "brandInfo.productName obrigatório" }, { status: 400 });
   }
 
-  if (!apiKey) {
-    try {
-      const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return Response.json({ error: "Faça login para gerar identidade visual." }, { status: 401 });
-    } catch { /* non-blocking */ }
+  const creditResult = await checkAndDeductCredit("brand_identity", brandInfo.productName);
+  if (isCreditError(creditResult)) {
+    return Response.json({ error: creditResult.error }, { status: creditResult.status });
+  }
+  if (!creditResult.allowed) {
+    return limitReachedResponse(creditResult);
   }
 
-  const aiConfig = resolveConfig(apiKey, aiProvider, aiModel);
+  const aiConfig = resolveConfig(undefined, undefined, undefined);
 
   try {
     const raw = await callOnce(aiConfig, SYSTEM, buildPrompt(brandInfo), 2048);
@@ -135,6 +203,12 @@ export async function POST(request: Request) {
       logo: parsed.logo || fallbackLogo(brandInfo.productName, brandInfo.primaryColor),
       createdAt: new Date().toISOString(),
     };
+
+    try {
+      const svgRaw = await callOnce(aiConfig, SVG_SYSTEM, buildSvgPrompt(brandInfo, identity), 2000);
+      const svgMatch = svgRaw.match(/<svg[\s\S]*?<\/svg>/i);
+      if (svgMatch) identity.svgLogo = sanitizeSvg(svgMatch[0]);
+    } catch { /* non-blocking — CSS fallback still works */ }
 
     return Response.json(identity);
   } catch (e: unknown) {

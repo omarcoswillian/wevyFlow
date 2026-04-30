@@ -25,6 +25,7 @@ export type AppView =
   | "emails"
   | "leads"
   | "paginas"
+  | "marca"
   | "projects-all"
   | "projects-starred"
   | "projects-mine"
@@ -38,6 +39,7 @@ export function viewToPath(view: AppView, projectId?: string): string {
     case "resources": return "/resources";
     case "criativos": return "/criativos";
     case "lancamentos": return "/lancamentos";
+    case "marca": return "/marca";
     case "emails": return "/emails";
     case "leads": return "/leads";
     case "paginas": return "/paginas";
@@ -77,6 +79,8 @@ interface AppContextValue {
   isLoading: boolean;
   isRefining: boolean;
   error: string;
+  limitReached: boolean;
+  clearLimitReached: () => void;
   currentPlatform: Platform;
   currentPrompt: string;
   activePageId: string | null;
@@ -143,6 +147,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isRefining, setIsRefining] = useState(false);
   const [error, setError] = useState("");
+  const [limitReached, setLimitReached] = useState(false);
+  const clearLimitReached = useCallback(() => setLimitReached(false), []);
   const [currentPlatform, setCurrentPlatform] = useState<Platform>("html");
   const [currentPrompt, setCurrentPrompt] = useState("");
   const [currentDesignContext, setCurrentDesignContext] = useState<DesignContext>(null);
@@ -302,8 +308,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
       if (!res.ok) {
         let msg = "Erro ao processar";
-        try { const data = await res.json(); msg = data.error || msg; } catch {}
-        throw new Error(msg);
+        let limitReached = false;
+        try {
+          const data = await res.json();
+          msg = data.error || msg;
+          limitReached = !!data.limitReached;
+        } catch {}
+        const err = new Error(msg);
+        if (limitReached) (err as Error & { limitReached: boolean }).limitReached = true;
+        throw err;
       }
       const reader = res.body?.getReader();
       if (!reader) throw new Error("Streaming não suportado");
@@ -376,9 +389,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const rawCode = await streamFromAPI("/api/generate", {
           ...data,
           copyDocument: data.copyDocument || undefined,
-          apiKey: apiKey || undefined,
-          aiProvider: apiKey ? aiProvider : undefined,
-          aiModel: apiKey ? aiModel : undefined,
         });
         // rawCode may be partial (stream aborted but content was salvaged)
         if (rawCode && rawCode.length > 100) {
@@ -390,7 +400,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Erro desconhecido");
+        const e = err as Error & { limitReached?: boolean };
+        if (e.limitReached) {
+          setLimitReached(true);
+          setError(e.message || "Limite atingido");
+        } else {
+          setError(e.message || "Erro desconhecido");
+        }
       } finally {
         setIsLoading(false);
       }
@@ -409,9 +425,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           platform: currentPlatform,
           images: images || [],
           designContext: currentDesignContext,
-          apiKey: apiKey || undefined,
-          aiProvider: apiKey ? aiProvider : undefined,
-          aiModel: apiKey ? aiModel : undefined,
         });
         if (rawCode) {
           const code = optimizeHtml(rawCode, { webhookUrl: webhookUrl || undefined });
@@ -536,7 +549,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AppContextValue>(() => ({
     projects, saveError, createProject, addPageToProject, updatePageCode,
     toggleStar, deleteProject, deletePageFromProject, updateCoverImage,
-    generatedCode, isLoading, isRefining, error, currentPlatform, currentPrompt, activePageId,
+    generatedCode, isLoading, isRefining, error, limitReached, clearLimitReached, currentPlatform, currentPrompt, activePageId,
     apiKey, aiProvider, aiModel, saveApiKey, clearApiKey,
     imageApiKey, imageProvider, imageModel, saveImageApiKey, clearImageApiKey,
     commandPaletteOpen, setCommandPaletteOpen,
@@ -550,7 +563,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }), [
     projects, saveError, createProject, addPageToProject, updatePageCode,
     toggleStar, deleteProject, deletePageFromProject, updateCoverImage,
-    generatedCode, isLoading, isRefining, error, currentPlatform, currentPrompt, activePageId,
+    generatedCode, isLoading, isRefining, error, limitReached, clearLimitReached, currentPlatform, currentPrompt, activePageId,
     apiKey, aiProvider, aiModel, saveApiKey, clearApiKey,
     imageApiKey, imageProvider, imageModel, saveImageApiKey, clearImageApiKey,
     commandPaletteOpen, setCommandPaletteOpen,

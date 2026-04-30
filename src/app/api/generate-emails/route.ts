@@ -1,4 +1,5 @@
 import { resolveConfig, callOnce, parseApiError } from "../../lib/ai-client";
+import { checkAndDeductCredit, isCreditError, limitReachedResponse } from "../../lib/credits";
 
 export const maxDuration = 60;
 
@@ -174,9 +175,6 @@ export async function POST(request: Request) {
   const {
     brandInfo,
     sequenceType,
-    apiKey,
-    aiProvider,
-    aiModel,
   }: {
     brandInfo: {
       productName: string;
@@ -189,9 +187,6 @@ export async function POST(request: Request) {
       provas?: string;
     };
     sequenceType: EmailSequenceType;
-    apiKey?: string;
-    aiProvider?: string;
-    aiModel?: string;
   } = await request.json();
 
   if (!brandInfo || !sequenceType) {
@@ -203,7 +198,15 @@ export async function POST(request: Request) {
     return Response.json({ error: "sequenceType inválido" }, { status: 400 });
   }
 
-  const aiConfig = resolveConfig(apiKey, aiProvider, aiModel);
+  const creditResult = await checkAndDeductCredit("email_sequence", brandInfo.productName);
+  if (isCreditError(creditResult)) {
+    return Response.json({ error: creditResult.error }, { status: creditResult.status });
+  }
+  if (!creditResult.allowed) {
+    return limitReachedResponse(creditResult);
+  }
+
+  const aiConfig = resolveConfig(undefined, undefined, undefined);
 
   const copyLines = [
     brandInfo.mecanismo ? `— Mecanismo único: ${brandInfo.mecanismo}` : "",

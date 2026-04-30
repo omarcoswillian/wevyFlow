@@ -217,6 +217,9 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
       cursor: cs.cursor !== 'auto' ? cs.cursor : 'auto',
       aspectRatio: el.style.aspectRatio || (cs.aspectRatio && cs.aspectRatio !== 'auto' ? cs.aspectRatio : ''),
       pointerEvents: cs.pointerEvents !== 'auto' ? cs.pointerEvents : 'auto',
+      wordBreak: el.style.wordBreak || (cs.wordBreak !== 'normal' ? cs.wordBreak : 'normal'),
+      overflowWrap: el.style.overflowWrap || (cs.overflowWrap !== 'normal' ? cs.overflowWrap : 'normal'),
+      whiteSpace: el.style.whiteSpace || cs.whiteSpace,
     };
   }
 

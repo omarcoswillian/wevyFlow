@@ -1,8 +1,7 @@
 import { SECTIONS } from "../../lib/arsenal/sections";
 import { assembleSections } from "../../lib/arsenal/loader";
 import { resolveConfig, callOnce, startStream, iterableToReadable, parseApiError, AICallConfig } from "../../lib/ai-client";
-import { createClient } from "@/lib/supabase/server";
-import { PLANS, DEFAULT_PLAN, type PlanId } from "../../lib/plans";
+import { checkAndDeductCredit, isCreditError, limitReachedResponse } from "../../lib/credits";
 
 export const maxDuration = 300;
 
@@ -427,62 +426,18 @@ export async function POST(request: Request) {
     stylePreset,
     images,
     copyDocument,
-    apiKey,
-    aiProvider,
-    aiModel,
   } = await request.json();
 
-  // Quota check — only when using the WevyFlow server key (not BYOK)
-  let quotaUserId: string | null = null;
-  if (!apiKey) {
-    try {
-      const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return Response.json({ error: "Faça login para gerar páginas." }, { status: 401 });
-      quotaUserId = user.id;
-
-      // Resolve user plan
-      let planId: PlanId = DEFAULT_PLAN;
-      const { data: profile } = await supabase
-        .from("user_profiles")
-        .select("plan")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (profile?.plan && profile.plan in PLANS) planId = profile.plan as PlanId;
-
-      const plan = PLANS[planId];
-      const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
-      const { count } = await supabase
-        .from("generation_history")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .gte("created_at", monthStart);
-
-      const used = count ?? 0;
-      if (used >= plan.pages) {
-        return Response.json({
-          error: `Limite mensal atingido (${used}/${plan.pages} páginas — Plano ${plan.label}). Faça upgrade para continuar gerando.`,
-          limitReached: true,
-          plan: planId,
-          used,
-          limit: plan.pages,
-        }, { status: 429 });
-      }
-
-      // Record the generation attempt (quota deduction)
-      await supabase.from("generation_history").insert({
-        user_id: user.id,
-        prompt: (prompt || "").slice(0, 500),
-        platform: platform || "html",
-        code: "",
-      });
-    } catch (e) {
-      // If supabase is unavailable, don't block generation — log and continue
-      console.error("[quota-check] error:", e);
-    }
+  // Credit check — all users go through quota system
+  const creditResult = await checkAndDeductCredit("landing_page", prompt || "");
+  if (isCreditError(creditResult)) {
+    return Response.json({ error: creditResult.error }, { status: creditResult.status });
+  }
+  if (!creditResult.allowed) {
+    return limitReachedResponse(creditResult);
   }
 
-  const aiConfig = resolveConfig(apiKey, aiProvider, aiModel);
+  const aiConfig = resolveConfig(undefined, undefined, undefined);
 
   if (!prompt && !copyDocument) {
     return Response.json({ error: "Prompt ou documento de copy é obrigatório" }, { status: 400 });

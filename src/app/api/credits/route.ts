@@ -9,7 +9,6 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return Response.json({ error: "não autenticado" }, { status: 401 });
 
-    // Resolve plan
     let planId: PlanId = DEFAULT_PLAN;
     try {
       const { data: profile } = await supabase
@@ -23,7 +22,6 @@ export async function GET() {
     const plan = PLANS[planId];
     const creditsLimit = plan.credits;
 
-    // Count this month's generations
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
     const { count } = await supabase
@@ -37,17 +35,12 @@ export async function GET() {
     return Response.json({
       plan: planId,
       planLabel: plan.label,
-      price: plan.price,
       creditsUsed,
       creditsLimit,
       remaining: Math.max(0, creditsLimit - creditsUsed),
-      month: `${now.toLocaleString("pt-BR", { month: "long" })} ${now.getFullYear()}`,
-      // Legacy fields — keep for backward compat
-      pagesUsed: creditsUsed,
-      pagesLimit: creditsLimit,
     });
   } catch (e) {
-    console.error("[usage]", e);
+    console.error("[credits GET]", e);
     return Response.json({ error: "erro interno" }, { status: 500 });
   }
 }

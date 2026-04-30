@@ -26,10 +26,19 @@ import {
   PlayCircle,
   Repeat,
   ChevronRight,
+  ChevronDown,
   Mail,
   Globe,
   TrendingUp,
   LogOut,
+  Fingerprint,
+  BookOpen,
+  ShoppingCart,
+  Monitor,
+  MessageCircle,
+  ClipboardList,
+  Tv2,
+  Lock,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Platform } from "../lib/types";
@@ -59,6 +68,8 @@ interface HomeViewProps {
   onOpenSearch?: () => void;
   contentOverride?: React.ReactNode;
   activeNav?: string;
+  upgradeOpen?: boolean;
+  onUpgradeClose?: () => void;
 }
 
 const LAUNCH_TYPES = [
@@ -99,7 +110,7 @@ const STRATEGY_LABELS: Record<StrategyId, string> = {
   perpetuo: "Perpétuo",
 };
 
-export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, contentOverride, activeNav }: HomeViewProps) {
+export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, contentOverride, activeNav, upgradeOpen: upgradeOpenProp, onUpgradeClose }: HomeViewProps) {
   const nav = onNavigate || (() => {});
   const { apiKey, aiProvider, aiModel, saveApiKey, clearApiKey, imageApiKey, imageProvider, imageModel, saveImageApiKey, clearImageApiKey, setShowLaunchWizard, launchKits, projects, webhookUrl, setWebhookUrl } = useAppContext();
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
@@ -115,6 +126,8 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
   const [images, setImages] = useState<{ name: string; base64: string }[]>([]);
   const [showConfig, setShowConfig] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [designExpanded, setDesignExpanded] = useState(false);
+  const [lpExpanded, setLpExpanded] = useState(false);
   const [copyDocument, setCopyDocument] = useState("");
   const [copyFileName, setCopyFileName] = useState<string | null>(null);
   const [copyUploading, setCopyUploading] = useState(false);
@@ -237,14 +250,14 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
   const recentProjects = projects.slice(0, 6);
 
   // Usage data (only relevant when not using BYOK)
-  const [usage, setUsage] = useState<{ pagesUsed: number; pagesLimit: number; planLabel: string; month: string } | null>(null);
+  const [usage, setUsage] = useState<{ creditsUsed: number; creditsLimit: number; planLabel: string; plan: string; month: string } | null>(null);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   useEffect(() => {
-    if (apiKey) return;
     fetch("/api/usage")
       .then((r) => r.ok ? r.json() : null)
-      .then((d) => d && setUsage({ pagesUsed: d.pagesUsed, pagesLimit: d.pagesLimit, planLabel: d.planLabel, month: d.month }))
+      .then((d) => d && setUsage({ creditsUsed: d.creditsUsed, creditsLimit: d.creditsLimit, planLabel: d.planLabel, plan: d.plan, month: d.month }))
       .catch(() => {});
-  }, [apiKey]);
+  }, []);
 
   // Current user info for sidebar avatar + logout
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -287,7 +300,7 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-2 space-y-0.5 overflow-hidden">
+        <nav className="flex-1 px-2 space-y-0.5 overflow-y-auto scrollbar-none">
           <SidebarItem icon={<Home className="w-4 h-4" />} label="Home" active={!activeNav || activeNav === "home"} collapsed={sidebarCollapsed} onClick={() => nav("home")} />
           <SidebarItem icon={<Search className="w-4 h-4" />} label="Search" collapsed={sidebarCollapsed} shortcut="⌘K" onClick={onOpenSearch} />
 
@@ -296,8 +309,104 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
           {sidebarCollapsed && <div className="pt-3" />}
 
           <SidebarItem icon={<Rocket className="w-4 h-4" />} label="Lançamentos" active={activeNav === "lancamentos"} collapsed={sidebarCollapsed} onClick={() => nav("lancamentos")} accent />
-          <SidebarItem icon={<Layout className="w-4 h-4" />} label="Landing Pages" active={activeNav === "resources"} collapsed={sidebarCollapsed} onClick={() => nav("resources")} />
-          <SidebarItem icon={<Paintbrush className="w-4 h-4" />} label="Design" active={activeNav === "criativos"} collapsed={sidebarCollapsed} onClick={() => nav("criativos")} />
+          {/* Landing Pages — accordion */}
+          <div>
+            <button
+              onClick={() => sidebarCollapsed ? nav("resources") : setLpExpanded(p => !p)}
+              title={sidebarCollapsed ? "Landing Pages" : undefined}
+              className={cn(
+                "flex items-center w-full rounded-xl transition-colors cursor-pointer",
+                sidebarCollapsed ? "justify-center p-2.5" : "gap-2.5 px-2.5 py-2 text-[12px]",
+                activeNav === "resources"
+                  ? "bg-white/[0.06] text-[#d1d1d1]"
+                  : "text-[#6b6b6b] hover:bg-white/[0.04] hover:text-[#9a9a9a]"
+              )}
+            >
+              <Layout className="w-4 h-4 shrink-0" />
+              {!sidebarCollapsed && (
+                <>
+                  <span className="flex-1 text-left">Landing Pages</span>
+                  <ChevronDown className={cn("w-3 h-3 text-white/20 transition-transform duration-200", lpExpanded ? "rotate-0" : "-rotate-90")} />
+                </>
+              )}
+            </button>
+            {!sidebarCollapsed && lpExpanded && (
+              <div className="ml-3 mt-0.5 border-l border-white/[0.06] pl-2 space-y-0.5 pb-1">
+                {([
+                  { label: "Página de vendas",   icon: <Rocket className="w-3 h-3" /> },
+                  { label: "Página de captura",  icon: <UserCheck className="w-3 h-3" /> },
+                  { label: "Página de blog",     icon: <FileText className="w-3 h-3" /> },
+                  { label: "Eventos / Workshop", icon: <Zap className="w-3 h-3" /> },
+                  { label: "Agregadora",         icon: <Globe className="w-3 h-3" /> },
+                ] as const).map((item) => (
+                  <button key={item.label} onClick={() => nav("resources")}
+                    className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] text-white/40 hover:text-white/70 hover:bg-white/[0.04] transition-colors cursor-pointer text-left">
+                    {item.icon}
+                    <span className="flex-1 truncate">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* Design — accordion */}
+          <div>
+            <button
+              onClick={() => sidebarCollapsed ? nav("criativos") : setDesignExpanded(p => !p)}
+              title={sidebarCollapsed ? "Design" : undefined}
+              className={cn(
+                "flex items-center w-full rounded-xl transition-colors cursor-pointer",
+                sidebarCollapsed ? "justify-center p-2.5" : "gap-2.5 px-2.5 py-2 text-[12px]",
+                activeNav === "criativos"
+                  ? "bg-white/[0.06] text-[#d1d1d1]"
+                  : "text-[#6b6b6b] hover:bg-white/[0.04] hover:text-[#9a9a9a]"
+              )}
+            >
+              <Paintbrush className="w-4 h-4 shrink-0" />
+              {!sidebarCollapsed && (
+                <>
+                  <span className="flex-1 text-left">Design</span>
+                  <ChevronDown className={cn("w-3 h-3 text-white/20 transition-transform duration-200", designExpanded ? "rotate-0" : "-rotate-90")} />
+                </>
+              )}
+            </button>
+            {!sidebarCollapsed && designExpanded && (
+              <div className="ml-3 mt-0.5 border-l border-white/[0.06] pl-2 space-y-0.5 pb-1">
+                <p className="text-[8px] font-semibold text-white/20 uppercase tracking-widest px-2 pt-2 pb-0.5">Primário</p>
+                {([
+                  { label: "KV",                icon: <Fingerprint className="w-3 h-3" />,   soon: false, onClick: () => nav("marca") },
+                  { label: "Criativos",         icon: <Paintbrush className="w-3 h-3" />,     soon: false, onClick: () => nav("criativos") },
+                  { label: "Capas dos módulos", icon: <BookOpen className="w-3 h-3" />,       soon: true,  onClick: () => {} },
+                  { label: "Banner checkout",   icon: <ShoppingCart className="w-3 h-3" />,   soon: false, onClick: () => nav("criativos") },
+                ] as const).map((item) => (
+                  <button key={item.label} onClick={item.onClick} disabled={item.soon}
+                    className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] transition-colors text-left",
+                      item.soon ? "text-white/15 cursor-not-allowed" : "text-white/40 hover:text-white/70 hover:bg-white/[0.04] cursor-pointer")}>
+                    {item.soon ? <Lock className="w-3 h-3 shrink-0" /> : item.icon}
+                    <span className="flex-1 truncate">{item.label}</span>
+                    {item.soon && <span className="text-[8px] text-white/15 shrink-0">breve</span>}
+                  </button>
+                ))}
+                <p className="text-[8px] font-semibold text-white/20 uppercase tracking-widest px-2 pt-3 pb-0.5">Secundário</p>
+                {([
+                  { label: "PDF / E-book",       icon: <FileText className="w-3 h-3" />,       soon: true,  onClick: () => {} },
+                  { label: "Slide",              icon: <Monitor className="w-3 h-3" />,         soon: true,  onClick: () => {} },
+                  { label: "Thumb YouTube",      icon: <PlayCircle className="w-3 h-3" />,      soon: false, onClick: () => nav("criativos") },
+                  { label: "Capa YouTube",       icon: <Tv2 className="w-3 h-3" />,             soon: true,  onClick: () => {} },
+                  { label: "WhatsApp API",       icon: <MessageCircle className="w-3 h-3" />,   soon: false, onClick: () => nav("criativos") },
+                  { label: "Banner e-mail",      icon: <Mail className="w-3 h-3" />,            soon: true,  onClick: () => {} },
+                  { label: "Capa de formulário", icon: <ClipboardList className="w-3 h-3" />,   soon: true,  onClick: () => {} },
+                ] as const).map((item) => (
+                  <button key={item.label} onClick={item.onClick} disabled={item.soon}
+                    className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] transition-colors text-left",
+                      item.soon ? "text-white/15 cursor-not-allowed" : "text-white/40 hover:text-white/70 hover:bg-white/[0.04] cursor-pointer")}>
+                    {item.soon ? <Lock className="w-3 h-3 shrink-0" /> : item.icon}
+                    <span className="flex-1 truncate">{item.label}</span>
+                    {item.soon && <span className="text-[8px] text-white/15 shrink-0">breve</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <SidebarItem icon={<Mail className="w-4 h-4" />} label="Emails" active={activeNav === "emails"} collapsed={sidebarCollapsed} onClick={() => nav("emails")} />
           <SidebarItem icon={<UserCheck className="w-4 h-4" />} label="Leads" active={activeNav === "leads"} collapsed={sidebarCollapsed} onClick={() => nav("leads")} />
           <SidebarItem icon={<Globe className="w-4 h-4" />} label="Publicadas" active={activeNav === "paginas"} collapsed={sidebarCollapsed} onClick={() => nav("paginas")} />
@@ -311,62 +420,45 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
           <SidebarItem icon={<Share2 className="w-4 h-4" />} label="Compartilhados" active={activeNav === "projects-shared"} collapsed={sidebarCollapsed} onClick={() => nav("projects-shared")} />
         </nav>
 
-        {/* Bottom — Usage + BYOK */}
+        {/* Bottom — Usage + User */}
         <div className="px-2 pb-3 space-y-1.5">
-          {/* Usage widget — shown when NOT using BYOK */}
-          {!sidebarCollapsed && !apiKey && usage && (
-            <div className="px-2.5 py-2 rounded-xl bg-white/[0.025] border border-white/[0.05]">
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center gap-1.5">
-                  <TrendingUp className="w-3 h-3 text-white/30" />
-                  <span className="text-[9px] text-white/30 font-medium uppercase tracking-widest">Plano {usage.planLabel}</span>
+          {/* Usage widget */}
+          {!sidebarCollapsed && usage && (() => {
+            const pct = Math.min(100, (usage.creditsUsed / usage.creditsLimit) * 100);
+            const nearLimit = usage.creditsUsed >= usage.creditsLimit * 0.8;
+            const atLimit = usage.creditsUsed >= usage.creditsLimit;
+            return (
+              <button
+                onClick={() => setUpgradeOpen(true)}
+                className="w-full px-2.5 py-2 rounded-xl bg-white/[0.025] border border-white/[0.05] hover:border-purple-500/20 hover:bg-white/[0.04] transition-all text-left cursor-pointer"
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <TrendingUp className="w-3 h-3 text-white/30" />
+                    <span className="text-[9px] text-white/30 font-medium uppercase tracking-widest">Plano {usage.planLabel}</span>
+                  </div>
+                  <span className="text-[9px] text-white/20">{usage.month}</span>
                 </div>
-                <span className="text-[9px] text-white/20">{usage.month}</span>
-              </div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] text-white/50">
-                  {usage.pagesLimit >= 999 ? "Ilimitado" : `${usage.pagesUsed} / ${usage.pagesLimit} páginas`}
-                </span>
-                {usage.pagesLimit < 999 && (
-                  <span className={cn("text-[9px] font-medium", usage.pagesUsed >= usage.pagesLimit ? "text-red-400" : usage.pagesUsed >= usage.pagesLimit * 0.8 ? "text-orange-400" : "text-white/25")}>
-                    {usage.pagesLimit - usage.pagesUsed} restantes
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] text-white/50">
+                    {usage.creditsUsed} / {usage.creditsLimit} gerações
                   </span>
-                )}
-              </div>
-              {usage.pagesLimit < 999 && (
+                  <span className={cn("text-[9px] font-medium", atLimit ? "text-red-400" : nearLimit ? "text-orange-400" : "text-white/25")}>
+                    {atLimit ? "Limite atingido" : nearLimit ? `${usage.creditsLimit - usage.creditsUsed} restantes` : `${usage.creditsLimit - usage.creditsUsed} restantes`}
+                  </span>
+                </div>
                 <div className="h-1 bg-white/[0.05] rounded-full overflow-hidden">
                   <div
-                    className={cn("h-full rounded-full transition-all", usage.pagesUsed >= usage.pagesLimit ? "bg-red-500" : usage.pagesUsed >= usage.pagesLimit * 0.8 ? "bg-orange-400" : "bg-purple-500")}
-                    style={{ width: `${Math.min(100, (usage.pagesUsed / usage.pagesLimit) * 100)}%` }}
+                    className={cn("h-full rounded-full transition-all", atLimit ? "bg-red-500" : nearLimit ? "bg-orange-400" : "bg-purple-500")}
+                    style={{ width: `${pct}%` }}
                   />
                 </div>
-              )}
-            </div>
-          )}
-
-          {!sidebarCollapsed ? (
-            apiKey ? (
-              <button onClick={() => setApiKeyModalOpen(true)} className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15 transition-colors cursor-pointer">
-                <CheckCircle className="w-3 h-3 text-emerald-400 shrink-0" />
-                <div className="flex-1 text-left min-w-0">
-                  <p className="text-[11px] font-medium text-emerald-400">IA Conectada</p>
-                  <p className="text-[9px] text-white/25 font-mono truncate">{apiKey.slice(0, 14)}…</p>
-                </div>
+                {(nearLimit || atLimit) && (
+                  <p className="text-[9px] text-purple-400 mt-1.5 font-medium">Fazer upgrade →</p>
+                )}
               </button>
-            ) : (
-              <button onClick={() => setApiKeyModalOpen(true)} className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.06] hover:border-purple-500/20 transition-colors cursor-pointer">
-                <Key className="w-3 h-3 text-purple-400 shrink-0" />
-                <div className="flex-1 text-left">
-                  <p className="text-[11px] font-medium text-white/50">Conectar sua IA</p>
-                  <p className="text-[9px] text-white/20">API Key Anthropic</p>
-                </div>
-              </button>
-            )
-          ) : (
-            <button onClick={() => setApiKeyModalOpen(true)} className={cn("w-10 h-10 mx-auto rounded-xl flex items-center justify-center transition-colors cursor-pointer", apiKey ? "text-emerald-400 hover:bg-emerald-500/10" : "text-purple-400 hover:bg-purple-500/10")} title={apiKey ? "IA Conectada" : "Conectar sua IA"}>
-              {apiKey ? <CheckCircle className="w-4 h-4" /> : <Key className="w-4 h-4" />}
-            </button>
-          )}
+            );
+          })()}
 
           {/* User row */}
           {userEmail && (
@@ -408,10 +500,16 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
         />
       </aside>
 
+      {/* Upgrade modal */}
+      {(upgradeOpen || upgradeOpenProp) && (
+        <UpgradeModal usage={usage} onClose={() => { setUpgradeOpen(false); onUpgradeClose?.(); }} />
+      )}
+
       {/* ─── Main Area ─── */}
       <main className="flex-1 flex flex-col relative overflow-hidden rounded-[20px] bg-[#0c0c10]">
         {/* Aurora gradient — only on home */}
         {!contentOverride && <div className="aurora-bg" style={{ borderRadius: "20px" }} />}
+
 
         {contentOverride ? (
           <div className="flex-1 overflow-y-auto">{contentOverride}</div>
@@ -781,6 +879,80 @@ function ProjectsRow({ projects, onNew, onNavigate }: { projects: Project[]; onN
           </div>
         </button>
       ))}
+    </div>
+  );
+}
+
+const UPGRADE_PLANS = [
+  { id: "starter", label: "Starter", price: "R$ 97", credits: 20, highlight: false, desc: "Ideal para começar" },
+  { id: "pro",     label: "Pro",     price: "R$ 197", credits: 60, highlight: true,  desc: "Melhor custo-benefício" },
+  { id: "scale",   label: "Scale",   price: "R$ 397", credits: 150, highlight: false, desc: "Para alto volume" },
+] as const;
+
+function UpgradeModal({ usage, onClose }: { usage: { creditsUsed: number; creditsLimit: number; planLabel: string; plan: string } | null; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-full max-w-[480px] bg-[#0e0e11] border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="px-6 pt-6 pb-4 border-b border-white/[0.06]">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-white">Faça upgrade do seu plano</h2>
+              {usage && usage.creditsUsed >= usage.creditsLimit ? (
+                <p className="text-sm text-red-400 mt-1">Você atingiu seu limite mensal de {usage.creditsLimit} gerações.</p>
+              ) : usage ? (
+                <p className="text-sm text-white/40 mt-1">{usage.creditsUsed} / {usage.creditsLimit} gerações usadas este mês.</p>
+              ) : null}
+            </div>
+            <button onClick={onClose} className="text-white/30 hover:text-white/60 cursor-pointer transition-colors p-1">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Plans */}
+        <div className="p-6 space-y-3">
+          {UPGRADE_PLANS.map((plan) => (
+            <div
+              key={plan.id}
+              className={cn(
+                "relative flex items-center gap-4 px-4 py-3.5 rounded-xl border transition-all",
+                plan.highlight
+                  ? "border-purple-500/40 bg-purple-500/[0.07]"
+                  : "border-white/[0.06] bg-white/[0.02]"
+              )}
+            >
+              {plan.highlight && (
+                <span className="absolute -top-2.5 right-4 px-2 py-0.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-[9px] font-bold text-white uppercase tracking-wide">Popular</span>
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-sm font-semibold text-white">{plan.label}</span>
+                  <span className="text-[10px] text-white/30">{plan.desc}</span>
+                </div>
+                <span className="text-[11px] text-white/40">{plan.credits} gerações / mês</span>
+              </div>
+              <div className="text-right">
+                <div className="text-base font-bold text-white">{plan.price}</div>
+                <div className="text-[10px] text-white/30">/mês</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <div className="px-6 pb-6">
+          <a
+            href="https://wa.me/5511999999999?text=Quero%20fazer%20upgrade%20na%20WevyFlow"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold text-sm hover:shadow-lg hover:shadow-purple-500/20 transition-all cursor-pointer"
+          >
+            Entrar em contato para upgrade
+          </a>
+          <p className="text-center text-[10px] text-white/25 mt-2">Pagamento via PIX, cartão ou boleto. Suporte em até 24h.</p>
+        </div>
+      </div>
     </div>
   );
 }

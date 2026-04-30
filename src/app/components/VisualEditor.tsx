@@ -84,6 +84,9 @@ export interface ElementProps {
   cursor: string;
   aspectRatio: string;
   pointerEvents: string;
+  wordBreak: string;
+  overflowWrap: string;
+  whiteSpace: string;
 }
 
 interface VisualEditorProps {
@@ -615,6 +618,38 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
                     <Strikethrough className="w-3 h-3" />
                   </button>
                 </div>
+              </div>
+            </div>
+            <div>
+              <span className="text-[9px] text-white/20 mb-1 block">Quebra de texto</span>
+              <div className="grid grid-cols-3 gap-1">
+                {[
+                  { prop: "whiteSpace", value: "normal", label: "Normal" },
+                  { prop: "whiteSpace", value: "nowrap", label: "Sem quebra" },
+                  { prop: "whiteSpace", value: "pre-wrap", label: "Pré-wrap" },
+                ].map((o) => (
+                  <button key={o.value} onClick={() => onStyleChange(o.prop, o.value)}
+                    className={cn("py-1.5 rounded-lg cursor-pointer transition-all text-[9px]",
+                      elementProps.whiteSpace === o.value ? "bg-purple-500/20 text-purple-400" : "bg-white/[0.03] text-white/30 hover:text-white/50")}>
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <span className="text-[9px] text-white/20 mb-1 block">Word break</span>
+              <div className="grid grid-cols-3 gap-1">
+                {[
+                  { value: "normal", label: "Normal" },
+                  { value: "break-word", label: "Break word" },
+                  { value: "break-all", label: "Break all" },
+                ].map((o) => (
+                  <button key={o.value} onClick={() => onStyleChange("wordBreak", o.value)}
+                    className={cn("py-1.5 rounded-lg cursor-pointer transition-all text-[9px]",
+                      elementProps.wordBreak === o.value ? "bg-purple-500/20 text-purple-400" : "bg-white/[0.03] text-white/30 hover:text-white/50")}>
+                    {o.label}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
