@@ -146,10 +146,10 @@ export async function POST(req: NextRequest) {
     }
 
     // ── OpenAI path ──────────────────────────────────────────────
-    const openaiKey = key || process.env.OPENAI_API_KEY;
+    const openaiKey = key;
     if (!openaiKey) {
       return NextResponse.json(
-        { error: "Chave OpenAI não configurada. Adicione em Configurações > IA de Imagem ou defina OPENAI_API_KEY." },
+        { error: "Chave OpenAI não configurada. Adicione em Configurações > IA de Imagem." },
         { status: 400 }
       );
     }

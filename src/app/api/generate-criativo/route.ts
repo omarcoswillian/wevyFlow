@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { toFile } from "openai/uploads";
+import { GoogleGenAI } from "@google/genai";
 
 export type CriativoFormat =
   | "youtube-thumbnail"
@@ -117,6 +118,65 @@ export async function POST(req: NextRequest) {
     const config = FORMAT_CONFIG[criativoFormat];
     const prompt = buildPrompt(criativoFormat, produto, headline, cta, cor, estilo, fase, chatInstruction);
 
+    // ── Gemini 3 Pro Image (Nano Banana Pro) path ────────────────
+    if (imageProvider === "gemini") {
+      if (!key) {
+        return NextResponse.json(
+          { error: "Chave Google AI Studio não configurada. Adicione em Configurações > IA de Imagem." },
+          { status: 400 }
+        );
+      }
+      try {
+        const client = new GoogleGenAI({ apiKey: key });
+        const model = imageModel || "gemini-3-pro-image-preview";
+
+        // Map format to aspect ratio
+        const aspectMap: Record<string, string> = {
+          "stories": "9:16", "feed-retrato": "9:16",
+          "feed-quadrado": "1:1", "whatsapp": "1:1",
+          "youtube-thumbnail": "16:9", "banner-horizontal": "16:9",
+        };
+        const aspectRatio = aspectMap[format] ?? "1:1";
+
+        const response = await client.models.generateContent({
+          model,
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          config: {
+            responseModalities: ["IMAGE", "TEXT"],
+            imageConfig: { aspectRatio, imageSize: "1K" },
+          },
+        } as Parameters<typeof client.models.generateContent>[0]);
+
+        let b64 = "";
+        let mimeType = "image/png";
+        const parts = response.candidates?.[0]?.content?.parts ?? [];
+        for (const part of parts) {
+          if ((part as { inlineData?: { data?: string; mimeType?: string } }).inlineData?.data) {
+            const id = (part as { inlineData: { data: string; mimeType?: string } }).inlineData;
+            b64 = id.data;
+            mimeType = id.mimeType ?? "image/png";
+            break;
+          }
+        }
+
+        if (!b64) return NextResponse.json({ error: "Imagem não retornada pelo Gemini." }, { status: 500 });
+        return NextResponse.json({ b64, mimeType, prompt });
+      } catch (e: unknown) {
+        const msg = String((e as Error)?.message ?? "");
+        if (msg.includes("401") || msg.includes("API_KEY") || msg.includes("invalid")) {
+          return NextResponse.json({ error: "API Key Google inválida ou expirada." }, { status: 401 });
+        }
+        if (msg.includes("429") || msg.includes("quota") || msg.includes("rate")) {
+          return NextResponse.json({ error: "Limite Google atingido. Aguarde alguns segundos." }, { status: 429 });
+        }
+        if (msg.includes("safety") || msg.includes("block")) {
+          return NextResponse.json({ error: "Prompt bloqueado pelo Google. Reformule." }, { status: 400 });
+        }
+        console.error("[generate-criativo gemini]", e);
+        return NextResponse.json({ error: "Erro ao gerar criativo com Gemini." }, { status: 500 });
+      }
+    }
+
     // ── Fal.ai path ──────────────────────────────────────────────
     if (imageProvider === "fal") {
       if (referenceBase64) {
@@ -174,7 +234,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ── OpenAI path ──────────────────────────────────────────────
-    const openaiKey = key || process.env.OPENAI_API_KEY;
+    const openaiKey = key;
     if (!openaiKey) {
       return NextResponse.json(
         { error: "Chave OpenAI não configurada. Adicione em Configurações > IA de Imagem." },

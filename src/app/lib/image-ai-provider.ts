@@ -1,9 +1,9 @@
 /**
  * Image AI provider types and metadata.
- * Independent from text AI provider — user can mix Anthropic (text) + Fal (image).
+ * Independent from text AI provider — user can mix Anthropic (text) + Gemini (image).
  */
 
-export type ImageProvider = "openai" | "fal";
+export type ImageProvider = "gemini" | "openai" | "fal";
 
 export interface ImageProviderMeta {
   label: string;
@@ -14,6 +14,13 @@ export interface ImageProviderMeta {
 }
 
 export const IMAGE_PROVIDER_META: Record<ImageProvider, ImageProviderMeta> = {
+  gemini: {
+    label: "Google Gemini",
+    description: "Gemini 3 Pro Image · Nano Banana Pro",
+    keyPlaceholder: "AIza...",
+    docsUrl: "https://aistudio.google.com/apikey",
+    color: "#4285f4",
+  },
   openai: {
     label: "OpenAI",
     description: "GPT-Image-2 · gpt-image-2",
@@ -31,6 +38,9 @@ export const IMAGE_PROVIDER_META: Record<ImageProvider, ImageProviderMeta> = {
 };
 
 export const IMAGE_MODEL_OPTIONS: Record<ImageProvider, { id: string; label: string; note?: string }[]> = {
+  gemini: [
+    { id: "gemini-3-pro-image-preview", label: "Gemini 3 Pro Image", note: "Nano Banana Pro · Recomendado" },
+  ],
   openai: [
     { id: "gpt-image-2", label: "GPT-Image-2", note: "Alta qualidade" },
   ],
@@ -43,6 +53,7 @@ export const IMAGE_MODEL_OPTIONS: Record<ImageProvider, { id: string; label: str
 };
 
 export const DEFAULT_IMAGE_MODELS: Record<ImageProvider, string> = {
+  gemini: "gemini-3-pro-image-preview",
   openai: "gpt-image-2",
   fal: "fal-ai/flux-pro/v1.1",
 };

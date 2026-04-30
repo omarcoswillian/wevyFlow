@@ -196,8 +196,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // BYOK — image AI
   const [imageApiKey, setImageApiKeyState] = useState<string>("");
-  const [imageProvider, setImageProviderState] = useState<ImageProvider>("openai");
-  const [imageModel, setImageModelState] = useState<string>("gpt-image-2");
+  const [imageProvider, setImageProviderState] = useState<ImageProvider>("gemini");
+  const [imageModel, setImageModelState] = useState<string>("gemini-3-pro-image-preview");
 
   useEffect(() => {
     try { setLaunchKits(JSON.parse(localStorage.getItem("wf_launch_kits") || "[]")); } catch {}
@@ -208,8 +208,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setAiProviderState((localStorage.getItem(STORAGE_PROVIDER_KEY) as AIProvider) ?? "anthropic");
     setAiModelState(localStorage.getItem(STORAGE_MODEL_KEY) ?? "claude-sonnet-4-6");
     setImageApiKeyState(localStorage.getItem(IMAGE_STORAGE_KEY) ?? "");
-    setImageProviderState((localStorage.getItem(IMAGE_STORAGE_PROVIDER) as ImageProvider) ?? "openai");
-    setImageModelState(localStorage.getItem(IMAGE_STORAGE_MODEL) ?? "gpt-image-2");
+    setImageProviderState((localStorage.getItem(IMAGE_STORAGE_PROVIDER) as ImageProvider) ?? "gemini");
+    setImageModelState(localStorage.getItem(IMAGE_STORAGE_MODEL) ?? "gemini-3-pro-image-preview");
     setWebhookUrlState(localStorage.getItem("wf_webhook_url") ?? "");
   }, []);
 
@@ -245,8 +245,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem(IMAGE_STORAGE_PROVIDER);
     localStorage.removeItem(IMAGE_STORAGE_MODEL);
     setImageApiKeyState("");
-    setImageProviderState("openai");
-    setImageModelState("gpt-image-2");
+    setImageProviderState("gemini");
+    setImageModelState("gemini-3-pro-image-preview");
   }, []);
 
   const { addEntry } = useHistory();
