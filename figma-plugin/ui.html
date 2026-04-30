@@ -8,13 +8,15 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background: #111114;
     color: #fff;
-    padding: 20px;
     font-size: 13px;
     line-height: 1.5;
   }
   .logo { font-size: 15px; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 2px; }
   .logo span { color: #8b5cf6; }
-  .sub { color: rgba(255,255,255,0.35); font-size: 11px; margin-bottom: 18px; }
+  .sub { color: rgba(255,255,255,0.35); font-size: 11px; }
+
+  .panel { padding: 18px 20px 20px; }
+  .header-area { padding: 16px 20px 0; }
 
   .steps {
     background: rgba(255,255,255,0.03);
@@ -95,38 +97,44 @@
 </head>
 <body>
 
-<p class="logo">Wevy<span>flow</span></p>
-<p class="sub">Exportar frame como template editável</p>
-
-<div class="steps">
-  <ol>
-    <li><strong>Selecione um Frame</strong> na tela do Figma</li>
-    <li>Clique em <strong>Exportar frame selecionado</strong></li>
-    <li>Baixe o arquivo <code>.wevyflow.json</code></li>
-    <li>No WevyFlow → Criativos → Biblioteca → <strong>"Importar do Figma"</strong></li>
-  </ol>
+<div class="header-area">
+  <p class="logo">Wevy<span>flow</span></p>
+  <p class="sub">Plugin de exportacao para WevyFlow</p>
 </div>
 
-<div class="note">
-  <strong>Fundo:</strong> PNG perfeito do Figma — foto, vetores, sombras, blur e efeitos, tudo incluso.<br>
-  <strong>Textos:</strong> exportados como camadas editáveis separadas.
+<div class="panel">
+
+  <div class="steps">
+    <ol>
+      <li><strong>Selecione um Frame</strong> na tela do Figma</li>
+      <li>Clique em <strong>Exportar frame selecionado</strong></li>
+      <li>Baixe o arquivo <code>.wevyflow.json</code></li>
+      <li>No WevyFlow &rarr; Criativos &rarr; Biblioteca &rarr; <strong>"Importar do Figma"</strong></li>
+    </ol>
+  </div>
+
+  <div class="note">
+    <strong>Fundo:</strong> PNG perfeito do Figma &mdash; foto, vetores, sombras, blur e efeitos, tudo incluso.<br>
+    <strong>Textos:</strong> exportados como camadas editaveis separadas.
+  </div>
+
+  <button class="btn btn-primary" id="btn-exp" onclick="doExport()">
+    Exportar frame selecionado
+  </button>
+
+  <div class="status" id="status">
+    <span class="spinner"></span> Exportando (imagens podem demorar alguns segundos)&hellip;
+  </div>
+
+  <div class="success-box" id="success-box">
+    <div class="fname" id="fname"></div>
+    <div class="finfo" id="finfo"></div>
+    <button class="btn btn-dl" onclick="doDownload()">Baixar JSON</button>
+  </div>
+
+  <div class="error-box" id="error-box"></div>
+
 </div>
-
-<button class="btn btn-primary" id="btn-exp" onclick="doExport()">
-  Exportar frame selecionado
-</button>
-
-<div class="status" id="status">
-  <span class="spinner"></span> Exportando (imagens podem demorar alguns segundos)…
-</div>
-
-<div class="success-box" id="success-box">
-  <div class="fname" id="fname"></div>
-  <div class="finfo" id="finfo"></div>
-  <button class="btn btn-dl" onclick="doDownload()">Baixar JSON</button>
-</div>
-
-<div class="error-box" id="error-box"></div>
 
 <script>
 var _blob = null;
@@ -153,31 +161,34 @@ window.onmessage = function(e) {
 
   if (msg.type === "loading") { show("status"); return; }
 
-  hide("status");
-  enable("btn-exp");
-
   if (msg.type === "done") {
+    hide("status");
+    enable("btn-exp");
     _blob = new Blob([msg.json], { type: "application/json" });
     _filename = safeFilename(msg.name) + ".wevyflow.json";
     var parsed = JSON.parse(msg.json);
     var objCount = (parsed.canvas && parsed.canvas.objects) ? parsed.canvas.objects.length : 0;
     setText("fname", _filename);
-    setText("finfo", parsed.w + " × " + parsed.h + "px  ·  " + objCount + " elementos exportados");
+    setText("finfo", parsed.w + " x " + parsed.h + "px  -  " + objCount + " elementos exportados");
     show("success-box");
+    return;
   }
 
   if (msg.type === "error") {
+    hide("status");
+    enable("btn-exp");
     setText("error-box", msg.text);
     show("error-box");
+    return;
   }
 };
 
 function safeFilename(s) { return (s || "template").replace(/[^a-zA-Z0-9\-_\s]/g, "").replace(/\s+/g, "_").slice(0, 60); }
-function show(id) { document.getElementById(id).style.display = "block"; }
-function hide(id) { document.getElementById(id).style.display = "none"; }
-function setText(id, t) { document.getElementById(id).textContent = t; }
-function disable(id) { document.getElementById(id).disabled = true; }
-function enable(id) { document.getElementById(id).disabled = false; }
+function show(id) { var el = document.getElementById(id); if (el) el.style.display = "block"; }
+function hide(id) { var el = document.getElementById(id); if (el) el.style.display = "none"; }
+function setText(id, t) { var el = document.getElementById(id); if (el) el.textContent = t; }
+function disable(id) { var el = document.getElementById(id); if (el) el.disabled = true; }
+function enable(id) { var el = document.getElementById(id); if (el) el.disabled = false; }
 </script>
 </body>
 </html>

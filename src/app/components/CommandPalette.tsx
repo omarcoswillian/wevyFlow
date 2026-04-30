@@ -65,7 +65,7 @@ export function CommandPalette({
   // Build command items
   const navigationItems: CommandItem[] = useMemo(() => [
     { id: "nav-home", type: "navigate", label: "Home", icon: <Home className="w-4 h-4" />, action: () => { onNavigate("home"); onClose(); } },
-    { id: "nav-resources", type: "navigate", label: "Resources", description: "Templates prontos", icon: <BookOpen className="w-4 h-4" />, action: () => { onNavigate("resources"); onClose(); } },
+    { id: "nav-resources", type: "navigate", label: "Landing Pages", description: "Templates prontos", icon: <BookOpen className="w-4 h-4" />, action: () => { onNavigate("resources"); onClose(); } },
     { id: "nav-projects", type: "navigate", label: "Todos os projetos", icon: <FolderOpen className="w-4 h-4" />, action: () => { onNavigate("projects-all"); onClose(); } },
     { id: "nav-starred", type: "navigate", label: "Favoritos", icon: <Star className="w-4 h-4" />, action: () => { onNavigate("projects-starred"); onClose(); } },
     { id: "action-new", type: "action", label: "Criar novo projeto", icon: <Plus className="w-4 h-4" />, action: () => { onCreateProject(); onClose(); } },

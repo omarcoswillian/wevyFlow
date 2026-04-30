@@ -112,7 +112,11 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
     return tag + cls;
   }
 
-  // Find the longest non-whitespace text node inside an element.
+  // Tags whose full innerHTML is the editable "text" of the element.
+  // For these, the inspector shows the complete HTML content (preserving <span> children).
+  var RICH_TEXT_TAGS = {H1:1,H2:1,H3:1,H4:1,H5:1,H6:1,P:1,LI:1,SPAN:1,A:1,B:1,STRONG:1,EM:1,I:1,SMALL:1,TD:1,TH:1,LABEL:1,FIGCAPTION:1,BLOCKQUOTE:1,CITE:1,DT:1,DD:1};
+
+  // Find the longest non-whitespace text node inside an element (used for containers).
   function findMainTextNode(root) {
     let best = null;
     function walk(node) {
@@ -129,13 +133,20 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
 
   function getComputedProps(el) {
     const cs = window.getComputedStyle(el);
-    const mainText = findMainTextNode(el);
+    // For text-type elements expose full innerHTML so the inspector shows the complete
+    // content including nested <span> color/gradient children. For containers fall back
+    // to finding the longest text node (existing behaviour).
+    var isRichText = RICH_TEXT_TAGS[el.tagName] === 1;
+    var richHtml = isRichText ? el.innerHTML : null;
+    var textValue = isRichText
+      ? (el.innerText && el.innerText.trim() ? el.innerHTML : null)
+      : (function(){ var n = findMainTextNode(el); return n ? n.textContent : null; }());
     return {
       tag: getElementTag(el),
       tagName: el.tagName.toLowerCase(),
       id: (el.id && !el.id.startsWith('wf-')) ? el.id : '',
       className: el.className || '',
-      text: mainText ? mainText.textContent : null,
+      text: textValue,
       href: el.getAttribute ? (el.getAttribute('href') || '') : '',
       target: el.getAttribute ? (el.getAttribute('target') || '') : '',
       src: el.getAttribute ? (el.getAttribute('src') || '') : '',
@@ -425,14 +436,19 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
     }
     if (e.data.type === 'wf-apply-text') {
       if (selectedEl) {
-        const mainText = findMainTextNode(selectedEl);
-        if (mainText) {
-          mainText.textContent = e.data.value;
+        if (RICH_TEXT_TAGS[selectedEl.tagName] === 1) {
+          // Rich-text element: update the full innerHTML so <span> color children are preserved.
+          selectedEl.innerHTML = e.data.value;
         } else {
-          // No existing text — prepend a text node so we don't nuke children
-          selectedEl.insertBefore(document.createTextNode(e.data.value), selectedEl.firstChild);
+          const mainText = findMainTextNode(selectedEl);
+          if (mainText) {
+            mainText.textContent = e.data.value;
+          } else {
+            selectedEl.insertBefore(document.createTextNode(e.data.value), selectedEl.firstChild);
+          }
         }
         postCodeUpdated();
+        window.parent.postMessage({ type: 'wf-element-selected', id: ensureId(selectedEl), props: getComputedProps(selectedEl) }, '*');
       }
     }
     if (e.data.type === 'wf-apply-attr' && typeof e.data.name === 'string') {

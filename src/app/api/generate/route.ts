@@ -1,6 +1,10 @@
 import { SECTIONS } from "../../lib/arsenal/sections";
 import { assembleSections } from "../../lib/arsenal/loader";
 import { resolveConfig, callOnce, startStream, iterableToReadable, parseApiError, AICallConfig } from "../../lib/ai-client";
+import { createClient } from "@/lib/supabase/server";
+import { PLANS, DEFAULT_PLAN, type PlanId } from "../../lib/plans";
+
+export const maxDuration = 300;
 
 /* ─────────────────────────────────────────────────────────────
    Rate limiter (in-memory, resets on deploy)
@@ -223,6 +227,7 @@ REGRAS INVIOLÁVEIS:
 13. Gradiente animado em CTAs (keyframes brilho) — reproduza se visível na referência.
 14. Letter-spacing negativo em headings grandes (-0.02em a -0.04em) — aplique se o texto parecer comprimido na referência.
 15. Glow de box-shadow em CTAs e elementos de destaque — reproduza se visível.
+16. PERFORMANCE: uma única tag <link> de fontes no <head> com preconnect hints antes dela. Adicione loading="lazy" em imgs fora do hero. Adicione fetchpriority="high" loading="eager" no primeiro img do hero.
 
 REGRA — HERO COM FOTO DE PESSOA (split layout):
 - min-height: 700px, width: 100%
@@ -235,8 +240,83 @@ A referência é a lei. Se ela tem 2 seções → gere 2. Se tem 4 → gere 4.
 
 /* ─────────────────────────────────────────────────────────────
    Step 3 — PERSONALIZE: Claude fills copy (streaming)
+   Padrões visuais variam por stylePreset para garantir que
+   light-clean, glassmorphism, neon-tech etc. sejam respeitados.
    ───────────────────────────────────────────────────────────── */
-const PERSONALIZE_SYSTEM = `Você é um designer e copywriter especialista em landing pages de alta conversão para o mercado digital brasileiro. Seu trabalho é transformar HTML de template em uma página que genuinamente vende.
+function getVisualPatterns(stylePreset: string, primaryColor: string): string {
+  switch (stylePreset) {
+    case "light-clean":
+      return `PADRÕES VISUAIS OBRIGATÓRIOS — ESTILO LIGHT CLEAN:
+⚠️ ATENÇÃO: O usuário escolheu modo CLARO. Ignore qualquer cor escura do template base.
+- Fundo geral: #ffffff ou #f8fafc (NUNCA preto, NUNCA cinza escuro)
+- Seções alternadas: #ffffff e #f1f5f9
+- Texto: #111827 (principal), #6b7280 (secundário/muted)
+- Headings: #0f172a, letter-spacing: -0.03em
+- Cards: background #ffffff, border: 1px solid #e5e7eb, border-radius: 12px
+- CTAs: background: ${primaryColor || "#6366f1"}; color: #ffffff; border-radius: 10px
+  Hover: filter: brightness(1.08); box-shadow: 0 4px 20px ${primaryColor || "#6366f1"}40
+- Sem blur circles escuros — se decorativo, use círculos com cor pastel e opacity: 0.15
+- Stats: cor primária ${primaryColor || "#6366f1"} ou #0f172a, fundo claro
+- Separadores de seção: border-top: 1px solid #e5e7eb
+- REGRA ABSOLUTA: qualquer background escuro do template DEVE ser substituído por branco ou cinza claro`;
+
+    case "glassmorphism":
+      return `PADRÕES VISUAIS OBRIGATÓRIOS — ESTILO GLASSMORPHISM:
+- Fundo: gradiente escuro ou imagem blur como base (#0f0f1a ou similar)
+- Cards/seções internas: background: rgba(255,255,255,0.07); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px
+- Texto: branco ou rgba(255,255,255,0.85)
+- CTAs: background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.25); color: #fff
+  Hover: background: rgba(255,255,255,0.25)
+- Blur circles decorativos: filter:blur(100px); opacity:0.25; border-radius:50%
+- Headings: letter-spacing: -0.03em; color: #ffffff`;
+
+    case "neon-tech":
+      return `PADRÕES VISUAIS OBRIGATÓRIOS — ESTILO NEON TECH:
+- Fundo: #050508 ou #020207 (quase preto)
+- Texto: #e2e8f0 (principal), #64748b (muted)
+- CTAs: background: transparent; border: 2px solid ${primaryColor || "#00f5ff"}; color: ${primaryColor || "#00f5ff"}
+  box-shadow: 0 0 20px ${primaryColor || "#00f5ff"}60, inset 0 0 20px ${primaryColor || "#00f5ff"}10
+  Hover: background: ${primaryColor || "#00f5ff"}15; box-shadow: 0 0 40px ${primaryColor || "#00f5ff"}80
+- Blur circles decorativos: filter:blur(120px); opacity:0.20; cor: ${primaryColor || "#00f5ff"}
+- Headings: letter-spacing: -0.03em; color: #ffffff; text-shadow: 0 0 30px ${primaryColor || "#00f5ff"}40
+- Bordas de cards: border: 1px solid ${primaryColor || "#00f5ff"}30; background: rgba(255,255,255,0.03)`;
+
+    case "luxury":
+      return `PADRÕES VISUAIS OBRIGATÓRIOS — ESTILO LUXURY:
+- Fundo: #0a0804 ou #09080d (preto quente ou frio profundo)
+- Acento: ${primaryColor || "#c9a84c"} (dourado ou cor primária)
+- Texto: #f5f0e8 (creme) ou #e8e0d0
+- CTAs: background: ${primaryColor || "#c9a84c"}; color: #000000; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase
+  box-shadow: 0 4px 24px ${primaryColor || "#c9a84c"}50
+  Hover: filter: brightness(1.1)
+- Sem blur circles — use linhas finas decorativas (border-bottom: 1px solid ${primaryColor || "#c9a84c"}40)
+- Headings: font-weight: 300 ou 600; letter-spacing: -0.02em; color: #f5f0e8
+- Cards: background: rgba(255,255,255,0.03); border: 1px solid ${primaryColor || "#c9a84c"}20`;
+
+    case "brutalist":
+      return `PADRÕES VISUAIS OBRIGATÓRIOS — ESTILO BRUTALIST:
+- Fundo: #ffffff (branco puro) ou #f5f500 (amarelo choque — escolha um)
+- Texto: #000000 (preto absoluto)
+- CTAs: background: #000000; color: #ffffff; border: 3px solid #000000; border-radius: 0; text-transform: uppercase; font-weight: 900; letter-spacing: 0.05em
+  Hover: background: ${primaryColor || "#ff0000"}; border-color: ${primaryColor || "#ff0000"}; color: #ffffff
+- Sem blur, sem gradiente, sem sombra suave — apenas box-shadow: 4px 4px 0 #000
+- Headings: font-weight: 900; text-transform: uppercase; letter-spacing: -0.02em; color: #000000
+- Cards: border: 3px solid #000000; border-radius: 0; background: #ffffff; box-shadow: 6px 6px 0 #000`;
+
+    default: // dark-premium
+      return `PADRÕES VISUAIS OBRIGATÓRIOS — ESTILO DARK PREMIUM:
+- CTAs: gradient animado: \`background-image: linear-gradient(45deg, ${primaryColor || "#FF5C00"}, ${primaryColor || "#E04E00"}, ${primaryColor || "#FF5C00"}, ${primaryColor || "#FF7A20"}); background-size: 400% 200%; animation: brilho 3.4s infinite;\` + \`@keyframes brilho { 0%{background-position:0 0} 100%{background-position:100% 0} }\`
+- Glow em CTAs: \`box-shadow: 0 4px 32px ${primaryColor || "rgba(255,92,0,0.35)"}80\` default, hover mais intenso
+- Hero: blur circles decorativos com \`filter:blur(120px); opacity:0.12; border-radius:50%\`
+- Fundo: #0a0a0b ou #0c0c10
+- Texto: #ffffff e rgba(255,255,255,0.6)
+- Headings: letter-spacing: -0.03em; color: #ffffff
+- Stats: números grandes, visualmente impactantes, cor primária ou branco`;
+  }
+}
+
+function buildPersonalizeSystem(stylePreset: string, primaryColor: string): string {
+  return `Você é um copywriter sênior especialista em páginas de vendas de alta conversão para o mercado digital brasileiro, com mais de 20 anos de experiência escrevendo landing pages para infoprodutos, lançamentos e perpétuos que faturaram milhões. Você entende que página não vende — copy vende. Ninguém compra layout: as pessoas compram promessa, desejo e medo.
 
 Quando uma imagem de referência for fornecida (screenshot de uma página existente):
 - ANALISE o screenshot antes de tudo: conte as seções, identifique o layout de cada uma, cores, tipografia e elementos visuais.
@@ -249,35 +329,63 @@ Receberá um HTML composto de múltiplas seções com dois tipos de copy:
 1. Marcadores [INSERIR: algo] — substitua pelo conteúdo real
 2. Copy de demonstração hardcoded — reescreva para o produto do usuário
 
-PADRÕES VISUAIS OBRIGATÓRIOS (aplique sempre que o template permitir):
-- CTAs: se o template tiver botão simples, MELHORE para gradient animado: \`background-image: linear-gradient(45deg, #FF5C00, #E04E00, #FF5C00, #FF7A20); background-size: 400% 200%; animation: brilho 3.4s infinite;\` + \`@keyframes brilho { 0%{background-position:0 0} 100%{background-position:100% 0} }\`
-- Glow em CTAs: \`box-shadow: 0 4px 32px rgba(255,92,0,0.35)\` default, \`0 0 48px rgba(255,92,0,0.5)\` hover
-- Hero: adicione blur circles decorativos se não existirem: 2-3 divs absolutos com \`filter:blur(120px); opacity:0.12; border-radius:50%; background:#FF5C00\`
-- Headings premium: \`letter-spacing: -0.03em\` em h1/h2 grandes
-- Trust imediata: se a página tiver stats logo após o hero, faça os números específicos e grandes
+ETAPA 1 — DIAGNÓSTICO INTERNO DA OFERTA (faça isso antes de escrever qualquer linha)
+Analise mentalmente o briefing e mapeie:
+• Promessa principal: o que o leitor terá, em quanto tempo, de forma específica e mensurável
+• Avatar real: quem é esse leitor, sua situação atual, o que já tentou e falhou
+• Dor central: não a dor genérica do nicho — a dor específica que mantém esse avatar acordado às 2h da manhã
+• Desejo dominante: a transformação que ele REALMENTE quer (não o que diz querer superficialmente)
+• Medo silencioso: "não vai funcionar pra mim também", "vou começar e desistir de novo", "sou diferente dos outros casos"
+• Mecanismo único: o que torna ESTA solução diferente de tudo que ele já tentou antes — o porquê funciona quando o resto falhou
+• Inimigo comum: a causa externa do problema (dietas de restrição, planilhas complicadas, gurus genéricos, o mercado, o sistema)
+• As 5 objeções em ordem de aparição na jornada de leitura da página
 
-PRINCÍPIOS DE COPY DE ALTA CONVERSÃO (aplique sempre):
-- Hero: headline focada em TRANSFORMAÇÃO (antes/depois), não em features. Subheadline explica o mecanismo único.
-- Benefícios: cada benefício foca no resultado emocional, não na feature técnica. Use "Você vai conseguir X" não "Inclui X".
-- Autoridade: credenciais concretas e verificáveis. Evite jargões vazios. Use números reais.
-- Depoimentos: nomes plausíveis (ficcionais OK), resultados específicos e mensuráveis, cargo/nicho real.
-- Oferta: crie urgência genuína com motivo crível. Parcelas acessíveis. CTA na voz ativa do cliente ("Quero começar agora").
-- Garantia: inverta o risco completamente. "Você não perde nada" é mais forte que "devolvemos o dinheiro".
-- FAQ: responda as 6 objeções REAIS do avatar (preço, tempo, funciona pra mim?, tenho suporte?, quando acessa?, é diferente de X?)
+ETAPA 2 — ARQUITETURA DE PERSUASÃO (cada bloco responde à objeção que surge após o anterior)
+1. Headline + sub-headline: promessa específica + mecanismo único. Para o scroll em menos de 3 segundos.
+2. Identificação com a dor: espelhe a dor COM AS PALAVRAS que o avatar usa — ele precisa sentir "isso foi escrito pra mim". Nunca use jargões do produto.
+3. Solução e mecanismo único: o que faz isso funcionar quando tudo que ele tentou antes falhou.
+4. O que é o produto: entrega tangível, módulos, formato, acesso.
+5. Para quem é / para quem não é: inclui e exclui com precisão — aumenta confiança e desejo.
+6. Prova social: depoimentos com resultados específicos e mensuráveis, ANTES da decisão de preço.
+7. Stack de valor + ancoragem: mostre o valor total antes de revelar o preço final.
+8. Garantia: não é cláusula jurídica, é argumento de venda. Inverta o risco completamente.
+9. FAQ / objeções: as 3-5 objeções mais prováveis respondidas de forma que convertem.
+10. CTA final + urgência legítima: um motivo claro e crível para agir AGORA, não amanhã.
 
-REGRAS INVIOLÁVEIS:
+REGRAS DE COPY:
+• Cada bloco termina com uma ponte para o próximo — nunca deixe o leitor sem razão para continuar scrollando
+• Pelo menos 3 CTAs ao longo da página com ângulos diferentes (transformação, medo de perder, lógica)
+• Botões sempre na primeira pessoa: "Quero [resultado específico]" — nunca "Comprar agora" ou "Saiba mais"
+• Ancoragem de preço sempre antes do número final
+• Urgência real e crível — nunca fabricada ou óbvia
+• Frases curtas, parágrafos de no máximo 3 linhas, ritmo de scroll vertical
+• Nomeie a dor com as palavras do avatar, nunca com termos técnicos do produto
+• Depoimentos ficcionais mas verossímeis: resultados específicos, nomes e cargos plausíveis do nicho
+
+${getVisualPatterns(stylePreset, primaryColor)}
+
+REGRAS TÉCNICAS INVIOLÁVEIS:
 1. Retorne APENAS o HTML completo. ZERO texto explicativo, markdown ou crases.
-2. Preserve 100% da estrutura HTML, atributos class, id, style, SVGs e tags.
+2. Preserve a estrutura HTML (tags, classes, layout) — MAS ADAPTE cores de fundo, texto e bordas ao estilo selecionado acima.
 3. Substitua TODOS os [INSERIR: ...] — nunca deixe nenhum marcador.
-4. Reescreva copy de demonstração para o produto real do usuário.
-5. Copy em Português Brasileiro, direto e persuasivo. Sem CLT e sem clichês de marketing.
-6. ZERO emojis. Use SVG icons quando necessário.
-7. Nunca invente nomes reais de pessoas — use nomes ficcionais plausíveis.
-8. Primeiro caractere da resposta = "<"
-9. NUNCA use a fonte Unbounded. Fontes padrão quando não especificado: Montserrat ou Sora.
-10. Números nos depoimentos devem ser específicos: "aumentei minhas vendas em 340%" não "melhorei muito".
-11. CTAs sempre na primeira pessoa: "Quero [resultado]" não "Comprar agora".
-12. Quando melhorar CTAs com brilho animado, adicione o @keyframes brilho no <style> da seção correspondente.`;
+4. Copy em Português Brasileiro. Sem CLT e sem clichês de marketing vazio.
+5. ZERO emojis. Use SVG icons quando necessário.
+6. Nunca invente nomes reais de pessoas — use nomes ficcionais plausíveis do nicho.
+7. Primeiro caractere da resposta = "<"
+8. NUNCA use a fonte Unbounded. Padrão: Montserrat ou Sora.
+9. Números em depoimentos sempre específicos: "340% de aumento" não "melhorou muito".
+10. Quando usar animação em CTAs, adicione o @keyframes no <style>.
+
+LIMITE DE TAMANHO — OBRIGATÓRIO:
+O HTML final deve ter no máximo 500 linhas de código. CSS inline: eficiente, sem repetição. Uma regra CSS serve várias seções. Textos de seção: máximo 3 parágrafos ou 5 itens de lista por bloco. Seja denso e preciso — não verboso.
+
+REGRAS DE PERFORMANCE (PageSpeed 99):
+11. Uma única tag <link> de fontes no <head> com preconnect hints antes.
+12. loading="lazy" decoding="async" em todas as <img> exceto o primeiro hero.
+13. O primeiro <img> do hero: loading="eager" fetchpriority="high".
+14. defer em todo <script src="..."> não crítico.
+15. Zero dependências externas além do Google Fonts.`;
+}
 
 const COPY_MODE_SYSTEM = `Você é um especialista em landing pages. O usuário forneceu a copy completa e quer que você distribua esse texto exato nas seções do HTML.
 
@@ -323,6 +431,56 @@ export async function POST(request: Request) {
     aiProvider,
     aiModel,
   } = await request.json();
+
+  // Quota check — only when using the WevyFlow server key (not BYOK)
+  let quotaUserId: string | null = null;
+  if (!apiKey) {
+    try {
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return Response.json({ error: "Faça login para gerar páginas." }, { status: 401 });
+      quotaUserId = user.id;
+
+      // Resolve user plan
+      let planId: PlanId = DEFAULT_PLAN;
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("plan")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (profile?.plan && profile.plan in PLANS) planId = profile.plan as PlanId;
+
+      const plan = PLANS[planId];
+      const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+      const { count } = await supabase
+        .from("generation_history")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .gte("created_at", monthStart);
+
+      const used = count ?? 0;
+      if (used >= plan.pages) {
+        return Response.json({
+          error: `Limite mensal atingido (${used}/${plan.pages} páginas — Plano ${plan.label}). Faça upgrade para continuar gerando.`,
+          limitReached: true,
+          plan: planId,
+          used,
+          limit: plan.pages,
+        }, { status: 429 });
+      }
+
+      // Record the generation attempt (quota deduction)
+      await supabase.from("generation_history").insert({
+        user_id: user.id,
+        prompt: (prompt || "").slice(0, 500),
+        platform: platform || "html",
+        code: "",
+      });
+    } catch (e) {
+      // If supabase is unavailable, don't block generation — log and continue
+      console.error("[quota-check] error:", e);
+    }
+  }
 
   const aiConfig = resolveConfig(apiKey, aiProvider, aiModel);
 
@@ -399,7 +557,7 @@ export async function POST(request: Request) {
         aiConfig,
         REPLICATE_SYSTEM,
         replicateMsg,
-        64000,
+        20000,
         replicateImages.length > 0 ? replicateImages : undefined
       );
     } catch (e: unknown) {
@@ -520,7 +678,7 @@ export async function POST(request: Request) {
   try {
     gen = await startStream(
       aiConfig,
-      hasCopyDocument ? COPY_MODE_SYSTEM : PERSONALIZE_SYSTEM,
+      hasCopyDocument ? COPY_MODE_SYSTEM : buildPersonalizeSystem(stylePreset || "dark-premium", primaryColor || "#FF5C00"),
       personalizeUserMsg,
       64000,
       allImages.length > 0 ? allImages : undefined

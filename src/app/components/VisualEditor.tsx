@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Type, Palette, Space, MousePointer, AlignLeft, AlignCenter, AlignRight, AlignJustify, Underline, Strikethrough, Italic, LayoutGrid, MoveHorizontal, MoveVertical, ArrowDownNarrowWide, Copy, Trash2, ArrowUp, ArrowDown, Link2, FileText, LogIn, Mail, Phone, Anchor, Package, PlayCircle, Plus, X, Hash, Eye, EyeOff, Sparkles, Image } from "lucide-react";
@@ -190,6 +190,42 @@ const INTERACTIVE_TAGS = new Set([
   "video",
   "audio",
 ]);
+
+// Rich-text contenteditable editor — renders HTML visually (colored spans appear colored).
+// The user types normally; on blur the updated innerHTML is sent back.
+// Key-based remounting (on the parent <section>) resets it when a new element is selected.
+function RichContentEditor({ initialHtml, onSave }: { initialHtml: string; onSave: (html: string) => void }) {
+  const divRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (divRef.current) {
+      divRef.current.innerHTML = initialHtml;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // only on mount — parent key resets on element change
+
+  return (
+    <div
+      ref={divRef}
+      contentEditable
+      suppressContentEditableWarning
+      spellCheck={false}
+      onBlur={() => onSave(divRef.current?.innerHTML ?? "")}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+          e.preventDefault();
+          divRef.current?.blur();
+        }
+      }}
+      className={cn(
+        "w-full bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2.5",
+        "text-[12px] text-white/90 min-h-[72px] leading-relaxed",
+        "focus:outline-none focus:border-purple-500/40 cursor-text",
+        "transition-colors"
+      )}
+    />
+  );
+}
 
 export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange, onTextChange, onAttrChange, onFontLoad, onDuplicate, onDelete, onMove, onSaveComponent, onBack }: VisualEditorProps) {
   const badge = VIEWPORT_BADGE[viewport] || VIEWPORT_BADGE.desktop;
@@ -402,19 +438,19 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
       {/* ── STYLE TAB ── */}
       {activeTab === "style" && (
       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-5">
-        {/* Text */}
+        {/* Rich text editor */}
         {elementProps.text !== null && (
-          <section>
+          <section key={"text-" + elementProps.tag + "-" + (elementProps.id || elementProps.className?.slice(0, 24))}>
             <Label className="flex items-center gap-1.5 mb-2">
-              <Type className="w-3 h-3" /> Texto
+              <Type className="w-3 h-3" /> Conteúdo
             </Label>
-            <textarea
-              key={"t-" + elementProps.text}
-              defaultValue={elementProps.text}
-              onBlur={(e) => onTextChange(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) (e.target as HTMLTextAreaElement).blur(); }}
-              className="w-full bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2 text-[12px] text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/30 resize-none h-20"
+            <RichContentEditor
+              initialHtml={elementProps.text}
+              onSave={onTextChange}
             />
+            <p className="text-[9px] text-white/25 mt-1.5 leading-relaxed">
+              Para editar uma palavra colorida, clique diretamente nela no canvas.
+            </p>
           </section>
         )}
 

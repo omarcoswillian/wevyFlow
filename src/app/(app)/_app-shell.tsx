@@ -2,6 +2,7 @@
 
 import { AppProvider, useAppContext } from "./_context";
 import { CommandPalette } from "../components/CommandPalette";
+import { LaunchWizard } from "../components/LaunchWizard";
 
 function GlobalPalette() {
   const {
@@ -31,6 +32,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <AppProvider>
       <GlobalPalette />
+      <LaunchWizard />
       <div className="h-screen overflow-hidden">{children}</div>
     </AppProvider>
   );

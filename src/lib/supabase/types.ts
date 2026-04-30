@@ -76,6 +76,28 @@ export type Database = {
           },
         ];
       };
+      creative_library: {
+        Row: {
+          id: string;
+          user_id: string;
+          url: string;
+          name: string | null;
+          format: string | null;
+          tags: string[] | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          url: string;
+          name?: string | null;
+          format?: string | null;
+          tags?: string[] | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["creative_library"]["Insert"]>;
+        Relationships: [];
+      };
       criativos: {
         Row: {
           id: string;
@@ -136,6 +158,70 @@ export type Database = {
         };
         Relationships: [];
       };
+      leads: {
+        Row: {
+          id: string;
+          user_id: string;
+          page_slug: string | null;
+          page_title: string | null;
+          name: string | null;
+          email: string | null;
+          phone: string | null;
+          extra: Record<string, string> | null;
+          utm_source: string | null;
+          utm_medium: string | null;
+          utm_campaign: string | null;
+          referrer: string | null;
+          ip: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          page_slug?: string | null;
+          page_title?: string | null;
+          name?: string | null;
+          email?: string | null;
+          phone?: string | null;
+          extra?: Record<string, string> | null;
+          utm_source?: string | null;
+          utm_medium?: string | null;
+          utm_campaign?: string | null;
+          referrer?: string | null;
+          ip?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["leads"]["Insert"]>;
+        Relationships: [];
+      };
+      published_pages: {
+        Row: {
+          id: string;
+          user_id: string;
+          slug: string;
+          title: string;
+          html: string;
+          kit_id: string | null;
+          page_type: string | null;
+          views: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          slug: string;
+          title: string;
+          html: string;
+          kit_id?: string | null;
+          page_type?: string | null;
+          views?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["published_pages"]["Insert"]>;
+        Relationships: [];
+      };
       generation_history: {
         Row: {
           id: string;
@@ -160,6 +246,29 @@ export type Database = {
           platform?: Platform;
           code?: string;
           created_at?: string;
+        };
+        Relationships: [];
+      };
+      user_profiles: {
+        Row: {
+          id: string;
+          user_id: string;
+          plan: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          plan?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          plan?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };

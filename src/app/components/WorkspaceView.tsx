@@ -30,6 +30,15 @@ import {
   Redo2,
   Save,
   ImageIcon,
+  Globe,
+  ExternalLink,
+  X,
+  Search,
+  BarChart2,
+  Link2,
+  EyeOff,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { Platform, ViewportSize } from "../lib/types";
 import { IFRAME_VISUAL_EDIT_SCRIPT } from "../lib/iframe-inject";
@@ -98,6 +107,18 @@ export function WorkspaceView({
   const [loadedFonts, setLoadedFonts] = useState<string[]>([]);
   const [showElementorExport, setShowElementorExport] = useState(false);
   const [elementorCopied, setElementorCopied] = useState(false);
+  const [wpCopied, setWpCopied] = useState(false);
+  const [publishModalOpen, setPublishModalOpen] = useState(false);
+  const [publishSlug, setPublishSlug] = useState("");
+  const [publishLoading, setPublishLoading] = useState(false);
+  const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const [publishGaId, setPublishGaId] = useState("");
+  const [publishFbPixel, setPublishFbPixel] = useState("");
+  const [publishMetaDesc, setPublishMetaDesc] = useState("");
+  const [publishNoIndex, setPublishNoIndex] = useState(false);
+  const [publishSeoOpen, setPublishSeoOpen] = useState(false);
+  const [publishTrackingOpen, setPublishTrackingOpen] = useState(false);
   const [vslDialog, setVslDialog] = useState<{ id: string; config: VSLConfig | null } | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
@@ -244,6 +265,96 @@ export function WorkspaceView({
   const handleCopyElementor = useCallback(() => {
     setShowElementorExport(true);
   }, []);
+
+  const handleExportWordPress = useCallback(() => {
+    const cleanHtml = stripEditorScripts(iframeSyncRef.current || finalCode || code);
+    const fullHtml = `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>${prompt || "WevyFlow Page"}</title>\n</head>\n<body>\n${cleanHtml}\n</body>\n</html>`;
+    const payload = JSON.stringify({
+      wf: 1,
+      title: prompt || "WevyFlow Page",
+      html: fullHtml,
+      exportedAt: new Date().toISOString(),
+    });
+    navigator.clipboard.writeText(payload);
+    setWpCopied(true);
+    setTimeout(() => setWpCopied(false), 3000);
+  }, [code, finalCode, prompt]);
+
+  const injectPublishOptions = useCallback((html: string): string => {
+    let out = html;
+    const hasHead = /<\/head>/i.test(out);
+    const hasBody = /<\/body>/i.test(out);
+    if (!hasHead) return out;
+
+    const headInserts: string[] = [];
+    const bodyInserts: string[] = [];
+
+    if (publishMetaDesc.trim()) {
+      const tag = `<meta name="description" content="${publishMetaDesc.trim().replace(/"/g, "&quot;")}">`;
+      if (/<meta\s+name=["']description["']/i.test(out)) {
+        out = out.replace(/<meta\s+name=["']description["'][^>]*>/i, tag);
+      } else {
+        headInserts.push(tag);
+      }
+    }
+
+    if (publishNoIndex) {
+      if (!/<meta\s+name=["']robots["']/i.test(out)) {
+        headInserts.push(`<meta name="robots" content="noindex, nofollow">`);
+      }
+    }
+
+    if (publishGaId.trim()) {
+      const id = publishGaId.trim();
+      headInserts.push(
+        `<script async src="https://www.googletagmanager.com/gtag/js?id=${id}"></script>`,
+        `<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${id}');</script>`
+      );
+    }
+
+    if (headInserts.length > 0) {
+      out = out.replace(/<\/head>/i, `${headInserts.map(s => `  ${s}`).join("\n")}\n</head>`);
+    }
+
+    if (publishFbPixel.trim()) {
+      const id = publishFbPixel.trim();
+      bodyInserts.push(
+        `<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${id}');fbq('track','PageView');</script>`,
+        `<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${id}&ev=PageView&noscript=1"/></noscript>`
+      );
+    }
+
+    if (bodyInserts.length > 0 && hasBody) {
+      out = out.replace(/<\/body>/i, `${bodyInserts.map(s => `  ${s}`).join("\n")}\n</body>`);
+    }
+
+    return out;
+  }, [publishMetaDesc, publishNoIndex, publishGaId, publishFbPixel]);
+
+  const handlePublish = useCallback(async () => {
+    const slug = publishSlug.trim();
+    if (!slug) return;
+    setPublishLoading(true);
+    setPublishError(null);
+    const cleanHtml = stripEditorScripts(iframeSyncRef.current || finalCode || code);
+    // Generated pages are already full HTML documents — avoid double-wrapping
+    const isFullDoc = /^\s*<!doctype\s/i.test(cleanHtml) || /^\s*<html/i.test(cleanHtml);
+    const baseHtml = isFullDoc
+      ? cleanHtml
+      : `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>${prompt || "WevyFlow Page"}</title>\n</head>\n<body>\n${cleanHtml}\n</body>\n</html>`;
+    const fullHtml = injectPublishOptions(baseHtml);
+    try {
+      const res = await fetch("/api/pages/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug, title: prompt || "WevyFlow Page", html: fullHtml, page_type: "generated" }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setPublishError(data.error || "Erro ao publicar"); return; }
+      setPublishedUrl(data.url);
+    } catch { setPublishError("Erro de conexão"); }
+    finally { setPublishLoading(false); }
+  }, [publishSlug, code, finalCode, prompt, injectPublishOptions]);
 
   // Visual edit: toggle mode
   const toggleVisualEdit = useCallback(() => {
@@ -709,13 +820,31 @@ export function WorkspaceView({
                   className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium text-white/30 hover:text-white/50 hover:bg-white/[0.05] transition-all cursor-pointer">
                   <Download className="w-3.5 h-3.5" /> HTML
                 </button>
-                <button onClick={handleCopyElementor}
-                  className={cn("flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer",
-                    elementorCopied
+                <button onClick={handleExportWordPress}
+                  className={cn("flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer",
+                    wpCopied
                       ? "bg-emerald-500/15 text-emerald-400"
-                      : "bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:shadow-lg hover:shadow-orange-500/20")}>
-                  {elementorCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {elementorCopied ? "Copiado! Cole no Elementor" : "Elementor"}
+                      : "bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-sm")}>
+                  {wpCopied ? <Check className="w-3.5 h-3.5" /> : <Download className="w-3.5 h-3.5" />}
+                  {wpCopied ? "Copiado!" : "WordPress"}
+                </button>
+                <button onClick={() => {
+                  setPublishModalOpen(true);
+                  setPublishedUrl(null);
+                  setPublishError(null);
+                  if (!publishSlug) {
+                    const suggested = (prompt || "minha-pagina")
+                      .toLowerCase()
+                      .normalize("NFD").replace(/[̀-ͯ]/g, "")
+                      .replace(/[^a-z0-9\s-]/g, "")
+                      .trim()
+                      .replace(/\s+/g, "-")
+                      .slice(0, 50);
+                    setPublishSlug(suggested);
+                  }
+                }}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-purple-600 hover:bg-purple-500 text-white transition-all cursor-pointer shadow-sm">
+                  <Globe className="w-3.5 h-3.5" /> Publicar
                 </button>
               </>
             )}
@@ -813,6 +942,202 @@ export function WorkspaceView({
           fonts={loadedFonts}
           onClose={() => setShowElementorExport(false)}
         />
+      )}
+
+      {/* Publish Modal */}
+      {publishModalOpen && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => { setPublishModalOpen(false); setPublishedUrl(null); }} />
+          <div className="relative z-10 w-full max-w-lg mx-4 bg-[#0f0f14] border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06] shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-purple-500/15 border border-purple-500/20 flex items-center justify-center">
+                  <Globe className="w-3.5 h-3.5 text-purple-400" />
+                </div>
+                <h3 className="text-[14px] font-semibold text-white">Publicar página</h3>
+              </div>
+              <button onClick={() => { setPublishModalOpen(false); setPublishedUrl(null); }} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/70 cursor-pointer transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {!publishedUrl ? (
+              <div className="overflow-y-auto flex-1">
+                <div className="px-6 py-5 space-y-5">
+
+                  {/* URL Section */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Link2 className="w-3.5 h-3.5 text-white/30" />
+                      <span className="text-[11px] uppercase tracking-widest text-white/30 font-semibold">URL</span>
+                    </div>
+                    <div className="flex items-center gap-0 rounded-lg border border-white/[0.08] overflow-hidden focus-within:border-purple-500/40 transition-colors">
+                      <span className="px-3 py-2.5 text-[11px] text-white/25 bg-white/[0.02] border-r border-white/[0.06] shrink-0 font-mono">wevyflow.com/p/</span>
+                      <input
+                        value={publishSlug}
+                        onChange={(e) => setPublishSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
+                        placeholder="meu-produto"
+                        autoFocus
+                        className="flex-1 bg-transparent px-3 py-2.5 text-[12px] text-white placeholder:text-white/20 focus:outline-none font-mono min-w-0"
+                      />
+                    </div>
+                  </div>
+
+                  {/* SEO Section */}
+                  <div className="rounded-xl border border-white/[0.06] overflow-hidden">
+                    <button
+                      onClick={() => setPublishSeoOpen((o) => !o)}
+                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/[0.02] transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Search className="w-3.5 h-3.5 text-white/30" />
+                        <span className="text-[12px] font-medium text-white/70">SEO e Indexação</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {(publishMetaDesc || publishNoIndex) && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-purple-500/15 text-purple-400 font-semibold">configurado</span>
+                        )}
+                        {publishSeoOpen ? <ChevronUp className="w-3.5 h-3.5 text-white/20" /> : <ChevronDown className="w-3.5 h-3.5 text-white/20" />}
+                      </div>
+                    </button>
+                    {publishSeoOpen && (
+                      <div className="px-4 pb-4 pt-1 space-y-3 border-t border-white/[0.05]">
+                        <div>
+                          <label className="block text-[10px] uppercase tracking-widest text-white/25 font-semibold mb-1.5">Meta description</label>
+                          <textarea
+                            value={publishMetaDesc}
+                            onChange={(e) => setPublishMetaDesc(e.target.value)}
+                            rows={2}
+                            placeholder="Descrição que aparece no Google e WhatsApp quando o link é compartilhado..."
+                            className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-[11px] text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/30 resize-none transition-colors"
+                          />
+                          <p className="text-[10px] text-white/20 mt-1">{publishMetaDesc.length}/160 caracteres</p>
+                        </div>
+                        <div className="flex items-center justify-between py-1">
+                          <div>
+                            <p className="text-[12px] text-white/60 font-medium">Ocultar do Google</p>
+                            <p className="text-[10px] text-white/25 mt-0.5">Adiciona noindex — útil para páginas de teste ou internas</p>
+                          </div>
+                          <button
+                            onClick={() => setPublishNoIndex((v) => !v)}
+                            className={cn(
+                              "relative w-9 h-5 rounded-full transition-colors shrink-0 cursor-pointer",
+                              publishNoIndex ? "bg-purple-500" : "bg-white/[0.08]"
+                            )}
+                          >
+                            <span className={cn(
+                              "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform",
+                              publishNoIndex ? "translate-x-4" : "translate-x-0.5"
+                            )} />
+                          </button>
+                        </div>
+                        {publishNoIndex && (
+                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/[0.08] border border-amber-500/[0.15]">
+                            <EyeOff className="w-3 h-3 text-amber-400 shrink-0" />
+                            <p className="text-[10px] text-amber-400/80">Esta página não será indexada pelo Google.</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Tracking Section */}
+                  <div className="rounded-xl border border-white/[0.06] overflow-hidden">
+                    <button
+                      onClick={() => setPublishTrackingOpen((o) => !o)}
+                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/[0.02] transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2">
+                        <BarChart2 className="w-3.5 h-3.5 text-white/30" />
+                        <span className="text-[12px] font-medium text-white/70">Rastreamento e Analytics</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {(publishGaId || publishFbPixel) && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-semibold">
+                            {[publishGaId && "GA4", publishFbPixel && "Meta Pixel"].filter(Boolean).join(" + ")}
+                          </span>
+                        )}
+                        {publishTrackingOpen ? <ChevronUp className="w-3.5 h-3.5 text-white/20" /> : <ChevronDown className="w-3.5 h-3.5 text-white/20" />}
+                      </div>
+                    </button>
+                    {publishTrackingOpen && (
+                      <div className="px-4 pb-4 pt-1 space-y-3 border-t border-white/[0.05]">
+                        <div>
+                          <label className="block text-[10px] uppercase tracking-widest text-white/25 font-semibold mb-1.5">Google Analytics 4 (Measurement ID)</label>
+                          <input
+                            value={publishGaId}
+                            onChange={(e) => setPublishGaId(e.target.value.trim())}
+                            placeholder="G-XXXXXXXXXX"
+                            className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2.5 text-[12px] text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/30 font-mono transition-colors"
+                          />
+                          <p className="text-[10px] text-white/20 mt-1">Encontre em GA4 → Admin → Fluxos de dados</p>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] uppercase tracking-widest text-white/25 font-semibold mb-1.5">Meta Pixel ID</label>
+                          <input
+                            value={publishFbPixel}
+                            onChange={(e) => setPublishFbPixel(e.target.value.trim())}
+                            placeholder="123456789012345"
+                            className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2.5 text-[12px] text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/30 font-mono transition-colors"
+                          />
+                          <p className="text-[10px] text-white/20 mt-1">Gerenciador de Anuncios → Pixels → seu pixel</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {publishError && (
+                    <p className="text-[11px] text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{publishError}</p>
+                  )}
+                </div>
+
+                {/* Footer */}
+                <div className="px-6 pb-6">
+                  <button
+                    onClick={handlePublish}
+                    disabled={publishLoading || !publishSlug.trim()}
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white text-[13px] font-semibold transition-colors cursor-pointer shadow-lg shadow-purple-900/30"
+                  >
+                    {publishLoading
+                      ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Publicando...</>
+                      : <><Globe className="w-3.5 h-3.5" /> Publicar agora</>
+                    }
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="px-6 py-8 text-center">
+                <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                  <Check className="w-6 h-6 text-emerald-400" />
+                </div>
+                <p className="text-[15px] font-bold text-white mb-1">Pagina no ar!</p>
+                <p className="text-[11px] text-white/35 mb-5 font-mono break-all">{publishedUrl}</p>
+                <div className="flex gap-2">
+                  <a href={publishedUrl} target="_blank" rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[12px] font-semibold transition-colors">
+                    <ExternalLink className="w-3.5 h-3.5" /> Abrir
+                  </a>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(publishedUrl)}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] text-white/60 text-[12px] font-medium transition-colors cursor-pointer">
+                    <Copy className="w-3.5 h-3.5" /> Copiar URL
+                  </button>
+                </div>
+                {(publishGaId || publishFbPixel) && (
+                  <div className="mt-4 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.05] text-left">
+                    <p className="text-[10px] uppercase tracking-widest text-white/20 font-semibold mb-1.5">Rastreamento injetado</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {publishGaId && <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono">GA4 {publishGaId}</span>}
+                      {publishFbPixel && <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#1877F2]/10 border border-[#1877F2]/20 text-[#4da6ff] font-mono">Pixel {publishFbPixel}</span>}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
     </div>

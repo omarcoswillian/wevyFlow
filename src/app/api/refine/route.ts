@@ -1,6 +1,8 @@
 import { resolveConfig, iterableToReadable, parseApiError, startStream } from "../../lib/ai-client";
 import { DESIGN_TOKENS_PROMPT } from "../../lib/design-tokens";
 
+export const maxDuration = 300;
+
 // In-memory rate limiter (resets on cold-start — replace with Upstash Redis for production)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_MAX = 30;
@@ -102,7 +104,7 @@ export async function POST(request: Request) {
     }
 
     const codeLength = compactCode.length;
-    const maxTokens = codeLength > 40000 ? 64000 : 32000;
+    const maxTokens = codeLength > 20000 ? 20000 : 16000;
 
     const userMsg = `PLATAFORMA: ${platform || "html"}
 
