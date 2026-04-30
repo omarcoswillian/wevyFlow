@@ -1,0 +1,23 @@
+[
+  { "path": "/library-seed/formagios/AD01V1-FEED.jpg",  "name": "Formagios — Feed 01", "client": "Formagios", "format": "feed-retrato" },
+  { "path": "/library-seed/formagios/AD02.jpg",         "name": "Formagios — AD 02",   "client": "Formagios", "format": "feed-quadrado" },
+  { "path": "/library-seed/formagios/AD02V1-FEED.jpg",  "name": "Formagios — Feed 02", "client": "Formagios", "format": "feed-retrato" },
+  { "path": "/library-seed/formagios/AD07.jpg",         "name": "Formagios — AD 07",   "client": "Formagios", "format": "feed-quadrado" },
+  { "path": "/library-seed/formagios/AD08.jpg",         "name": "Formagios — AD 08",   "client": "Formagios", "format": "feed-quadrado" },
+  { "path": "/library-seed/formagios/AD11.jpg",         "name": "Formagios — AD 11",   "client": "Formagios", "format": "feed-quadrado" },
+  { "path": "/library-seed/formagios/AD16.jpg",         "name": "Formagios — AD 16",   "client": "Formagios", "format": "feed-quadrado" },
+  { "path": "/library-seed/formagios/AD29.jpg",         "name": "Formagios — AD 29",   "client": "Formagios", "format": "feed-quadrado" },
+  { "path": "/library-seed/formagios/AD37.jpg",         "name": "Formagios — AD 37",   "client": "Formagios", "format": "feed-quadrado" },
+  { "path": "/library-seed/formagios/AD38.jpg",         "name": "Formagios — AD 38",   "client": "Formagios", "format": "feed-quadrado" },
+  { "path": "/library-seed/formagios/V3.jpg",           "name": "Formagios — V3",      "client": "Formagios", "format": "feed-quadrado" },
+  { "path": "/library-seed/luana/6202-ED-IMG.png",      "name": "Luana — 6202",        "client": "Luana",     "format": "feed-retrato" },
+  { "path": "/library-seed/luana/6210-ED-IMG.png",      "name": "Luana — 6210",        "client": "Luana",     "format": "feed-retrato" },
+  { "path": "/library-seed/luana/6216-ED-IMG.png",      "name": "Luana — 6216",        "client": "Luana",     "format": "feed-retrato" },
+  { "path": "/library-seed/luana/6217-ED-IMG.png",      "name": "Luana — 6217",        "client": "Luana",     "format": "feed-retrato" },
+  { "path": "/library-seed/luana/AD02.png",             "name": "Luana — AD 02",       "client": "Luana",     "format": "feed-quadrado" },
+  { "path": "/library-seed/luana/AD05.png",             "name": "Luana — AD 05",       "client": "Luana",     "format": "feed-quadrado" },
+  { "path": "/library-seed/luana/AD07.png",             "name": "Luana — AD 07",       "client": "Luana",     "format": "feed-quadrado" },
+  { "path": "/library-seed/luana/faltam7dias-1.png",    "name": "Luana — Faltam 7 Dias (v1)", "client": "Luana", "format": "feed-quadrado" },
+  { "path": "/library-seed/luana/faltam7dias.png",      "name": "Luana — Faltam 7 Dias",      "client": "Luana", "format": "feed-quadrado" },
+  { "path": "/library-seed/luana/hoje.png",             "name": "Luana — Hoje",        "client": "Luana",     "format": "feed-quadrado" }
+]
