@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 
 const SIZE_MAP_OPENAI: Record<string, "1024x1024" | "1536x1024" | "1024x1536"> = {
   square:    "1024x1024",
@@ -11,6 +12,12 @@ const SIZE_MAP_FAL: Record<string, { width: number; height: number }> = {
   square:    { width: 1024, height: 1024 },
   landscape: { width: 1344, height: 768 },
   portrait:  { width: 768,  height: 1344 },
+};
+
+const GEMINI_ASPECT: Record<string, string> = {
+  square:    "1:1",
+  landscape: "16:9",
+  portrait:  "9:16",
 };
 
 export async function POST(req: NextRequest) {
@@ -29,6 +36,60 @@ export async function POST(req: NextRequest) {
     }
 
     const key = apiKey && apiKey.length > 10 ? apiKey : null;
+
+    // ── Gemini 3 Pro Image (Nano Banana Pro) path ────────────────
+    if (imageProvider === "gemini") {
+      if (!key) {
+        return NextResponse.json(
+          { error: "Chave Google AI Studio não configurada. Adicione em Configurações > IA de Imagem." },
+          { status: 400 }
+        );
+      }
+      try {
+        const client = new GoogleGenAI({ apiKey: key });
+        const model = imageModel || "gemini-3-pro-image-preview";
+        const aspectRatio = GEMINI_ASPECT[size] ?? "16:9";
+
+        const response = await client.models.generateContent({
+          model,
+          contents: [{ role: "user", parts: [{ text: prompt.trim() }] }],
+          config: {
+            responseModalities: ["IMAGE", "TEXT"],
+            imageConfig: { aspectRatio, imageSize: "1K" },
+          },
+        } as Parameters<typeof client.models.generateContent>[0]);
+
+        let b64 = "";
+        let mimeType = "image/png";
+        const parts = response.candidates?.[0]?.content?.parts ?? [];
+        for (const part of parts) {
+          if ((part as { inlineData?: { data?: string; mimeType?: string } }).inlineData?.data) {
+            const id = (part as { inlineData: { data: string; mimeType?: string } }).inlineData;
+            b64 = id.data;
+            mimeType = id.mimeType ?? "image/png";
+            break;
+          }
+        }
+
+        if (!b64) {
+          return NextResponse.json({ error: "Imagem não retornada pelo Gemini." }, { status: 500 });
+        }
+        return NextResponse.json({ b64, mimeType });
+      } catch (e: unknown) {
+        const msg = String((e as Error)?.message ?? "");
+        if (msg.includes("401") || msg.includes("API_KEY") || msg.includes("invalid")) {
+          return NextResponse.json({ error: "API Key Google inválida ou expirada." }, { status: 401 });
+        }
+        if (msg.includes("429") || msg.includes("quota") || msg.includes("rate")) {
+          return NextResponse.json({ error: "Limite de requisições Google atingido. Aguarde alguns segundos." }, { status: 429 });
+        }
+        if (msg.includes("safety") || msg.includes("block")) {
+          return NextResponse.json({ error: "Prompt bloqueado pela política do Google. Tente reformular." }, { status: 400 });
+        }
+        console.error("[generate-image gemini]", e);
+        return NextResponse.json({ error: "Erro ao gerar imagem com Gemini." }, { status: 500 });
+      }
+    }
 
     // ── Fal.ai path ──────────────────────────────────────────────
     if (imageProvider === "fal") {
@@ -102,7 +163,18 @@ export async function POST(req: NextRequest) {
       n: 1,
     });
 
-    const b64 = response.data?.[0]?.b64_json;
+    type ImageItem = { b64_json?: string | null; url?: string | null };
+    const item = (response.data as ImageItem[] | undefined)?.[0];
+    let b64 = item?.b64_json ?? undefined;
+
+    if (!b64 && item?.url) {
+      const imgRes = await fetch(item.url);
+      if (imgRes.ok) {
+        const buf = await imgRes.arrayBuffer();
+        b64 = Buffer.from(buf).toString("base64");
+      }
+    }
+
     if (!b64) {
       return NextResponse.json({ error: "Imagem não retornada pela API." }, { status: 500 });
     }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 
 export interface BrandDNA {
   name: string;
@@ -103,6 +104,59 @@ export async function POST(req: NextRequest) {
 
     const prompt = buildLogoPrompt(dna as BrandDNA);
     const key = apiKey && apiKey.length > 10 ? apiKey : null;
+
+    // ── Gemini 3 Pro Image (Nano Banana Pro) path ─────────────────
+    if (imageProvider === "gemini") {
+      if (!key) {
+        return NextResponse.json(
+          { error: "Chave Google AI Studio não configurada. Adicione em Configurações > IA de Imagem." },
+          { status: 400 }
+        );
+      }
+      try {
+        const client = new GoogleGenAI({ apiKey: key });
+        const model = imageModel || "gemini-3-pro-image-preview";
+
+        const response = await client.models.generateContent({
+          model,
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          config: {
+            responseModalities: ["IMAGE", "TEXT"],
+            imageConfig: { aspectRatio: "1:1", imageSize: "1K" },
+          },
+        } as Parameters<typeof client.models.generateContent>[0]);
+
+        let b64 = "";
+        let mimeType = "image/png";
+        const parts = response.candidates?.[0]?.content?.parts ?? [];
+        for (const part of parts) {
+          if ((part as { inlineData?: { data?: string; mimeType?: string } }).inlineData?.data) {
+            const id = (part as { inlineData: { data: string; mimeType?: string } }).inlineData;
+            b64 = id.data;
+            mimeType = id.mimeType ?? "image/png";
+            break;
+          }
+        }
+
+        if (!b64) {
+          return NextResponse.json({ error: "Logo não retornado pelo Gemini." }, { status: 500 });
+        }
+        return NextResponse.json({ b64, mimeType, prompt });
+      } catch (e: unknown) {
+        const msg = String((e as Error)?.message ?? "");
+        if (msg.includes("401") || msg.includes("API_KEY") || msg.includes("invalid")) {
+          return NextResponse.json({ error: "API Key Google inválida ou expirada." }, { status: 401 });
+        }
+        if (msg.includes("429") || msg.includes("quota") || msg.includes("rate")) {
+          return NextResponse.json({ error: "Limite de requisições Google atingido. Aguarde." }, { status: 429 });
+        }
+        if (msg.includes("safety") || msg.includes("block")) {
+          return NextResponse.json({ error: "Prompt bloqueado pela política do Google. Tente reformular." }, { status: 400 });
+        }
+        console.error("[generate-logo gemini]", e);
+        return NextResponse.json({ error: "Erro ao gerar logo com Gemini." }, { status: 500 });
+      }
+    }
 
     // ── Fal.ai path ──────────────────────────────────────────────
     if (imageProvider === "fal") {
