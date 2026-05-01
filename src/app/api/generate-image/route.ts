@@ -35,9 +35,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Prompt é obrigatório." }, { status: 400 });
     }
 
-    const key = apiKey && apiKey.length > 10 ? apiKey : null;
+    const byok = apiKey && apiKey.length > 10 ? apiKey : null;
+    const key = byok ?? (imageProvider === "gemini" ? (process.env.GOOGLE_AI_API_KEY ?? null) : null);
 
-    // ── Gemini 3 Pro Image (Nano Banana Pro) path ────────────────
+    // ── Gemini 3 Pro Image (Nano Banana) path ────────────────────
     if (imageProvider === "gemini") {
       if (!key) {
         return NextResponse.json(
@@ -47,26 +48,24 @@ export async function POST(req: NextRequest) {
       }
       try {
         const client = new GoogleGenAI({ apiKey: key });
-        const model = imageModel || "gemini-3-pro-image-preview";
+        const model = imageModel || "gemini-2.5-flash-image";
         const aspectRatio = GEMINI_ASPECT[size] ?? "16:9";
+        const promptWithAspect = `${prompt.trim()} Aspect ratio: ${aspectRatio}.`;
 
-        const response = await client.models.generateContent({
+        const interaction = await client.interactions.create({
           model,
-          contents: [{ role: "user", parts: [{ text: prompt.trim() }] }],
-          config: {
-            responseModalities: ["IMAGE", "TEXT"],
-            imageConfig: { aspectRatio, imageSize: "1K" },
-          },
-        } as Parameters<typeof client.models.generateContent>[0]);
+          input: promptWithAspect,
+          response_modalities: ["image"],
+          stream: false,
+        });
 
         let b64 = "";
         let mimeType = "image/png";
-        const parts = response.candidates?.[0]?.content?.parts ?? [];
-        for (const part of parts) {
-          if ((part as { inlineData?: { data?: string; mimeType?: string } }).inlineData?.data) {
-            const id = (part as { inlineData: { data: string; mimeType?: string } }).inlineData;
-            b64 = id.data;
-            mimeType = id.mimeType ?? "image/png";
+        const outputs = (interaction as { outputs?: { type: string; data?: string; mime_type?: string }[] })?.outputs ?? [];
+        for (const out of outputs) {
+          if (out.type === "image" && out.data) {
+            b64 = out.data;
+            mimeType = out.mime_type ?? "image/png";
             break;
           }
         }
@@ -77,16 +76,19 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ b64, mimeType });
       } catch (e: unknown) {
         const msg = String((e as Error)?.message ?? "");
+        console.error("[generate-image gemini]", msg);
         if (msg.includes("401") || msg.includes("API_KEY") || msg.includes("invalid")) {
           return NextResponse.json({ error: "API Key Google inválida ou expirada." }, { status: 401 });
         }
-        if (msg.includes("429") || msg.includes("quota") || msg.includes("rate")) {
-          return NextResponse.json({ error: "Limite de requisições Google atingido. Aguarde alguns segundos." }, { status: 429 });
+        if (msg.includes("429") || msg.includes("quota") || msg.includes("RESOURCE_EXHAUSTED") || msg.includes("rate") || msg.includes("too_many_requests")) {
+          return NextResponse.json({ error: "Cota Google insuficiente. Ative billing em aistudio.google.com ou troque o modelo para Gemini 2.5 Flash Image em Configurações > IA de Imagem." }, { status: 429 });
         }
-        if (msg.includes("safety") || msg.includes("block")) {
+        if (msg.includes("safety") || msg.includes("block") || msg.includes("SAFETY")) {
           return NextResponse.json({ error: "Prompt bloqueado pela política do Google. Tente reformular." }, { status: 400 });
         }
-        console.error("[generate-image gemini]", e);
+        if (msg.includes("not found") || msg.includes("404") || msg.includes("MODEL")) {
+          return NextResponse.json({ error: "Modelo Gemini não disponível para esta chave. Verifique o acesso." }, { status: 400 });
+        }
         return NextResponse.json({ error: "Erro ao gerar imagem com Gemini." }, { status: 500 });
       }
     }

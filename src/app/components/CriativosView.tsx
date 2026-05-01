@@ -7,10 +7,13 @@ import {
   Sparkles, Download, Trash2, Loader2, AlertCircle, Check, RefreshCw,
   ImageIcon, Bot, User, Send, ImagePlus, X, MessageSquare, FileText,
   Library, Wand2, Upload, Pencil, Code2,
+  Layout, BookOpen, ShoppingCart, Monitor, PlayCircle,
+  MessageCircle, Mail, ClipboardList, Fingerprint, ChevronRight, Lock, Grid3X3, Tv2,
 } from "lucide-react";
 import type { CriativoFormat } from "../api/generate-criativo/route";
 import { CANVAS_TEMPLATES, type CanvasTemplate } from "../lib/canvas-templates";
 import { CanvasEditor } from "./CanvasEditor";
+import { useAppContext } from "../(app)/_context";
 
 /* ─── Types ─────────────────────────────────────────────── */
 interface SavedCriativo {
@@ -104,11 +107,21 @@ const ESTILOS  = [{ id: "bold", label: "Bold" }, { id: "minimal", label: "Minima
 function getImageConfig(): { apiKey?: string; imageProvider: string; imageModel?: string } {
   try {
     const key = localStorage.getItem("wf_img_key") || undefined;
-    const provider = localStorage.getItem("wf_img_provider") || "openai";
+    const provider = localStorage.getItem("wf_img_provider") || "gemini";
     const model = localStorage.getItem("wf_img_model") || undefined;
     return { apiKey: key, imageProvider: provider, imageModel: model };
   } catch { /* no localStorage */ }
-  return { imageProvider: "openai" };
+  return { imageProvider: "gemini" };
+}
+
+function getActiveImageProviderLabel(): string {
+  try {
+    const provider = localStorage.getItem("wf_img_provider") || "gemini";
+    const model = localStorage.getItem("wf_img_model") || "";
+    if (provider === "gemini") return model.includes("nano") ? "Nano Banana" : "Gemini Image";
+    if (provider === "fal") return "Fal.ai";
+    return "GPT-Images-2";
+  } catch { return "Gemini Image"; }
 }
 async function dataUrlToFile(dataUrl: string, filename: string): Promise<File> {
   const res = await fetch(dataUrl);
@@ -129,10 +142,38 @@ function readFileAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(r.result as string); r.onerror = reject; r.readAsDataURL(file); });
 }
 
+/* ─── Category definitions ───────────────────────────────── */
+type CategoryAction = "generate" | "navigate" | "soon";
+interface DesignCategory {
+  id: string; label: string; description: string;
+  icon: React.ElementType; action: CategoryAction;
+  formats?: CriativoFormat[]; navigateTo?: string; size?: string;
+}
+
+const PRIMARIO: DesignCategory[] = [
+  { id: "kv",             label: "KV",                icon: Fingerprint,    action: "navigate",  navigateTo: "marca",   description: "Logo, cores, fonte e brandbook" },
+  { id: "paginas",        label: "Páginas",           icon: Layout,         action: "navigate",  navigateTo: "home",    description: "Copy, design e implementação" },
+  { id: "criativos",      label: "Criativos",         icon: ImageIcon,      action: "generate",  formats: ["feed-retrato", "feed-quadrado", "stories"],   description: "Feed e story + copy",            size: "1080×1080" },
+  { id: "capas-modulos",  label: "Capas dos módulos", icon: BookOpen,       action: "soon",      description: "Personalizar área de membros" },
+  { id: "banner-checkout",label: "Banner checkout",   icon: ShoppingCart,   action: "generate",  formats: ["banner-horizontal"],                          description: "Banner para a página de checkout", size: "1200×628" },
+];
+
+const SECUNDARIO: DesignCategory[] = [
+  { id: "pdf",        label: "PDF / E-book",    icon: FileText,      action: "soon",     description: "Materiais em PDF",          size: "A4" },
+  { id: "slide",      label: "Slide",           icon: Monitor,       action: "soon",     description: "Apresentações profissionais", size: "16:9" },
+  { id: "thumb-yt",   label: "Thumb YouTube",   icon: PlayCircle,    action: "generate", formats: ["youtube-thumbnail"],           description: "Thumbnail para vídeos",     size: "1280×720" },
+  { id: "capa-yt",    label: "Capa YouTube",    icon: Tv2,           action: "soon",     description: "Arte do canal",             size: "2560×1440" },
+  { id: "whatsapp",   label: "WhatsApp API",    icon: MessageCircle, action: "generate", formats: ["whatsapp"],                    description: "Imagens para disparos",     size: "1080×1080" },
+  { id: "email",      label: "Banner e-mail",   icon: Mail,          action: "soon",     description: "Cabeçalhos para e-mail marketing", size: "600×200" },
+  { id: "capa-form",  label: "Capa de formulário", icon: ClipboardList, action: "soon", description: "Imagens para formulários" },
+];
+
 /* ─── Main Component ─────────────────────────────────────── */
 export function CriativosView() {
-  // Main tab — Biblioteca first
-  const [mainTab, setMainTab] = useState<"gerar" | "biblioteca" | "galeria">("biblioteca");
+  const { navigate } = useAppContext();
+
+  // Main tab — hub first
+  const [mainTab, setMainTab] = useState<"hub" | "gerar" | "biblioteca" | "galeria">("hub");
 
   // Generate brief state
   const [selectedFormat, setSelectedFormat] = useState<CriativoFormat>("youtube-thumbnail");
@@ -292,65 +333,85 @@ export function CriativosView() {
     if (!htmlPreview) return;
     const fmtDef = FORMATS.find((f) => f.id === selectedFormat)!;
     setExporting(true);
+
+    const container = document.createElement("div");
+    container.style.cssText = `
+      position:fixed;left:-${fmtDef.w + 200}px;top:0;
+      width:${fmtDef.w}px;height:${fmtDef.h}px;
+      overflow:hidden;background:#000;
+    `;
+
     try {
       const { toPng } = await import("html-to-image");
 
-      // Parsear o documento HTML gerado
       const parser = new DOMParser();
       const doc = parser.parseFromString(htmlPreview, "text/html");
 
-      // Injetar Google Fonts no documento principal (para pré-carregar)
-      const fontLinks = Array.from(doc.querySelectorAll('link[href*="fonts.googleapis"]'));
-      fontLinks.forEach((link) => {
-        const id = `injected-${(link as HTMLLinkElement).href}`;
-        if (!document.querySelector(`link[data-cid="${id}"]`)) {
-          const clone = link.cloneNode(true) as HTMLLinkElement;
-          clone.dataset.cid = id;
-          document.head.appendChild(clone);
+      // Fetch Google Fonts CSS and embed fonts as base64 to avoid CORS block.
+      // Uses chunked btoa to avoid stack overflow with large font files.
+      function arrayBufferToBase64(buf: ArrayBuffer): string {
+        const bytes = new Uint8Array(buf);
+        const CHUNK = 8192;
+        let b64 = "";
+        for (let i = 0; i < bytes.length; i += CHUNK) {
+          b64 += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
         }
-      });
+        return btoa(b64);
+      }
 
-      // Criar container off-screen com dimensões reais
-      const container = document.createElement("div");
-      container.style.cssText = `
-        position:fixed;left:-${fmtDef.w + 200}px;top:0;
-        width:${fmtDef.w}px;height:${fmtDef.h}px;
-        overflow:hidden;background:#000;
-      `;
+      const fontLinks = Array.from(doc.querySelectorAll<HTMLLinkElement>('link[href*="fonts.googleapis"]'));
+      let fontEmbedCSS = "";
+      for (const link of fontLinks) {
+        try {
+          const res = await fetch(link.href);
+          if (!res.ok) continue;
+          const css = await res.text();
+          const fontFaceUrls = [...css.matchAll(/url\((https:\/\/fonts\.gstatic[^)]+)\)/g)].map((m) => m[1]);
+          let embeddedCss = css;
+          for (const fontUrl of fontFaceUrls) {
+            try {
+              const fontRes = await fetch(fontUrl);
+              if (!fontRes.ok) continue;
+              const b64 = arrayBufferToBase64(await fontRes.arrayBuffer());
+              const mime = fontUrl.includes(".woff2") ? "font/woff2" : "font/woff";
+              embeddedCss = embeddedCss.replace(fontUrl, `data:${mime};base64,${b64}`);
+            } catch { /* skip this font file, fallback to system font */ }
+          }
+          fontEmbedCSS += embeddedCss + "\n";
+        } catch { /* skip this font URL entirely */ }
+      }
 
-      // Injetar estilos + conteúdo do body
       const styles = Array.from(doc.querySelectorAll("style")).map((s) => s.outerHTML).join("\n");
-      const bodyHtml = doc.body.innerHTML;
-      container.innerHTML = styles + bodyHtml;
+      container.innerHTML = styles + doc.body.innerHTML;
       document.body.appendChild(container);
 
-      // Aguardar fontes e renderização
       try { await document.fonts.ready; } catch { /* ok */ }
-      await new Promise((r) => setTimeout(r, 700));
+      await new Promise((r) => setTimeout(r, 800));
 
       const dataUrl = await toPng(container, {
         width: fmtDef.w,
         height: fmtDef.h,
         pixelRatio: 1,
-        cacheBust: true,
+        // cacheBust omitted — breaks SVG fragment refs like url(#gradient)
+        skipFonts: true,                        // skip html-to-image's own font fetch (CORS-blocked)
+        fontEmbedCSS: fontEmbedCSS || undefined, // provide pre-fetched fonts instead
       });
 
       document.body.removeChild(container);
-
-      const a = document.createElement("a");
-      a.href = dataUrl;
-      a.download = `criativo-${selectedFormat}-${Date.now()}.png`;
-      a.click();
+      downloadDataUrl(dataUrl, `criativo-${selectedFormat}-${Date.now()}.png`);
     } catch (e) {
       console.error("[export-html]", e);
-      // Fallback: baixar o HTML diretamente
+      if (document.body.contains(container)) document.body.removeChild(container);
+      // Fallback: download raw HTML
       const blob = new Blob([htmlPreview], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
+      const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
+      a.href = blobUrl;
       a.download = `criativo-${selectedFormat}-${Date.now()}.html`;
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
     } finally {
       setExporting(false);
     }
@@ -521,7 +582,7 @@ export function CriativosView() {
                 ? "border-purple-500/30 bg-purple-500/10 text-purple-400"
                 : "border-white/10 bg-white/[0.04] text-white/35"
             )}>
-              {gerarMode === "claude" ? "Claude HTML" : "gpt-image-2"}
+              {gerarMode === "claude" ? "Claude HTML" : getActiveImageProviderLabel()}
             </span>
           </div>
           <p className="text-[13px] text-white/30">Criativos profissionais para cada fase do seu lançamento.</p>
@@ -530,6 +591,7 @@ export function CriativosView() {
         {/* Top tabs */}
         <div className="flex items-center gap-1 bg-white/[0.03] border border-white/[0.07] rounded-xl p-1">
           {([
+            { id: "hub",        label: "Tipos",      icon: <Grid3X3 className="w-3.5 h-3.5" /> },
             { id: "biblioteca", label: "Biblioteca", icon: <Library className="w-3.5 h-3.5" />, badge: library.length },
             { id: "gerar",      label: "Gerar",      icon: <Wand2 className="w-3.5 h-3.5" /> },
             { id: "galeria",    label: "Gerados",    icon: <ImageIcon className="w-3.5 h-3.5" />, badge: gallery.length },
@@ -549,6 +611,112 @@ export function CriativosView() {
       {/* ── Canvas editor overlay ── */}
       {activeTemplate && (
         <CanvasEditor template={activeTemplate} onClose={() => setActiveTemplate(null)} />
+      )}
+
+      {/* ══════════════════════════════════════════════════
+          TAB: HUB — categorias
+      ══════════════════════════════════════════════════ */}
+      {mainTab === "hub" && (
+        <div className="flex-1 overflow-y-auto px-8 pb-10 space-y-10">
+
+          {/* Primário */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+              <span className="text-[11px] font-semibold text-white/40 uppercase tracking-widest">Primário</span>
+            </div>
+            <div className="grid grid-cols-5 gap-3">
+              {PRIMARIO.map((cat) => {
+                const Icon = cat.icon;
+                const isSoon = cat.action === "soon";
+                return (
+                  <button
+                    key={cat.id}
+                    disabled={isSoon}
+                    onClick={() => {
+                      if (cat.action === "navigate" && cat.navigateTo) navigate(cat.navigateTo as any);
+                      if (cat.action === "generate" && cat.formats?.[0]) {
+                        setSelectedFormat(cat.formats[0] as CriativoFormat);
+                        setMainTab("gerar");
+                      }
+                    }}
+                    className={cn(
+                      "group relative flex flex-col items-start gap-3 p-4 rounded-2xl border text-left transition-all",
+                      isSoon
+                        ? "border-white/[0.05] bg-white/[0.015] cursor-not-allowed opacity-50"
+                        : "border-white/[0.07] bg-white/[0.025] hover:bg-purple-500/[0.07] hover:border-purple-500/30 cursor-pointer"
+                    )}
+                  >
+                    <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                      isSoon ? "bg-white/[0.04]" : "bg-purple-500/10 group-hover:bg-purple-500/20")}>
+                      {isSoon ? <Lock className="w-4 h-4 text-white/20" /> : <Icon className="w-4 h-4 text-purple-400" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <p className="text-[12px] font-semibold text-white/80 truncate">{cat.label}</p>
+                        {isSoon && <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-white/[0.06] text-[8px] font-semibold text-white/30 uppercase tracking-wider">Em breve</span>}
+                      </div>
+                      <p className="text-[10px] text-white/30 leading-snug">{cat.description}</p>
+                      {cat.size && <p className="text-[9px] text-white/15 font-mono mt-1">{cat.size}</p>}
+                    </div>
+                    {!isSoon && (
+                      <ChevronRight className="absolute top-4 right-4 w-3.5 h-3.5 text-white/15 group-hover:text-purple-400 transition-colors" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Secundário */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
+              <span className="text-[11px] font-semibold text-white/30 uppercase tracking-widest">Secundário</span>
+            </div>
+            <div className="grid grid-cols-5 gap-3">
+              {SECUNDARIO.map((cat) => {
+                const Icon = cat.icon;
+                const isSoon = cat.action === "soon";
+                return (
+                  <button
+                    key={cat.id}
+                    disabled={isSoon}
+                    onClick={() => {
+                      if (cat.action === "generate" && cat.formats?.[0]) {
+                        setSelectedFormat(cat.formats[0] as CriativoFormat);
+                        setMainTab("gerar");
+                      }
+                    }}
+                    className={cn(
+                      "group relative flex flex-col items-start gap-3 p-4 rounded-2xl border text-left transition-all",
+                      isSoon
+                        ? "border-white/[0.04] bg-white/[0.01] cursor-not-allowed opacity-45"
+                        : "border-white/[0.07] bg-white/[0.025] hover:bg-purple-500/[0.07] hover:border-purple-500/30 cursor-pointer"
+                    )}
+                  >
+                    <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                      isSoon ? "bg-white/[0.03]" : "bg-purple-500/10 group-hover:bg-purple-500/20")}>
+                      {isSoon ? <Lock className="w-4 h-4 text-white/15" /> : <Icon className="w-4 h-4 text-purple-400" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <p className="text-[12px] font-semibold text-white/60 truncate">{cat.label}</p>
+                        {isSoon && <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-white/[0.05] text-[8px] font-semibold text-white/25 uppercase tracking-wider">Em breve</span>}
+                      </div>
+                      <p className="text-[10px] text-white/25 leading-snug">{cat.description}</p>
+                      {cat.size && <p className="text-[9px] text-white/10 font-mono mt-1">{cat.size}</p>}
+                    </div>
+                    {!isSoon && (
+                      <ChevronRight className="absolute top-4 right-4 w-3.5 h-3.5 text-white/15 group-hover:text-purple-400 transition-colors" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+        </div>
       )}
 
       {/* ══════════════════════════════════════════════════
@@ -598,7 +766,7 @@ export function CriativosView() {
                     className={cn("flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer",
                       gerarMode === "gpt" ? "bg-white/[0.08] text-white/70" : "text-white/30 hover:text-white/55")}
                   >
-                    <ImageIcon className="w-3 h-3" /> GPT-Images-2
+                    <ImageIcon className="w-3 h-3" /> {getActiveImageProviderLabel()}
                   </button>
                 </div>
 
@@ -855,7 +1023,7 @@ export function CriativosView() {
                       </div>
                       <div className="text-center space-y-1">
                         <p className="text-[13px] text-white/50 font-medium">
-                          {gerarMode === "claude" ? "Gerando com Claude..." : "Gerando com gpt-image-2"}
+                          {gerarMode === "claude" ? "Gerando com Claude..." : `Gerando com ${getActiveImageProviderLabel()}...`}
                         </p>
                         <p className="text-[11px] text-white/20 font-mono">{fmt.platform} · {fmt.size}</p>
                       </div>

@@ -39,7 +39,9 @@ export const IMAGE_PROVIDER_META: Record<ImageProvider, ImageProviderMeta> = {
 
 export const IMAGE_MODEL_OPTIONS: Record<ImageProvider, { id: string; label: string; note?: string }[]> = {
   gemini: [
-    { id: "gemini-3-pro-image-preview", label: "Gemini 3 Pro Image", note: "Nano Banana Pro · Recomendado" },
+    { id: "gemini-2.5-flash-image",      label: "Gemini 2.5 Flash Image",   note: "Recomendado · Free tier" },
+    { id: "gemini-3-pro-image-preview",  label: "Gemini 3 Pro Image",       note: "Nano Banana · Requer billing" },
+    { id: "gemini-3.1-flash-image-preview", label: "Gemini 3.1 Flash Image", note: "Preview" },
   ],
   openai: [
     { id: "gpt-image-2", label: "GPT-Image-2", note: "Alta qualidade" },
@@ -53,7 +55,7 @@ export const IMAGE_MODEL_OPTIONS: Record<ImageProvider, { id: string; label: str
 };
 
 export const DEFAULT_IMAGE_MODELS: Record<ImageProvider, string> = {
-  gemini: "gemini-3-pro-image-preview",
+  gemini: "gemini-2.5-flash-image",
   openai: "gpt-image-2",
   fal: "fal-ai/flux-pro/v1.1",
 };
