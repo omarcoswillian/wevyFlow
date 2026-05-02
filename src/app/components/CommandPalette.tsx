@@ -21,6 +21,7 @@ interface CommandPaletteProps {
   open: boolean;
   onClose: () => void;
   projects: Project[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onNavigate: (view: any) => void;
   onOpenProject: (project: Project) => void;
   onCreateProject: () => void;

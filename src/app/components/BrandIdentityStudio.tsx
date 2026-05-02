@@ -92,11 +92,12 @@ function LogoRenderer({
 /* ── Logo card ──────────────────────────────────────────── */
 
 function LogoCard({
-  logo, bgType, primaryHex,
+  logo, bgType, primaryHex, svgLogo,
 }: {
   logo: BrandLogo;
   bgType: "dark" | "light" | "brand";
   primaryHex: string;
+  svgLogo?: string;
 }) {
   const bg =
     bgType === "dark" ? "#0c0c10" :
@@ -109,6 +110,7 @@ function LogoCard({
     "Fundo da marca";
 
   const onDark = bgType !== "light";
+  const showSvg = !!svgLogo && onDark;
 
   return (
     <div
@@ -116,7 +118,14 @@ function LogoCard({
       style={{ background: bg }}
     >
       <div className="flex items-center justify-center px-6 py-7 min-h-[96px]">
-        <LogoRenderer logo={logo} size="md" onDark={onDark} />
+        {showSvg ? (
+          <div
+            className="w-full max-w-[240px]"
+            dangerouslySetInnerHTML={{ __html: svgLogo! }}
+          />
+        ) : (
+          <LogoRenderer logo={logo} size="md" onDark={onDark} />
+        )}
       </div>
       <div
         className="px-3 py-1.5 text-[9px] uppercase tracking-widest font-semibold border-t"
@@ -419,9 +428,9 @@ export function BrandIdentityStudio({ kit, onUpdate, apiKey, aiProvider, aiModel
                 <span className="text-[9px] uppercase tracking-widest text-white/25 font-semibold">Logo</span>
               </div>
               <div className="flex gap-2">
-                <LogoCard logo={identity.logo} bgType="dark" primaryHex={primaryColor} />
+                <LogoCard logo={identity.logo} bgType="dark"  primaryHex={primaryColor} svgLogo={identity.svgLogo} />
                 <LogoCard logo={identity.logo} bgType="light" primaryHex={primaryColor} />
-                <LogoCard logo={identity.logo} bgType="brand" primaryHex={primaryColor} />
+                <LogoCard logo={identity.logo} bgType="brand" primaryHex={primaryColor} svgLogo={identity.svgLogo} />
               </div>
             </div>
           )}

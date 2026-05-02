@@ -14,8 +14,6 @@ import {
   Users,
   Share2,
   PanelLeft,
-  Key,
-  CheckCircle,
   FileText,
   X,
   Paintbrush,
@@ -64,6 +62,7 @@ export interface GenerateData {
 interface HomeViewProps {
   onGenerate: (data: GenerateData) => void;
   isLoading: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onNavigate?: (view: any) => void;
   onOpenSearch?: () => void;
   contentOverride?: React.ReactNode;
@@ -115,10 +114,10 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
   const { apiKey, aiProvider, aiModel, saveApiKey, clearApiKey, imageApiKey, imageProvider, imageModel, saveImageApiKey, clearImageApiKey, setShowLaunchWizard, launchKits, projects, webhookUrl, setWebhookUrl } = useAppContext();
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
-  const [platform, setPlatform] = useState<Platform>("html");
+  const [_platform, _setPlatform] = useState<Platform>("html");
   const [referenceUrl, setReferenceUrl] = useState("");
-  const [brandReference, setBrandReference] = useState("");
-  const [expectations, setExpectations] = useState("");
+  const [brandReference, _setBrandReference] = useState("");
+  const [expectations, _setExpectations] = useState("");
   const [primaryColor, setPrimaryColor] = useState("#a78bfa");
   const [secondaryColor, setSecondaryColor] = useState("#6366f1");
   const [fontChoice, setFontChoice] = useState("sora");
@@ -136,9 +135,12 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
   const [copyUrl, setCopyUrl] = useState("");
   const [bottomTab, setBottomTab] = useState<"kits" | "projetos">("kits");
   const [produto, setProduto] = useState("");
-  const [oferta, setOferta] = useState("");
+  const [nicho, setNicho] = useState("");
   const [publicoAlvo, setPublicoAlvo] = useState("");
   const [promessa, setPromessa] = useState("");
+  const [mecanismo, setMecanismo] = useState("");
+  const [preco, setPreco] = useState("");
+  const [provas, setProvas] = useState("");
   const [tipoLancamento, setTipoLancamento] = useState("Perpétuo");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
@@ -174,6 +176,7 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
         return () => clearTimeout(t);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [twText, twDeleting, twWordIdx]);
 
   const handleDocUpload = useCallback(async (file: File) => {
@@ -222,10 +225,13 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
     if ((!prompt.trim() && images.length === 0 && !copyDocument.trim()) || isLoading) return;
     const briefing = [
       produto && `Produto: ${produto}`,
+      nicho && `Nicho: ${nicho}`,
       tipoLancamento && `Tipo de lançamento: ${tipoLancamento}`,
-      oferta && `Oferta: ${oferta}`,
       publicoAlvo && `Público-alvo: ${publicoAlvo}`,
-      promessa && `Promessa principal: ${promessa}`,
+      promessa && `Transformação prometida: ${promessa}`,
+      mecanismo && `Mecanismo único: ${mecanismo}`,
+      preco && `Preço + âncora: ${preco}`,
+      provas && `Provas e resultados: ${provas}`,
     ].filter(Boolean).join("\n");
     const enrichedPrompt = briefing ? `${briefing}\n\n${prompt}`.trim() : prompt;
     onGenerate({ prompt: enrichedPrompt, platform: "html", referenceUrl, brandReference: produto || brandReference, expectations: promessa || expectations, primaryColor, secondaryColor, fontChoice, stylePreset, images, copyDocument: copyDocument.trim() || undefined });
@@ -283,6 +289,7 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
         <div className="px-2 pt-3 pb-2">
           {sidebarCollapsed ? (
             <div className="flex flex-col items-center gap-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/IconeAtual3.png" alt="WevyFlow" className="w-8 h-8" />
               <button onClick={() => setSidebarCollapsed(false)} className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6b6b6b] hover:text-[#9a9a9a] hover:bg-white/[0.06] transition-all cursor-pointer">
                 <PanelLeft className="w-4 h-4" />
@@ -290,6 +297,7 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
             </div>
           ) : (
             <div className="flex items-center px-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/IconeAtual3.png" alt="WevyFlow" className="w-7 h-7 shrink-0" />
               <div className="flex-1" />
               <button onClick={() => setSidebarCollapsed(true)} className="w-7 h-7 rounded-lg flex items-center justify-center text-[#6b6b6b] hover:text-[#9a9a9a] hover:bg-white/[0.06] transition-all cursor-pointer">
@@ -517,9 +525,9 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
           <div className="relative z-10 flex-1 overflow-y-auto">
 
             {/* ─── Hero: Prompt area ─── */}
-            <div className="flex flex-col items-center justify-center px-6 py-12 min-h-full">
+            <div className="flex flex-col items-center justify-center px-6 py-12 min-h-[90vh]">
               <h1 className="text-3xl md:text-[2.6rem] font-semibold text-center text-white mb-8 tracking-tight leading-tight animate-fade-in-slow">
-                O que vamos construir seu{" "}
+                Vamos construir seu{" "}
                 <span className="whitespace-nowrap">
                   <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
                     {twText}{twText.length === TYPEWRITER_WORDS[twWordIdx].length && !twDeleting ? "?" : ""}
@@ -532,31 +540,31 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
               {showConfig && (
                 <div className="w-full max-w-[580px] mb-3 rounded-2xl bg-[#18181b] border border-white/[0.07] shadow-2xl shadow-black/70 animate-slide-up overflow-y-auto max-h-[62vh]">
 
-                  {/* ── Seção 1: Briefing do lançamento ── */}
+                  {/* ── Seção 1: Briefing do produto ── */}
                   <div className="p-4 space-y-3">
-                    <p className="text-[9px] uppercase tracking-widest text-white/20 font-semibold">Briefing do lançamento</p>
+                    <p className="text-[9px] uppercase tracking-widest text-white/20 font-semibold">Sobre o produto</p>
 
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Produto / Curso</label>
+                        <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Nome do produto</label>
                         <input value={produto} onChange={(e) => setProduto(e.target.value)} placeholder="Ex: Método Alpha" className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors" />
                       </div>
                       <div>
-                        <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Tipo de lançamento</label>
-                        <div className="flex flex-wrap gap-1">
-                          {LAUNCH_TYPES.map((t) => (
-                            <button key={t} onClick={() => setTipoLancamento(t)}
-                              className={cn("px-2 py-1 rounded-md text-[9px] font-medium transition-all cursor-pointer border", tipoLancamento === t ? "bg-purple-500/20 border-purple-500/40 text-purple-300" : "bg-white/[0.03] border-white/[0.06] text-white/30 hover:text-white/50 hover:border-white/[0.10]")}>
-                              {t}
-                            </button>
-                          ))}
-                        </div>
+                        <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Nicho</label>
+                        <input value={nicho} onChange={(e) => setNicho(e.target.value)} placeholder="Ex: Fitness, finanças, desenvolvimento pessoal..." className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors" />
                       </div>
                     </div>
 
                     <div>
-                      <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Oferta</label>
-                      <input value={oferta} onChange={(e) => setOferta(e.target.value)} placeholder="Ex: R$ 997 — 4 módulos + 3 bônus + suporte 30 dias" className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors" />
+                      <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Tipo de lançamento</label>
+                      <div className="flex flex-wrap gap-1">
+                        {LAUNCH_TYPES.map((t) => (
+                          <button key={t} onClick={() => setTipoLancamento(t)}
+                            className={cn("px-2 py-1 rounded-md text-[9px] font-medium transition-all cursor-pointer border", tipoLancamento === t ? "bg-purple-500/20 border-purple-500/40 text-purple-300" : "bg-white/[0.03] border-white/[0.06] text-white/30 hover:text-white/50 hover:border-white/[0.10]")}>
+                            {t}
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
                     <div>
@@ -565,8 +573,31 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
                     </div>
 
                     <div>
-                      <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Promessa principal</label>
-                      <input value={promessa} onChange={(e) => setPromessa(e.target.value)} placeholder="Ex: Do zero ao primeiro R$ 10k em 60 dias" className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors" />
+                      <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Transformação prometida</label>
+                      <textarea value={promessa} onChange={(e) => setPromessa(e.target.value)} rows={2} placeholder="Ex: Do zero ao primeiro R$ 10k em 60 dias" className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors resize-none" />
+                    </div>
+                  </div>
+
+                  {/* ── Seção 1b: Copy — Diagnóstico do produto ── */}
+                  <div className="px-4 pb-4 pt-1 border-t border-white/[0.05] space-y-3">
+                    <div className="pt-3">
+                      <p className="text-[9px] uppercase tracking-widest text-purple-400/60 font-semibold">Copy — Diagnóstico do produto</p>
+                      <p className="text-[9px] text-white/20 mt-0.5">Quanto mais detalhado, mais específica e persuasiva será a copy gerada.</p>
+                    </div>
+
+                    <div>
+                      <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Mecanismo único</label>
+                      <textarea value={mecanismo} onChange={(e) => setMecanismo(e.target.value)} rows={2} placeholder="Ex: Método das 3 fases de recondicionamento metabólico — sequência específica que ativa a queima de gordura visceral sem corte calórico agressivo" className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors resize-none" />
+                    </div>
+
+                    <div>
+                      <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Preço + âncora</label>
+                      <input value={preco} onChange={(e) => setPreco(e.target.value)} placeholder="Ex: R$997 — de R$2.997 (parcela em 12x de R$97)" className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors" />
+                    </div>
+
+                    <div>
+                      <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Provas e resultados</label>
+                      <textarea value={provas} onChange={(e) => setProvas(e.target.value)} rows={2} placeholder="Ex: 3.200 alunos. Ana P. (SP): perdeu 14kg em 67 dias. Média: 8,3kg nos primeiros 30 dias." className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors resize-none" />
                     </div>
                   </div>
 
@@ -612,6 +643,7 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
                       <span className="text-[9px] text-white/25 uppercase tracking-widest">Logo / Imgs</span>
                       {images.map((img, i) => (
                         <div key={i} className="relative group">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={img.base64} alt="" className="w-8 h-8 rounded-lg object-cover border border-white/10" />
                           <button onClick={() => setImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[8px] flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer">×</button>
                         </div>
@@ -668,7 +700,7 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
                                 {copyUploading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Importar"}
                               </button>
                             </div>
-                            <p className="text-[9px] text-white/20 leading-relaxed">O documento deve estar público ("Qualquer pessoa com o link").</p>
+                            <p className="text-[9px] text-white/20 leading-relaxed">O documento deve estar público (&quot;Qualquer pessoa com o link&quot;).</p>
                           </div>
                         )}
                       </>
@@ -869,6 +901,7 @@ function ProjectsRow({ projects, onNew, onNavigate }: { projects: Project[]; onN
         <button key={project.id} onClick={onNavigate}
           className="group relative flex flex-col justify-between w-[160px] h-[88px] shrink-0 rounded-xl overflow-hidden border border-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer text-left bg-white/[0.02]">
           {project.thumbnail ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img src={project.thumbnail} alt={project.name} className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity" />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent" />

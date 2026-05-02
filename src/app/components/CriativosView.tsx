@@ -96,7 +96,7 @@ const FORMATS: { id: CriativoFormat; label: string; platform: string; size: stri
   { id: "stories",           label: "Stories",       platform: "Instagram",      size: "1080 × 1920", w: 9,  h: 16 },
 ];
 
-const FORMAT_LABELS: Record<string, string> = Object.fromEntries(
+const _FORMAT_LABELS: Record<string, string> = Object.fromEntries(
   FORMATS.map((f) => [f.id, `${f.platform} — ${f.size}`])
 );
 
@@ -634,6 +634,7 @@ export function CriativosView() {
                     key={cat.id}
                     disabled={isSoon}
                     onClick={() => {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       if (cat.action === "navigate" && cat.navigateTo) navigate(cat.navigateTo as any);
                       if (cat.action === "generate" && cat.formats?.[0]) {
                         setSelectedFormat(cat.formats[0] as CriativoFormat);
@@ -952,6 +953,7 @@ export function CriativosView() {
                           <p className="text-[10px] text-white/25 mb-1">{msg.role === "user" ? "Você" : "WevyFlow"}</p>
                           {msg.images && (
                             <div className="flex gap-1.5 mb-2 flex-wrap">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
                               {msg.images.map((img, j) => <img key={j} src={img} alt="ref" className="w-20 h-20 rounded-xl object-cover border border-white/[0.1]" />)}
                             </div>
                           )}
@@ -972,6 +974,7 @@ export function CriativosView() {
                       <div className="flex gap-1.5 px-1 pt-1 flex-wrap">
                         {chatImages.map((img, i) => (
                           <div key={i} className="relative group">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={img} alt="ref" className="w-12 h-12 rounded-lg object-cover border border-white/[0.1]" />
                             <button onClick={() => setChatImages((prev) => prev.filter((_, idx) => idx !== i))} className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer"><X className="w-2.5 h-2.5" /></button>
                           </div>
@@ -1068,6 +1071,7 @@ export function CriativosView() {
                   {/* GPT image preview */}
                   {!hasHtml && hasGpt && (
                     <div style={{ width: pW, height: pH, borderRadius: 8, overflow: "hidden", position: "relative" }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={preview!.dataUrl} alt="Criativo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                       <div className="absolute top-2 left-2 px-2 py-1 rounded-lg bg-black/50 backdrop-blur-sm border border-white/10 text-[10px] text-white/60 font-mono">{fmt.platform}</div>
                     </div>
@@ -1384,6 +1388,7 @@ export function CriativosView() {
                   return (
                     <div key={criativo.id} className="group rounded-2xl overflow-hidden border border-white/[0.06] hover:border-white/15 transition-all bg-white/[0.02]">
                       <div className="relative overflow-hidden" style={{ aspectRatio: f ? String(f.w / f.h) : "16/9" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={criativo.url} alt={criativo.headline ?? "Criativo"} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                         <div className="absolute inset-x-0 bottom-0 p-3 flex gap-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">

@@ -55,7 +55,7 @@ async function fetchReferenceHTML(url: string): Promise<string | null> {
     let extracted = "";
     const styleMatches = html.match(/<style[^>]*>[\s\S]*?<\/style>/gi);
     if (styleMatches) extracted += "/* CSS */\n" + styleMatches.join("\n").slice(0, 3000) + "\n\n";
-    let bodyHtml = html
+    const bodyHtml = html
       .replace(/<script[\s\S]*?<\/script>/gi, "")
       .replace(/<svg[\s\S]*?<\/svg>/gi, "")
       .replace(/<img[^>]*>/gi, "[IMG]")

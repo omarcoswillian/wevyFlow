@@ -4,23 +4,12 @@ export const TEMPLATE_CATEGORIES = [
   { id: "vendas" as const, label: "Página de Vendas" },
   { id: "captura" as const, label: "Captura de Leads" },
   { id: "evento" as const, label: "Evento / Workshop" },
-  { id: "saas" as const, label: "SaaS / Produto" },
   { id: "servico" as const, label: "Serviço / Consultoria" },
   { id: "blog" as const, label: "Blog / Conteúdo" },
-  { id: "portfolio" as const, label: "Portfolio" },
-  { id: "sections" as const, label: "Seções" },
 ];
 
 export const TEMPLATES: TemplateItem[] = [
   // ━━━ PÁGINA DE VENDAS ━━━
-  {
-    id: "ready-produto-fisico",
-    label: "LP Produto Físico · D2C Premium Terracota (Pronto)",
-    description: "Página de produto físico D2C completa. Hero com galeria interativa (4 thumbnails clicáveis + imagem principal), detalhes de compra, trust strip, benefícios, ingredientes, como usar, avaliações com rating breakdown, mais produtos, FAQ e CTA final. Sticky CTA no mobile. Paleta branca + terracota #C4581A, estilo Apple Store.",
-    category: "vendas",
-    tags: ["pronto", "produto físico", "d2c", "ecommerce", "terracota", "galeria", "avaliações", "mobile", "skincare"],
-    prompt: "READY:ready-produto-fisico",
-  },
   {
     id: "ready-vendas-premium-completa",
     label: "LP Vendas Premium Completa · Âmbar (Pronto)",
@@ -95,44 +84,12 @@ export const TEMPLATES: TemplateItem[] = [
   },
 
   {
-    id: "ready-ecommerce-apple",
-    label: "E-commerce Apple Style (Pronto)",
-    description: "Pagina de loja estilo Apple Store. Nav bar com blur, sidebar de filtros, grid de produtos com cards, badges, cores, precos. Ultra-minimal, fundo branco. Responsivo.",
-    category: "vendas",
-    tags: ["pronto", "ecommerce", "loja", "apple", "minimal", "produtos", "grid"],
-    prompt: "READY:ready-ecommerce-apple",
-  },
-  {
-    id: "ready-store-apple",
-    label: "Store Page — Estilo Apple (Pronto)",
-    description: "Pagina de loja principal estilo Apple Store BR. Hero grande, quick links, cards de produto full-width e side-by-side, diferencial, trade-in, ajuda, footer completo. Ultra-minimal.",
-    category: "vendas",
-    tags: ["pronto", "store", "loja", "apple", "cards", "produtos", "minimal", "premium"],
-    prompt: "READY:ready-store-apple",
-  },
-  {
     id: "ready-lp-workshop",
     label: "LP Workshop / Imersao (Pronto)",
     description: "Pagina de vendas completa para workshop/imersao online. 16 secoes: Hero, marquee, depoimentos, problema, solucao, para quem, beneficios, conteudo com VIP, cronograma, pricing 2 cards (Start+VIP), instrutores, garantia, contato WhatsApp, FAQ accordion, CTA final. Estilo clean white.",
     category: "vendas",
     tags: ["pronto", "workshop", "imersao", "evento", "white", "clean", "pricing", "faq"],
     prompt: "READY:ready-lp-workshop",
-  },
-  {
-    id: "ready-saas-harmonic",
-    label: "SaaS Page — Estilo Harmonic (Pronto)",
-    description: "Pagina SaaS completa: hero dark com bricks decorativos e dashboard mockup, logo cloud, solutions grid 4col, features alternadas dark, quote, discover 3col, developer section com code block, testimonials, case studies, CTA, footer dark. Estilo dark/light alternado.",
-    category: "saas",
-    tags: ["pronto", "saas", "dark", "api", "code", "developer", "startup", "harmonic"],
-    prompt: "READY:ready-saas-harmonic",
-  },
-  {
-    id: "ready-saas-agency",
-    label: "Agency / Automacao AI (Pronto)",
-    description: "Pagina de agencia de automacao/IA: hero dark com foto bg, logo cloud, missao split, processo com tabs e workflow diagram, testimonial dark com foto, case studies, use cases grid com categorias, footer dark com marca grande. CTA laranja.",
-    category: "saas",
-    tags: ["pronto", "agency", "automacao", "ai", "dark", "process", "cases", "workflow"],
-    prompt: "READY:ready-saas-agency",
   },
 
   // ━━━ CAPTURA DE LEADS ━━━
@@ -327,50 +284,6 @@ Tipografia Sora. Mínimo de elementos. Máximo de impacto.`,
     tags: ["pronto", "evento", "presencial", "congresso", "workshop", "dark", "red", "ingressos", "palestrantes", "lote", "marquee"],
     prompt: "READY:evento-presencial-dark",
   },
-  // ━━━ SaaS / PRODUTO ━━━
-  {
-    id: "ready-saas-premium-lp",
-    label: "LP SaaS Premium · Azul Elétrico (Pronto)",
-    description: "Landing page SaaS completa estilo Stripe/Linear. Hero dark com dashboard mockup em CSS puro, logo cloud, 3 features alternadas com mockups, como funciona em 3 steps, stats em fundo azul, depoimentos, pricing 3 tiers com toggle mensal/anual (JS), FAQ accordion e CTA final com formulário. Fundo off-white + dark #0B1121 + accent azul #2563EB.",
-    category: "saas",
-    tags: ["pronto", "saas", "azul", "dashboard", "pricing", "toggle", "accordion", "premium", "stripe", "linear"],
-    prompt: "READY:ready-saas-premium-lp",
-  },
-  {
-    id: "saas-dashboard",
-    label: "SaaS com Dashboard",
-    description: "Landing page SaaS com hero, mockup de dashboard detalhado e features",
-    category: "saas",
-    tags: ["saas", "dashboard", "app", "software"],
-    prompt: `Crie uma landing page de produto SaaS estilo Linear/Stripe/Vercel.
-
-1. HEADER: Logo preto à esquerda, nav (Features, Pricing, Docs), botão "Get Started" preto pill.
-2. HERO: Centralizado. Badge "Novo: API v2.0 disponível". Headline ENORME "The only platform built for your team" com uma palavra em itálico. Subtítulo cinza. Botão preto pill "Get started free →". Abaixo: mockup DETALHADO de dashboard — card com browser chrome (3 dots), sidebar com 5 items, área principal com 4 cards de métricas (números + labels + mini sparklines), tabela com 3 rows, e gráfico de barras colorido. Sombra sofisticada 3 camadas.
-3. LOGOS: "Trusted by" + 6 logos em cinza.
-4. FEATURES: Grid 2x2 de cards grandes. Cada card: stat grande no canto (100%, 2x, 0, AI), título, descrição, ícone.
-5. CTA: "Start building today" + botão.
-6. FOOTER minimalista.
-
-Fundo: creme #f5f5f0. Tipografia: Inter ou Sora. Preto puro para textos. Zero gradientes vibrantes. Espaçamento CINEMATOGRÁFICO (140px+ entre seções).`,
-  },
-  {
-    id: "saas-ai",
-    label: "Produto de IA",
-    description: "Landing page para produto de inteligência artificial com visual futurista",
-    category: "saas",
-    tags: ["ia", "ai", "inteligência artificial", "tech"],
-    prompt: `Crie uma landing page para um produto de IA. Visual futurista mas elegante.
-
-1. HEADER: Logo com gradiente, nav em branco, botão outline.
-2. HERO: Fundo escuro (#0a0a0f) com glow roxo/azul sutil. Headline branca "Inteligência artificial que realmente entende seu negócio". Badge "Powered by AI". Botão gradiente. Abaixo: interface de chat simulada (card escuro com mensagens de usuário e respostas de IA com typing indicator).
-3. COMO FUNCIONA: 3 steps visuais em row (1→2→3) com ícones, títulos e descrições.
-4. FEATURES: Alternado esquerda/direita com mockups de interface.
-5. PRICING: 2 planos (Free e Pro).
-6. CTA com glow.
-
-Cores: roxo (#8b5cf6) como acento, fundo escuro, glassmorphism nos cards.`,
-  },
-
   // ━━━ SERVIÇO / CONSULTORIA ━━━
   {
     id: "ready-servico-premium",
@@ -426,189 +339,4 @@ Fundo branco, tipografia Inter. Estilo editorial limpo como Medium ou Substack.`
 Fundo branco puro. Tipografia é o design. Espaçamento generoso.`,
   },
 
-  // ━━━ PORTFOLIO ━━━
-  {
-    id: "portfolio-designer",
-    label: "Portfolio Designer",
-    description: "Portfolio minimalista para designer com grid de projetos e about",
-    category: "portfolio",
-    tags: ["portfolio", "designer", "criativo"],
-    prompt: `Crie um site PORTFOLIO para designer/criativo. Ultra minimalista.
-
-1. HEADER: Nome do designer como logo, nav (Work, About, Contact), sem botão.
-2. HERO: "Design that speaks" em tipografia enorme (80px+), subtítulo "Creative Director & UI Designer", sem CTA.
-3. PROJETOS: Grid 2 colunas com 4 projetos. Cada projeto: card com gradiente como "foto" (cada um cor diferente), título, cliente, ano. Hover: zoom sutil na imagem + overlay.
-4. SOBRE: Duas colunas — esquerda foto placeholder, direita bio em parágrafo, skills como tags.
-5. CONTATO: Email grande clicável, redes sociais como ícones.
-6. FOOTER: Apenas "© 2026 Nome".
-
-Fundo branco, tipografia Sora, preto puro. Sem cores de acento — monocromático. O espaço negativo é o protagonista.`,
-  },
-  {
-    id: "portfolio-dev",
-    label: "Portfolio Developer",
-    description: "Portfolio para desenvolvedor com projetos, tech stack e terminal aesthetic",
-    category: "portfolio",
-    tags: ["portfolio", "developer", "dev", "programador"],
-    prompt: `Crie um site PORTFOLIO para desenvolvedor. Estilo tech/terminal.
-
-1. HEADER: "dev.nome" como logo em monospace, nav (Projects, Stack, Blog, Contact).
-2. HERO: Fundo escuro. Simulação de terminal: "$ whoami" → nome. "$ cat about.txt" → bio curta. Cursor piscando. Botão "View Projects ↓".
-3. PROJETOS: Grid 2x2. Cards escuros com border sutil. Cada projeto: nome em monospace bold, descrição, tags de tecnologia (React, Node, etc) como pills coloridas, link "View →".
-4. TECH STACK: Grid de ícones/logos de tecnologias organizados por categoria (Frontend, Backend, Tools).
-5. EXPERIÊNCIA: Timeline vertical com empresas, cargos, datas.
-6. CONTATO: Email + GitHub + LinkedIn como links grandes.
-
-Fundo #0a0a0f, texto branco/verde terminal (#10b981). Monospace + Sans-serif mix.`,
-  },
-
-  // ━━━ ARSENAL DE HEROES (hand-crafted por referencia) ━━━
-  {
-    id: "ready-hero-captura-luana",
-    label: "Hero Personal Brand Light (Pronto)",
-    description: "Hero split light com foto recortada, form inline (nome, whatsapp, email), CTA verde animado, cards flutuantes 'Venda aprovada'. Estilo personal brand premium.",
-    category: "sections",
-    tags: ["pronto", "hero", "captura", "personal", "light", "form", "cards flutuantes"],
-    prompt: "READY:ready-hero-captura-luana",
-  },
-  {
-    id: "ready-hero-captura-conversao",
-    label: "Hero Captura Conversao (Pronto)",
-    description: "Hero split light com form com labels e select, CTA verde pill, foto com mockups de tela flutuantes. Estilo mentoria premium.",
-    category: "sections",
-    tags: ["pronto", "hero", "captura", "conversao", "labels", "select", "mockups"],
-    prompt: "READY:ready-hero-captura-conversao",
-  },
-  {
-    id: "ready-hero-captura-cinematic",
-    label: "Hero Cinematic Dark (Pronto)",
-    description: "Hero fullscreen dark com foto e overlay cinematografico, logo editorial serif, CTA verde simples sem form. Estilo cinematográfico para lançamento premium.",
-    category: "sections",
-    tags: ["pronto", "hero", "captura", "dark", "cinematic", "foto", "premium"],
-    prompt: "READY:ready-hero-captura-cinematic",
-  },
-  {
-    id: "ready-hero-vendas-saas",
-    label: "Hero SaaS Minimal (Pronto)",
-    description: "Hero centralizado com fundo creme, headline gigante, CTA preto pill, mockup de dashboard detalhado com stats e graficos. Estilo AssetWise/Linear.",
-    category: "sections",
-    tags: ["pronto", "hero", "vendas", "saas", "dashboard", "minimal", "creme"],
-    prompt: "READY:ready-hero-vendas-saas",
-  },
-  {
-    id: "ready-hero-vendas-bege",
-    label: "Hero Split Bege (Pronto)",
-    description: "Hero split 50/50 com fundo bege/nude, tag uppercase, headline com acento verde oliva, foto lifestyle. Estilo wellness/lifestyle warm.",
-    category: "sections",
-    tags: ["pronto", "hero", "vendas", "bege", "lifestyle", "wellness"],
-    prompt: "READY:ready-hero-vendas-bege",
-  },
-  {
-    id: "ready-hero-vendas-portfolio",
-    label: "Hero Portfolio Dark (Pronto)",
-    description: "Hero dark com foto PB grande, cards de projetos flutuantes com cores diferentes (roxo, dourado, oliva). Estilo showroom/portfolio pessoal.",
-    category: "sections",
-    tags: ["pronto", "hero", "vendas", "portfolio", "dark", "showroom", "projetos"],
-    prompt: "READY:ready-hero-vendas-portfolio",
-  },
-
-  // ━━━ SECOES PRONTAS (hand-crafted) ━━━
-  {
-    id: "ready-hero-simples",
-    label: "Hero Simples (Pronto)",
-    description: "Hero centralizado com badge, headline, subheadline, CTA laranja e prova social. Design system padrao.",
-    category: "sections",
-    tags: ["pronto", "hero", "centralizado"],
-    prompt: "READY:ready-hero-simples",
-  },
-  {
-    id: "ready-urgencia",
-    label: "Barra de Urgencia (Pronto)",
-    description: "Barra de urgencia laranja com countdown animado. Ideal para topo de pagina de lancamento.",
-    category: "sections",
-    tags: ["pronto", "urgencia", "countdown", "timer"],
-    prompt: "READY:ready-urgencia",
-  },
-  {
-    id: "ready-para-quem",
-    label: "Para Quem E (Pronto)",
-    description: "Grid 3 colunas com cards de perfil ideal. Icones SVG, hover com borda laranja.",
-    category: "sections",
-    tags: ["pronto", "avatar", "perfil", "para quem"],
-    prompt: "READY:ready-para-quem",
-  },
-  {
-    id: "ready-depoimentos",
-    label: "Depoimentos Grid (Pronto)",
-    description: "Grid 3 colunas de depoimentos com estrelas, avatar, nome, nicho e badge de resultado.",
-    category: "sections",
-    tags: ["pronto", "depoimentos", "reviews", "social proof"],
-    prompt: "READY:ready-depoimentos",
-  },
-  {
-    id: "ready-oferta",
-    label: "Oferta + Preco (Pronto)",
-    description: "Card de oferta com ancora de preco, parcelas, lista de itens inclusos, bonus e CTA com garantia.",
-    category: "sections",
-    tags: ["pronto", "oferta", "preco", "checkout"],
-    prompt: "READY:ready-oferta",
-  },
-  {
-    id: "ready-faq",
-    label: "FAQ Accordion (Pronto)",
-    description: "Layout 2 colunas: titulo + contato a esquerda, 6 perguntas a direita. Estilo accordion.",
-    category: "sections",
-    tags: ["pronto", "faq", "perguntas"],
-    prompt: "READY:ready-faq",
-  },
-
-  // ━━━ SECOES VIA IA ━━━
-  {
-    id: "section-hero-split",
-    label: "Hero Split com Mockup",
-    description: "Seção hero com texto + mockup de dashboard lado a lado",
-    category: "sections",
-    tags: ["hero", "split", "mockup"],
-    prompt: `Crie APENAS uma hero section split (duas colunas 55/45). Fundo branco. Esquerda: badge, headline gigante, parágrafo, dois botões, stats. Direita: mockup de dashboard detalhado com browser chrome, sidebar, métricas e gráfico. Sombra 3 camadas. Scroll reveal. Responsivo.`,
-  },
-  {
-    id: "section-pricing",
-    label: "Seção de Preços",
-    description: "3 planos com destaque, features e CTAs",
-    category: "sections",
-    tags: ["preços", "pricing", "planos"],
-    prompt: `Crie APENAS uma seção de pricing com 3 planos (Starter R$47, Pro R$97 DESTAQUE, Premium R$197). Cards com lista de features com checks, botão CTA. Plano Pro com fundo escuro, badge "Popular", escala maior. Fundo #fafafa. Responsivo.`,
-  },
-  {
-    id: "section-testimonials",
-    label: "Depoimentos Premium",
-    description: "3 cards de depoimento com estrelas, avatar e cargo",
-    category: "sections",
-    tags: ["depoimentos", "testimonials", "reviews"],
-    prompt: `Crie APENAS uma seção de depoimentos. 3 cards premium com 5 estrelas douradas, texto em itálico, avatar circular com gradiente, nome bold, cargo/empresa. Card central elevado com sombra maior. Fundo branco. Scroll reveal com stagger.`,
-  },
-  {
-    id: "section-features",
-    label: "Features Grid",
-    description: "Grid 3x2 de features com ícones, hover effects e stats",
-    category: "sections",
-    tags: ["features", "benefícios", "grid"],
-    prompt: `Crie APENAS uma seção de features. Headline "Tudo que você precisa", grid 3x2 de 6 cards. Cada card: stat grande no canto (100%, 2x, etc), ícone em div com background colorido, título bold, descrição. Hover: elevação + borda colorida. Fundo #f8f8f8. Responsivo.`,
-  },
-  {
-    id: "section-cta",
-    label: "CTA com Urgência",
-    description: "Call-to-action com countdown, garantia e botão grande",
-    category: "sections",
-    tags: ["cta", "urgência", "conversão"],
-    prompt: `Crie APENAS uma seção CTA. Fundo escuro #111. Headline branca "Não perca essa oportunidade". Countdown estático (02d 14h 32m 08s) em cards. Botão ENORME gradiente verde. Garantia 7 dias com ícone de escudo. Badges de pagamento seguro. Responsivo.`,
-  },
-  {
-    id: "section-faq",
-    label: "FAQ Elegante",
-    description: "Perguntas frequentes em 2 colunas com estilo accordion",
-    category: "sections",
-    tags: ["faq", "perguntas", "suporte"],
-    prompt: `Crie APENAS uma seção FAQ. Layout 2 colunas: esquerda "Perguntas frequentes" + subtítulo + link "Fale conosco", direita 6 perguntas com respostas visíveis (sem JS). Cada pergunta: border-bottom, título bold, resposta cinza. Fundo branco. Responsivo.`,
-  },
 ];

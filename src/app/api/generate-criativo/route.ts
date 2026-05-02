@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { toFile } from "openai/uploads";
 import { GoogleGenAI } from "@google/genai";
+import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
 
 export type CriativoFormat =
   | "youtube-thumbnail"
@@ -86,207 +87,198 @@ function buildPrompt(
   return parts.filter(Boolean).join(" ");
 }
 
+async function runGeneration(params: {
+  imageProvider: string;
+  imageModel?: string;
+  key: string | null;
+  byok: string | null;
+  format: CriativoFormat;
+  prompt: string;
+  referenceBase64?: string;
+  quality: string;
+  config: (typeof FORMAT_CONFIG)[CriativoFormat];
+}): Promise<{ b64: string; mimeType: string }> {
+  const { imageProvider, imageModel, key, format, prompt, referenceBase64, quality, config } = params;
+
+  // ── Gemini path ──────────────────────────────────────────────
+  if (imageProvider === "gemini") {
+    if (!key) throw Object.assign(new Error("Chave Google AI Studio não configurada. Adicione em Configurações > IA de Imagem."), { status: 400 });
+
+    const client = new GoogleGenAI({ apiKey: key });
+    const model = imageModel || "gemini-3-pro-image-preview";
+
+    const aspectMap: Record<string, string> = {
+      "stories": "9:16", "feed-retrato": "9:16",
+      "feed-quadrado": "1:1", "whatsapp": "1:1",
+      "youtube-thumbnail": "16:9", "banner-horizontal": "16:9",
+    };
+    const aspectRatio = aspectMap[format] ?? "1:1";
+    const promptWithAspect = `${prompt} Aspect ratio: ${aspectRatio}.`;
+
+    const interaction = await client.interactions.create({
+      model,
+      input: promptWithAspect,
+      response_modalities: ["image"],
+      stream: false,
+    });
+
+    let b64 = "";
+    let mimeType = "image/png";
+    const outputs = (interaction as { outputs?: { type: string; data?: string; mime_type?: string }[] })?.outputs ?? [];
+    for (const out of outputs) {
+      if (out.type === "image" && out.data) {
+        b64 = out.data;
+        mimeType = out.mime_type ?? "image/png";
+        break;
+      }
+    }
+
+    if (!b64) throw new Error("Imagem não retornada pelo Gemini.");
+    return { b64, mimeType };
+  }
+
+  // ── Fal.ai path ──────────────────────────────────────────────
+  if (imageProvider === "fal") {
+    if (referenceBase64) throw Object.assign(new Error("Edição com imagem de referência não é suportada com Fal.ai. Use OpenAI."), { status: 400 });
+    if (!key) throw Object.assign(new Error("Chave Fal.ai não configurada. Adicione em Configurações > IA de Imagem."), { status: 400 });
+
+    const model = imageModel || "fal-ai/flux-pro/v1.1";
+    const falRes = await fetch(`https://fal.run/${model}`, {
+      method: "POST",
+      headers: { "Authorization": `Key ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt, image_size: config.sizeFal, num_images: 1, sync_mode: true }),
+    });
+
+    if (!falRes.ok) {
+      const errText = await falRes.text().catch(() => "");
+      console.error("[generate-criativo fal]", falRes.status, errText);
+      if (falRes.status === 401 || falRes.status === 403) throw Object.assign(new Error("API Key Fal.ai inválida ou expirada."), { status: 401 });
+      if (falRes.status === 429) throw Object.assign(new Error("Limite de requisições Fal.ai atingido."), { status: 429 });
+      throw new Error("Erro ao gerar criativo com Fal.ai.");
+    }
+
+    const falData = await falRes.json();
+    const imageUrl = falData?.images?.[0]?.url;
+    if (!imageUrl) throw new Error("Imagem não retornada pelo Fal.ai.");
+
+    const imgRes = await fetch(imageUrl);
+    if (!imgRes.ok) throw new Error("Falha ao baixar imagem do Fal.ai.");
+
+    const imgBuffer = await imgRes.arrayBuffer();
+    const b64 = Buffer.from(imgBuffer).toString("base64");
+    const mimeType = imgRes.headers.get("content-type") || "image/jpeg";
+    return { b64, mimeType };
+  }
+
+  // ── OpenAI path ──────────────────────────────────────────────
+  if (!key) throw Object.assign(new Error("Chave OpenAI não configurada. Adicione em Configurações > IA de Imagem."), { status: 400 });
+
+  const openai = new OpenAI({ apiKey: key });
+  let b64: string | null | undefined;
+
+  if (referenceBase64) {
+    const [meta, b64data] = String(referenceBase64).split(",");
+    const mimeMatch = meta.match(/:(.*?);/);
+    const mimeType = mimeMatch ? mimeMatch[1] : "image/png";
+    const ext = mimeType.split("/")[1] ?? "png";
+    const imageBuffer = Buffer.from(b64data ?? referenceBase64, "base64");
+    const imageFile = await toFile(imageBuffer, `reference.${ext}`, { type: mimeType });
+
+    const response = await openai.images.edit({
+      model: imageModel || "gpt-image-1",
+      image: imageFile,
+      prompt,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      size: config.sizeOpenAI as any,
+      quality: quality as "high" | "medium" | "low",
+      n: 1,
+    });
+    b64 = response.data?.[0]?.b64_json;
+  } else {
+    const response = await openai.images.generate({
+      model: imageModel || "gpt-image-1",
+      prompt,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      size: config.sizeOpenAI as any,
+      quality: quality as "high" | "medium" | "low",
+      n: 1,
+    });
+    b64 = response.data?.[0]?.b64_json;
+  }
+
+  if (!b64) throw new Error("Imagem não retornada.");
+  return { b64, mimeType: "image/png" };
+}
+
 export async function POST(req: NextRequest) {
+  const {
+    format,
+    produto = "",
+    headline = "",
+    cta = "",
+    cor = "",
+    estilo = "bold",
+    fase = "lancamento",
+    quality = "high",
+    apiKey,
+    referenceBase64,
+    chatInstruction,
+    imageProvider = "openai",
+    imageModel,
+  } = await req.json();
+
+  const hasBrief = headline?.trim() || produto?.trim();
+  const hasChat  = chatInstruction?.trim();
+  if (!hasBrief && !hasChat) {
+    return NextResponse.json({ error: "Preencha o Brief ou descreva o criativo no chat." }, { status: 400 });
+  }
+  if (!FORMAT_CONFIG[format as CriativoFormat]) {
+    return NextResponse.json({ error: "Formato inválido." }, { status: 400 });
+  }
+
+  const creditResult = await checkAndDeductCredit("criativo_html", produto || headline || "");
+  if (isCreditError(creditResult)) {
+    return NextResponse.json({ error: creditResult.error }, { status: creditResult.status });
+  }
+  if (!creditResult.allowed) {
+    return limitReachedResponse(creditResult) as NextResponse;
+  }
+  const { generationId } = creditResult;
+
+  const byok = apiKey && apiKey.length > 10 ? apiKey : null;
+  const key = byok ?? (imageProvider === "gemini" ? (process.env.GOOGLE_AI_API_KEY ?? null) : null);
+  const criativoFormat = format as CriativoFormat;
+  const config = FORMAT_CONFIG[criativoFormat];
+  const prompt = buildPrompt(criativoFormat, produto, headline, cta, cor, estilo, fase, chatInstruction);
+
   try {
-    const {
-      format,
-      produto = "",
-      headline = "",
-      cta = "",
-      cor = "",
-      estilo = "bold",
-      fase = "lancamento",
-      quality = "high",
-      apiKey,
-      referenceBase64,
-      chatInstruction,
-      imageProvider = "openai",
-      imageModel,
-    } = await req.json();
-
-    const hasBrief = headline?.trim() || produto?.trim();
-    const hasChat  = chatInstruction?.trim();
-    if (!hasBrief && !hasChat) {
-      return NextResponse.json({ error: "Preencha o Brief ou descreva o criativo no chat." }, { status: 400 });
-    }
-    if (!FORMAT_CONFIG[format as CriativoFormat]) {
-      return NextResponse.json({ error: "Formato inválido." }, { status: 400 });
-    }
-
-    const byok = apiKey && apiKey.length > 10 ? apiKey : null;
-    const key = byok ?? (imageProvider === "gemini" ? (process.env.GOOGLE_AI_API_KEY ?? null) : null);
-    const criativoFormat = format as CriativoFormat;
-    const config = FORMAT_CONFIG[criativoFormat];
-    const prompt = buildPrompt(criativoFormat, produto, headline, cta, cor, estilo, fase, chatInstruction);
-
-    // ── Gemini 3 Pro Image (Nano Banana) path ────────────────────
-    if (imageProvider === "gemini") {
-      if (!key) {
-        return NextResponse.json(
-          { error: "Chave Google AI Studio não configurada. Adicione em Configurações > IA de Imagem." },
-          { status: 400 }
-        );
-      }
-      try {
-        const client = new GoogleGenAI({ apiKey: key });
-        const model = imageModel || "gemini-2.5-flash-image";
-
-        // Aspect ratio hint embedded in the prompt — interactions.create has no imageConfig param
-        const aspectMap: Record<string, string> = {
-          "stories": "9:16", "feed-retrato": "9:16",
-          "feed-quadrado": "1:1", "whatsapp": "1:1",
-          "youtube-thumbnail": "16:9", "banner-horizontal": "16:9",
-        };
-        const aspectRatio = aspectMap[format] ?? "1:1";
-        const promptWithAspect = `${prompt} Aspect ratio: ${aspectRatio}.`;
-
-        const interaction = await client.interactions.create({
-          model,
-          input: promptWithAspect,
-          response_modalities: ["image"],
-          stream: false,
-        });
-
-        let b64 = "";
-        let mimeType = "image/png";
-        const outputs = (interaction as { outputs?: { type: string; data?: string; mime_type?: string }[] })?.outputs ?? [];
-        for (const out of outputs) {
-          if (out.type === "image" && out.data) {
-            b64 = out.data;
-            mimeType = out.mime_type ?? "image/png";
-            break;
-          }
-        }
-
-        if (!b64) return NextResponse.json({ error: "Imagem não retornada pelo Gemini." }, { status: 500 });
-        return NextResponse.json({ b64, mimeType, prompt });
-      } catch (e: unknown) {
-        const msg = String((e as Error)?.message ?? "");
-        console.error("[generate-criativo gemini]", msg);
-        if (msg.includes("401") || msg.includes("API_KEY") || msg.includes("invalid")) {
-          return NextResponse.json({ error: "API Key Google inválida ou expirada." }, { status: 401 });
-        }
-        if (msg.includes("429") || msg.includes("quota") || msg.includes("RESOURCE_EXHAUSTED") || msg.includes("rate") || msg.includes("too_many_requests")) {
-          return NextResponse.json({ error: "Cota Google insuficiente. Ative billing em aistudio.google.com ou troque o modelo para Gemini 2.5 Flash Image em Configurações > IA de Imagem." }, { status: 429 });
-        }
-        if (msg.includes("safety") || msg.includes("block") || msg.includes("SAFETY")) {
-          return NextResponse.json({ error: "Prompt bloqueado pelo Google. Reformule." }, { status: 400 });
-        }
-        if (msg.includes("not found") || msg.includes("404") || msg.includes("MODEL")) {
-          return NextResponse.json({ error: "Modelo Gemini não disponível para esta chave. Verifique o acesso." }, { status: 400 });
-        }
-        return NextResponse.json({ error: "Erro ao gerar criativo com Gemini." }, { status: 500 });
-      }
-    }
-
-    // ── Fal.ai path ──────────────────────────────────────────────
-    if (imageProvider === "fal") {
-      if (referenceBase64) {
-        return NextResponse.json({ error: "Edição com imagem de referência não é suportada com Fal.ai. Use OpenAI." }, { status: 400 });
-      }
-      if (!key) {
-        return NextResponse.json(
-          { error: "Chave Fal.ai não configurada. Adicione em Configurações > IA de Imagem." },
-          { status: 400 }
-        );
-      }
-      const model = imageModel || "fal-ai/flux-pro/v1.1";
-
-      const falRes = await fetch(`https://fal.run/${model}`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Key ${key}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prompt,
-          image_size: config.sizeFal,
-          num_images: 1,
-          sync_mode: true,
-        }),
-      });
-
-      if (!falRes.ok) {
-        const errText = await falRes.text().catch(() => "");
-        if (falRes.status === 401 || falRes.status === 403) {
-          return NextResponse.json({ error: "API Key Fal.ai inválida ou expirada." }, { status: 401 });
-        }
-        if (falRes.status === 429) {
-          return NextResponse.json({ error: "Limite de requisições Fal.ai atingido." }, { status: 429 });
-        }
-        console.error("[generate-criativo fal]", falRes.status, errText);
-        return NextResponse.json({ error: "Erro ao gerar criativo com Fal.ai." }, { status: 500 });
-      }
-
-      const falData = await falRes.json();
-      const imageUrl = falData?.images?.[0]?.url;
-      if (!imageUrl) {
-        return NextResponse.json({ error: "Imagem não retornada pelo Fal.ai." }, { status: 500 });
-      }
-
-      const imgRes = await fetch(imageUrl);
-      if (!imgRes.ok) {
-        return NextResponse.json({ error: "Falha ao baixar imagem do Fal.ai." }, { status: 500 });
-      }
-      const imgBuffer = await imgRes.arrayBuffer();
-      const b64 = Buffer.from(imgBuffer).toString("base64");
-      const contentType = imgRes.headers.get("content-type") || "image/jpeg";
-
-      return NextResponse.json({ b64, mimeType: contentType, prompt });
-    }
-
-    // ── OpenAI path ──────────────────────────────────────────────
-    const openaiKey = key;
-    if (!openaiKey) {
-      return NextResponse.json(
-        { error: "Chave OpenAI não configurada. Adicione em Configurações > IA de Imagem." },
-        { status: 400 }
-      );
-    }
-
-    const openai = new OpenAI({ apiKey: openaiKey });
-    let b64: string | null | undefined;
-
-    if (referenceBase64) {
-      const [meta, b64data] = String(referenceBase64).split(",");
-      const mimeMatch = meta.match(/:(.*?);/);
-      const mimeType = mimeMatch ? mimeMatch[1] : "image/png";
-      const ext = mimeType.split("/")[1] ?? "png";
-      const imageBuffer = Buffer.from(b64data ?? referenceBase64, "base64");
-      const imageFile = await toFile(imageBuffer, `reference.${ext}`, { type: mimeType });
-
-      const response = await openai.images.edit({
-        model: imageModel || "gpt-image-2",
-        image: imageFile,
-        prompt,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        size: config.sizeOpenAI as any,
-        quality: quality as "high" | "medium" | "low",
-        n: 1,
-      });
-      b64 = response.data?.[0]?.b64_json;
-    } else {
-      const response = await openai.images.generate({
-        model: imageModel || "gpt-image-2",
-        prompt,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        size: config.sizeOpenAI as any,
-        quality: quality as "high" | "medium" | "low",
-        n: 1,
-      });
-      b64 = response.data?.[0]?.b64_json;
-    }
-
-    if (!b64) return NextResponse.json({ error: "Imagem não retornada." }, { status: 500 });
-
-    return NextResponse.json({ b64, mimeType: "image/png", prompt });
+    const { b64, mimeType } = await runGeneration({
+      imageProvider, imageModel, key, byok, format: criativoFormat,
+      prompt, referenceBase64, quality, config,
+    });
+    await finalizeGeneration(generationId, true);
+    return NextResponse.json({ b64, mimeType, prompt });
   } catch (e: unknown) {
     const msg = String((e as Error)?.message ?? "");
-    if (msg.includes("401") || msg.includes("Incorrect API key")) return NextResponse.json({ error: "API Key OpenAI inválida." }, { status: 401 });
-    if (msg.includes("402") || msg.includes("billing") || msg.includes("credit")) return NextResponse.json({ error: "Saldo OpenAI insuficiente." }, { status: 402 });
-    if (msg.includes("429")) return NextResponse.json({ error: "Limite de requisições. Aguarde alguns segundos." }, { status: 429 });
-    if (msg.includes("content_policy") || msg.includes("safety")) return NextResponse.json({ error: "Prompt bloqueado. Reformule." }, { status: 400 });
-    console.error("[generate-criativo]", e);
+    await finalizeGeneration(generationId, false, msg);
+
+    console.error("[generate-criativo]", msg);
+
+    const httpStatus = (e as { status?: number })?.status;
+    if (httpStatus) return NextResponse.json({ error: msg }, { status: httpStatus });
+
+    if (msg.includes("401") || msg.includes("API_KEY") || msg.includes("invalid") || msg.includes("Incorrect API key")) {
+      return NextResponse.json({ error: "API Key inválida ou expirada." }, { status: 401 });
+    }
+    if (msg.includes("402") || msg.includes("billing") || msg.includes("credit")) {
+      return NextResponse.json({ error: "Saldo insuficiente." }, { status: 402 });
+    }
+    if (msg.includes("429") || msg.includes("quota") || msg.includes("RESOURCE_EXHAUSTED") || msg.includes("rate")) {
+      return NextResponse.json({ error: "Cota esgotada. Aguarde alguns segundos." }, { status: 429 });
+    }
+    if (msg.includes("safety") || msg.includes("block") || msg.includes("SAFETY") || msg.includes("content_policy")) {
+      return NextResponse.json({ error: "Prompt bloqueado. Reformule." }, { status: 400 });
+    }
     return NextResponse.json({ error: "Erro ao gerar criativo." }, { status: 500 });
   }
 }

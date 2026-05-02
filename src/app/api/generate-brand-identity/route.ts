@@ -72,9 +72,20 @@ RULES:
 
 function sanitizeSvg(raw: string): string {
   return raw
+    // Remove script tags
     .replace(/<script[\s\S]*?<\/script>/gi, "")
+    // Remove inline event handlers
     .replace(/\son\w+\s*=/gi, " data-removed=")
-    .replace(/javascript:/gi, "");
+    // Remove javascript: URIs
+    .replace(/javascript:/gi, "")
+    // Remove <use> elements pointing to external resources
+    .replace(/<use[^>]+href\s*=\s*["'][^#][^"']*["'][^>]*\/?>/gi, "")
+    // Remove <a> elements pointing to external URLs (keep structure, remove href)
+    .replace(/(<a[^>]+)href\s*=\s*["'](?!#)[^"']*["']/gi, "$1data-href-removed")
+    // Strip @import rules that load external resources (except Google Fonts which we intentionally use)
+    .replace(/@import\s+url\(['"](?!https:\/\/fonts\.googleapis\.com)[^'"]*['"]\)\s*;?/gi, "")
+    // Remove data: URIs in image/use/script contexts to prevent data exfiltration
+    .replace(/(<(?:image|use)[^>]+(?:href|xlink:href)\s*=\s*["'])data:[^"']*["']/gi, "$1");
 }
 
 const SYSTEM = `You are a senior brand strategist and visual identity designer specializing in premium digital brands for the Brazilian market.

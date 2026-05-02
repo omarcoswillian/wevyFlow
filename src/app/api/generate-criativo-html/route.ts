@@ -87,9 +87,9 @@ export async function POST(req: Request) {
     fase = "lancamento",
     chatInstruction,
     brandContext,
-    apiKey,
-    aiProvider,
-    aiModel,
+    apiKey: _apiKey,
+    aiProvider: _aiProvider,
+    aiModel: _aiModel,
   } = await req.json();
 
   const hasBrief = headline?.trim() || produto?.trim() || chatInstruction?.trim();

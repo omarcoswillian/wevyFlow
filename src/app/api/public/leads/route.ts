@@ -34,6 +34,10 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: "email ou phone obrigatório" }, { status: 400, headers: CORS });
     }
 
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return Response.json({ error: "email inválido" }, { status: 400, headers: CORS });
+    }
+
     const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_KEY!,
@@ -81,15 +85,9 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: "erro ao salvar lead" }, { status: 500, headers: CORS });
     }
 
-    // Increment page views (best-effort, ignore errors)
+    // Atomic page view increment — avoids read-then-write race condition
     if (page_slug) {
-      supabase.from("published_pages")
-        .select("views")
-        .eq("slug", page_slug)
-        .maybeSingle()
-        .then(({ data: p }) => {
-          if (p) supabase.from("published_pages").update({ views: (p.views ?? 0) + 1 }).eq("slug", page_slug).then(() => {});
-        });
+      supabase.rpc("increment_page_views", { p_slug: page_slug }).then(() => {});
     }
 
     return Response.json({ ok: true }, { headers: CORS });

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { Pipette, Eye, EyeOff } from "lucide-react";
+
 
 interface ColorPickerProps {
   value: string;
@@ -234,6 +234,7 @@ function AlphaSlider({ alpha, color, onChange }: { alpha: number; color: RGBA; o
 /* ─── Hex input ─── */
 function HexInput({ value, onChange }: { value: string; onChange: (hex: string) => void }) {
   const [local, setLocal] = useState(value);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setLocal(value), [value]);
   return (
     <div className="flex-1 flex items-center bg-white/[0.04] border border-white/[0.06] rounded-md focus-within:border-purple-500/30">
@@ -264,6 +265,7 @@ function SwatchesRow({ current, onPick }: { current: string; onPick: (hex: strin
   useEffect(() => {
     try {
       const raw = localStorage.getItem(SWATCHES_KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (raw) setSwatches(JSON.parse(raw));
     } catch {}
   }, []);
@@ -272,6 +274,7 @@ function SwatchesRow({ current, onPick }: { current: string; onPick: (hex: strin
   useEffect(() => {
     try {
       const raw = localStorage.getItem(SWATCHES_KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (raw) setSwatches(JSON.parse(raw));
     } catch {}
   }, [current]);

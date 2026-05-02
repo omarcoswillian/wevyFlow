@@ -102,6 +102,7 @@ export interface BrandIdentity {
   colors: BrandColor[];
   fonts: BrandFont[];
   logo: BrandLogo;
+  svgLogo?: string;
   createdAt: string;
   approvedAt?: string;
 }

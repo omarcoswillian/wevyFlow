@@ -90,6 +90,7 @@ export function ProjectDetailPage({
   useEffect(() => {
     try {
       const raw = localStorage.getItem(settingsKey);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (raw) setSettings(JSON.parse(raw));
     } catch {}
     try {

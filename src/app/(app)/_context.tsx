@@ -411,6 +411,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isLoading, streamFromAPI, addEntry, activeProjectId, addPageToProject, router]
   );
 
@@ -443,6 +444,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setIsRefining(false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [generatedCode, isRefining, currentPlatform, currentDesignContext, streamFromAPI, addEntry, activeProjectId, activePageId, updatePageCode]
   );
 
@@ -521,6 +523,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       stylePreset: "dark-premium",
       images: [],
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [handleGenerate, addEntry, router]);
 
   /* Manual compact — exposed via StorageToast */

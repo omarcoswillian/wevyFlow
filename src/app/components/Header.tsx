@@ -20,7 +20,7 @@ export function Header({ onToggleHistory, historyCount }: HeaderProps) {
             Wevy<span className="text-wf-primary">Flow</span>
           </h1>
           <p className="text-[10px] text-wf-text-muted leading-none">
-            Gerador de Layouts com IA
+            Plataforma de Lancamentos
           </p>
         </div>
       </div>

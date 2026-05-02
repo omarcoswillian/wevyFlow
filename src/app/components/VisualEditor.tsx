@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
-import { Type, Palette, Space, MousePointer, AlignLeft, AlignCenter, AlignRight, AlignJustify, Underline, Strikethrough, Italic, LayoutGrid, MoveHorizontal, MoveVertical, ArrowDownNarrowWide, Copy, Trash2, ArrowUp, ArrowDown, Link2, FileText, LogIn, Mail, Phone, Anchor, Package, PlayCircle, Plus, X, Hash, Eye, EyeOff, Sparkles, Image } from "lucide-react";
+import { Type, Palette, Space, MousePointer, AlignLeft, AlignCenter, AlignRight, AlignJustify, Underline, Strikethrough, Italic, LayoutGrid, MoveHorizontal, MoveVertical, ArrowDownNarrowWide, Copy, Trash2, ArrowUp, ArrowDown, Link2, Mail, Phone, Anchor, Package, PlayCircle, Plus, X, Hash, Eye, EyeOff, Sparkles, Image } from "lucide-react";
 import { ImageGeneratorModal } from "./ImageGeneratorModal";
 import { GOOGLE_FONTS, findFont, cssFontStack } from "@/app/lib/editor/google-fonts";
 import { NumberInput } from "./inspector/NumberInput";
@@ -388,7 +388,7 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
           {elementProps.tagName === "img" && (
             <section>
               <Label className="flex items-center gap-1.5 mb-2">
-                <Image className="w-3 h-3" /> Imagem
+                <Image className="w-3 h-3" alt="" /> Imagem
               </Label>
               <div className="space-y-2">
                 {/* Alt text */}
@@ -838,7 +838,7 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
         {elementProps.tagName === "img" && (
           <section>
             <Label className="flex items-center gap-1.5 mb-2">
-              <Image className="w-3 h-3" /> Imagem
+              <Image className="w-3 h-3" alt="" /> Imagem
             </Label>
             <div className="space-y-2">
               <div>
@@ -1188,7 +1188,7 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
   );
 }
 
-function CustomAttributesSection({ elementProps, onAttrChange }: { elementProps: ElementProps; onAttrChange: (name: string, value: string | null) => void }) {
+function CustomAttributesSection({ elementProps: _elementProps, onAttrChange }: { elementProps: ElementProps; onAttrChange: (name: string, value: string | null) => void }) {
   const [attrs, setAttrs] = useState<{ key: string; value: string }[]>([]);
   const [newKey, setNewKey] = useState("");
   const [newValue, setNewValue] = useState("");
@@ -1659,7 +1659,7 @@ function compactColor(raw: string): string {
   return [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("").toUpperCase();
 }
 
-function rgbToHex(rgb: string): string {
+function _rgbToHex(rgb: string): string {
   const match = rgb.match(/\d+/g);
   if (!match || match.length < 3) return "#000000";
   const [r, g, b] = match.map(Number);

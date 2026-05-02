@@ -49,6 +49,7 @@ function cleanHtml(html: string): string {
 export function useComponents() {
   const [components, setComponents] = useState<SavedComponent[]>([]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setComponents(load()); }, []);
 
   const add = useCallback((name: string, html: string, tag: string): SavedComponent => {

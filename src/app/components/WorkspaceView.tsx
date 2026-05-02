@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import {
   ChevronLeft,
   PanelLeftClose,
@@ -24,8 +23,6 @@ import {
   MousePointer,
   Layers,
   Code2,
-  CheckCircle2,
-  Circle,
   Undo2,
   Redo2,
   Save,
@@ -87,7 +84,7 @@ const VIEWPORTS: { id: ViewportSize; icon: React.ReactNode; label: string }[] = 
 ];
 
 export function WorkspaceView({
-  code, isLoading, isRefining, platform, prompt, error, onRefine, onBack,
+  code, isLoading, isRefining, platform: _platform, prompt, error, onRefine, onBack,
 }: WorkspaceViewProps) {
   const [rightTab, setRightTab] = useState<"preview" | "code">("preview");
   const [userOverrodeTab, setUserOverrodeTab] = useState(false);
@@ -106,8 +103,7 @@ export function WorkspaceView({
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [loadedFonts, setLoadedFonts] = useState<string[]>([]);
   const [showElementorExport, setShowElementorExport] = useState(false);
-  const [elementorCopied, setElementorCopied] = useState(false);
-  const [wpCopied, setWpCopied] = useState(false);
+  const [_elementorCopied, _setElementorCopied] = useState(false);
   const [publishModalOpen, setPublishModalOpen] = useState(false);
   const [publishSlug, setPublishSlug] = useState("");
   const [publishLoading, setPublishLoading] = useState(false);
@@ -125,7 +121,7 @@ export function WorkspaceView({
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Build steps based on loading state
-  const buildSteps: BuildStep[] = [
+  const _buildSteps: BuildStep[] = [
     { label: "Analisando referências e contexto", status: isLoading && !code ? "active" : "done" },
     { label: "Construindo estrutura HTML", status: isLoading && code && code.length < 500 ? "active" : code ? "done" : "pending" },
     { label: "Aplicando estilos CSS", status: isLoading && code && code.length >= 500 ? "active" : code && !isLoading ? "done" : "pending" },
@@ -248,6 +244,7 @@ export function WorkspaceView({
     navigator.clipboard.writeText(stripEditorScripts(finalCode || code));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
 
   const handleDownload = useCallback(() => {
@@ -260,25 +257,13 @@ export function WorkspaceView({
     a.download = "wevyflow-layout.html";
     a.click();
     URL.revokeObjectURL(url);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
 
-  const handleCopyElementor = useCallback(() => {
+  const _handleCopyElementor = useCallback(() => {
     setShowElementorExport(true);
   }, []);
 
-  const handleExportWordPress = useCallback(() => {
-    const cleanHtml = stripEditorScripts(iframeSyncRef.current || finalCode || code);
-    const fullHtml = `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>${prompt || "WevyFlow Page"}</title>\n</head>\n<body>\n${cleanHtml}\n</body>\n</html>`;
-    const payload = JSON.stringify({
-      wf: 1,
-      title: prompt || "WevyFlow Page",
-      html: fullHtml,
-      exportedAt: new Date().toISOString(),
-    });
-    navigator.clipboard.writeText(payload);
-    setWpCopied(true);
-    setTimeout(() => setWpCopied(false), 3000);
-  }, [code, finalCode, prompt]);
 
   const injectPublishOptions = useCallback((html: string): string => {
     let out = html;
@@ -609,6 +594,7 @@ export function WorkspaceView({
         timestamp: Date.now(),
       }]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
 
   const handleChatRefine = useCallback((text: string, images?: { name: string; base64: string }[]) => {
@@ -619,6 +605,7 @@ export function WorkspaceView({
   const handleInsertPhotoFromChat = useCallback((base64: string, caption: string) => {
     insertPhotoIntoTemplate(base64);
     setMessages((prev) => [...prev, { role: "user", content: caption, images: [{ name: "foto", base64 }], timestamp: Date.now() }]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
@@ -819,14 +806,6 @@ export function WorkspaceView({
                 <button onClick={handleDownload}
                   className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium text-white/30 hover:text-white/50 hover:bg-white/[0.05] transition-all cursor-pointer">
                   <Download className="w-3.5 h-3.5" /> HTML
-                </button>
-                <button onClick={handleExportWordPress}
-                  className={cn("flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer",
-                    wpCopied
-                      ? "bg-emerald-500/15 text-emerald-400"
-                      : "bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-sm")}>
-                  {wpCopied ? <Check className="w-3.5 h-3.5" /> : <Download className="w-3.5 h-3.5" />}
-                  {wpCopied ? "Copiado!" : "WordPress"}
                 </button>
                 <button onClick={() => {
                   setPublishModalOpen(true);

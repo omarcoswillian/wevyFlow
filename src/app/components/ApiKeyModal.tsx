@@ -37,7 +37,7 @@ interface ApiKeyModalProps {
 }
 
 const TEXT_PROVIDERS: AIProvider[] = ["anthropic", "openai", "openrouter"];
-const IMAGE_PROVIDERS: ImageProvider[] = ["openai", "fal"];
+const IMAGE_PROVIDERS: ImageProvider[] = ["gemini", "openai", "fal"];
 
 const MASK = "••••••••••••••••••••••••••";
 
@@ -45,7 +45,7 @@ export function ApiKeyModal({
   open,
   currentKey, currentProvider, currentModel,
   onSave, onClear,
-  currentImageKey = "", currentImageProvider = "openai", currentImageModel = "gpt-image-2",
+  currentImageKey = "", currentImageProvider = "gemini", currentImageModel = "gemini-3-pro-image-preview",
   onSaveImage, onClearImage,
   onClose,
   defaultSection = "text",
@@ -73,6 +73,7 @@ export function ApiKeyModal({
 
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSection(defaultSection);
       // text AI
       setProvider(currentProvider);
@@ -224,7 +225,7 @@ export function ApiKeyModal({
                 : "text-white/30 hover:text-white/60 border border-transparent"
             )}
           >
-            <Image className="w-3 h-3" />
+            <Image className="w-3 h-3" alt="" />
             IA de Imagem
             {currentImageKey && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
           </button>
@@ -329,7 +330,7 @@ export function ApiKeyModal({
           <div className="px-5 py-4 space-y-4">
             <div>
               <p className="text-[10px] font-medium text-white/30 uppercase tracking-wider mb-2">Provedor de Imagem</p>
-              <div className="grid grid-cols-2 gap-1.5">
+              <div className="grid grid-cols-3 gap-1.5">
                 {IMAGE_PROVIDERS.map((p) => {
                   const m = IMAGE_PROVIDER_META[p];
                   const active = imgProvider === p;
@@ -406,7 +407,7 @@ export function ApiKeyModal({
 
             <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
               <p className="text-[10px] text-white/40 leading-relaxed">
-                Usada para gerar imagens de fundo nas páginas e criativos no modo GPT-Image. O modo Claude HTML não consome esta key.
+                Usada para gerar imagens, criativos e carrosséis. Gemini 3 Pro Image (Nano Banana Pro) é o provedor padrão recomendado.
               </p>
             </div>
           </div>

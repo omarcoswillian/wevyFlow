@@ -63,7 +63,7 @@ export function ImageAIPanel({ selectedElementTagName, onInsertImage }: ImageAIP
   const [createError, setCreateError] = useState<string | null>(null);
 
   // Edit tab
-  const [refFile, setRefFile] = useState<File | null>(null);
+  const [_refFile, setRefFile] = useState<File | null>(null);
   const [refPreview, setRefPreview] = useState<string | null>(null);
   const [editPrompt, setEditPrompt] = useState("");
   const [editLoading, setEditLoading] = useState(false);

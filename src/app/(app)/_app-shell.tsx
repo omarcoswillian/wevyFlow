@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AppProvider, useAppContext } from "./_context";
 import { CommandPalette } from "../components/CommandPalette";
 import { LaunchWizard } from "../components/LaunchWizard";
+import { OnboardingWizard } from "../components/Onboarding";
 
 function GlobalPalette() {
   const {
@@ -28,11 +30,36 @@ function GlobalPalette() {
   );
 }
 
+function OnboardingGate() {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      const done = localStorage.getItem("wf_onboarding_done");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (!done) setOpen(true);
+    } catch {
+      // storage unavailable
+    }
+  }, []);
+
+  return (
+    <OnboardingWizard
+      open={open}
+      onClose={() => {
+        try { localStorage.setItem("wf_onboarding_done", "1"); } catch {}
+        setOpen(false);
+      }}
+    />
+  );
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <AppProvider>
       <GlobalPalette />
       <LaunchWizard />
+      <OnboardingGate />
       <div className="h-screen overflow-hidden">{children}</div>
     </AppProvider>
   );

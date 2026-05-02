@@ -309,6 +309,87 @@ export type Database = {
         };
         Relationships: [];
       };
+      launch_kits: {
+        Row: {
+          id: string;
+          user_id: string;
+          brand_kit_id: string | null;
+          strategy_id: string;
+          brand_info: Record<string, unknown>;
+          brand_identity: Record<string, unknown> | null;
+          assets: unknown[];
+          briefing: Record<string, unknown>;
+          status: "draft" | "active" | "archived";
+          project_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          brand_kit_id?: string | null;
+          strategy_id: string;
+          brand_info?: Record<string, unknown>;
+          brand_identity?: Record<string, unknown> | null;
+          assets?: unknown[];
+          briefing?: Record<string, unknown>;
+          status?: "draft" | "active" | "archived";
+          project_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["launch_kits"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "launch_kits_brand_kit_id_fkey";
+            columns: ["brand_kit_id"];
+            referencedRelation: "brand_kits";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "launch_kits_project_id_fkey";
+            columns: ["project_id"];
+            referencedRelation: "projects";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      ai_usage_log: {
+        Row: {
+          id: string;
+          user_id: string;
+          action: string;
+          tokens_used: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          action: string;
+          tokens_used?: number;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["ai_usage_log"]["Insert"]>;
+        Relationships: [];
+      };
+      user_credits: {
+        Row: {
+          id: string;
+          user_id: string;
+          credits_used: number;
+          credits_limit: number;
+          reset_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          credits_used?: number;
+          credits_limit?: number;
+          reset_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["user_credits"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -329,6 +410,14 @@ export type Database = {
       finalize_generation: {
         Args: { p_id: string; p_success: boolean; p_error?: string | null };
         Returns: void;
+      };
+      increment_page_views: {
+        Args: { p_slug: string };
+        Returns: void;
+      };
+      deduct_credit: {
+        Args: { p_user_id: string; p_action: string; p_tokens?: number };
+        Returns: boolean;
       };
     };
     Enums: Record<string, never>;

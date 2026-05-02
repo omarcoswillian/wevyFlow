@@ -103,7 +103,8 @@ export async function POST(req: NextRequest) {
     }
 
     const prompt = buildLogoPrompt(dna as BrandDNA);
-    const key = apiKey && apiKey.length > 10 ? apiKey : null;
+    const byok = apiKey && apiKey.length > 10 ? apiKey : null;
+    const key = byok ?? (imageProvider === "gemini" ? (process.env.GOOGLE_AI_API_KEY ?? null) : null);
 
     // ── Gemini 3 Pro Image (Nano Banana Pro) path ─────────────────
     if (imageProvider === "gemini") {
@@ -117,23 +118,20 @@ export async function POST(req: NextRequest) {
         const client = new GoogleGenAI({ apiKey: key });
         const model = imageModel || "gemini-3-pro-image-preview";
 
-        const response = await client.models.generateContent({
+        const interaction = await client.interactions.create({
           model,
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          config: {
-            responseModalities: ["IMAGE", "TEXT"],
-            imageConfig: { aspectRatio: "1:1", imageSize: "1K" },
-          },
-        } as Parameters<typeof client.models.generateContent>[0]);
+          input: `${prompt} Aspect ratio: 1:1.`,
+          response_modalities: ["image"],
+          stream: false,
+        });
 
         let b64 = "";
         let mimeType = "image/png";
-        const parts = response.candidates?.[0]?.content?.parts ?? [];
-        for (const part of parts) {
-          if ((part as { inlineData?: { data?: string; mimeType?: string } }).inlineData?.data) {
-            const id = (part as { inlineData: { data: string; mimeType?: string } }).inlineData;
-            b64 = id.data;
-            mimeType = id.mimeType ?? "image/png";
+        const outputs = (interaction as { outputs?: { type: string; data?: string; mime_type?: string }[] })?.outputs ?? [];
+        for (const out of outputs) {
+          if (out.type === "image" && out.data) {
+            b64 = out.data;
+            mimeType = out.mime_type ?? "image/png";
             break;
           }
         }
@@ -223,10 +221,10 @@ export async function POST(req: NextRequest) {
 
     const openai = new OpenAI({ apiKey: openaiKey });
     const response = await openai.images.generate({
-      model: imageModel || "gpt-image-2",
+      model: imageModel || "gpt-image-1",
       prompt,
       size: "1024x1024",
-      quality: "high" as "high",
+      quality: "high" as const,
       n: 1,
     });
 

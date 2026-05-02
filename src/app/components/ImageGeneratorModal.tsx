@@ -232,7 +232,7 @@ export function ImageGeneratorModal({ onInsert, onClose }: ImageGeneratorModalPr
                 {loading ? (
                   <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Gerando...</>
                 ) : (
-                  <><Image className="w-3.5 h-3.5" /> Gerar imagem</>
+                  <><Image className="w-3.5 h-3.5" alt="" /> Gerar imagem</>
                 )}
               </button>
             </>

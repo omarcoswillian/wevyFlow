@@ -192,7 +192,7 @@ export function EmailsDashboard() {
             <div>
               <p className="text-[14px] font-semibold text-white/60 mb-1">Nenhum kit de lançamento ainda</p>
               <p className="text-[12px] text-white/30 max-w-xs">
-                Crie um kit de lançamento para gerar as sequências automaticamente, ou use a opção "Informar manualmente".
+                Crie um kit de lançamento para gerar as sequências automaticamente, ou use a opção &quot;Informar manualmente&quot;.
               </p>
             </div>
           </div>

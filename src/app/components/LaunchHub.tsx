@@ -295,6 +295,8 @@ export function LaunchHub() {
   const [webhookSaved, setWebhookSaved] = useState(false);
   // Tracks which asset IDs are actively generating IN THIS SESSION (not persisted)
   const [localGenerating, setLocalGenerating] = useState<Set<string>>(new Set());
+  // Ref-based guard to prevent double-click race — updated synchronously before setState
+  const localGeneratingRef = useRef<Set<string>>(new Set());
 
   // Always points to the latest kit — avoids stale closure when multiple assets generate sequentially
   const kitRef = useRef(activeLaunchKit);
@@ -324,6 +326,10 @@ export function LaunchHub() {
   });
 
   const handleGenerateAsset = async (asset: StrategyAsset) => {
+    // Synchronous ref-guard prevents double-click before React re-renders
+    if (localGeneratingRef.current.has(asset.id)) return;
+    localGeneratingRef.current.add(asset.id);
+
     // Read from ref so this closure always has the latest kit, even when called sequentially
     const kitAtStart = kitRef.current!;
 
@@ -387,6 +393,7 @@ export function LaunchHub() {
       saveLaunchKit(withError);
       setActiveLaunchKit(withError);
     } finally {
+      localGeneratingRef.current.delete(asset.id);
       setLocalGenerating((prev) => { const s = new Set(prev); s.delete(asset.id); return s; });
     }
   };

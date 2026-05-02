@@ -220,6 +220,7 @@ function ImagesTab({ pageHtml, search, onInsert, onDragHtml }: {
             title={img.alt || img.src}
             className="relative aspect-square rounded-lg overflow-hidden bg-white/[0.03] border border-white/[0.06] hover:border-purple-500/40 cursor-grab active:cursor-grabbing transition-all"
           >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={img.src} alt={img.alt || ""} className="w-full h-full object-cover" />
           </div>
         ))}

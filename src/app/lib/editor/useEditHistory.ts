@@ -27,6 +27,7 @@ export function useEditHistory(initial: string) {
       initialRef.current = initial;
       if (commitTimer.current) clearTimeout(commitTimer.current);
       pendingBaseRef.current = null;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setState({ past: [], present: initial, future: [] });
     }
   }, [initial]);

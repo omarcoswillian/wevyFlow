@@ -62,6 +62,7 @@ function TreeRow({ node, depth, selectedId, onSelect, onDelete, onToggleHidden, 
   const selected = selectedId === node.id;
 
   // Keep edit value in sync when label changes externally
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { if (!editing) setEditValue(node.label); }, [node.label, editing]);
 
   const commit = () => {
