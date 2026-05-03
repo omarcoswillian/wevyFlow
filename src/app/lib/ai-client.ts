@@ -47,21 +47,33 @@ export async function callOnce(
   config: AICallConfig,
   system: string,
   userMsg: string,
-  maxTokens = 512
+  maxTokens = 512,
+  images?: Array<{ base64: string; mediaType: "image/jpeg" | "image/png" | "image/webp" }>
 ): Promise<string> {
   const model = config.model || DEFAULT_MODELS[config.provider];
 
   if (config.provider === "anthropic") {
+    let content: Anthropic.MessageParam["content"] = userMsg;
+    if (images && images.length > 0) {
+      content = [
+        ...images.map((img) => ({
+          type: "image" as const,
+          source: { type: "base64" as const, media_type: img.mediaType, data: img.base64 },
+        })),
+        { type: "text" as const, text: userMsg },
+      ];
+    }
     const res = await anthropicClient(config.apiKey).messages.create({
       model,
       max_tokens: maxTokens,
       // Cache system prompt so repeat calls (compose + personalize chain) hit cache
       system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
-      messages: [{ role: "user", content: userMsg }],
+      messages: [{ role: "user", content }],
     });
     return res.content[0].type === "text" ? res.content[0].text : "";
   }
 
+  // OpenAI/OpenRouter path (sem vision)
   const res = await openaiClient(config.apiKey, config.provider as "openai" | "openrouter")
     .chat.completions.create({
       model,

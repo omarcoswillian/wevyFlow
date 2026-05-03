@@ -29,23 +29,28 @@ function LogoRenderer({
   logo,
   size = "md",
   onDark,
+  stylePreset,
 }: {
   logo: BrandLogo;
   size?: "sm" | "md" | "lg";
   onDark: boolean;
+  stylePreset?: string;
 }) {
-  const fontSize = size === "lg" ? 44 : size === "md" ? 32 : 22;
-  const subtextSize = Math.round(fontSize * 0.22);
-
+  const fontSize = size === "lg" ? 48 : size === "md" ? 34 : 22;
+  const subtextSize = Math.round(fontSize * 0.21);
   const textColor = onDark ? "#ffffff" : "#111827";
-  const accentColorResolved = logo.accentColor || (onDark ? "rgba(255,255,255,0.55)" : logo.mainColor);
+  const accentColorResolved = logo.accentColor || (onDark ? "rgba(255,255,255,0.6)" : logo.mainColor);
+  const decorative = logo.decorativeStyle || "none";
+
+  // Suprimir aviso sobre stylePreset não usado diretamente (passado por prop para expansões futuras)
+  void stylePreset;
 
   const idx = logo.accentText ? logo.text.indexOf(logo.accentText) : -1;
   const before = idx >= 0 ? logo.text.slice(0, idx) : logo.text;
   const accentPart = idx >= 0 ? logo.accentText! : "";
   const after = idx >= 0 ? logo.text.slice(idx + (logo.accentText?.length ?? 0)) : "";
 
-  const baseStyle: React.CSSProperties = {
+  const baseTextStyle: React.CSSProperties = {
     fontFamily: `'${logo.fontFamily}', 'Sora', sans-serif`,
     fontSize,
     fontWeight: parseInt(logo.fontWeight) || 700,
@@ -56,9 +61,59 @@ function LogoRenderer({
     display: "block",
   };
 
+  const renderDecorativeAbove = () => {
+    if (decorative === "flanking-lines") {
+      return (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: fontSize * 0.25, width: "100%" }}>
+          <div style={{ flex: 1, height: 1, background: accentColorResolved, opacity: 0.5 }} />
+          <div style={{ width: 4, height: 4, borderRadius: "50%", background: accentColorResolved, opacity: 0.7 }} />
+          <div style={{ flex: 1, height: 1, background: accentColorResolved, opacity: 0.5 }} />
+        </div>
+      );
+    }
+    if (decorative === "geo-mark") {
+      return (
+        <div style={{ marginBottom: fontSize * 0.2, display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ width: 6, height: 6, background: accentColorResolved, transform: "rotate(45deg)" }} />
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const renderDecorativeBelow = () => {
+    if (decorative === "rule-below") {
+      return (
+        <div style={{ width: "100%", height: 1, background: accentColorResolved, opacity: 0.6, marginTop: fontSize * 0.35 }} />
+      );
+    }
+    if (decorative === "gradient-line") {
+      return (
+        <div style={{
+          width: "60%",
+          height: 2,
+          marginTop: fontSize * 0.28,
+          background: `linear-gradient(90deg, ${accentColorResolved}, transparent)`,
+          borderRadius: 2,
+        }} />
+      );
+    }
+    if (decorative === "flanking-lines") {
+      return (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: fontSize * 0.25, width: "100%" }}>
+          <div style={{ flex: 1, height: 1, background: accentColorResolved, opacity: 0.5 }} />
+          <div style={{ width: 4, height: 4, borderRadius: "50%", background: accentColorResolved, opacity: 0.7 }} />
+          <div style={{ flex: 1, height: 1, background: accentColorResolved, opacity: 0.5 }} />
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <div style={{ fontFamily: `'${logo.fontFamily}', 'Sora', sans-serif` }}>
-      <span style={baseStyle}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", fontFamily: `'${logo.fontFamily}', 'Sora', sans-serif` }}>
+      {renderDecorativeAbove()}
+      <span style={baseTextStyle}>
         {before}
         {accentPart && (
           <span style={{
@@ -76,15 +131,16 @@ function LogoRenderer({
           display: "block",
           fontFamily: `'${logo.fontFamily}', 'Sora', sans-serif`,
           fontSize: subtextSize,
-          letterSpacing: logo.subtextSpacing || "0.18em",
+          letterSpacing: logo.subtextSpacing || "0.22em",
           textTransform: "uppercase",
-          color: onDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.35)",
-          marginTop: Math.round(fontSize * 0.18),
-          fontWeight: 400,
+          color: onDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)",
+          marginTop: Math.round(fontSize * 0.22),
+          fontWeight: 300,
         }}>
           {logo.subtext}
         </span>
       )}
+      {renderDecorativeBelow()}
     </div>
   );
 }
@@ -92,12 +148,13 @@ function LogoRenderer({
 /* ── Logo card ──────────────────────────────────────────── */
 
 function LogoCard({
-  logo, bgType, primaryHex, svgLogo,
+  logo, bgType, primaryHex, svgLogo, stylePreset,
 }: {
   logo: BrandLogo;
   bgType: "dark" | "light" | "brand";
   primaryHex: string;
   svgLogo?: string;
+  stylePreset?: string;
 }) {
   const bg =
     bgType === "dark" ? "#0c0c10" :
@@ -124,7 +181,7 @@ function LogoCard({
             dangerouslySetInnerHTML={{ __html: svgLogo! }}
           />
         ) : (
-          <LogoRenderer logo={logo} size="md" onDark={onDark} />
+          <LogoRenderer logo={logo} size="md" onDark={onDark} stylePreset={stylePreset} />
         )}
       </div>
       <div
@@ -428,9 +485,9 @@ export function BrandIdentityStudio({ kit, onUpdate, apiKey, aiProvider, aiModel
                 <span className="text-[9px] uppercase tracking-widest text-white/25 font-semibold">Logo</span>
               </div>
               <div className="flex gap-2">
-                <LogoCard logo={identity.logo} bgType="dark"  primaryHex={primaryColor} svgLogo={identity.svgLogo} />
-                <LogoCard logo={identity.logo} bgType="light" primaryHex={primaryColor} />
-                <LogoCard logo={identity.logo} bgType="brand" primaryHex={primaryColor} svgLogo={identity.svgLogo} />
+                <LogoCard logo={identity.logo} bgType="dark"  primaryHex={primaryColor} svgLogo={identity.svgLogo} stylePreset={kit.brandInfo.stylePreset} />
+                <LogoCard logo={identity.logo} bgType="light" primaryHex={primaryColor} stylePreset={kit.brandInfo.stylePreset} />
+                <LogoCard logo={identity.logo} bgType="brand" primaryHex={primaryColor} svgLogo={identity.svgLogo} stylePreset={kit.brandInfo.stylePreset} />
               </div>
             </div>
           )}

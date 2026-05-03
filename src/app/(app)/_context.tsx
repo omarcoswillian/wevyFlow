@@ -1,14 +1,38 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, startTransition, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  startTransition,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import { Platform } from "../lib/types";
 import { useHistory } from "../lib/history";
 import { useProjects, Project, ProjectPage } from "../lib/projects";
-import { compactStorage, aggressiveCleanup, formatBytes } from "../lib/storage-compact";
+import {
+  compactStorage,
+  aggressiveCleanup,
+  formatBytes,
+} from "../lib/storage-compact";
 import { GenerateData } from "../components/HomeView";
-import { AIProvider, DEFAULT_MODELS, STORAGE_KEY_KEY, STORAGE_PROVIDER_KEY, STORAGE_MODEL_KEY } from "../lib/ai-provider";
-import { ImageProvider, DEFAULT_IMAGE_MODELS, IMAGE_STORAGE_KEY, IMAGE_STORAGE_PROVIDER, IMAGE_STORAGE_MODEL } from "../lib/image-ai-provider";
+import {
+  AIProvider,
+  DEFAULT_MODELS,
+  STORAGE_KEY_KEY,
+  STORAGE_PROVIDER_KEY,
+  STORAGE_MODEL_KEY,
+} from "../lib/ai-provider";
+import {
+  ImageProvider,
+  DEFAULT_IMAGE_MODELS,
+  IMAGE_STORAGE_KEY,
+  IMAGE_STORAGE_PROVIDER,
+  IMAGE_STORAGE_MODEL,
+} from "../lib/image-ai-provider";
 import { NewProjectModal } from "../components/NewProjectModal";
 import type { LaunchKit } from "../lib/types-kit";
 import { optimizeHtml } from "../lib/html-optimizer";
@@ -35,20 +59,34 @@ export type AppView =
 
 export function viewToPath(view: AppView, projectId?: string): string {
   switch (view) {
-    case "home": return "/";
-    case "resources": return "/resources";
-    case "criativos": return "/criativos";
-    case "lancamentos": return "/lancamentos";
-    case "marca": return "/marca";
-    case "emails": return "/emails";
-    case "leads": return "/leads";
-    case "paginas": return "/paginas";
-    case "projects-all": return "/projects";
-    case "projects-starred": return "/projects/starred";
-    case "projects-mine": return "/projects/mine";
-    case "projects-shared": return "/projects/shared";
-    case "project-detail": return projectId ? `/projects/${projectId}` : "/projects";
-    case "workspace": return "/workspace";
+    case "home":
+      return "/";
+    case "resources":
+      return "/resources";
+    case "criativos":
+      return "/criativos";
+    case "lancamentos":
+      return "/lancamentos";
+    case "marca":
+      return "/marca";
+    case "emails":
+      return "/emails";
+    case "leads":
+      return "/leads";
+    case "paginas":
+      return "/paginas";
+    case "projects-all":
+      return "/projects";
+    case "projects-starred":
+      return "/projects/starred";
+    case "projects-mine":
+      return "/projects/mine";
+    case "projects-shared":
+      return "/projects/shared";
+    case "project-detail":
+      return projectId ? `/projects/${projectId}` : "/projects";
+    case "workspace":
+      return "/workspace";
   }
 }
 
@@ -67,7 +105,10 @@ interface AppContextValue {
   projects: Project[];
   saveError: string | null;
   createProject: (name: string, client: string) => Promise<Project>;
-  addPageToProject: (projectId: string, page: Omit<ProjectPage, "id" | "createdAt" | "updatedAt">) => void;
+  addPageToProject: (
+    projectId: string,
+    page: Omit<ProjectPage, "id" | "createdAt" | "updatedAt">,
+  ) => void;
   updatePageCode: (projectId: string, pageId: string, code: string) => void;
   toggleStar: (projectId: string) => void;
   deleteProject: (projectId: string) => void;
@@ -96,7 +137,11 @@ interface AppContextValue {
   imageApiKey: string;
   imageProvider: ImageProvider;
   imageModel: string;
-  saveImageApiKey: (key: string, provider: ImageProvider, model: string) => void;
+  saveImageApiKey: (
+    key: string,
+    provider: ImageProvider,
+    model: string,
+  ) => void;
   clearImageApiKey: () => void;
 
   // command palette
@@ -119,7 +164,10 @@ interface AppContextValue {
   // actions
   navigate: (view: AppView, projectId?: string) => void;
   handleGenerate: (data: GenerateData) => Promise<void>;
-  handleRefine: (refinementRequest: string, images?: { name: string; base64: string }[]) => Promise<void>;
+  handleRefine: (
+    refinementRequest: string,
+    images?: { name: string; base64: string }[],
+  ) => Promise<void>;
   handleBack: () => void;
   handleOpenProject: (project: Project) => void;
   handleOpenPage: (page: ProjectPage) => void;
@@ -151,7 +199,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const clearLimitReached = useCallback(() => setLimitReached(false), []);
   const [currentPlatform, setCurrentPlatform] = useState<Platform>("html");
   const [currentPrompt, setCurrentPrompt] = useState("");
-  const [currentDesignContext, setCurrentDesignContext] = useState<DesignContext>(null);
+  const [currentDesignContext, setCurrentDesignContext] =
+    useState<DesignContext>(null);
   const [activePageId, setActivePageId] = useState<string | null>(null);
   const [storageToast, setStorageToast] = useState<string | null>(null);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -160,22 +209,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // integrations
   const [webhookUrl, setWebhookUrlState] = useState("");
   const setWebhookUrl = useCallback((url: string) => {
-    try { localStorage.setItem("wf_webhook_url", url); } catch {}
+    try {
+      localStorage.setItem("wf_webhook_url", url);
+    } catch {}
     setWebhookUrlState(url);
   }, []);
 
   // launch kits — persisted to localStorage
   const [launchKits, setLaunchKits] = useState<LaunchKit[]>([]);
-  const [activeLaunchKit, setActiveLaunchKit] = useState<LaunchKit | null>(null);
+  const [activeLaunchKit, setActiveLaunchKit] = useState<LaunchKit | null>(
+    null,
+  );
   const [showLaunchWizard, setShowLaunchWizard] = useState(false);
 
   const saveLaunchKit = useCallback((kit: LaunchKit) => {
     setLaunchKits((prev) => {
       const idx = prev.findIndex((k) => k.id === kit.id);
-      const next = idx >= 0
-        ? [...prev.slice(0, idx), kit, ...prev.slice(idx + 1)]
-        : [...prev, kit];
-      try { localStorage.setItem("wf_launch_kits", JSON.stringify(next)); } catch {}
+      const next =
+        idx >= 0
+          ? [...prev.slice(0, idx), kit, ...prev.slice(idx + 1)]
+          : [...prev, kit];
+      try {
+        localStorage.setItem("wf_launch_kits", JSON.stringify(next));
+      } catch {}
       return next;
     });
   }, []);
@@ -183,7 +239,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const deleteLaunchKit = useCallback((id: string) => {
     setLaunchKits((prev) => {
       const next = prev.filter((k) => k.id !== id);
-      try { localStorage.setItem("wf_launch_kits", JSON.stringify(next)); } catch {}
+      try {
+        localStorage.setItem("wf_launch_kits", JSON.stringify(next));
+      } catch {}
       return next;
     });
     setActiveLaunchKit((prev) => (prev?.id === id ? null : prev));
@@ -196,31 +254,51 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // BYOK — image AI
   const [imageApiKey, setImageApiKeyState] = useState<string>("");
-  const [imageProvider, setImageProviderState] = useState<ImageProvider>("gemini");
-  const [imageModel, setImageModelState] = useState<string>("gemini-3-pro-image-preview");
+  const [imageProvider, setImageProviderState] =
+    useState<ImageProvider>("gemini");
+  const [imageModel, setImageModelState] = useState<string>(
+    "gemini-3-pro-image-preview",
+  );
 
   useEffect(() => {
-    try { setLaunchKits(JSON.parse(localStorage.getItem("wf_launch_kits") || "[]")); } catch {}
+    try {
+      setLaunchKits(JSON.parse(localStorage.getItem("wf_launch_kits") || "[]"));
+    } catch {}
   }, []);
 
   useEffect(() => {
     setApiKeyState(localStorage.getItem(STORAGE_KEY_KEY) ?? "");
-    setAiProviderState((localStorage.getItem(STORAGE_PROVIDER_KEY) as AIProvider) ?? "anthropic");
-    setAiModelState(localStorage.getItem(STORAGE_MODEL_KEY) ?? "claude-sonnet-4-6");
+    setAiProviderState(
+      (localStorage.getItem(STORAGE_PROVIDER_KEY) as AIProvider) ?? "anthropic",
+    );
+    setAiModelState(
+      localStorage.getItem(STORAGE_MODEL_KEY) ?? "claude-sonnet-4-6",
+    );
     setImageApiKeyState(localStorage.getItem(IMAGE_STORAGE_KEY) ?? "");
-    setImageProviderState((localStorage.getItem(IMAGE_STORAGE_PROVIDER) as ImageProvider) ?? "gemini");
-    setImageModelState(localStorage.getItem(IMAGE_STORAGE_MODEL) ?? "gemini-3-pro-image-preview");
+    setImageProviderState(
+      (localStorage.getItem(IMAGE_STORAGE_PROVIDER) as ImageProvider) ??
+        "gemini",
+    );
+    setImageModelState(
+      localStorage.getItem(IMAGE_STORAGE_MODEL) ?? "gemini-3-pro-image-preview",
+    );
     setWebhookUrlState(localStorage.getItem("wf_webhook_url") ?? "");
   }, []);
 
-  const saveApiKey = useCallback((key: string, provider: AIProvider, model: string) => {
-    localStorage.setItem(STORAGE_KEY_KEY, key);
-    localStorage.setItem(STORAGE_PROVIDER_KEY, provider);
-    localStorage.setItem(STORAGE_MODEL_KEY, model || DEFAULT_MODELS[provider]);
-    setApiKeyState(key);
-    setAiProviderState(provider);
-    setAiModelState(model || DEFAULT_MODELS[provider]);
-  }, []);
+  const saveApiKey = useCallback(
+    (key: string, provider: AIProvider, model: string) => {
+      localStorage.setItem(STORAGE_KEY_KEY, key);
+      localStorage.setItem(STORAGE_PROVIDER_KEY, provider);
+      localStorage.setItem(
+        STORAGE_MODEL_KEY,
+        model || DEFAULT_MODELS[provider],
+      );
+      setApiKeyState(key);
+      setAiProviderState(provider);
+      setAiModelState(model || DEFAULT_MODELS[provider]);
+    },
+    [],
+  );
 
   const clearApiKey = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY_KEY);
@@ -231,14 +309,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setAiModelState("claude-sonnet-4-6");
   }, []);
 
-  const saveImageApiKey = useCallback((key: string, provider: ImageProvider, model: string) => {
-    localStorage.setItem(IMAGE_STORAGE_KEY, key);
-    localStorage.setItem(IMAGE_STORAGE_PROVIDER, provider);
-    localStorage.setItem(IMAGE_STORAGE_MODEL, model || DEFAULT_IMAGE_MODELS[provider]);
-    setImageApiKeyState(key);
-    setImageProviderState(provider);
-    setImageModelState(model || DEFAULT_IMAGE_MODELS[provider]);
-  }, []);
+  const saveImageApiKey = useCallback(
+    (key: string, provider: ImageProvider, model: string) => {
+      localStorage.setItem(IMAGE_STORAGE_KEY, key);
+      localStorage.setItem(IMAGE_STORAGE_PROVIDER, provider);
+      localStorage.setItem(
+        IMAGE_STORAGE_MODEL,
+        model || DEFAULT_IMAGE_MODELS[provider],
+      );
+      setImageApiKeyState(key);
+      setImageProviderState(provider);
+      setImageModelState(model || DEFAULT_IMAGE_MODELS[provider]);
+    },
+    [],
+  );
 
   const clearImageApiKey = useCallback(() => {
     localStorage.removeItem(IMAGE_STORAGE_KEY);
@@ -251,8 +335,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const { addEntry } = useHistory();
   const {
-    projects, saveError, createProject, addPageToProject, updatePageCode,
-    toggleStar, deleteProject, deletePageFromProject, updateCoverImage,
+    projects,
+    saveError,
+    createProject,
+    addPageToProject,
+    updatePageCode,
+    toggleStar,
+    deleteProject,
+    deletePageFromProject,
+    updateCoverImage,
   } = useProjects();
 
   /* storage error toast */
@@ -269,7 +360,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const result = compactStorage();
     const saved = result.bytesBefore - result.bytesAfter;
     if (saved > 50 * 1024) {
-      setStorageToast(`Espaço liberado: ${formatBytes(saved)} (${result.keysShrunk} entradas otimizadas)`);
+      setStorageToast(
+        `Espaço liberado: ${formatBytes(saved)} (${result.keysShrunk} entradas otimizadas)`,
+      );
       setTimeout(() => setStorageToast(null), 5000);
     }
   }, []);
@@ -287,13 +380,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   /* navigation helper */
-  const navigate = useCallback((view: AppView, projectId?: string) => {
-    if (view === "home") {
-      setGeneratedCode("");
-      setError("");
-    }
-    router.push(viewToPath(view, projectId));
-  }, [router]);
+  const navigate = useCallback(
+    (view: AppView, projectId?: string) => {
+      if (view === "home") {
+        setGeneratedCode("");
+        setError("");
+      }
+      router.push(viewToPath(view, projectId));
+    },
+    [router],
+  );
 
   /* streaming helper */
   const streamFromAPI = useCallback(
@@ -315,7 +411,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           limitReached = !!data.limitReached;
         } catch {}
         const err = new Error(msg);
-        if (limitReached) (err as Error & { limitReached: boolean }).limitReached = true;
+        if (limitReached)
+          (err as Error & { limitReached: boolean }).limitReached = true;
         throw err;
       }
       const reader = res.body?.getReader();
@@ -340,16 +437,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // Stream aborted mid-way — if meaningful content was generated, use it
         if (fullCode.length > 500) {
           startTransition(() => setGeneratedCode(fullCode));
-          setError("Geração parcial — a IA demorou mais que o esperado. O conteúdo foi salvo. Refine via chat ou regenere.");
+          setError(
+            "Geração parcial — a IA demorou mais que o esperado. O conteúdo foi salvo. Refine via chat ou regenere.",
+          );
           return fullCode;
         }
-        throw new Error("A geração falhou antes de produzir conteúdo suficiente. Tente novamente.");
+        throw new Error(
+          "A geração falhou antes de produzir conteúdo suficiente. Tente novamente.",
+        );
       }
       // Final flush
       startTransition(() => setGeneratedCode(fullCode));
       return fullCode;
     },
-    []
+    [],
   );
 
   /* active project is derived from URL in the detail route — but for
@@ -377,11 +478,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const res = await fetch(`/api/template?id=${templateId}`);
           if (!res.ok) throw new Error("Template nao encontrado");
           const rawHtml = await res.text();
-          const html = optimizeHtml(rawHtml, { webhookUrl: webhookUrl || undefined });
+          const html = optimizeHtml(rawHtml, {
+            webhookUrl: webhookUrl || undefined,
+          });
           setGeneratedCode(html);
-          addEntry({ id: crypto.randomUUID(), prompt: "Template: " + templateId, platform: data.platform, code: html, createdAt: Date.now() });
+          addEntry({
+            id: crypto.randomUUID(),
+            prompt: "Template: " + templateId,
+            platform: data.platform,
+            code: html,
+            createdAt: Date.now(),
+          });
           if (activeProjectId) {
-            addPageToProject(activeProjectId, { name: "Template: " + templateId, code: html, platform: data.platform });
+            addPageToProject(activeProjectId, {
+              name: "Template: " + templateId,
+              code: html,
+              platform: data.platform,
+            });
           }
           return;
         }
@@ -392,11 +505,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         });
         // rawCode may be partial (stream aborted but content was salvaged)
         if (rawCode && rawCode.length > 100) {
-          const code = optimizeHtml(rawCode, { webhookUrl: webhookUrl || undefined });
+          const code = optimizeHtml(rawCode, {
+            webhookUrl: webhookUrl || undefined,
+          });
           if (code !== rawCode) startTransition(() => setGeneratedCode(code));
-          addEntry({ id: crypto.randomUUID(), prompt: data.prompt, platform: data.platform, code, createdAt: Date.now() });
+          addEntry({
+            id: crypto.randomUUID(),
+            prompt: data.prompt,
+            platform: data.platform,
+            code,
+            createdAt: Date.now(),
+          });
           if (activeProjectId) {
-            addPageToProject(activeProjectId, { name: data.prompt.slice(0, 50), code, platform: data.platform });
+            addPageToProject(activeProjectId, {
+              name: data.prompt.slice(0, 50),
+              code,
+              platform: data.platform,
+            });
           }
         }
       } catch (err) {
@@ -412,11 +537,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isLoading, streamFromAPI, addEntry, activeProjectId, addPageToProject, router]
+    [
+      isLoading,
+      streamFromAPI,
+      addEntry,
+      activeProjectId,
+      addPageToProject,
+      router,
+    ],
   );
 
   const handleRefine = useCallback(
-    async (refinementRequest: string, images?: { name: string; base64: string }[]) => {
+    async (
+      refinementRequest: string,
+      images?: { name: string; base64: string }[],
+    ) => {
       if (!generatedCode || isRefining) return;
       setIsRefining(true);
       try {
@@ -428,24 +563,44 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           designContext: currentDesignContext,
         });
         if (rawCode) {
-          const code = optimizeHtml(rawCode, { webhookUrl: webhookUrl || undefined });
+          const code = optimizeHtml(rawCode, {
+            webhookUrl: webhookUrl || undefined,
+          });
           if (code !== rawCode) startTransition(() => setGeneratedCode(code));
-          addEntry({ id: crypto.randomUUID(), prompt: `Refinamento: ${refinementRequest}`, platform: currentPlatform, code, createdAt: Date.now() });
+          addEntry({
+            id: crypto.randomUUID(),
+            prompt: `Refinamento: ${refinementRequest}`,
+            platform: currentPlatform,
+            code,
+            createdAt: Date.now(),
+          });
           if (activeProjectId && activePageId) {
             updatePageCode(activeProjectId, activePageId, code);
           }
         }
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Erro desconhecido";
-        setError(msg === "Failed to fetch"
-          ? "Erro de conexao com a IA. O template pode ser muito grande — tente um pedido mais simples."
-          : msg);
+        setError(
+          msg === "Failed to fetch"
+            ? "Erro de conexao com a IA. O template pode ser muito grande — tente um pedido mais simples."
+            : msg,
+        );
       } finally {
         setIsRefining(false);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [generatedCode, isRefining, currentPlatform, currentDesignContext, streamFromAPI, addEntry, activeProjectId, activePageId, updatePageCode]
+    [
+      generatedCode,
+      isRefining,
+      currentPlatform,
+      currentDesignContext,
+      streamFromAPI,
+      addEntry,
+      activeProjectId,
+      activePageId,
+      updatePageCode,
+    ],
   );
 
   const handleBack = useCallback(() => {
@@ -455,76 +610,99 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     router.push("/");
   }, [router]);
 
-  const handleOpenProject = useCallback((project: Project) => {
-    setActiveProjectId(project.id);
-    router.push(`/projects/${project.id}`);
-  }, [router]);
+  const handleOpenProject = useCallback(
+    (project: Project) => {
+      setActiveProjectId(project.id);
+      router.push(`/projects/${project.id}`);
+    },
+    [router],
+  );
 
-  const handleOpenPage = useCallback((page: ProjectPage) => {
-    setGeneratedCode(page.code);
-    setCurrentPlatform(page.platform);
-    setCurrentPrompt(page.name);
-    setActivePageId(page.id);
-    router.push("/workspace");
-  }, [router]);
+  const handleOpenPage = useCallback(
+    (page: ProjectPage) => {
+      setGeneratedCode(page.code);
+      setCurrentPlatform(page.platform);
+      setCurrentPrompt(page.name);
+      setActivePageId(page.id);
+      router.push("/workspace");
+    },
+    [router],
+  );
 
   const handleCreateProject = useCallback(() => {
     setNewProjectModalOpen(true);
   }, []);
 
-  const handleCreateProjectConfirm = useCallback(async (name: string, client: string) => {
-    const project = await createProject(name, client);
-    setActiveProjectId(project.id);
-    router.push(`/projects/${project.id}`);
-  }, [createProject, router]);
+  const handleCreateProjectConfirm = useCallback(
+    async (name: string, client: string) => {
+      const project = await createProject(name, client);
+      setActiveProjectId(project.id);
+      router.push(`/projects/${project.id}`);
+    },
+    [createProject, router],
+  );
 
   const handleCreatePage = useCallback(() => {
     router.push("/");
   }, [router]);
 
-  const openCodeInWorkspace = useCallback((code: string, prompt?: string) => {
-    setGeneratedCode(code);
-    setCurrentPrompt(prompt || "");
-    setCurrentPlatform("html");
-    router.push("/workspace");
-  }, [router]);
-
-  const handleTemplateFromResources = useCallback(async (prompt: string) => {
-    if (prompt.startsWith("READY:")) {
-      const templateId = prompt.replace("READY:", "");
-      setCurrentPrompt("Template: " + templateId);
+  const openCodeInWorkspace = useCallback(
+    (code: string, prompt?: string) => {
+      setGeneratedCode(code);
+      setCurrentPrompt(prompt || "");
       setCurrentPlatform("html");
       router.push("/workspace");
-      setIsLoading(true);
-      try {
-        const res = await fetch(`/api/template?id=${templateId}`);
-        if (!res.ok) throw new Error("Template nao encontrado");
-        const rawHtml = await res.text();
-        const html = optimizeHtml(rawHtml, { webhookUrl: webhookUrl || undefined });
-        setGeneratedCode(html);
-        addEntry({ id: crypto.randomUUID(), prompt: "Template: " + templateId, platform: "html", code: html, createdAt: Date.now() });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Erro");
-      } finally {
-        setIsLoading(false);
-      }
-      return;
-    }
+    },
+    [router],
+  );
 
-    handleGenerate({
-      prompt,
-      platform: "html",
-      referenceUrl: "",
-      brandReference: "",
-      expectations: "",
-      primaryColor: "#a78bfa",
-      secondaryColor: "#6366f1",
-      fontChoice: "sora",
-      stylePreset: "dark-premium",
-      images: [],
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [handleGenerate, addEntry, router]);
+  const handleTemplateFromResources = useCallback(
+    async (prompt: string) => {
+      if (prompt.startsWith("READY:")) {
+        const templateId = prompt.replace("READY:", "");
+        setCurrentPrompt("Template: " + templateId);
+        setCurrentPlatform("html");
+        router.push("/workspace");
+        setIsLoading(true);
+        try {
+          const res = await fetch(`/api/template?id=${templateId}`);
+          if (!res.ok) throw new Error("Template nao encontrado");
+          const rawHtml = await res.text();
+          const html = optimizeHtml(rawHtml, {
+            webhookUrl: webhookUrl || undefined,
+          });
+          setGeneratedCode(html);
+          addEntry({
+            id: crypto.randomUUID(),
+            prompt: "Template: " + templateId,
+            platform: "html",
+            code: html,
+            createdAt: Date.now(),
+          });
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Erro");
+        } finally {
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      handleGenerate({
+        prompt,
+        platform: "html",
+        referenceUrl: "",
+        brandReference: "",
+        expectations: "",
+        primaryColor: "#a78bfa",
+        secondaryColor: "#6366f1",
+        fontChoice: "sora",
+        stylePreset: "dark-premium",
+        images: [],
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [handleGenerate, addEntry, router],
+  );
 
   /* Manual compact — exposed via StorageToast */
   const handleManualCompact = useCallback(() => {
@@ -533,7 +711,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (compacted < 100 * 1024) {
       const ok = window.confirm(
         "A limpeza leve liberou pouco espaço. Quer apagar o histórico de gerações e drafts antigos?\n\n" +
-        "Seus projetos, componentes salvos e o draft atual ficam intactos."
+          "Seus projetos, componentes salvos e o draft atual ficam intactos.",
       );
       if (!ok) {
         setStorageToast(`${formatBytes(compacted)} liberados.`);
@@ -541,45 +719,126 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       const aggressive = aggressiveCleanup(null);
-      setStorageToast(`${formatBytes(compacted + aggressive.bytesFreed)} liberados (${aggressive.itemsRemoved} itens removidos).`);
+      setStorageToast(
+        `${formatBytes(compacted + aggressive.bytesFreed)} liberados (${aggressive.itemsRemoved} itens removidos).`,
+      );
       setTimeout(() => setStorageToast(null), 5000);
       return;
     }
-    setStorageToast(`${formatBytes(compacted)} liberados em ${compact.keysShrunk} entradas.`);
+    setStorageToast(
+      `${formatBytes(compacted)} liberados em ${compact.keysShrunk} entradas.`,
+    );
     setTimeout(() => setStorageToast(null), 5000);
   }, []);
 
-  const value = useMemo<AppContextValue>(() => ({
-    projects, saveError, createProject, addPageToProject, updatePageCode,
-    toggleStar, deleteProject, deletePageFromProject, updateCoverImage,
-    generatedCode, isLoading, isRefining, error, limitReached, clearLimitReached, currentPlatform, currentPrompt, activePageId,
-    apiKey, aiProvider, aiModel, saveApiKey, clearApiKey,
-    imageApiKey, imageProvider, imageModel, saveImageApiKey, clearImageApiKey,
-    commandPaletteOpen, setCommandPaletteOpen,
-    launchKits, activeLaunchKit, showLaunchWizard, setShowLaunchWizard,
-    setActiveLaunchKit, saveLaunchKit, deleteLaunchKit,
-    webhookUrl, setWebhookUrl,
-    navigate,
-    handleGenerate, handleRefine, handleBack,
-    handleOpenProject, handleOpenPage, handleCreateProject, handleCreatePage,
-    handleTemplateFromResources, openCodeInWorkspace,
-  }), [
-    projects, saveError, createProject, addPageToProject, updatePageCode,
-    toggleStar, deleteProject, deletePageFromProject, updateCoverImage,
-    generatedCode, isLoading, isRefining, error, limitReached, clearLimitReached, currentPlatform, currentPrompt, activePageId,
-    apiKey, aiProvider, aiModel, saveApiKey, clearApiKey,
-    imageApiKey, imageProvider, imageModel, saveImageApiKey, clearImageApiKey,
-    commandPaletteOpen, setCommandPaletteOpen,
-    launchKits, activeLaunchKit, showLaunchWizard, setShowLaunchWizard, setActiveLaunchKit,
-    saveLaunchKit, deleteLaunchKit,
-    webhookUrl, setWebhookUrl,
-    navigate,
-    handleGenerate, handleRefine, handleBack,
-    handleOpenProject, handleOpenPage, handleCreateProject, handleCreatePage,
-    handleTemplateFromResources, openCodeInWorkspace,
-  ]);
+  const value = useMemo<AppContextValue>(
+    () => ({
+      projects,
+      saveError,
+      createProject,
+      addPageToProject,
+      updatePageCode,
+      toggleStar,
+      deleteProject,
+      deletePageFromProject,
+      updateCoverImage,
+      generatedCode,
+      isLoading,
+      isRefining,
+      error,
+      limitReached,
+      clearLimitReached,
+      currentPlatform,
+      currentPrompt,
+      activePageId,
+      apiKey,
+      aiProvider,
+      aiModel,
+      saveApiKey,
+      clearApiKey,
+      imageApiKey,
+      imageProvider,
+      imageModel,
+      saveImageApiKey,
+      clearImageApiKey,
+      commandPaletteOpen,
+      setCommandPaletteOpen,
+      launchKits,
+      activeLaunchKit,
+      showLaunchWizard,
+      setShowLaunchWizard,
+      setActiveLaunchKit,
+      saveLaunchKit,
+      deleteLaunchKit,
+      webhookUrl,
+      setWebhookUrl,
+      navigate,
+      handleGenerate,
+      handleRefine,
+      handleBack,
+      handleOpenProject,
+      handleOpenPage,
+      handleCreateProject,
+      handleCreatePage,
+      handleTemplateFromResources,
+      openCodeInWorkspace,
+    }),
+    [
+      projects,
+      saveError,
+      createProject,
+      addPageToProject,
+      updatePageCode,
+      toggleStar,
+      deleteProject,
+      deletePageFromProject,
+      updateCoverImage,
+      generatedCode,
+      isLoading,
+      isRefining,
+      error,
+      limitReached,
+      clearLimitReached,
+      currentPlatform,
+      currentPrompt,
+      activePageId,
+      apiKey,
+      aiProvider,
+      aiModel,
+      saveApiKey,
+      clearApiKey,
+      imageApiKey,
+      imageProvider,
+      imageModel,
+      saveImageApiKey,
+      clearImageApiKey,
+      commandPaletteOpen,
+      setCommandPaletteOpen,
+      launchKits,
+      activeLaunchKit,
+      showLaunchWizard,
+      setShowLaunchWizard,
+      setActiveLaunchKit,
+      saveLaunchKit,
+      deleteLaunchKit,
+      webhookUrl,
+      setWebhookUrl,
+      navigate,
+      handleGenerate,
+      handleRefine,
+      handleBack,
+      handleOpenProject,
+      handleOpenPage,
+      handleCreateProject,
+      handleCreatePage,
+      handleTemplateFromResources,
+      openCodeInWorkspace,
+    ],
+  );
 
-  const storageToastIsError = storageToast?.toLowerCase().includes("cheio") || storageToast?.toLowerCase().includes("erro");
+  const storageToastIsError =
+    storageToast?.toLowerCase().includes("cheio") ||
+    storageToast?.toLowerCase().includes("erro");
 
   return (
     <AppContext.Provider value={value}>
@@ -590,11 +849,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         onConfirm={handleCreateProjectConfirm}
       />
       {storageToast && (
-        <div className={`fixed bottom-4 left-1/2 -translate-x-1/2 z-[200] px-4 py-3 rounded-xl border text-[12px] font-medium backdrop-blur-xl shadow-2xl animate-fade-in-delay max-w-md text-center flex items-center gap-3 ${
-          storageToastIsError
-            ? "bg-red-500/15 border-red-500/25 text-red-400"
-            : "bg-emerald-500/15 border-emerald-500/25 text-emerald-400"
-        }`}>
+        <div
+          className={`fixed bottom-4 left-1/2 -translate-x-1/2 z-[200] px-4 py-3 rounded-xl border text-[12px] font-medium backdrop-blur-xl shadow-2xl animate-fade-in-delay max-w-md text-center flex items-center gap-3 ${
+            storageToastIsError
+              ? "bg-red-500/15 border-red-500/25 text-red-400"
+              : "bg-emerald-500/15 border-emerald-500/25 text-emerald-400"
+          }`}
+        >
           <span>{storageToast}</span>
           {storageToastIsError && (
             <button

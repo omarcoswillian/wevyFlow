@@ -1,4 +1,5 @@
 import { resolveConfig, callOnce, parseApiError } from "../../lib/ai-client";
+import type { AICallConfig } from "../../lib/ai-client";
 import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
 import type { BrandInfo, BrandIdentity, BrandLogo } from "../../lib/types-kit";
 
@@ -88,11 +89,60 @@ function sanitizeSvg(raw: string): string {
     .replace(/(<(?:image|use)[^>]+(?:href|xlink:href)\s*=\s*["'])data:[^"']*["']/gi, "$1");
 }
 
+async function analyzeVisualReferences(
+  referenceImages: string[],
+  referenceBrands: string | undefined,
+  config: AICallConfig
+): Promise<string> {
+  const images = referenceImages.slice(0, 4).map((dataUrl) => {
+    const [meta, data] = dataUrl.split(",");
+    const mediaType = (meta.match(/:(.*?);/) || [])[1] as "image/jpeg" | "image/png" | "image/webp";
+    return { base64: data, mediaType: mediaType || ("image/jpeg" as const) };
+  });
+
+  const brandsContext = referenceBrands
+    ? `\nO cliente também mencionou admirar estas marcas: ${referenceBrands}`
+    : "";
+
+  const prompt = `Analyze these visual brand references and extract precise visual DNA for brand identity creation.${brandsContext}
+
+Return ONLY a JSON object:
+{
+  "dominantColors": ["#hex1", "#hex2", "#hex3"],
+  "colorMood": "description of color palette feeling (e.g., 'deep jewel tones with gold accent')",
+  "typographyDirection": "serif|sans-serif|slab|mixed",
+  "typographyWeight": "light|regular|bold|ultra-bold",
+  "typographyStyle": "editorial|geometric|humanist|display|condensed",
+  "visualDensity": "minimal|balanced|rich",
+  "backgroundPreference": "dark|light|both",
+  "brandPositioning": "mass|professional|premium|ultra-luxury",
+  "graphicLanguage": "description of graphic elements (geometric shapes, lines, organic forms, etc.)",
+  "overallMood": "2-3 word mood (e.g., 'refined and authoritative')",
+  "fontSuggestions": ["FontName1", "FontName2"],
+  "keyVisualObservations": "most important visual observations in 2-3 sentences"
+}`;
+
+  try {
+    const raw = await callOnce(
+      config,
+      "You are a senior brand strategist and visual identity analyst. Analyze visual references with precision.",
+      prompt,
+      800,
+      images
+    );
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) return "";
+    return raw;
+  } catch {
+    return "";
+  }
+}
+
 const SYSTEM = `You are a senior brand strategist and visual identity designer specializing in premium digital brands for the Brazilian market.
 
 Generate a complete visual identity system. Return ONLY a valid JSON object — no markdown, no code fences, no comments. First character must be "{".`;
 
-function buildPrompt(b: BrandInfo): string {
+function buildPrompt(b: BrandInfo, visualBrief?: string): string {
   return `Create a complete visual brand identity for:
 
 Product: ${b.productName}
@@ -135,7 +185,15 @@ Return this exact JSON (remove optional fields if not needed):
   }
 }
 
-RULES:
+${visualBrief ? `VISUAL REFERENCE ANALYSIS (extracted from client's reference images — treat as primary direction):
+${visualBrief}
+
+These visual observations should STRONGLY guide your color and typography choices.
+Respect the dominant colors (refine them for the brand, but stay in that family).
+Match the typography direction and weight style.
+The brand positioning level must match.
+
+` : ""}RULES:
 — words: exactly 5 personality keywords in Portuguese (adjectives or nouns)
 — colors: exactly 5, each usage type once; refine the client's color suggestion but keep the spirit
 — fonts: REAL Google Fonts — bold choices that match the brand personality. Examples:
@@ -171,6 +229,13 @@ function fallbackLogo(productName: string, primaryColor: string): BrandLogo {
   };
 }
 
+const DECORATIVE_BY_PRESET: Record<string, "flanking-lines" | "rule-below" | "geo-mark" | "gradient-line" | "none"> = {
+  "dark-premium": "flanking-lines",
+  "luxury": "rule-below",
+  "neon-tech": "geo-mark",
+  "glassmorphism": "gradient-line",
+};
+
 export async function POST(request: Request) {
   const { brandInfo } = await request.json() as { brandInfo: BrandInfo };
 
@@ -189,8 +254,25 @@ export async function POST(request: Request) {
 
   const aiConfig = resolveConfig(undefined, undefined, undefined);
 
+  // Analisar referências visuais se fornecidas
+  let visualBrief: string | undefined;
+  if (brandInfo.referenceImages && brandInfo.referenceImages.length > 0) {
+    try {
+      visualBrief = await analyzeVisualReferences(
+        brandInfo.referenceImages,
+        brandInfo.referenceBrands,
+        aiConfig
+      );
+    } catch {
+      // não-bloqueante — segue sem referências
+    }
+  } else if (brandInfo.referenceBrands) {
+    // Só marcas de texto, sem imagens — injeta como contexto simples
+    visualBrief = JSON.stringify({ keyVisualObservations: `O cliente admira as marcas: ${brandInfo.referenceBrands}. Extraia o DNA visual dessas referências na identidade.` });
+  }
+
   try {
-    const raw = await callOnce(aiConfig, SYSTEM, buildPrompt(brandInfo), 2048);
+    const raw = await callOnce(aiConfig, SYSTEM, buildPrompt(brandInfo, visualBrief), 2048);
 
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Resposta inválida — JSON não encontrado.");
@@ -206,13 +288,19 @@ export async function POST(request: Request) {
       parsed.logo.type = "wordmark";
     }
 
+    const stylePreset = brandInfo.stylePreset || "dark-premium";
+    const decorativeStyle = DECORATIVE_BY_PRESET[stylePreset] ?? "none";
+
+    const baseLogo: BrandLogo = parsed.logo || fallbackLogo(brandInfo.productName, brandInfo.primaryColor);
+    const logoWithDecoration: BrandLogo = { ...baseLogo, decorativeStyle };
+
     const identity: BrandIdentity = {
       status: "draft",
       concept: String(parsed.concept || ""),
       words: Array.isArray(parsed.words) ? parsed.words.slice(0, 7).map(String) : [],
       colors: Array.isArray(parsed.colors) ? parsed.colors.slice(0, 6) : [],
       fonts: Array.isArray(parsed.fonts) ? parsed.fonts.slice(0, 3) : [],
-      logo: parsed.logo || fallbackLogo(brandInfo.productName, brandInfo.primaryColor),
+      logo: logoWithDecoration,
       createdAt: new Date().toISOString(),
     };
 

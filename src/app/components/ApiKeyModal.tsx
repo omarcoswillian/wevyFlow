@@ -225,7 +225,7 @@ export function ApiKeyModal({
                 : "text-white/30 hover:text-white/60 border border-transparent"
             )}
           >
-            <Image className="w-3 h-3" alt="" />
+            <Image className="w-3 h-3" />
             IA de Imagem
             {currentImageKey && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
           </button>

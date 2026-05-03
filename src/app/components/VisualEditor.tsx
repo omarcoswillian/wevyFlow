@@ -388,7 +388,7 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
           {elementProps.tagName === "img" && (
             <section>
               <Label className="flex items-center gap-1.5 mb-2">
-                <Image className="w-3 h-3" alt="" /> Imagem
+                <Image className="w-3 h-3" /> Imagem
               </Label>
               <div className="space-y-2">
                 {/* Alt text */}
@@ -838,7 +838,7 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
         {elementProps.tagName === "img" && (
           <section>
             <Label className="flex items-center gap-1.5 mb-2">
-              <Image className="w-3 h-3" alt="" /> Imagem
+              <Image className="w-3 h-3" /> Imagem
             </Label>
             <div className="space-y-2">
               <div>

@@ -52,6 +52,9 @@ export interface BrandInfo {
   mecanismo?: string;   // unique mechanism — why this works when everything else failed
   preco?: string;       // price + anchor (e.g. "R$997 — de R$2.997")
   provas?: string;      // social proof — results, numbers, testimonial snippets
+  // Visual reference fields
+  referenceImages?: string[];  // base64 data URLs, max 4 imagens
+  referenceBrands?: string;    // ex: "Nike, Apple, Headspace"
 }
 
 export interface KitAssetInstance {
@@ -93,6 +96,7 @@ export interface BrandLogo {
   accentColor?: string;
   subtext?: string;
   subtextSpacing?: string;
+  decorativeStyle?: "flanking-lines" | "rule-below" | "geo-mark" | "gradient-line" | "none";
 }
 
 export interface BrandIdentity {

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { X, ChevronRight, ChevronLeft, Rocket, Zap, Sprout, PlayCircle, Repeat, Check } from "lucide-react";
+import { useState, useCallback, useRef } from "react";
+import { X, ChevronRight, ChevronLeft, Rocket, Zap, Sprout, PlayCircle, Repeat, Check, Upload, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppContext } from "../(app)/_context";
 import { LAUNCH_STRATEGIES } from "../lib/launch-strategies";
@@ -149,8 +149,51 @@ export function LaunchWizard() {
   );
 }
 
+/* ── Image resize helper ────────────────────────────────── */
+async function resizeImage(file: File): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const MAX = 800;
+      let { width, height } = img;
+      if (width > MAX || height > MAX) {
+        const ratio = Math.min(MAX / width, MAX / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL("image/jpeg", 0.85));
+    };
+    img.src = url;
+  });
+}
+
 /* ── Step 1: Brand Info ─────────────────────────────────── */
 function StepBrand({ brand, setBrand }: { brand: Partial<BrandInfo>; setBrand: (p: Partial<BrandInfo>) => void }) {
+  const [refOpen, setRefOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleImageFiles(files: FileList | null) {
+    if (!files) return;
+    const current = brand.referenceImages || [];
+    const remaining = 4 - current.length;
+    if (remaining <= 0) return;
+    const selected = Array.from(files).slice(0, remaining);
+    const resized = await Promise.all(selected.map(resizeImage));
+    setBrand({ referenceImages: [...current, ...resized].slice(0, 4) });
+  }
+
+  function removeImage(idx: number) {
+    const current = brand.referenceImages || [];
+    setBrand({ referenceImages: current.filter((_, i) => i !== idx) });
+  }
+
   return (
     <div className="space-y-4">
       <div>
@@ -217,6 +260,88 @@ function StepBrand({ brand, setBrand }: { brand: Partial<BrandInfo>; setBrand: (
             {STYLE_PRESETS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
           </select>
         </Field>
+      </div>
+
+      {/* Referencias visuais — colapsavel */}
+      <div className="border border-white/[0.08] rounded-xl overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setRefOpen((o) => !o)}
+          className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-white/[0.02] transition-colors"
+        >
+          <div>
+            <span className="text-[12px] font-medium text-white/60">Referencias Visuais</span>
+            <span className="ml-2 text-[10px] text-purple-400/70">(opcional mas recomendado)</span>
+          </div>
+          <ChevronDown
+            className={cn("w-4 h-4 text-white/30 transition-transform", refOpen && "rotate-180")}
+          />
+        </button>
+
+        {refOpen && (
+          <div className="px-4 pb-4 space-y-3 border-t border-white/[0.06]">
+            <p className="text-[10px] text-white/30 pt-3">
+              Imagens de marcas que inspiram voce — logos, paletas, materiais visuais
+            </p>
+
+            {/* Drop zone */}
+            <div
+              className={cn(
+                "border-2 border-dashed rounded-xl p-4 text-center transition-all cursor-pointer",
+                isDragging
+                  ? "border-purple-500/60 bg-purple-500/[0.06]"
+                  : "border-white/[0.08] hover:border-white/[0.14] hover:bg-white/[0.02]"
+              )}
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={async (e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                await handleImageFiles(e.dataTransfer.files);
+              }}
+            >
+              <Upload size={16} className="mx-auto mb-1.5 text-white/25" />
+              <p className="text-[11px] text-white/40">Arraste ou clique para selecionar</p>
+              <p className="text-[10px] text-white/20 mt-0.5">JPG, PNG ou WEBP — max. 4 imagens</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                className="hidden"
+                onChange={(e) => handleImageFiles(e.target.files)}
+              />
+            </div>
+
+            {/* Thumbnails */}
+            {(brand.referenceImages || []).length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {(brand.referenceImages || []).map((src, idx) => (
+                  <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-white/[0.08] group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt={`Referencia ${idx + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => removeImage(idx)}
+                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X size={10} className="text-white" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <Field label="Marcas de referencia">
+              <input
+                value={brand.referenceBrands || ""}
+                onChange={(e) => setBrand({ referenceBrands: e.target.value })}
+                placeholder="Ex: Nike, Apple, Headspace"
+                className={inputCls}
+              />
+            </Field>
+          </div>
+        )}
       </div>
     </div>
   );
