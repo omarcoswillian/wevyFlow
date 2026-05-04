@@ -5,601 +5,423 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import {
   Sparkles, Download, Trash2, Loader2, AlertCircle, Check, RefreshCw,
-  ImageIcon, Bot, User, Send, ImagePlus, X, MessageSquare, FileText,
-  Library, Wand2, Upload, Pencil, Code2,
-  Layout, BookOpen, ShoppingCart, Monitor, PlayCircle,
-  MessageCircle, Mail, ClipboardList, Fingerprint, ChevronRight, Lock, Grid3X3, Tv2,
+  ImageIcon, User, ImagePlus, X,
+  Library, Wand2, Upload, Play, ChevronDown, MousePointer2,
 } from "lucide-react";
-import type { CriativoFormat } from "../api/generate-criativo/route";
-import { CANVAS_TEMPLATES, type CanvasTemplate } from "../lib/canvas-templates";
-import { CanvasEditor } from "./CanvasEditor";
 import { useAppContext } from "../(app)/_context";
 
 /* ─── Types ─────────────────────────────────────────────── */
 interface SavedCriativo {
-  id: string;
-  format: string;
-  url: string;
-  headline: string | null;
-  produto: string | null;
-  created_at: string;
+  id: string; format: string; url: string;
+  headline: string | null; produto: string | null; created_at: string;
 }
-
 interface LibraryItem {
-  id: string;
-  url: string;
-  name: string | null;
-  format: string | null;
-  tags: string[] | null;
-  created_at: string;
+  id: string; url: string; name: string | null;
+  format: string | null; tags: string[] | null; created_at: string;
 }
-
-interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-  images?: string[];
+interface SeedItem {
+  path: string; name: string; client: string; format: string;
 }
-
-/* ─── Seed data (mirrors public/library-seed/manifest.json) ─ */
-const SEED_GROUPS: { client: string; color: string; items: { path: string; name: string; format: string }[] }[] = [
-  {
-    client: "Formagios",
-    color: "#f97316",
-    items: [
-      { path: "/library-seed/formagios/AD01V1-FEED.jpg",  name: "Feed 01",    format: "feed-retrato" },
-      { path: "/library-seed/formagios/AD02.jpg",         name: "AD 02",      format: "feed-quadrado" },
-      { path: "/library-seed/formagios/AD02V1-FEED.jpg",  name: "Feed 02",    format: "feed-retrato" },
-      { path: "/library-seed/formagios/AD07.jpg",         name: "AD 07",      format: "feed-quadrado" },
-      { path: "/library-seed/formagios/AD08.jpg",         name: "AD 08",      format: "feed-quadrado" },
-      { path: "/library-seed/formagios/AD11.jpg",         name: "AD 11",      format: "feed-quadrado" },
-      { path: "/library-seed/formagios/AD16.jpg",         name: "AD 16",      format: "feed-quadrado" },
-      { path: "/library-seed/formagios/AD29.jpg",         name: "AD 29",      format: "feed-quadrado" },
-      { path: "/library-seed/formagios/AD37.jpg",         name: "AD 37",      format: "feed-quadrado" },
-      { path: "/library-seed/formagios/AD38.jpg",         name: "AD 38",      format: "feed-quadrado" },
-      { path: "/library-seed/formagios/V3.jpg",           name: "V3",         format: "feed-quadrado" },
-    ],
-  },
-  {
-    client: "Luana",
-    color: "#ec4899",
-    items: [
-      { path: "/library-seed/luana/6202-ED-IMG.png",   name: "6202",           format: "feed-retrato" },
-      { path: "/library-seed/luana/6210-ED-IMG.png",   name: "6210",           format: "feed-retrato" },
-      { path: "/library-seed/luana/6216-ED-IMG.png",   name: "6216",           format: "feed-retrato" },
-      { path: "/library-seed/luana/6217-ED-IMG.png",   name: "6217",           format: "feed-retrato" },
-      { path: "/library-seed/luana/AD02.png",          name: "AD 02",          format: "feed-quadrado" },
-      { path: "/library-seed/luana/AD05.png",          name: "AD 05",          format: "feed-quadrado" },
-      { path: "/library-seed/luana/AD07.png",          name: "AD 07",          format: "feed-quadrado" },
-      { path: "/library-seed/luana/faltam7dias-1.png", name: "Faltam 7 Dias",  format: "stories" },
-      { path: "/library-seed/luana/faltam7dias.png",   name: "Faltam 7 Dias v2", format: "stories" },
-      { path: "/library-seed/luana/hoje.png",          name: "Hoje",           format: "stories" },
-    ],
-  },
-];
-
-const FORMAT_SHAPE: Record<string, { w: number; h: number }> = {
-  "feed-retrato":  { w: 4, h: 5 },
-  "feed-quadrado": { w: 1, h: 1 },
-  "stories":       { w: 9, h: 16 },
-  "youtube-thumbnail": { w: 16, h: 9 },
-  "banner-horizontal": { w: 1.91, h: 1 },
-  "whatsapp":      { w: 1, h: 1 },
-};
+interface RefCard    { id: string; label: string; dataUrl: string | null; }
+interface AvatarCard { id: string; label: string; name: string; dataUrl: string | null; }
+interface GenResult  {
+  id: string; label: string; status: "loading" | "done" | "error";
+  dataUrl?: string; mimeType?: string; error?: string;
+}
+interface CardPos { x: number; y: number; }
+interface Viewport { x: number; y: number; scale: number; }
+interface CtxMenu  { x: number; y: number; cx: number; cy: number; }
 
 /* ─── Constants ──────────────────────────────────────────── */
-const FORMATS: { id: CriativoFormat; label: string; platform: string; size: string; w: number; h: number }[] = [
-  { id: "youtube-thumbnail", label: "Thumbnail",    platform: "YouTube",        size: "1280 × 720",  w: 16, h: 9 },
-  { id: "whatsapp",          label: "Criativo",      platform: "WhatsApp",       size: "1080 × 1080", w: 1,  h: 1 },
-  { id: "banner-horizontal", label: "Banner",        platform: "Meta / Google",  size: "1200 × 628",  w: 1.91, h: 1 },
-  { id: "feed-retrato",      label: "Feed Retrato",  platform: "Instagram",      size: "1080 × 1350", w: 4,  h: 5 },
-  { id: "feed-quadrado",     label: "Feed Quadrado", platform: "Instagram / FB", size: "1080 × 1080", w: 1,  h: 1 },
-  { id: "stories",           label: "Stories",       platform: "Instagram",      size: "1080 × 1920", w: 9,  h: 16 },
+const DOT_SIZE = 24;
+
+const GEN_FORMATS: { id: string; label: string; w: number; h: number }[] = [
+  { id: "1:1",  label: "1:1",  w: 14,   h: 14    },
+  { id: "4:5",  label: "4:5",  w: 14,   h: 17.5  },
+  { id: "9:16", label: "9:16", w: 9.5,  h: 17.5  },
+  { id: "16:9", label: "16:9", w: 20,   h: 11.25 },
+];
+const GALLERY_FORMATS: { id: string; platform: string; w: number; h: number }[] = [
+  { id: "youtube-thumbnail", platform: "YouTube",     w: 16,   h: 9  },
+  { id: "whatsapp",          platform: "WhatsApp",    w: 1,    h: 1  },
+  { id: "banner-horizontal", platform: "Meta/Google", w: 1.91, h: 1  },
+  { id: "feed-retrato",      platform: "Instagram",   w: 4,    h: 5  },
+  { id: "feed-quadrado",     platform: "Inst/FB",     w: 1,    h: 1  },
+  { id: "stories",           platform: "Stories",     w: 9,    h: 16 },
 ];
 
-const _FORMAT_LABELS: Record<string, string> = Object.fromEntries(
-  FORMATS.map((f) => [f.id, `${f.platform} — ${f.size}`])
-);
-
-const FASES    = [{ id: "aquecimento", label: "Aquecimento" }, { id: "lancamento", label: "Lançamento" }, { id: "urgencia", label: "Urgência" }, { id: "encerramento", label: "Encerramento" }];
-const ESTILOS  = [{ id: "bold", label: "Bold" }, { id: "minimal", label: "Minimal" }, { id: "professional", label: "Profissional" }, { id: "colorful", label: "Colorido" }];
+const REF_PORT_Y   = 17;
+const GERAR_PORT_Y = 20;
+const REF_WIDTH    = 228;
 
 /* ─── Helpers ────────────────────────────────────────────── */
-function getImageConfig(): { apiKey?: string; imageProvider: string; imageModel?: string } {
-  try {
-    const key = localStorage.getItem("wf_img_key") || undefined;
-    const provider = localStorage.getItem("wf_img_provider") || "gemini";
-    const model = localStorage.getItem("wf_img_model") || undefined;
-    return { apiKey: key, imageProvider: provider, imageModel: model };
-  } catch { /* no localStorage */ }
-  return { imageProvider: "gemini" };
-}
-
-function getActiveImageProviderLabel(): string {
-  try {
-    const provider = localStorage.getItem("wf_img_provider") || "gemini";
-    const model = localStorage.getItem("wf_img_model") || "";
-    if (provider === "gemini") return model.includes("nano") ? "Nano Banana" : "Gemini Image";
-    if (provider === "fal") return "Fal.ai";
-    return "GPT-Images-2";
-  } catch { return "Gemini Image"; }
-}
-async function dataUrlToFile(dataUrl: string, filename: string): Promise<File> {
-  const res = await fetch(dataUrl);
-  const blob = await res.blob();
-  return new File([blob], filename, { type: blob.type || "image/png" });
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload  = () => resolve(r.result as string);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
 }
 function downloadDataUrl(dataUrl: string, filename: string) {
   const a = document.createElement("a"); a.href = dataUrl; a.download = filename; a.click();
 }
 async function downloadFromUrl(url: string, filename: string) {
-  const res = await fetch(url);
-  const blob = await res.blob();
+  const res = await fetch(url); const blob = await res.blob();
   const obj = URL.createObjectURL(blob);
   const a = document.createElement("a"); a.href = obj; a.download = filename; a.click();
   URL.revokeObjectURL(obj);
 }
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(r.result as string); r.onerror = reject; r.readAsDataURL(file); });
+let _refCtr = 0; let _avCtr = 0;
+function nextRefLabel() { _refCtr++; return `img${_refCtr}`; }
+function nextAvLabel()  { _avCtr++;  return `avatar${_avCtr}`; }
+
+/* ─── BrandCarousel ──────────────────────────────────────── */
+function BrandCarousel({ label, count, items }: {
+  label: string;
+  count: number;
+  items: { key: string; src: string; name: string }[];
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scroll = (dir: -1 | 1) => {
+    if (scrollRef.current) scrollRef.current.scrollBy({ left: dir * 600, behavior: "smooth" });
+  };
+
+  return (
+    <div className="px-8 py-4 border-b border-white/[0.04] last:border-0">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2.5">
+          <span className="text-[13px] font-semibold text-white/80">{label}</span>
+          {count > 0
+            ? <span className="text-[10px] text-white/25 font-mono">{count} criativo{count !== 1 ? "s" : ""}</span>
+            : <span className="text-[10px] text-white/20 italic">em breve</span>
+          }
+        </div>
+        {count > 3 && (
+          <div className="flex gap-1">
+            <button onClick={() => scroll(-1)} className="w-6 h-6 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-white/40 hover:text-white/80 transition-all cursor-pointer">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M6.5 2L3.5 5L6.5 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+            <button onClick={() => scroll(1)} className="w-6 h-6 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-white/40 hover:text-white/80 transition-all cursor-pointer">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3.5 2L6.5 5L3.5 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+          </div>
+        )}
+      </div>
+      <div
+        ref={scrollRef}
+        className="flex gap-3 overflow-x-auto pb-1"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {items.map(item => (
+            <div key={item.key} className="group shrink-0 w-[320px] rounded-2xl overflow-hidden border border-white/[0.06] hover:border-purple-500/30 transition-all bg-white/[0.02] relative cursor-pointer" style={{ aspectRatio: "4/5" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={item.src} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="absolute inset-x-0 bottom-0 p-2 opacity-0 group-hover:opacity-100 bg-gradient-to-t from-black/80 transition-all">
+                <p className="text-[10px] text-white/70 truncate font-medium">{item.name}</p>
+              </div>
+            </div>
+          ))}
+      </div>
+    </div>
+  );
 }
-
-/* ─── Category definitions ───────────────────────────────── */
-type CategoryAction = "generate" | "navigate" | "soon";
-interface DesignCategory {
-  id: string; label: string; description: string;
-  icon: React.ElementType; action: CategoryAction;
-  formats?: CriativoFormat[]; navigateTo?: string; size?: string;
-}
-
-const PRIMARIO: DesignCategory[] = [
-  { id: "kv",             label: "KV",                icon: Fingerprint,    action: "navigate",  navigateTo: "marca",   description: "Logo, cores, fonte e brandbook" },
-  { id: "paginas",        label: "Páginas",           icon: Layout,         action: "navigate",  navigateTo: "home",    description: "Copy, design e implementação" },
-  { id: "criativos",      label: "Criativos",         icon: ImageIcon,      action: "generate",  formats: ["feed-retrato", "feed-quadrado", "stories"],   description: "Feed e story + copy",            size: "1080×1080" },
-  { id: "capas-modulos",  label: "Capas dos módulos", icon: BookOpen,       action: "soon",      description: "Personalizar área de membros" },
-  { id: "banner-checkout",label: "Banner checkout",   icon: ShoppingCart,   action: "generate",  formats: ["banner-horizontal"],                          description: "Banner para a página de checkout", size: "1200×628" },
-];
-
-const SECUNDARIO: DesignCategory[] = [
-  { id: "pdf",        label: "PDF / E-book",    icon: FileText,      action: "soon",     description: "Materiais em PDF",          size: "A4" },
-  { id: "slide",      label: "Slide",           icon: Monitor,       action: "soon",     description: "Apresentações profissionais", size: "16:9" },
-  { id: "thumb-yt",   label: "Thumb YouTube",   icon: PlayCircle,    action: "generate", formats: ["youtube-thumbnail"],           description: "Thumbnail para vídeos",     size: "1280×720" },
-  { id: "capa-yt",    label: "Capa YouTube",    icon: Tv2,           action: "soon",     description: "Arte do canal",             size: "2560×1440" },
-  { id: "whatsapp",   label: "WhatsApp API",    icon: MessageCircle, action: "generate", formats: ["whatsapp"],                    description: "Imagens para disparos",     size: "1080×1080" },
-  { id: "email",      label: "Banner e-mail",   icon: Mail,          action: "soon",     description: "Cabeçalhos para e-mail marketing", size: "600×200" },
-  { id: "capa-form",  label: "Capa de formulário", icon: ClipboardList, action: "soon", description: "Imagens para formulários" },
-];
 
 /* ─── Main Component ─────────────────────────────────────── */
 export function CriativosView() {
-  const { navigate } = useAppContext();
-
-  // Main tab — hub first
-  const [mainTab, setMainTab] = useState<"hub" | "gerar" | "biblioteca" | "galeria">("hub");
-
-  // Generate brief state
-  const [selectedFormat, setSelectedFormat] = useState<CriativoFormat>("youtube-thumbnail");
-  const [produto, setProduto] = useState("");
-  const [headline, setHeadline] = useState("");
-  const [cta, setCta] = useState("");
-  const [cor, setCor] = useState("#6c47ff");
-  const [estilo, setEstilo] = useState("bold");
-  const [fase, setFase] = useState("lancamento");
-  const [quality, setQuality] = useState<"high" | "medium" | "low">("high");
-
-  // Modo de geração: Claude HTML ou GPT-Images-2
-  const [gerarMode, setGerarMode] = useState<"claude" | "gpt">("claude");
-  const [htmlPreview, setHtmlPreview] = useState<string | null>(null);
-  const [exporting, setExporting] = useState(false);
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [preview, setPreview] = useState<{ dataUrl: string; prompt: string } | null>(null);
-  const [saving, setSaving] = useState(false);
-
-  const [briefTab, setBriefTab] = useState<"brief" | "chat">("brief");
-  const [referenceImage, setReferenceImage] = useState<string | null>(null);
-  const [referenceSource, setReferenceSource] = useState<"upload" | "library" | null>(null);
-  const [showLibraryPicker, setShowLibraryPicker] = useState(false);
-
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    { role: "assistant", content: "Descreva o criativo que deseja gerar, ou preencha o Brief ao lado e volte aqui para refinar." },
-  ]);
-  const [chatInput, setChatInput] = useState("");
-  const [chatImages, setChatImages] = useState<string[]>([]);
-
-  // Gallery state
-  const [gallery, setGallery] = useState<SavedCriativo[]>([]);
-  const [activeGalleryFormat, setActiveGalleryFormat] = useState("all");
-
-  // Library state (user uploads only — seed is static from public/)
-  const [library, setLibrary] = useState<LibraryItem[]>([]);
-  const [libraryUploading, setLibraryUploading] = useState(false);
-  const [libraryDragOver, setLibraryDragOver] = useState(false);
-
-  // Template editor
-  const [activeTemplate, setActiveTemplate] = useState<CanvasTemplate | null>(null);
-  const [importedTemplates, setImportedTemplates] = useState<CanvasTemplate[]>([]);
-
-  const colorInputRef = useRef<HTMLInputElement>(null);
-  const referenceFileRef = useRef<HTMLInputElement>(null);
-  const chatFileRef = useRef<HTMLInputElement>(null);
-  const libraryUploadRef = useRef<HTMLInputElement>(null);
-  const figmaImportRef = useRef<HTMLInputElement>(null);
-  const chatEndRef = useRef<HTMLDivElement | null>(null);
-  const carouselRef = useRef<HTMLDivElement>(null);
+  useAppContext();
   const supabase = createClient();
 
-  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages, loading]);
+  const [mainTab, setMainTab] = useState<"gerar" | "biblioteca" | "galeria">("gerar");
 
-  /* ─── Import Figma JSON ─ */
-  const handleFigmaImport = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    e.target.value = "";
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const json = JSON.parse(ev.target?.result as string);
-        if (json.wevyflow !== "1.0" || !json.canvas) {
-          alert("Arquivo inválido. Use o plugin WevyFlow Export no Figma.");
-          return;
-        }
-        const tpl: CanvasTemplate = {
-          id: json.id || `figma-${Date.now()}`,
-          name: json.name || "Template importado",
-          client: "Figma",
-          format: json.h > json.w ? "stories" : "feed-quadrado",
-          w: json.w,
-          h: json.h,
-          bgColor: json.bgColor || "#ffffff",
-          referencePath: "",
-          objects: [],
-          fabricJson: json.canvas,
-        };
-        setImportedTemplates((prev) => {
-          const filtered = prev.filter((t) => t.id !== tpl.id);
-          return [...filtered, tpl];
+  /* viewport (pan + zoom) */
+  const [viewport, setViewport] = useState<Viewport>({ x: 0, y: 0, scale: 1 });
+  const viewportRef = useRef<Viewport>({ x: 0, y: 0, scale: 1 });
+  useEffect(() => { viewportRef.current = viewport; }, [viewport]);
+
+  /* design gen state */
+  const [references, setReferences] = useState<RefCard[]>([]);
+  const [avatars,    setAvatars]    = useState<AvatarCard[]>([]);
+  const [genPrompt,  setGenPrompt]  = useState("");
+  const [genCount,   setGenCount]   = useState(1);
+  const [genFormat,  setGenFormat]  = useState("9:16");
+  const [genQuality, setGenQuality] = useState("2K");
+  const [genResults, setGenResults] = useState<GenResult[]>([]);
+  const [genRunning, setGenRunning] = useState(false);
+
+  /* canvas */
+  const [positions,  setPositions]  = useState<Record<string, CardPos>>({});
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [ctxMenu,    setCtxMenu]    = useState<CtxMenu | null>(null);
+  const positionsRef = useRef<Record<string, CardPos>>({});
+  const dragRef      = useRef<{ id: string; startMX: number; startMY: number; startX: number; startY: number } | null>(null);
+  const canvasRef    = useRef<HTMLDivElement>(null);
+  const ctxMenuRef   = useRef<HTMLDivElement>(null);
+  const isPanningRef = useRef(false);
+  const panStartRef  = useRef({ mx: 0, my: 0, vx: 0, vy: 0 });
+
+  /* gallery / library */
+  const [gallery,             setGallery]             = useState<SavedCriativo[]>([]);
+  const [activeGalleryFormat, setActiveGalleryFormat] = useState("all");
+  const [library,             setLibrary]             = useState<LibraryItem[]>([]);
+  const [libraryUploading,    setLibraryUploading]    = useState(false);
+  const [libraryDragOver,     setLibraryDragOver]     = useState(false);
+  const [seedItems,           setSeedItems]           = useState<SeedItem[]>([]);
+  const libraryUploadRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { positionsRef.current = positions; }, [positions]);
+
+  /* ── Wheel zoom (non-passive) ── */
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      if (e.ctrlKey || e.metaKey) {
+        /* pinch / ctrl+scroll → zoom centrado no cursor */
+        setViewport(v => {
+          const factor = e.deltaY > 0 ? 0.92 : 1.08;
+          const newScale = Math.max(0.15, Math.min(5, v.scale * factor));
+          const rect = canvas.getBoundingClientRect();
+          const mx = e.clientX - rect.left;
+          const my = e.clientY - rect.top;
+          const newX = mx - (mx - v.x) * (newScale / v.scale);
+          const newY = my - (my - v.y) * (newScale / v.scale);
+          return { x: newX, y: newY, scale: newScale };
         });
-        setActiveTemplate(tpl);
-      } catch {
-        alert("Erro ao ler o arquivo. Certifique-se de que é um .wevyflow.json válido.");
+      } else {
+        /* dois dedos scroll → pan */
+        setViewport(v => ({ ...v, x: v.x - e.deltaX, y: v.y - e.deltaY }));
       }
     };
-    reader.readAsText(file);
+    canvas.addEventListener("wheel", onWheel, { passive: false });
+    return () => canvas.removeEventListener("wheel", onWheel);
   }, []);
 
-  /* ─── Load gallery ─ */
+  /* ── Context menu: close on outside click (via ref check) ── */
+  useEffect(() => {
+    if (!ctxMenu) return;
+    const close = (e: MouseEvent) => {
+      if (ctxMenuRef.current?.contains(e.target as Node)) return;
+      setCtxMenu(null);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [ctxMenu]);
+
+  /* load gallery */
   const loadGallery = useCallback(async () => {
-    const { data } = await supabase.from("criativos").select("id, format, url, headline, produto, created_at").order("created_at", { ascending: false });
+    const { data } = await supabase.from("criativos").select("id,format,url,headline,produto,created_at").order("created_at", { ascending: false });
     if (data) setGallery(data as SavedCriativo[]);
   }, [supabase]);
   useEffect(() => { loadGallery(); }, [loadGallery]);
 
-  /* ─── Load user library (uploads only) ─ */
+  /* load library */
   const loadLibrary = useCallback(async () => {
     const { data } = await supabase.from("creative_library").select("*").order("created_at", { ascending: false });
     if (data) setLibrary(data as LibraryItem[]);
   }, [supabase]);
   useEffect(() => { loadLibrary(); }, [loadLibrary]);
 
-  const fmt = FORMATS.find((f) => f.id === selectedFormat)!;
-  const canGenerate = (headline.trim() || produto.trim()) && !loading;
+  /* load seed manifest */
+  useEffect(() => {
+    fetch("/library-seed/manifest.json")
+      .then(r => r.json())
+      .then(setSeedItems)
+      .catch(() => {});
+  }, []);
 
-  /* ─── Generate Claude HTML ─ */
-  async function callGenerateClaude(opts: { chatInstruction?: string }) {
-    setLoading(true);
-    setError(null);
-    setHtmlPreview(null);
+  /* ── Canvas pan ── */
+  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    const target = e.target as HTMLElement;
+    if (target.closest("[data-node]")) return;
+    isPanningRef.current = true;
+    panStartRef.current = {
+      mx: e.clientX, my: e.clientY,
+      vx: viewportRef.current.x, vy: viewportRef.current.y,
+    };
+    document.body.style.cursor = "grabbing";
+    const onMove = (me: MouseEvent) => {
+      if (!isPanningRef.current) return;
+      const dx = me.clientX - panStartRef.current.mx;
+      const dy = me.clientY - panStartRef.current.my;
+      setViewport(v => ({ ...v, x: panStartRef.current.vx + dx, y: panStartRef.current.vy + dy }));
+    };
+    const onUp = () => {
+      isPanningRef.current = false;
+      document.body.style.cursor = "";
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  };
 
-    try {
-      const res = await fetch("/api/generate-criativo-html", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          format: selectedFormat, produto, headline, cta, cor, estilo, fase,
-          chatInstruction: opts.chatInstruction ?? null,
-        }),
-        signal: AbortSignal.timeout(120_000),
-      });
+  /* ── Node drag (scale-aware) ── */
+  const startDrag = useCallback((id: string, e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("button,input,textarea,select,a")) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const pos = positionsRef.current[id] || { x: 0, y: 0 };
+    dragRef.current = { id, startMX: e.clientX, startMY: e.clientY, startX: pos.x, startY: pos.y };
+    setDraggingId(id);
+    document.body.style.cursor = "grabbing";
+    document.body.style.userSelect = "none";
+    const onMove = (me: MouseEvent) => {
+      const drag = dragRef.current;
+      if (!drag) return;
+      const scale = viewportRef.current.scale;
+      const dx = (me.clientX - drag.startMX) / scale;
+      const dy = (me.clientY - drag.startMY) / scale;
+      setPositions(prev => ({
+        ...prev,
+        [drag.id]: { x: drag.startX + dx, y: drag.startY + dy },
+      }));
+    };
+    const onUp = () => {
+      dragRef.current = null; setDraggingId(null);
+      document.body.style.cursor = ""; document.body.style.userSelect = "";
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  }, []);
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({ error: "Erro ao gerar." }));
-        throw new Error(data.error ?? "Erro ao gerar.");
-      }
+  /* ── Context menu ── */
+  const handleCanvasContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const rect = canvasRef.current?.getBoundingClientRect() ?? { left: 0, top: 0 };
+    const vp = viewportRef.current;
+    const cx = (e.clientX - rect.left - vp.x) / vp.scale;
+    const cy = (e.clientY - rect.top  - vp.y) / vp.scale;
+    setCtxMenu({ x: e.clientX, y: e.clientY, cx, cy });
+  };
 
-      const reader = res.body?.getReader();
-      if (!reader) throw new Error("Stream indisponível.");
-
-      const decoder = new TextDecoder();
-      let html = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        html += decoder.decode(value, { stream: true });
-        setHtmlPreview(html); // live preview à medida que chega
-      }
-      html += decoder.decode();
-      setHtmlPreview(html);
-      return true;
-    } catch (e: unknown) {
-      setError(String((e as Error)?.message ?? "Falha na conexão."));
-      return false;
-    } finally {
-      setLoading(false);
+  const spawnReference = (cx: number, cy: number) => {
+    const label = nextRefLabel(); const id = crypto.randomUUID();
+    setReferences(prev => [...prev, { id, label, dataUrl: null }]);
+    setPositions(prev => ({ ...prev, [id]: { x: cx, y: cy } }));
+    setCtxMenu(null);
+  };
+  const spawnAvatar = (cx: number, cy: number) => {
+    const label = nextAvLabel(); const id = crypto.randomUUID();
+    setAvatars(prev => [...prev, { id, label, name: "", dataUrl: null }]);
+    setPositions(prev => ({ ...prev, [id]: { x: cx, y: cy } }));
+    setCtxMenu(null);
+  };
+  const spawnGerar = (cx: number, cy: number) => {
+    if (!positions["gerar"]) {
+      setPositions(prev => ({ ...prev, gerar: { x: cx, y: cy } }));
     }
-  }
+    setCtxMenu(null);
+  };
 
-  /* ─── Export HTML criativo como PNG ─ */
-  async function handleExportHtml() {
-    if (!htmlPreview) return;
-    const fmtDef = FORMATS.find((f) => f.id === selectedFormat)!;
-    setExporting(true);
+  /* ── References ── */
+  const updateReference = (id: string, patch: Partial<RefCard>) =>
+    setReferences(prev => prev.map(r => r.id === id ? { ...r, ...patch } : r));
+  const removeReference = (id: string) => setReferences(prev => prev.filter(r => r.id !== id));
 
-    const container = document.createElement("div");
-    container.style.cssText = `
-      position:fixed;left:-${fmtDef.w + 200}px;top:0;
-      width:${fmtDef.w}px;height:${fmtDef.h}px;
-      overflow:hidden;background:#000;
-    `;
+  /* ── Avatars ── */
+  const updateAvatar = (id: string, patch: Partial<AvatarCard>) =>
+    setAvatars(prev => prev.map(a => a.id === id ? { ...a, ...patch } : a));
+  const removeAvatar = (id: string) => setAvatars(prev => prev.filter(a => a.id !== id));
 
-    try {
-      const { toPng } = await import("html-to-image");
-
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(htmlPreview, "text/html");
-
-      // Fetch Google Fonts CSS and embed fonts as base64 to avoid CORS block.
-      // Uses chunked btoa to avoid stack overflow with large font files.
-      function arrayBufferToBase64(buf: ArrayBuffer): string {
-        const bytes = new Uint8Array(buf);
-        const CHUNK = 8192;
-        let b64 = "";
-        for (let i = 0; i < bytes.length; i += CHUNK) {
-          b64 += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
-        }
-        return btoa(b64);
+  /* ── Generate ── */
+  const handleDesignGenerate = async () => {
+    if (!genPrompt.trim() || genRunning) return;
+    setGenRunning(true);
+    const count = Math.max(1, Math.min(8, genCount));
+    const placeholders: GenResult[] = Array.from({ length: count }, (_, i) => ({
+      id: crypto.randomUUID(), label: `img${Date.now()}-${i + 1}`, status: "loading" as const,
+    }));
+    setGenResults(placeholders);
+    setPositions(prev => {
+      const next = { ...prev };
+      placeholders.forEach((p, i) => {
+        const gPos = positionsRef.current["gerar"] || { x: 0, y: 0 };
+        next[p.id] = { x: gPos.x + 430 + (i % 2) * 260, y: gPos.y + Math.floor(i / 2) * 290 };
+      });
+      return next;
+    });
+    const refImages = references.map(r => r.dataUrl).filter(Boolean) as string[];
+    const avImages  = avatars.map(a => a.dataUrl).filter(Boolean) as string[];
+    await Promise.all(placeholders.map(async (ph) => {
+      try {
+        const res = await fetch("/api/generate-design", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: genPrompt, referenceImages: refImages, avatarImages: avImages, format: genFormat }),
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || "Erro ao gerar.");
+        const dataUrl = `data:${json.mimeType};base64,${json.b64}`;
+        setGenResults(prev => prev.map(r => r.id === ph.id ? { ...r, status: "done", dataUrl, mimeType: json.mimeType } : r));
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Erro.";
+        setGenResults(prev => prev.map(r => r.id === ph.id ? { ...r, status: "error", error: msg } : r));
       }
+    }));
+    setGenRunning(false);
+  };
+  const removeResult = (id: string) => setGenResults(prev => prev.filter(r => r.id !== id));
 
-      const fontLinks = Array.from(doc.querySelectorAll<HTMLLinkElement>('link[href*="fonts.googleapis"]'));
-      let fontEmbedCSS = "";
-      for (const link of fontLinks) {
-        try {
-          const res = await fetch(link.href);
-          if (!res.ok) continue;
-          const css = await res.text();
-          const fontFaceUrls = [...css.matchAll(/url\((https:\/\/fonts\.gstatic[^)]+)\)/g)].map((m) => m[1]);
-          let embeddedCss = css;
-          for (const fontUrl of fontFaceUrls) {
-            try {
-              const fontRes = await fetch(fontUrl);
-              if (!fontRes.ok) continue;
-              const b64 = arrayBufferToBase64(await fontRes.arrayBuffer());
-              const mime = fontUrl.includes(".woff2") ? "font/woff2" : "font/woff";
-              embeddedCss = embeddedCss.replace(fontUrl, `data:${mime};base64,${b64}`);
-            } catch { /* skip this font file, fallback to system font */ }
-          }
-          fontEmbedCSS += embeddedCss + "\n";
-        } catch { /* skip this font URL entirely */ }
-      }
-
-      const styles = Array.from(doc.querySelectorAll("style")).map((s) => s.outerHTML).join("\n");
-      container.innerHTML = styles + doc.body.innerHTML;
-      document.body.appendChild(container);
-
-      try { await document.fonts.ready; } catch { /* ok */ }
-      await new Promise((r) => setTimeout(r, 800));
-
-      const dataUrl = await toPng(container, {
-        width: fmtDef.w,
-        height: fmtDef.h,
-        pixelRatio: 1,
-        // cacheBust omitted — breaks SVG fragment refs like url(#gradient)
-        skipFonts: true,                        // skip html-to-image's own font fetch (CORS-blocked)
-        fontEmbedCSS: fontEmbedCSS || undefined, // provide pre-fetched fonts instead
-      });
-
-      document.body.removeChild(container);
-      downloadDataUrl(dataUrl, `criativo-${selectedFormat}-${Date.now()}.png`);
-    } catch (e) {
-      console.error("[export-html]", e);
-      if (document.body.contains(container)) document.body.removeChild(container);
-      // Fallback: download raw HTML
-      const blob = new Blob([htmlPreview], { type: "text/html" });
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = `criativo-${selectedFormat}-${Date.now()}.html`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
-    } finally {
-      setExporting(false);
-    }
-  }
-
-  /* ─── Generate GPT ─ */
-  async function callGenerate(opts: { chatInstruction?: string; referenceBase64?: string | null }) {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/generate-criativo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ format: selectedFormat, produto, headline, cta, cor, estilo, fase, quality, ...getImageConfig(), referenceBase64: opts.referenceBase64 ?? null, chatInstruction: opts.chatInstruction ?? null }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Erro ao gerar.");
-      setPreview({ dataUrl: `data:${data.mimeType};base64,${data.b64}`, prompt: data.prompt });
-      return true;
-    } catch (e: unknown) {
-      setError(String((e as Error)?.message ?? "Falha na conexão."));
-      return false;
-    } finally { setLoading(false); }
-  }
-
-  async function handleGenerate() {
-    if (!canGenerate) return;
-    if (gerarMode === "claude") {
-      setPreview(null);
-      await callGenerateClaude({});
-    } else {
-      setPreview(null);
-      setHtmlPreview(null);
-      await callGenerate({ referenceBase64: referenceImage });
-    }
-  }
-
-  /* ─── Chat ─ */
-  async function handleChatSend() {
-    const text = chatInput.trim();
-    const imgs = [...chatImages];
-    if (!text && imgs.length === 0) return;
-    if (loading) return;
-    const content = text || "Analise a referência e gere o criativo";
-    setChatMessages((prev) => [...prev, { role: "user", content, images: imgs.length > 0 ? imgs : undefined }]);
-    setChatInput(""); setChatImages([]);
-
-    if (gerarMode === "claude") {
-      setChatMessages((prev) => [...prev, { role: "assistant", content: "Gerando..." }]);
-      const ok = await callGenerateClaude({ chatInstruction: content });
-      setChatMessages((prev) => {
-        const next = [...prev];
-        next[next.length - 1] = { role: "assistant", content: ok ? "Criativo gerado! Veja no preview ao lado. O que quer ajustar?" : "Erro ao gerar. Tente novamente." };
-        return next;
-      });
-      return;
-    }
-
-    const refBase64 = imgs[0] ?? (preview ? preview.dataUrl : null);
-    setLoading(true); setError(null);
-    try {
-      const res = await fetch("/api/generate-criativo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ format: selectedFormat, produto, headline, cta, cor, estilo, fase, quality, ...getImageConfig(), chatInstruction: content, referenceBase64: refBase64 }),
-      });
-      const data = await res.json();
-      if (!res.ok) { setChatMessages((prev) => [...prev, { role: "assistant", content: data.error ?? "Erro ao gerar." }]); return; }
-      setPreview({ dataUrl: `data:${data.mimeType};base64,${data.b64}`, prompt: data.prompt });
-      setChatMessages((prev) => [...prev, { role: "assistant", content: preview ? "Criativo refinado! Veja no preview. O que mais quer ajustar?" : "Criativo gerado! Veja no preview ao lado. O que mais quer ajustar?" }]);
-    } catch { setChatMessages((prev) => [...prev, { role: "assistant", content: "Falha na conexão. Tente novamente." }]); }
-    finally { setLoading(false); }
-  }
-
-  /* ─── Save to gallery ─ */
-  async function handleSave() {
-    if (!preview) return;
-    setSaving(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error();
-      const filename = `criativo-${selectedFormat}-${Date.now()}.png`;
-      const file = await dataUrlToFile(preview.dataUrl, filename);
-      const path = `${user.id}/${filename}`;
-      const { error: uploadError } = await supabase.storage.from("ai-images").upload(path, file, { upsert: false, contentType: "image/png" });
-      if (uploadError) throw uploadError;
-      const { data: { publicUrl } } = supabase.storage.from("ai-images").getPublicUrl(path);
-      await supabase.from("criativos").insert({ user_id: user.id, format: selectedFormat, url: publicUrl, headline: headline || null, produto: produto || null, prompt: preview.prompt });
-      await loadGallery();
-      setPreview(null);
-    } catch { /* silent */ } finally { setSaving(false); }
-  }
-
-  /* ─── Library upload ─ */
+  /* ── Library ── */
   async function uploadToLibrary(files: FileList | File[]) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    const { data: { user } } = await supabase.auth.getUser(); if (!user) return;
     setLibraryUploading(true);
     for (const file of Array.from(files)) {
       if (!file.type.startsWith("image/")) continue;
-      const filename = `lib-${Date.now()}-${file.name}`;
-      const path = `${user.id}/library/${filename}`;
+      const path = `${user.id}/library/lib-${Date.now()}-${file.name}`;
       const { error: uploadErr } = await supabase.storage.from("ai-images").upload(path, file, { upsert: false });
       if (uploadErr) continue;
       const { data: { publicUrl } } = supabase.storage.from("ai-images").getPublicUrl(path);
       await supabase.from("creative_library").insert({ user_id: user.id, url: publicUrl, name: file.name.replace(/\.[^/.]+$/, ""), format: null, tags: [] });
     }
-    await loadLibrary();
-    setLibraryUploading(false);
+    await loadLibrary(); setLibraryUploading(false);
   }
-
   async function handleLibraryFileInput(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.files) { await uploadToLibrary(e.target.files); }
+    if (e.target.files) await uploadToLibrary(e.target.files);
     if (libraryUploadRef.current) libraryUploadRef.current.value = "";
   }
-
   async function handleLibraryDrop(e: React.DragEvent) {
     e.preventDefault(); setLibraryDragOver(false);
     if (e.dataTransfer.files.length) await uploadToLibrary(e.dataTransfer.files);
   }
-
-  /* ─── Carousel scroll ─ */
-  function scrollCarousel(dir: "left" | "right") {
-    if (!carouselRef.current) return;
-    carouselRef.current.scrollBy({ left: dir === "right" ? 360 : -360, behavior: "smooth" });
-  }
-
-  /* ─── Use seed image as reference ─ */
-  function handleUseSeedAsReference(path: string) {
-    setReferenceImage(path);
-    setReferenceSource("library");
-    setMainTab("gerar");
-    setBriefTab("brief");
-  }
-
-  function handleUseAsReference(item: LibraryItem) {
-    setReferenceImage(item.url);
-    setReferenceSource("library");
-    setMainTab("gerar");
-    setBriefTab("brief");
-    setShowLibraryPicker(false);
-  }
-
   async function handleDeleteGallery(c: SavedCriativo) {
     await supabase.from("criativos").delete().eq("id", c.id);
-    try {
-      const storagePath = new URL(c.url).pathname.split("/ai-images/")[1];
-      if (storagePath) await supabase.storage.from("ai-images").remove([storagePath]);
-    } catch { /* ok */ }
-    setGallery((prev) => prev.filter((x) => x.id !== c.id));
+    try { const p = new URL(c.url).pathname.split("/ai-images/")[1]; if (p) await supabase.storage.from("ai-images").remove([p]); } catch { /* ok */ }
+    setGallery(prev => prev.filter(x => x.id !== c.id));
   }
 
-  /* ─── All seed items flat (for carousel) ─ */
-  const ALL_SEED_ITEMS = SEED_GROUPS.flatMap((g) => g.items.map((item) => ({ ...item, client: g.client, clientColor: g.color })));
+  const filteredGallery = activeGalleryFormat === "all" ? gallery : gallery.filter(c => c.format === activeGalleryFormat);
+  const hasGerarCard = !!positions["gerar"];
+  const totalNodes = references.length + avatars.length + (hasGerarCard ? 1 : 0) + genResults.length;
 
-  const filteredGallery = activeGalleryFormat === "all" ? gallery : gallery.filter((c) => c.format === activeGalleryFormat);
+  /* dot grid background moves with viewport */
+  const dotSpacing = DOT_SIZE * viewport.scale;
+  const dotGridStyle: React.CSSProperties = {
+    backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.065) 1px, transparent 1px)",
+    backgroundSize: `${dotSpacing}px ${dotSpacing}px`,
+    backgroundPosition: `${viewport.x}px ${viewport.y}px`,
+  };
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden h-full">
-      {/* ─── Header ─────────────────────────────────────── */}
-      <div className="px-8 pt-8 pb-4 shrink-0 flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-0.5">
-            <h1 className="text-[26px] font-bold text-white tracking-tight">Design</h1>
-            <span className={cn(
-              "px-2 py-0.5 rounded-full border text-[10px] font-mono",
-              gerarMode === "claude"
-                ? "border-purple-500/30 bg-purple-500/10 text-purple-400"
-                : "border-white/10 bg-white/[0.04] text-white/35"
-            )}>
-              {gerarMode === "claude" ? "Claude HTML" : getActiveImageProviderLabel()}
-            </span>
-          </div>
-          <p className="text-[13px] text-white/30">Criativos profissionais para cada fase do seu lançamento.</p>
-        </div>
 
-        {/* Top tabs */}
+      {/* ─── Tab bar ─────────────────────────── */}
+      <div className="px-8 pt-6 pb-4 shrink-0 flex items-center justify-end">
         <div className="flex items-center gap-1 bg-white/[0.03] border border-white/[0.07] rounded-xl p-1">
           {([
-            { id: "hub",        label: "Tipos",      icon: <Grid3X3 className="w-3.5 h-3.5" /> },
             { id: "biblioteca", label: "Biblioteca", icon: <Library className="w-3.5 h-3.5" />, badge: library.length },
             { id: "gerar",      label: "Gerar",      icon: <Wand2 className="w-3.5 h-3.5" /> },
             { id: "galeria",    label: "Gerados",    icon: <ImageIcon className="w-3.5 h-3.5" />, badge: gallery.length },
-          ] as const).map((t) => (
+          ] as const).map(t => (
             <button key={t.id} onClick={() => setMainTab(t.id as typeof mainTab)}
               className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer",
                 mainTab === t.id ? "bg-purple-600/20 text-purple-300" : "text-white/35 hover:text-white/60")}>
-              {t.icon} {t.label}
+              {t.icon}{t.label}
               {"badge" in t && t.badge > 0 && (
                 <span className="ml-0.5 min-w-[16px] h-4 rounded-full bg-white/[0.08] text-white/35 text-[9px] flex items-center justify-center px-1">{t.badge}</span>
               )}
@@ -608,767 +430,352 @@ export function CriativosView() {
         </div>
       </div>
 
-      {/* ── Canvas editor overlay ── */}
-      {activeTemplate && (
-        <CanvasEditor template={activeTemplate} onClose={() => setActiveTemplate(null)} />
-      )}
+      {/* ═══════════════ TAB: GERAR ═══════════════ */}
+      {mainTab === "gerar" && (
+        <div className="flex-1 overflow-hidden min-h-0 relative">
+          <style>{`
+            @keyframes dash-flow    { to { stroke-dashoffset: -12; } }
+            @keyframes glow-pulse   { 0%,100% { opacity:.5 } 50% { opacity:1 } }
+            @keyframes light-travel { from { stroke-dashoffset: 0 } to { stroke-dashoffset: -600 } }
+            @keyframes shimmer-idle { from { stroke-dashoffset: 0 } to { stroke-dashoffset: -400 } }
+          `}</style>
 
-      {/* ══════════════════════════════════════════════════
-          TAB: HUB — categorias
-      ══════════════════════════════════════════════════ */}
-      {mainTab === "hub" && (
-        <div className="flex-1 overflow-y-auto px-8 pb-10 space-y-10">
-
-          {/* Primário */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-              <span className="text-[11px] font-semibold text-white/40 uppercase tracking-widest">Primário</span>
-            </div>
-            <div className="grid grid-cols-5 gap-3">
-              {PRIMARIO.map((cat) => {
-                const Icon = cat.icon;
-                const isSoon = cat.action === "soon";
+          {/* ── Infinite canvas ── */}
+          <div
+            ref={canvasRef}
+            style={{
+              position: "absolute", inset: 0,
+              cursor: isPanningRef.current ? "grabbing" : "default",
+              ...dotGridStyle,
+            }}
+            onContextMenu={handleCanvasContextMenu}
+            onMouseDown={handleCanvasMouseDown}
+          >
+            {/* ── World (transformed) ── */}
+            <div style={{
+              position: "absolute", left: 0, top: 0,
+              transform: `translate(${viewport.x}px,${viewport.y}px) scale(${viewport.scale})`,
+              transformOrigin: "0 0",
+              willChange: "transform",
+            }}>
+              {/* Reference cards */}
+              {references.map(ref => {
+                const pos = positions[ref.id] || { x: 0, y: 0 };
                 return (
-                  <button
-                    key={cat.id}
-                    disabled={isSoon}
-                    onClick={() => {
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      if (cat.action === "navigate" && cat.navigateTo) navigate(cat.navigateTo as any);
-                      if (cat.action === "generate" && cat.formats?.[0]) {
-                        setSelectedFormat(cat.formats[0] as CriativoFormat);
-                        setMainTab("gerar");
-                      }
-                    }}
-                    className={cn(
-                      "group relative flex flex-col items-start gap-3 p-4 rounded-2xl border text-left transition-all",
-                      isSoon
-                        ? "border-white/[0.05] bg-white/[0.015] cursor-not-allowed opacity-50"
-                        : "border-white/[0.07] bg-white/[0.025] hover:bg-purple-500/[0.07] hover:border-purple-500/30 cursor-pointer"
-                    )}
-                  >
-                    <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors",
-                      isSoon ? "bg-white/[0.04]" : "bg-purple-500/10 group-hover:bg-purple-500/20")}>
-                      {isSoon ? <Lock className="w-4 h-4 text-white/20" /> : <Icon className="w-4 h-4 text-purple-400" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 mb-0.5">
-                        <p className="text-[12px] font-semibold text-white/80 truncate">{cat.label}</p>
-                        {isSoon && <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-white/[0.06] text-[8px] font-semibold text-white/30 uppercase tracking-wider">Em breve</span>}
-                      </div>
-                      <p className="text-[10px] text-white/30 leading-snug">{cat.description}</p>
-                      {cat.size && <p className="text-[9px] text-white/15 font-mono mt-1">{cat.size}</p>}
-                    </div>
-                    {!isSoon && (
-                      <ChevronRight className="absolute top-4 right-4 w-3.5 h-3.5 text-white/15 group-hover:text-purple-400 transition-colors" />
-                    )}
-                  </button>
+                  <div key={ref.id} data-node="true" style={{
+                    position: "absolute", left: pos.x, top: pos.y, width: REF_WIDTH,
+                    zIndex: draggingId === ref.id ? 200 : 10,
+                    cursor: draggingId === ref.id ? "grabbing" : "grab",
+                  }} onMouseDown={e => startDrag(ref.id, e)}>
+                    <NodeRefCard ref_={ref} onDelete={() => removeReference(ref.id)} onChange={p => updateReference(ref.id, p)} />
+                    <div style={{
+                      position: "absolute", right: -5, top: REF_PORT_Y - 5,
+                      width: 10, height: 10, borderRadius: "50%",
+                      background: "#4ade80", border: "2px solid #0d0d11",
+                      boxShadow: genRunning ? "0 0 10px rgba(74,222,128,.9)" : "0 0 6px rgba(74,222,128,.4)",
+                      zIndex: 3, transition: "box-shadow .3s",
+                    }} />
+                  </div>
+                );
+              })}
+
+              {/* Avatar cards */}
+              {avatars.map(av => {
+                const pos = positions[av.id] || { x: 0, y: 0 };
+                return (
+                  <div key={av.id} data-node="true" style={{
+                    position: "absolute", left: pos.x, top: pos.y, width: REF_WIDTH,
+                    zIndex: draggingId === av.id ? 200 : 10,
+                    cursor: draggingId === av.id ? "grabbing" : "grab",
+                  }} onMouseDown={e => startDrag(av.id, e)}>
+                    <NodeAvatarCard avatar={av} onChange={p => updateAvatar(av.id, p)} onDelete={() => removeAvatar(av.id)} />
+                    <div style={{
+                      position: "absolute", right: -5, top: REF_PORT_Y - 5,
+                      width: 10, height: 10, borderRadius: "50%",
+                      background: "#fbbf24", border: "2px solid #0d0d11",
+                      boxShadow: genRunning ? "0 0 10px rgba(251,191,36,.9)" : "0 0 6px rgba(251,191,36,.4)",
+                      zIndex: 3, transition: "box-shadow .3s",
+                    }} />
+                  </div>
+                );
+              })}
+
+              {/* Gerar Imagem card */}
+              {hasGerarCard && (() => {
+                const pos = positions["gerar"]!;
+                return (
+                  <div data-node="true" style={{
+                    position: "absolute", left: pos.x, top: pos.y, width: 380,
+                    zIndex: draggingId === "gerar" ? 200 : 20,
+                  }}>
+                    <div style={{
+                      position: "absolute", left: -5, top: GERAR_PORT_Y - 5,
+                      width: 10, height: 10, borderRadius: "50%",
+                      background: "#7c3aed", border: "2px solid #09090e",
+                      boxShadow: genRunning ? "0 0 12px rgba(124,58,237,.95)" : "0 0 8px rgba(124,58,237,.6)",
+                      zIndex: 3, transition: "box-shadow .3s",
+                    }} />
+                    <GerarImagemCard
+                      prompt={genPrompt} onChange={setGenPrompt}
+                      references={references} avatars={avatars}
+                      genCount={genCount} setGenCount={setGenCount}
+                      genFormat={genFormat} setGenFormat={setGenFormat}
+                      genQuality={genQuality} setGenQuality={setGenQuality}
+                      genRunning={genRunning} onGenerate={handleDesignGenerate}
+                      isDragging={draggingId === "gerar"}
+                      onDragStart={e => startDrag("gerar", e)}
+                    />
+                  </div>
+                );
+              })()}
+
+              {/* Result cards */}
+              {genResults.map(result => {
+                const pos = positions[result.id] || { x: 800, y: 0 };
+                return (
+                  <div key={result.id} data-node="true" style={{
+                    position: "absolute", left: pos.x, top: pos.y, width: REF_WIDTH,
+                    zIndex: draggingId === result.id ? 200 : 10,
+                    cursor: draggingId === result.id ? "grabbing" : "grab",
+                  }} onMouseDown={e => startDrag(result.id, e)}>
+                    <NodeResultCard result={result} onDelete={() => removeResult(result.id)} />
+                  </div>
                 );
               })}
             </div>
-          </div>
 
-          {/* Secundário */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-              <span className="text-[11px] font-semibold text-white/30 uppercase tracking-widest">Secundário</span>
-            </div>
-            <div className="grid grid-cols-5 gap-3">
-              {SECUNDARIO.map((cat) => {
-                const Icon = cat.icon;
-                const isSoon = cat.action === "soon";
-                return (
+            {/* ── SVG connection lines — screen space (never clipped) ── */}
+            {hasGerarCard && (
+              <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 6, overflow: "visible" }}>
+                <defs>
+                  {/* outer glow blur */}
+                  <filter id="line-glow" x="-100%" y="-100%" width="300%" height="300%">
+                    <feGaussianBlur stdDeviation="4" result="blur" />
+                    <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                  </filter>
+                  {/* strong glow for traveling light */}
+                  <filter id="light-glow" x="-200%" y="-200%" width="500%" height="500%">
+                    <feGaussianBlur stdDeviation="6" result="blur" />
+                    <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                  </filter>
+                </defs>
+                {(() => {
+                  const sc   = viewport.scale;
+                  const gPos = positions["gerar"]!;
+                  const GERAR_W = 380;
+
+                  /* helper: desenha uma linha roxa com luz viajando */
+                  const PurpleLine = ({ id, x1, y1, x2, y2 }: { id: string; x1:number; y1:number; x2:number; y2:number }) => {
+                    const cx = Math.max(50, Math.abs(x2 - x1) * 0.45);
+                    const d  = `M ${x1} ${y1} C ${x1+cx} ${y1} ${x2-cx} ${y2} ${x2} ${y2}`;
+                    return (
+                      <g key={id}>
+                        <path d={d} fill="none" stroke="rgba(139,92,246,.18)"
+                          strokeWidth={genRunning ? 10 : 7} strokeLinecap="round"
+                          filter="url(#line-glow)"
+                          style={genRunning ? { animation: "glow-pulse 1.4s ease-in-out infinite" } : {}} />
+                        <path d={d} fill="none" stroke="rgba(139,92,246,.45)"
+                          strokeWidth={genRunning ? 2 : 1.5} strokeLinecap="round" />
+                        <path d={d} fill="none" stroke="rgba(216,180,254,.95)"
+                          strokeWidth={3} strokeLinecap="round"
+                          strokeDasharray="28 500" filter="url(#light-glow)"
+                          style={{ animation: genRunning ? "light-travel .9s linear infinite" : "shimmer-idle 3.5s linear infinite" }} />
+                        <path d={d} fill="none" stroke="rgba(255,255,255,.85)"
+                          strokeWidth={1.2} strokeLinecap="round"
+                          strokeDasharray="10 518"
+                          style={{ animation: genRunning ? "light-travel .9s linear infinite" : "shimmer-idle 3.5s linear infinite" }} />
+                      </g>
+                    );
+                  };
+
+                  return (
+                    <>
+                      {/* ref/avatar → gerar */}
+                      {[
+                        ...references.map(r => ({ id: r.id, pos: positions[r.id] })),
+                        ...avatars.map(a   => ({ id: a.id, pos: positions[a.id] })),
+                      ].map(({ id, pos }) => {
+                        if (!pos) return null;
+                        return <PurpleLine key={id} id={id}
+                          x1={(pos.x + REF_WIDTH)    * sc + viewport.x}
+                          y1={(pos.y + REF_PORT_Y)    * sc + viewport.y}
+                          x2={gPos.x                  * sc + viewport.x}
+                          y2={(gPos.y + GERAR_PORT_Y) * sc + viewport.y} />;
+                      })}
+
+                      {/* gerar → output cards */}
+                      {genResults.map(r => {
+                        const rPos = positions[r.id];
+                        if (!rPos) return null;
+                        return <PurpleLine key={`out-${r.id}`} id={`out-${r.id}`}
+                          x1={(gPos.x + GERAR_W)    * sc + viewport.x}
+                          y1={(gPos.y + GERAR_PORT_Y) * sc + viewport.y}
+                          x2={rPos.x                  * sc + viewport.x}
+                          y2={(rPos.y + REF_PORT_Y)   * sc + viewport.y} />;
+                      })}
+                    </>
+                  );
+                })()}
+              </svg>
+            )}
+
+            {/* Empty state (screen-space, not world) */}
+            {totalNodes === 0 && (
+              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none", userSelect: "none" }}>
+                <div style={{ textAlign: "center" }}>
+                  <div style={{
+                    width: 56, height: 56, borderRadius: 16,
+                    background: "rgba(255,255,255,.02)",
+                    border: "1px solid rgba(255,255,255,.05)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    margin: "0 auto 16px",
+                  }}>
+                    <MousePointer2 style={{ width: 24, height: 24, color: "rgba(255,255,255,.10)" }} />
+                  </div>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,.20)", marginBottom: 6 }}>Canvas vazio</p>
+                  <p style={{ fontSize: 11, color: "rgba(255,255,255,.12)" }}>Clique com o botão direito para adicionar nós</p>
+                </div>
+              </div>
+            )}
+
+            {/* Context menu (fixed, screen coords) */}
+            {ctxMenu && (
+              <div
+                ref={ctxMenuRef}
+                style={{
+                  position: "fixed", left: ctxMenu.x, top: ctxMenu.y,
+                  zIndex: 2000, minWidth: 210,
+                  background: "#111117",
+                  border: "1px solid rgba(255,255,255,.10)",
+                  borderRadius: 12,
+                  boxShadow: "0 16px 48px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.04)",
+                  overflow: "hidden", padding: "4px 0",
+                }}
+              >
+                <div style={{ padding: "6px 12px 8px", borderBottom: "1px solid rgba(255,255,255,.06)" }}>
+                  <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: "0.12em", color: "rgba(255,255,255,.25)", textTransform: "uppercase" }}>
+                    Adicionar nó
+                  </span>
+                </div>
+                {[
+                  { icon: <ImageIcon style={{ width: 14, height: 14 }} />, label: "Referência",        sub: "Imagem de referência",   color: "#4ade80", bg: "rgba(74,222,128,.10)",  onClick: () => spawnReference(ctxMenu.cx, ctxMenu.cy) },
+                  { icon: <User      style={{ width: 14, height: 14 }} />, label: "Avatar",             sub: "Pessoa ou personagem",   color: "#fbbf24", bg: "rgba(251,191,36,.10)", onClick: () => spawnAvatar(ctxMenu.cx, ctxMenu.cy) },
+                  { icon: <Wand2     style={{ width: 14, height: 14 }} />, label: "Output (Geração)",  sub: "Gerar imagem com IA",    color: "#a78bfa", bg: "rgba(124,58,237,.12)", onClick: () => spawnGerar(ctxMenu.cx, ctxMenu.cy), disabled: hasGerarCard },
+                ].map(item => (
                   <button
-                    key={cat.id}
-                    disabled={isSoon}
-                    onClick={() => {
-                      if (cat.action === "generate" && cat.formats?.[0]) {
-                        setSelectedFormat(cat.formats[0] as CriativoFormat);
-                        setMainTab("gerar");
-                      }
+                    key={item.label}
+                    onClick={item.disabled ? undefined : item.onClick}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 10,
+                      width: "100%", padding: "8px 12px", textAlign: "left",
+                      background: "none", border: "none",
+                      cursor: item.disabled ? "not-allowed" : "pointer",
+                      opacity: item.disabled ? 0.35 : 1,
                     }}
-                    className={cn(
-                      "group relative flex flex-col items-start gap-3 p-4 rounded-2xl border text-left transition-all",
-                      isSoon
-                        ? "border-white/[0.04] bg-white/[0.01] cursor-not-allowed opacity-45"
-                        : "border-white/[0.07] bg-white/[0.025] hover:bg-purple-500/[0.07] hover:border-purple-500/30 cursor-pointer"
-                    )}
+                    className={item.disabled ? "" : "hover:bg-white/[0.04] transition-colors"}
                   >
-                    <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors",
-                      isSoon ? "bg-white/[0.03]" : "bg-purple-500/10 group-hover:bg-purple-500/20")}>
-                      {isSoon ? <Lock className="w-4 h-4 text-white/15" /> : <Icon className="w-4 h-4 text-purple-400" />}
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 9, background: item.bg,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: item.color, flexShrink: 0,
+                    }}>
+                      {item.icon}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 mb-0.5">
-                        <p className="text-[12px] font-semibold text-white/60 truncate">{cat.label}</p>
-                        {isSoon && <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-white/[0.05] text-[8px] font-semibold text-white/25 uppercase tracking-wider">Em breve</span>}
-                      </div>
-                      <p className="text-[10px] text-white/25 leading-snug">{cat.description}</p>
-                      {cat.size && <p className="text-[9px] text-white/10 font-mono mt-1">{cat.size}</p>}
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,.75)" }}>{item.label}</div>
+                      <div style={{ fontSize: 10, color: "rgba(255,255,255,.30)", marginTop: 2 }}>{item.sub}</div>
                     </div>
-                    {!isSoon && (
-                      <ChevronRight className="absolute top-4 right-4 w-3.5 h-3.5 text-white/15 group-hover:text-purple-400 transition-colors" />
-                    )}
                   </button>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
-
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════
-          TAB: GERAR
-      ══════════════════════════════════════════════════ */}
-      {mainTab === "gerar" && (
-        <div className="flex-1 flex overflow-hidden px-8 pb-8 gap-5 min-h-0">
+      {/* ═══════════════ TAB: BIBLIOTECA ═══════════════ */}
+      {mainTab === "biblioteca" && (() => {
+        const BRAND_ORDER = [
+          "Luana Carolina",
+          "Formagios",
+        ];
+        const seedByClient = seedItems.reduce<Record<string, SeedItem[]>>((acc, s) => {
+          (acc[s.client] ??= []).push(s); return acc;
+        }, {});
+        const extraClients = Object.keys(seedByClient).filter(c => !BRAND_ORDER.includes(c));
+        const allBrands = [...BRAND_ORDER, ...extraClients].filter(b => (seedByClient[b]?.length ?? 0) > 0);
 
-          {/* Col 1: Formats */}
-          <div className="w-[196px] shrink-0 flex flex-col gap-1 overflow-y-auto">
-            <p className="text-[10px] font-semibold text-white/25 tracking-widest uppercase px-3 mb-1">Formato</p>
-            {FORMATS.map((f) => {
-              const active = selectedFormat === f.id;
+        const userByClient = library.reduce<Record<string, LibraryItem[]>>((acc, l) => {
+          const key = l.name ?? "Meus uploads";
+          (acc["Meus uploads"] ??= []).push(l); return acc;
+        }, {});
+
+        return (
+          <div className="flex-1 overflow-y-auto pb-10 min-h-0">
+            <input ref={libraryUploadRef} type="file" accept="image/*" multiple onChange={handleLibraryFileInput} className="hidden" />
+
+            {/* Meus uploads row */}
+            {library.length > 0 && (
+              <BrandCarousel
+                label="Meus uploads"
+                count={library.length}
+                items={library.map(l => ({ key: l.id, src: l.url, name: l.name ?? "" }))}
+              />
+            )}
+
+            {/* Upload drop row */}
+            <div className="px-8 pt-4 pb-2">
+              <div
+                onDragOver={e => { e.preventDefault(); setLibraryDragOver(true); }}
+                onDragLeave={() => setLibraryDragOver(false)}
+                onDrop={handleLibraryDrop}
+                onClick={() => libraryUploadRef.current?.click()}
+                className={cn(
+                  "w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl border border-dashed transition-all cursor-pointer",
+                  libraryDragOver ? "border-purple-500/50 bg-purple-500/[0.06]" : "border-white/[0.06] hover:border-purple-500/20 hover:bg-purple-500/[0.03]"
+                )}
+              >
+                {libraryUploading
+                  ? <><Loader2 className="w-3.5 h-3.5 text-purple-400 animate-spin" /><p className="text-[11px] text-white/35">Salvando...</p></>
+                  : <><Upload className="w-3.5 h-3.5 text-white/20" /><p className="text-[11px] text-white/25">Adicionar criativos — PNG, JPG, WEBP</p></>
+                }
+              </div>
+            </div>
+
+            {/* Brand carousels */}
+            {allBrands.map(brand => {
+              const items = seedByClient[brand] ?? [];
               return (
-                <button key={f.id} onClick={() => { setSelectedFormat(f.id); setPreview(null); setError(null); }}
-                  className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border cursor-pointer transition-all text-left",
-                    active ? "bg-purple-600/15 border-purple-500/40 text-white" : "border-transparent text-white/40 hover:bg-white/[0.04] hover:text-white/70")}>
-                  <div className="shrink-0 flex items-center justify-center w-8 h-8">
-                    <div className={cn("rounded border", active ? "border-purple-500/60 bg-purple-500/20" : "border-white/15 bg-white/[0.04]")}
-                      style={{ aspectRatio: String(f.w / f.h), height: f.h >= f.w ? 22 : undefined, width: f.w > f.h ? 26 : undefined, maxWidth: 28, maxHeight: 24 }} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className={cn("text-[12px] font-semibold leading-tight truncate", active ? "text-white" : "")}>{f.platform}</p>
-                    <p className={cn("text-[10px] leading-tight mt-0.5 font-mono", active ? "text-purple-400" : "text-white/25")}>{f.size}</p>
-                  </div>
-                  {active && <div className="w-1 h-1 rounded-full bg-purple-400 shrink-0" />}
-                </button>
+                <BrandCarousel
+                  key={brand}
+                  label={brand}
+                  count={items.length}
+                  items={items.map(s => ({ key: s.path, src: s.path, name: s.name }))}
+                />
               );
             })}
           </div>
+        );
+      })()}
 
-          {/* Col 2: Brief / Chat */}
-          <div className="w-[320px] shrink-0 flex flex-col overflow-hidden">
-            <div className="flex-1 bg-white/[0.02] border border-white/[0.07] rounded-2xl overflow-hidden flex flex-col">
-              <div className="px-4 py-2.5 border-b border-white/[0.06] shrink-0 space-y-2.5">
-                {/* Modo: Claude vs GPT */}
-                <div className="flex items-center gap-1 p-0.5 bg-white/[0.03] border border-white/[0.06] rounded-xl">
-                  <button
-                    onClick={() => { setGerarMode("claude"); setPreview(null); setError(null); }}
-                    className={cn("flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer",
-                      gerarMode === "claude" ? "bg-purple-600/25 text-purple-300" : "text-white/30 hover:text-white/55")}
-                  >
-                    <Code2 className="w-3 h-3" /> Claude HTML
-                  </button>
-                  <button
-                    onClick={() => { setGerarMode("gpt"); setHtmlPreview(null); setError(null); }}
-                    className={cn("flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer",
-                      gerarMode === "gpt" ? "bg-white/[0.08] text-white/70" : "text-white/30 hover:text-white/55")}
-                  >
-                    <ImageIcon className="w-3 h-3" /> {getActiveImageProviderLabel()}
-                  </button>
-                </div>
-
-                {/* Brief / Chat tabs */}
-                <div className="flex items-center gap-1">
-                  {([
-                    { id: "brief", label: "Brief", icon: <FileText className="w-3 h-3" /> },
-                    { id: "chat",  label: "Chat",  icon: <MessageSquare className="w-3 h-3" /> },
-                  ] as const).map((t) => (
-                    <button key={t.id} onClick={() => setBriefTab(t.id)}
-                      className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer",
-                        briefTab === t.id ? "bg-purple-600/20 text-purple-300" : "text-white/30 hover:text-white/60")}>
-                      {t.icon} {t.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* ── Brief tab ── */}
-              {briefTab === "brief" && (
-                <>
-                  <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
-
-                    {/* Reference image */}
-                    <div>
-                      <label className="text-[10px] text-white/30 tracking-wider uppercase mb-1.5 block">
-                        Referência <span className="normal-case text-white/15">— orienta o gpt-image-2</span>
-                      </label>
-                      {referenceImage ? (
-                        <div className="relative rounded-xl overflow-hidden border border-white/[0.07]">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={referenceImage} alt="Referência" className="w-full object-cover" style={{ maxHeight: 110 }} />
-                          {referenceSource === "library" && (
-                            <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[9px] font-semibold">
-                              Biblioteca
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end justify-end p-2">
-                            <button onClick={() => { setReferenceImage(null); setReferenceSource(null); }} className="w-6 h-6 rounded-lg bg-red-500/30 flex items-center justify-center text-red-300 hover:bg-red-500/50 cursor-pointer">
-                              <X className="w-3 h-3" />
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-2 gap-2">
-                          <button onClick={() => referenceFileRef.current?.click()}
-                            className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl border border-dashed border-white/[0.08] text-[10px] text-white/25 hover:text-white/50 hover:border-purple-500/30 hover:bg-purple-500/5 transition-all cursor-pointer">
-                            <ImagePlus className="w-4 h-4" /> Upload
-                          </button>
-                          <button onClick={() => setShowLibraryPicker(true)}
-                            className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl border border-dashed border-purple-500/20 bg-purple-500/5 text-[10px] text-purple-400/60 hover:text-purple-300 hover:border-purple-500/40 hover:bg-purple-500/[0.08] transition-all cursor-pointer">
-                            <Library className="w-4 h-4" /> Da Biblioteca
-                          </button>
-                        </div>
-                      )}
-                      <input ref={referenceFileRef} type="file" accept="image/*" onChange={async (e) => { const f = e.target.files?.[0]; if (f) { setReferenceImage(await readFileAsDataUrl(f)); setReferenceSource("upload"); } if (referenceFileRef.current) referenceFileRef.current.value = ""; }} className="hidden" />
-                    </div>
-
-                    {/* Library picker inline */}
-                    {showLibraryPicker && (
-                      <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 overflow-hidden">
-                        <div className="flex items-center justify-between px-3 py-2 border-b border-purple-500/10">
-                          <span className="text-[11px] font-semibold text-purple-300">Selecionar da Biblioteca</span>
-                          <button onClick={() => setShowLibraryPicker(false)} className="text-white/30 hover:text-white/60 cursor-pointer"><X className="w-3.5 h-3.5" /></button>
-                        </div>
-                        {library.length === 0 ? (
-                          <p className="text-[11px] text-white/30 text-center py-4">Biblioteca vazia — adicione criativos na aba Biblioteca.</p>
-                        ) : (
-                          <div className="grid grid-cols-3 gap-1.5 p-2 max-h-[180px] overflow-y-auto">
-                            {library.map((item) => (
-                              <button key={item.id} onClick={() => handleUseAsReference(item)}
-                                className="relative rounded-lg overflow-hidden border border-white/[0.06] hover:border-purple-500/40 transition-all cursor-pointer group">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={item.url} alt={item.name ?? "ref"} className="w-full h-16 object-cover" />
-                                <div className="absolute inset-0 bg-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                  <Check className="w-4 h-4 text-white" />
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="h-px bg-white/[0.05]" />
-
-                    {/* Produto */}
-                    <div>
-                      <label className="text-[10px] text-white/30 tracking-wider uppercase mb-1.5 block">Produto / Oferta <span className="text-purple-500 normal-case">*</span></label>
-                      <input value={produto} onChange={(e) => setProduto(e.target.value)} placeholder="Curso de Marketing Digital"
-                        className="w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2 text-[12px] text-white placeholder:text-white/15 focus:outline-none focus:border-purple-500/50 focus:bg-purple-500/5 transition-all" />
-                    </div>
-
-                    {/* Headline */}
-                    <div>
-                      <label className="text-[10px] text-white/30 tracking-wider uppercase mb-1.5 block">Headline <span className="text-purple-500 normal-case">*</span> <span className="normal-case text-white/15">— texto da imagem</span></label>
-                      <textarea value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="Aprenda a dobrar seu faturamento em 30 dias" rows={3}
-                        className="w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2 text-[12px] text-white placeholder:text-white/15 focus:outline-none focus:border-purple-500/50 focus:bg-purple-500/5 transition-all resize-none" />
-                    </div>
-
-                    {/* CTA */}
-                    <div>
-                      <label className="text-[10px] text-white/30 tracking-wider uppercase mb-1.5 block">CTA <span className="normal-case text-white/15">— opcional</span></label>
-                      <input value={cta} onChange={(e) => setCta(e.target.value)} placeholder="Garanta sua vaga agora"
-                        className="w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2 text-[12px] text-white placeholder:text-white/15 focus:outline-none focus:border-purple-500/50 focus:bg-purple-500/5 transition-all" />
-                    </div>
-
-                    <div className="h-px bg-white/[0.05]" />
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-[10px] text-white/30 tracking-wider uppercase mb-1.5 block">Cor</label>
-                        <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2 cursor-pointer hover:border-white/15 transition-colors" onClick={() => colorInputRef.current?.click()}>
-                          <div className="w-4 h-4 rounded-md shrink-0 ring-1 ring-white/10" style={{ backgroundColor: cor }} />
-                          <span className="text-[10px] text-white/40 font-mono">{cor.toUpperCase()}</span>
-                          <input ref={colorInputRef} type="color" value={cor} onChange={(e) => setCor(e.target.value)} className="hidden" />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-white/30 tracking-wider uppercase mb-1.5 block">Qualidade</label>
-                        <div className="flex gap-1 p-0.5 bg-white/[0.03] border border-white/[0.07] rounded-xl">
-                          {(["high", "medium", "low"] as const).map((q) => (
-                            <button key={q} onClick={() => setQuality(q)} className={cn("flex-1 py-1.5 rounded-lg text-[9px] font-semibold cursor-pointer transition-all", quality === q ? "bg-purple-600 text-white" : "text-white/25 hover:text-white/60")}>
-                              {q === "high" ? "Alta" : q === "medium" ? "Med" : "Low"}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="text-[10px] text-white/30 tracking-wider uppercase mb-2 block">Estilo</label>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {ESTILOS.map((e) => (
-                          <button key={e.id} onClick={() => setEstilo(e.id)}
-                            className={cn("py-2 rounded-xl text-[11px] font-medium cursor-pointer transition-all border", estilo === e.id ? "bg-purple-600/20 border-purple-500/40 text-purple-300" : "border-white/[0.07] text-white/30 hover:text-white/60 hover:border-white/15")}>
-                            {e.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="text-[10px] text-white/30 tracking-wider uppercase mb-2 block">Fase</label>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {FASES.map((f) => (
-                          <button key={f.id} onClick={() => setFase(f.id)}
-                            className={cn("py-2 rounded-xl text-[11px] font-medium cursor-pointer transition-all border", fase === f.id ? "bg-purple-600/20 border-purple-500/40 text-purple-300" : "border-white/[0.07] text-white/30 hover:text-white/60 hover:border-white/15")}>
-                            {f.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {error && (
-                      <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
-                        <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0 mt-px" />
-                        <p className="text-[11px] text-red-300 leading-snug">{error}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="px-5 py-4 border-t border-white/[0.06] shrink-0">
-                    <button onClick={handleGenerate} disabled={!canGenerate}
-                      className={cn("w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[13px] font-bold transition-all",
-                        canGenerate ? "bg-purple-600 hover:bg-purple-500 text-white cursor-pointer active:scale-[0.99]" : "bg-white/[0.04] text-white/15 cursor-not-allowed")}>
-                      {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Gerando...</> : referenceImage ? <><ImagePlus className="w-4 h-4" /> Gerar com referência</> : <><Sparkles className="w-4 h-4" /> Gerar para {fmt.platform}</>}
-                    </button>
-                  </div>
-                </>
-              )}
-
-              {/* ── Chat tab ── */}
-              {briefTab === "chat" && (
-                <>
-                  <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4">
-                    {chatMessages.map((msg, i) => (
-                      <div key={i} className="flex gap-2.5">
-                        <div className={cn("w-6 h-6 rounded-lg shrink-0 flex items-center justify-center mt-0.5", msg.role === "user" ? "bg-white/[0.06]" : "bg-purple-500/15")}>
-                          {msg.role === "user" ? <User className="w-3 h-3 text-white/40" /> : <Bot className="w-3 h-3 text-purple-400" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[10px] text-white/25 mb-1">{msg.role === "user" ? "Você" : "WevyFlow"}</p>
-                          {msg.images && (
-                            <div className="flex gap-1.5 mb-2 flex-wrap">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              {msg.images.map((img, j) => <img key={j} src={img} alt="ref" className="w-20 h-20 rounded-xl object-cover border border-white/[0.1]" />)}
-                            </div>
-                          )}
-                          <p className="text-[12px] text-white/60 leading-relaxed">{msg.content}</p>
-                        </div>
-                      </div>
-                    ))}
-                    {loading && (
-                      <div className="flex gap-2.5">
-                        <div className="w-6 h-6 rounded-lg bg-purple-500/15 shrink-0 flex items-center justify-center mt-0.5"><Bot className="w-3 h-3 text-purple-400" /></div>
-                        <div className="flex-1"><p className="text-[10px] text-white/25 mb-1">WevyFlow</p><div className="flex items-center gap-2 text-[12px] text-purple-400"><Loader2 className="w-3 h-3 animate-spin" /> Gerando criativo...</div></div>
-                      </div>
-                    )}
-                    <div ref={chatEndRef} />
-                  </div>
-                  <div className="px-3 pb-3 pt-2 space-y-2 border-t border-white/[0.06] shrink-0">
-                    {chatImages.length > 0 && (
-                      <div className="flex gap-1.5 px-1 pt-1 flex-wrap">
-                        {chatImages.map((img, i) => (
-                          <div key={i} className="relative group">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={img} alt="ref" className="w-12 h-12 rounded-lg object-cover border border-white/[0.1]" />
-                            <button onClick={() => setChatImages((prev) => prev.filter((_, idx) => idx !== i))} className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer"><X className="w-2.5 h-2.5" /></button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    <div className="flex items-center gap-1.5 bg-white/[0.03] border border-white/[0.06] rounded-xl px-2.5 py-2 focus-within:border-purple-500/30 transition-colors">
-                      <button onClick={() => chatFileRef.current?.click()} disabled={loading || chatImages.length >= 3} className={cn("p-1.5 rounded-lg transition-all cursor-pointer shrink-0", chatImages.length >= 3 ? "text-white/10 cursor-not-allowed" : "text-white/25 hover:text-purple-400 hover:bg-white/[0.05]")}><ImagePlus className="w-4 h-4" /></button>
-                      <input ref={chatFileRef} type="file" accept="image/*" multiple onChange={async (e) => { if (!e.target.files) return; const urls: string[] = []; for (const f of Array.from(e.target.files)) { if (!f.type.startsWith("image/") || f.size > 4_000_000) continue; urls.push(await readFileAsDataUrl(f)); } if (urls.length) setChatImages((prev) => [...prev, ...urls].slice(0, 3)); if (chatFileRef.current) chatFileRef.current.value = ""; }} className="hidden" />
-                      <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleChatSend(); } }} placeholder={preview ? "O que quer ajustar?" : "Descreva o criativo..."} className="flex-1 bg-transparent text-[12px] text-white placeholder:text-white/20 focus:outline-none" disabled={loading} />
-                      <button onClick={handleChatSend} disabled={loading || (!chatInput.trim() && chatImages.length === 0)} className={cn("p-1.5 rounded-lg transition-all cursor-pointer shrink-0", (chatInput.trim() || chatImages.length > 0) && !loading ? "bg-purple-500 text-white hover:bg-purple-400" : "text-white/15")}><Send className="w-3.5 h-3.5" /></button>
-                    </div>
-                    <p className="text-[9px] text-white/15 text-center">Envie prints e referências — a IA analisa visualmente</p>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Col 3: Preview */}
-          {(() => {
-            // Dimensões reais do formato selecionado
-            const fW = fmt.w; const fH = fmt.h;
-            // Calcular escala para caber no container (aprox 500px de altura máx para vertical, 400px para horizontal)
-            const maxH = fH > fW ? 520 : 400;
-            const maxW = 700;
-            const scaleH = maxH / fH;
-            const scaleW = maxW / fW;
-            const scale = Math.min(scaleH, scaleW, 1);
-            const pW = Math.round(fW * scale);
-            const pH = Math.round(fH * scale);
-
-            const hasHtml = !!htmlPreview;
-            const hasGpt = !!preview;
-            const hasAny = hasHtml || hasGpt;
-
-            return (
-              <div className="flex-1 flex flex-col gap-4 min-w-0">
-                <div className="flex-1 rounded-2xl border border-white/[0.07] bg-[#0d0d10] flex items-center justify-center overflow-hidden relative min-h-0">
-
-                  {/* Loading */}
-                  {loading && !hasHtml && (
-                    <div className="flex flex-col items-center justify-center gap-4">
-                      <div className="relative w-10 h-10">
-                        <div className="absolute inset-0 rounded-full border-2 border-purple-500/20 border-t-purple-500 animate-spin" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          {gerarMode === "claude" ? <Code2 className="w-4 h-4 text-purple-400/60" /> : <Sparkles className="w-4 h-4 text-purple-400/60" />}
-                        </div>
-                      </div>
-                      <div className="text-center space-y-1">
-                        <p className="text-[13px] text-white/50 font-medium">
-                          {gerarMode === "claude" ? "Gerando com Claude..." : `Gerando com ${getActiveImageProviderLabel()}...`}
-                        </p>
-                        <p className="text-[11px] text-white/20 font-mono">{fmt.platform} · {fmt.size}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Empty */}
-                  {!loading && !hasAny && (
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <ImageIcon className="w-8 h-8 text-white/10" />
-                      <div className="text-center">
-                        <p className="text-[13px] text-white/20">Preview aparece aqui</p>
-                        <p className="text-[11px] text-white/10 mt-0.5 font-mono">{fmt.platform} · {fmt.size}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Claude HTML preview — iframe live */}
-                  {hasHtml && (
-                    <div className="relative" style={{ width: pW, height: pH, overflow: "hidden", borderRadius: 8 }}>
-                      <div style={{ transform: `scale(${scale})`, transformOrigin: "top left", width: fW, height: fH }}>
-                        <iframe
-                          srcDoc={htmlPreview}
-                          title="preview"
-                          style={{ border: "none", display: "block", width: fW, height: fH }}
-                          sandbox="allow-same-origin"
-                        />
-                      </div>
-                      {/* Loading overlay com progresso parcial */}
-                      {loading && (
-                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center rounded-lg">
-                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-black/70 border border-white/10">
-                            <Loader2 className="w-3.5 h-3.5 text-purple-400 animate-spin" />
-                            <span className="text-[11px] text-white/60">Gerando...</span>
-                          </div>
-                        </div>
-                      )}
-                      <div className="absolute top-2 left-2 px-2 py-1 rounded-lg bg-black/50 backdrop-blur-sm border border-white/10 text-[10px] text-purple-300 font-mono">Claude HTML</div>
-                    </div>
-                  )}
-
-                  {/* GPT image preview */}
-                  {!hasHtml && hasGpt && (
-                    <div style={{ width: pW, height: pH, borderRadius: 8, overflow: "hidden", position: "relative" }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={preview!.dataUrl} alt="Criativo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-                      <div className="absolute top-2 left-2 px-2 py-1 rounded-lg bg-black/50 backdrop-blur-sm border border-white/10 text-[10px] text-white/60 font-mono">{fmt.platform}</div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Actions */}
-                {hasAny && !loading && (
-                  <div className="flex gap-2 shrink-0">
-                    {/* Regenerar */}
-                    <button
-                      onClick={() => gerarMode === "claude" ? callGenerateClaude({}) : callGenerate({ referenceBase64: referenceImage })}
-                      className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-white/[0.08] text-[12px] text-white/50 hover:text-white hover:border-white/20 cursor-pointer transition-all"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5" /> Outra versão
-                    </button>
-
-                    {/* Download */}
-                    {hasHtml ? (
-                      <button
-                        onClick={handleExportHtml}
-                        disabled={exporting}
-                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-white/[0.08] text-[12px] text-white/50 hover:text-white hover:border-white/20 cursor-pointer transition-all disabled:opacity-40"
-                      >
-                        {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
-                        {exporting ? "Exportando..." : "Baixar PNG"}
-                      </button>
-                    ) : (
-                      <button onClick={() => downloadDataUrl(preview!.dataUrl, `criativo-${selectedFormat}.png`)} className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-white/[0.08] text-[12px] text-white/50 hover:text-white hover:border-white/20 cursor-pointer transition-all">
-                        <Download className="w-3.5 h-3.5" /> Baixar
-                      </button>
-                    )}
-
-                    {/* Salvar (só GPT tem persistência na galeria por ora) */}
-                    {!hasHtml && (
-                      <button onClick={handleSave} disabled={saving} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-[12px] font-bold text-white cursor-pointer transition-all disabled:opacity-60">
-                        {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Salvar na galeria
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════════════════
-          TAB: BIBLIOTECA
-      ══════════════════════════════════════════════════ */}
-      {mainTab === "biblioteca" && (
-        <div className="flex-1 overflow-y-auto pb-8 min-h-0">
-
-          {/* ── Carrossel vitrine ── */}
-          <div className="px-8 pb-6">
-            {/* Section header */}
-            <div className="flex items-end justify-between mb-5">
-              <div>
-                <p className="text-[11px] text-white/25 uppercase tracking-widest font-semibold mb-1">Vitrine de referências</p>
-                <p className="text-[13px] text-white/50 leading-snug max-w-lg">O nível de qualidade que a WevyFlow entrega — clique em qualquer criativo para usar como inspiração no gpt-image-2.</p>
-              </div>
-              <div className="flex gap-1.5 shrink-0">
-                <button onClick={() => scrollCarousel("left")}
-                  className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center text-white/40 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-all">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 11L5 7l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </button>
-                <button onClick={() => scrollCarousel("right")}
-                  className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center text-white/40 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-all">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 11l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Carousel track */}
-            <div
-              ref={carouselRef}
-              className="flex gap-3 overflow-x-auto scroll-smooth pb-3"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
-              {ALL_SEED_ITEMS.map((item, idx) => {
-                const shape = FORMAT_SHAPE[item.format] ?? { w: 1, h: 1 };
-                const cardH = 280;
-                const cardW = Math.max(80, Math.round(cardH * shape.w / shape.h));
-                const isStories = item.format === "stories";
-                return (
-                  <div
-                    key={idx}
-                    className="group/card shrink-0 relative rounded-2xl overflow-hidden border border-white/[0.08] cursor-pointer"
-                    style={{ height: cardH, width: cardW }}
-                    onClick={() => handleUseSeedAsReference(item.path)}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={item.path}
-                      alt={item.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
-                      loading="lazy"
-                    />
-
-                    {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300" />
-
-                    {/* CTA */}
-                    <div className="absolute inset-x-0 bottom-0 p-3 translate-y-2 opacity-0 group-hover/card:translate-y-0 group-hover/card:opacity-100 transition-all duration-300 flex flex-col gap-1.5">
-                      {/* Editar — only if template exists */}
-                      {(() => {
-                        const tpl = CANVAS_TEMPLATES.find((t) => t.referencePath === item.path);
-                        return tpl ? (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setActiveTemplate(tpl); }}
-                            className="flex items-center gap-1.5 justify-center py-2 rounded-xl bg-white/90 backdrop-blur-sm text-[#111] text-[11px] font-bold cursor-pointer hover:bg-white transition-colors"
-                          >
-                            <Pencil className="w-3 h-3" /> Editar template
-                          </button>
-                        ) : null;
-                      })()}
-                      <div
-                        className="flex items-center gap-1.5 justify-center py-2 rounded-xl bg-purple-600/90 backdrop-blur-sm text-white text-[11px] font-semibold cursor-pointer"
-                        onClick={() => handleUseSeedAsReference(item.path)}
-                      >
-                        <Wand2 className="w-3 h-3" /> Usar como referência
-                      </div>
-                    </div>
-
-                    {/* Client badge */}
-                    <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-bold backdrop-blur-sm border opacity-0 group-hover/card:opacity-100 transition-opacity"
-                      style={{ backgroundColor: item.clientColor + "33", borderColor: item.clientColor + "55", color: item.clientColor }}>
-                      {item.client}
-                    </div>
-
-                    {/* Stories badge (always visible) */}
-                    {isStories && (
-                      <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-lg bg-pink-500/25 border border-pink-500/30 backdrop-blur-sm">
-                        <span className="text-[8px] font-bold text-pink-300 uppercase tracking-wider">9:16</span>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* ── Templates editáveis ── */}
-          <div className="px-8 pb-6">
-            <div className="flex items-center gap-2.5 mb-4">
-              <Pencil className="w-3.5 h-3.5 text-purple-400" />
-              <span className="text-[13px] font-semibold text-white/70">Templates editáveis</span>
-              <span className="text-[11px] text-white/25">{CANVAS_TEMPLATES.length + importedTemplates.length} disponíveis</span>
-              <div className="flex-1 h-px bg-white/[0.05]" />
-              {/* Import from Figma */}
-              <label
-                title="Importar template do Figma (.wevyflow.json)"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-dashed border-white/[0.12] text-[11px] text-white/35 hover:text-white/70 hover:border-purple-500/40 cursor-pointer transition-all"
-              >
-                <Upload className="w-3 h-3" />
-                Importar do Figma
-                <input
-                  ref={figmaImportRef}
-                  type="file"
-                  accept=".json,.wevyflow.json"
-                  onChange={handleFigmaImport}
-                  className="hidden"
-                />
-              </label>
-            </div>
-            <div className="grid grid-cols-4 gap-3">
-              {[...CANVAS_TEMPLATES, ...importedTemplates].map((tpl) => (
-                <button
-                  key={tpl.id}
-                  onClick={() => setActiveTemplate(tpl)}
-                  className="group/tpl relative rounded-xl overflow-hidden border border-white/[0.07] hover:border-purple-500/40 transition-all bg-[#0d0d10] cursor-pointer text-left"
-                >
-                  <div className="relative" style={{ aspectRatio: String(tpl.w / tpl.h) }}>
-                    {tpl.referencePath ? (
-                      <>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={tpl.referencePath} alt={tpl.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/tpl:scale-105" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      </>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-white/[0.03]" style={{ minHeight: 100 }}>
-                        <Pencil className="w-6 h-6 text-purple-400/40" />
-                      </div>
-                    )}
-                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-purple-600/80 backdrop-blur-sm text-[9px] font-bold text-white opacity-0 group-hover/tpl:opacity-100 transition-opacity">
-                      Editar
-                    </div>
-                    {tpl.client === "Figma" && (
-                      <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-[#0d99ff]/20 border border-[#0d99ff]/30">
-                        <span className="text-[8px] font-bold text-[#0d99ff] uppercase tracking-wider">Figma</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="px-3 py-2.5">
-                    <p className="text-[12px] font-semibold text-white/80 truncate">{tpl.name}</p>
-                    <p className="text-[10px] text-white/30 mt-0.5">{tpl.client} · {tpl.format === "stories" ? "Stories 9:16" : "Feed 1:1"}</p>
-                  </div>
-                  <div className="absolute inset-0 bg-purple-500/[0.06] opacity-0 group-hover/tpl:opacity-100 transition-opacity rounded-xl" />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* ── Grid por cliente ── */}
-          {SEED_GROUPS.map((group) => (
-            <div key={group.client} className="px-8 pb-8">
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: group.color }} />
-                <span className="text-[13px] font-semibold text-white/70">{group.client}</span>
-                <span className="text-[11px] text-white/25">{group.items.length} criativos</span>
-                <div className="flex-1 h-px bg-white/[0.05]" />
-              </div>
-              <div className="grid grid-cols-5 gap-3">
-                {group.items.map((item, idx) => {
-                  const shape = FORMAT_SHAPE[item.format] ?? { w: 1, h: 1 };
-                  const isStories = item.format === "stories";
-                  return (
-                    <div
-                      key={idx}
-                      className="group/grid cursor-pointer rounded-xl overflow-hidden border border-white/[0.06] hover:border-white/20 transition-all bg-[#0d0d10] relative"
-                      style={{ aspectRatio: String(shape.w / shape.h) }}
-                      onClick={() => handleUseSeedAsReference(item.path)}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={item.path}
-                        alt={item.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover/grid:scale-105"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-0 group-hover/grid:opacity-100 transition-opacity" />
-                      <div className="absolute inset-x-0 bottom-0 p-2 translate-y-1 opacity-0 group-hover/grid:translate-y-0 group-hover/grid:opacity-100 transition-all space-y-1">
-                        {(() => {
-                          const tpl = CANVAS_TEMPLATES.find((t) => t.referencePath === item.path);
-                          return tpl ? (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); setActiveTemplate(tpl); }}
-                              className="w-full flex items-center justify-center gap-1 py-1 rounded-lg bg-white/90 text-[#111] text-[9px] font-bold cursor-pointer hover:bg-white transition-colors"
-                            >
-                              <Pencil className="w-2.5 h-2.5" /> Editar
-                            </button>
-                          ) : null;
-                        })()}
-                        <p className="text-[9px] font-semibold text-white truncate">{item.name}</p>
-                      </div>
-                      {isStories && (
-                        <div className="absolute top-1.5 right-1.5 px-1 py-0.5 rounded-md bg-pink-500/20 border border-pink-500/20">
-                          <span className="text-[7px] font-bold text-pink-300">9:16</span>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-
-          {/* ── Drag & drop zone no rodapé ── */}
-          <div className="px-8">
-            <input ref={libraryUploadRef} type="file" accept="image/*" multiple onChange={handleLibraryFileInput} className="hidden" />
-            <div
-              onDragOver={(e) => { e.preventDefault(); setLibraryDragOver(true); }}
-              onDragLeave={() => setLibraryDragOver(false)}
-              onDrop={handleLibraryDrop}
-              onClick={() => libraryUploadRef.current?.click()}
-              className={cn(
-                "w-full flex items-center justify-center gap-3 py-4 rounded-2xl border border-dashed transition-all cursor-pointer",
-                libraryDragOver ? "border-purple-500/50 bg-purple-500/[0.06]" : "border-white/[0.06] hover:border-purple-500/25 hover:bg-purple-500/[0.03]"
-              )}
-            >
-              {libraryUploading
-                ? <><Loader2 className="w-4 h-4 text-purple-400 animate-spin" /><p className="text-[12px] text-white/35">Salvando...</p></>
-                : <><Upload className="w-4 h-4 text-white/20" /><p className="text-[11px] text-white/25">Adicionar mais criativos de referência — PNG, JPG, WEBP</p></>
-              }
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════════════════
-          TAB: GALERIA (gerados pelo gpt-image-2)
-      ══════════════════════════════════════════════════ */}
+      {/* ═══════════════ TAB: GALERIA ═══════════════ */}
       {mainTab === "galeria" && (
         <div className="flex-1 overflow-y-auto px-8 pb-8 space-y-5">
           {gallery.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-4"><Sparkles className="w-6 h-6 text-white/15" /></div>
+              <div className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-4">
+                <Sparkles className="w-6 h-6 text-white/15" />
+              </div>
               <p className="text-[14px] font-semibold text-white/40 mb-1">Nenhum criativo gerado ainda</p>
-              <p className="text-[12px] text-white/25">Vá para Gerar, preencha o brief e salve na galeria.</p>
+              <p className="text-[12px] text-white/25">Gere e salve criativos na aba Gerar.</p>
             </div>
           ) : (
             <>
               <div className="flex items-center gap-3 flex-wrap pt-2">
                 <span className="text-[12px] text-white/30 font-mono">{gallery.length} gerado{gallery.length !== 1 ? "s" : ""}</span>
                 <div className="flex gap-1 flex-wrap">
-                  {["all", ...FORMATS.filter((f) => gallery.some((c) => c.format === f.id)).map((f) => f.id)].map((id) => {
-                    const f = FORMATS.find((x) => x.id === id);
+                  {["all", ...GALLERY_FORMATS.filter(f => gallery.some(c => c.format === f.id)).map(f => f.id)].map(id => {
+                    const f = GALLERY_FORMATS.find(x => x.id === id);
                     return (
                       <button key={id} onClick={() => setActiveGalleryFormat(id)}
                         className={cn("px-3 py-1.5 rounded-lg text-[11px] font-medium cursor-pointer transition-all border",
@@ -1379,27 +786,23 @@ export function CriativosView() {
                   })}
                 </div>
                 <div className="flex-1" />
-                <button onClick={loadGallery} className="p-1.5 rounded-lg text-white/20 hover:text-white hover:bg-white/[0.06] cursor-pointer transition-colors"><RefreshCw className="w-3.5 h-3.5" /></button>
+                <button onClick={loadGallery} className="p-1.5 rounded-lg text-white/20 hover:text-white hover:bg-white/[0.06] cursor-pointer transition-colors">
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </button>
               </div>
-
               <div className="grid grid-cols-4 gap-4">
-                {filteredGallery.map((criativo) => {
-                  const f = FORMATS.find((x) => x.id === criativo.format);
+                {filteredGallery.map(criativo => {
+                  const f = GALLERY_FORMATS.find(x => x.id === criativo.format);
                   return (
                     <div key={criativo.id} className="group rounded-2xl overflow-hidden border border-white/[0.06] hover:border-white/15 transition-all bg-white/[0.02]">
                       <div className="relative overflow-hidden" style={{ aspectRatio: f ? String(f.w / f.h) : "16/9" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={criativo.url} alt={criativo.headline ?? "Criativo"} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
+                        <img src={criativo.url} alt="criativo" className="w-full h-full object-cover group-hover:scale-105 duration-500 transition-transform" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                         <div className="absolute inset-x-0 bottom-0 p-3 flex gap-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
                           <button onClick={() => downloadFromUrl(criativo.url, `criativo-${criativo.format}.png`)} className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-white/10 backdrop-blur-sm text-white/80 text-[11px] cursor-pointer hover:bg-white/20 transition-colors"><Download className="w-3.5 h-3.5" /> Baixar</button>
                           <button onClick={() => handleDeleteGallery(criativo)} className="p-1.5 rounded-lg bg-red-500/20 backdrop-blur-sm text-red-300 cursor-pointer hover:bg-red-500/40 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                         </div>
-                      </div>
-                      <div className="px-3 py-2.5 space-y-0.5">
-                        <span className="text-[9px] font-semibold text-purple-400 tracking-wide uppercase">{f?.platform ?? criativo.format}</span>
-                        {criativo.headline && <p className="text-[11px] text-white/70 font-medium line-clamp-1">{criativo.headline}</p>}
-                        {criativo.produto && <p className="text-[10px] text-white/25 line-clamp-1">{criativo.produto}</p>}
                       </div>
                     </div>
                   );
@@ -1409,6 +812,375 @@ export function CriativosView() {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ─── Node Cards ─────────────────────────────────────────── */
+
+function NodeRefCard({ ref_, onDelete, onChange }: {
+  ref_: RefCard; onDelete: () => void; onChange: (p: Partial<RefCard>) => void;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  return (
+    <div style={{ background: "#0d0d11", border: "1px solid rgba(74,222,128,.15)", borderRadius: 12, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,.4)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderBottom: "1px solid rgba(255,255,255,.06)" }}>
+        <ImageIcon style={{ width: 12, height: 12, color: "rgba(74,222,128,.5)", flexShrink: 0 }} />
+        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".07em", color: "rgba(74,222,128,.5)", textTransform: "uppercase", flex: 1 }}>Referência</span>
+        <span style={{ fontSize: 11, fontFamily: "monospace", color: "rgba(74,222,128,.3)" }}>{ref_.label}</span>
+        <button onClick={e => { e.stopPropagation(); onDelete(); }} style={{ marginLeft: 4, color: "rgba(255,255,255,.15)", cursor: "pointer", background: "none", border: "none", padding: 2, lineHeight: 1, display: "flex" }} className="hover:text-red-400 transition-colors">
+          <X style={{ width: 12, height: 12 }} />
+        </button>
+      </div>
+      {ref_.dataUrl ? (
+        <div style={{ position: "relative" }} onMouseDown={e => e.stopPropagation()}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={ref_.dataUrl} alt="" style={{ width: "100%", display: "block", maxHeight: 280, objectFit: "cover" }} />
+          <button onClick={() => onChange({ dataUrl: null })} style={{ position: "absolute", top: 6, right: 6, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,.6)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,.7)", cursor: "pointer" }}>
+            <X style={{ width: 11, height: 11 }} />
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => fileRef.current?.click()}
+          onMouseDown={e => e.stopPropagation()}
+          style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, padding: "36px 0", background: "none", border: "none", cursor: "pointer", color: "rgba(74,222,128,.35)" }}
+          className="hover:bg-green-500/[0.04] transition-colors"
+        >
+          <div style={{ width: 40, height: 40, borderRadius: 10, border: "1.5px dashed rgba(74,222,128,.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <ImagePlus style={{ width: 18, height: 18 }} />
+          </div>
+          <span style={{ fontSize: 11, color: "rgba(255,255,255,.30)" }}>Upload de Imagem</span>
+          <span style={{ fontSize: 9, color: "rgba(255,255,255,.15)" }}>PNG, JPG, WEBP</span>
+        </button>
+      )}
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={async e => {
+        const f = e.target.files?.[0]; if (f) onChange({ dataUrl: await readFileAsDataUrl(f) });
+        if (fileRef.current) fileRef.current.value = "";
+      }} />
+    </div>
+  );
+}
+
+function NodeAvatarCard({ avatar, onChange, onDelete }: {
+  avatar: AvatarCard; onChange: (p: Partial<AvatarCard>) => void; onDelete: () => void;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  return (
+    <div style={{ background: "#0d0d11", border: "1px solid rgba(251,191,36,.15)", borderRadius: 12, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,.4)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderBottom: "1px solid rgba(255,255,255,.06)" }}>
+        <User style={{ width: 12, height: 12, color: "rgba(251,191,36,.5)", flexShrink: 0 }} />
+        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".07em", color: "rgba(251,191,36,.5)", textTransform: "uppercase", flex: 1 }}>Avatar</span>
+        <span style={{ fontSize: 11, fontFamily: "monospace", color: "rgba(251,191,36,.3)" }}>{avatar.label}</span>
+        <button onClick={e => { e.stopPropagation(); onDelete(); }} style={{ marginLeft: 4, color: "rgba(255,255,255,.15)", cursor: "pointer", background: "none", border: "none", padding: 2, lineHeight: 1, display: "flex" }} className="hover:text-red-400 transition-colors">
+          <X style={{ width: 12, height: 12 }} />
+        </button>
+      </div>
+      <div style={{ padding: 10, display: "flex", flexDirection: "column", gap: 8 }} onMouseDown={e => e.stopPropagation()}>
+        <input type="text" value={avatar.name} onChange={e => onChange({ name: e.target.value })} placeholder="Nome da pessoa"
+          style={{ width: "100%", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)", borderRadius: 8, padding: "6px 10px", fontSize: 11, color: "rgba(255,255,255,.7)", outline: "none", fontFamily: "inherit" }}
+          className="placeholder-white/20" />
+        {avatar.dataUrl ? (
+          <div style={{ position: "relative", borderRadius: 8, overflow: "hidden" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={avatar.dataUrl} alt={avatar.name || "avatar"} style={{ width: "100%", height: 150, objectFit: "cover", objectPosition: "top", display: "block" }} />
+            <button onClick={() => onChange({ dataUrl: null })} style={{ position: "absolute", top: 6, right: 6, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,.6)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,.7)", cursor: "pointer" }}>
+              <X style={{ width: 11, height: 11 }} />
+            </button>
+          </div>
+        ) : (
+          <button onClick={() => fileRef.current?.click()}
+            style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: "20px 0", background: "none", border: "1px dashed rgba(251,191,36,.15)", borderRadius: 8, cursor: "pointer", color: "rgba(251,191,36,.35)", fontSize: 10 }}
+            className="hover:border-amber-500/30 hover:text-amber-400/60 transition-colors">
+            <User style={{ width: 16, height: 16 }} />
+            <span>Foto do avatar</span>
+          </button>
+        )}
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={async e => {
+          const f = e.target.files?.[0]; if (f) onChange({ dataUrl: await readFileAsDataUrl(f) });
+          if (fileRef.current) fileRef.current.value = "";
+        }} />
+      </div>
+    </div>
+  );
+}
+
+function GerarImagemCard({
+  prompt, onChange, references, avatars,
+  genCount, setGenCount, genFormat, setGenFormat, genQuality, setGenQuality,
+  genRunning, onGenerate, isDragging, onDragStart,
+}: {
+  prompt: string; onChange: (v: string) => void;
+  references: RefCard[]; avatars: AvatarCard[];
+  genCount: number; setGenCount: (n: number) => void;
+  genFormat: string; setGenFormat: (v: string) => void;
+  genQuality: string; setGenQuality: (v: string) => void;
+  genRunning: boolean; onGenerate: () => void;
+  isDragging: boolean; onDragStart: (e: React.MouseEvent) => void;
+}) {
+  const canGenerate = prompt.trim().length > 0 && !genRunning;
+  return (
+    <div style={{ background: "#09090e", border: "1px solid rgba(124,58,237,.35)", borderRadius: 14, overflow: "visible", boxShadow: "0 0 0 1px rgba(124,58,237,.08), 0 0 40px rgba(124,58,237,.10), 0 8px 40px rgba(0,0,0,.5)", cursor: isDragging ? "grabbing" : "default" }}>
+      <div onMouseDown={onDragStart} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderBottom: "1px solid rgba(124,58,237,.15)", cursor: isDragging ? "grabbing" : "grab" }}>
+        <div style={{ width: 22, height: 22, borderRadius: 7, background: "rgba(124,58,237,.15)", border: "1px solid rgba(124,58,237,.25)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Wand2 style={{ width: 12, height: 12, color: "#a78bfa" }} />
+        </div>
+        <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,.7)", flex: 1 }}>Gerar Imagem</span>
+      </div>
+      <div onMouseDown={e => e.stopPropagation()} style={{ position: "relative", minHeight: 180 }}>
+        <MentionTextarea value={prompt} onChange={onChange} references={references} avatars={avatars} />
+        <button style={{ position: "absolute", bottom: 10, right: 12, width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(255,255,255,.25)" }}
+          className="hover:text-purple-400 hover:border-purple-500/30 hover:bg-purple-500/[0.08] transition-colors">
+          <Sparkles style={{ width: 13, height: 13 }} />
+        </button>
+      </div>
+      <div onMouseDown={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderTop: "1px solid rgba(124,58,237,.12)" }}>
+        <CountPill count={genCount} setCount={setGenCount} />
+        <FormatSelector value={genFormat} onChange={setGenFormat} />
+        <QualityToggle value={genQuality} onChange={setGenQuality} />
+        <button onClick={onGenerate} disabled={!canGenerate}
+          style={{ marginLeft: "auto", width: 36, height: 36, borderRadius: 10, background: canGenerate ? "rgba(124,58,237,.25)" : "rgba(255,255,255,.03)", border: canGenerate ? "1px solid rgba(124,58,237,.4)" : "1px solid rgba(255,255,255,.06)", display: "flex", alignItems: "center", justifyContent: "center", cursor: canGenerate ? "pointer" : "not-allowed", color: canGenerate ? "#a78bfa" : "rgba(255,255,255,.12)", flexShrink: 0, transition: "all .15s" }}>
+          {genRunning ? <Loader2 style={{ width: 14, height: 14, animation: "spin 1s linear infinite" }} /> : <Play style={{ width: 13, height: 13, marginLeft: 1 }} />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function NodeResultCard({ result, onDelete }: { result: GenResult; onDelete: () => void }) {
+  return (
+    <div style={{ background: "#0d0d11", border: "1px solid rgba(255,255,255,.08)", borderRadius: 12, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,.4)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderBottom: "1px solid rgba(255,255,255,.06)" }}>
+        <ImageIcon style={{ width: 12, height: 12, color: "rgba(167,139,250,.4)", flexShrink: 0 }} />
+        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".07em", color: "rgba(167,139,250,.4)", textTransform: "uppercase", flex: 1 }}>Output</span>
+        <span style={{ fontSize: 10, fontFamily: "monospace", color: "rgba(255,255,255,.20)" }}>{result.label.slice(0, 12)}</span>
+        <button onClick={e => { e.stopPropagation(); onDelete(); }} style={{ marginLeft: 4, color: "rgba(255,255,255,.12)", cursor: "pointer", background: "none", border: "none", padding: 2, lineHeight: 1, display: "flex" }} className="hover:text-red-400 transition-colors">
+          <X style={{ width: 12, height: 12 }} />
+        </button>
+      </div>
+      {result.status === "loading" && (
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, padding: "32px 16px", minHeight: 140 }}>
+          <div style={{ position: "relative", width: 32, height: 32 }}>
+            <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "1.5px solid rgba(124,58,237,.15)", borderTopColor: "#7c3aed", animation: "spin 1s linear infinite" }} />
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <ImagePlus style={{ width: 12, height: 12, color: "rgba(124,58,237,.5)" }} />
+            </div>
+          </div>
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,.2)" }}>Gerando...</p>
+        </div>
+      )}
+      {result.status === "error" && (
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, padding: "28px 16px", textAlign: "center" }}>
+          <AlertCircle style={{ width: 18, height: 18, color: "rgba(248,113,113,.5)" }} />
+          <p style={{ fontSize: 10, color: "rgba(248,113,113,.6)", lineHeight: 1.5 }}>{result.error}</p>
+        </div>
+      )}
+      {result.status === "done" && result.dataUrl && (
+        <div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={result.dataUrl} alt="" style={{ width: "100%", display: "block", maxHeight: 320, objectFit: "cover" }} />
+          <div style={{ display: "flex", gap: 6, padding: 8 }} onMouseDown={e => e.stopPropagation()}>
+            <button onClick={() => downloadDataUrl(result.dataUrl!, `design-${Date.now()}.png`)}
+              style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "6px 0", borderRadius: 7, background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)", color: "rgba(255,255,255,.4)", fontSize: 10, cursor: "pointer" }}
+              className="hover:text-white hover:bg-white/[0.07] transition-colors">
+              <Download style={{ width: 12, height: 12 }} /> Baixar
+            </button>
+            <button style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "6px 0", borderRadius: 7, background: "rgba(124,58,237,.08)", border: "1px solid rgba(124,58,237,.2)", color: "rgba(167,139,250,.7)", fontSize: 10, cursor: "pointer" }}
+              className="hover:bg-purple-500/15 hover:text-purple-300 transition-colors">
+              <Check style={{ width: 12, height: 12 }} /> Usar
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MentionTextarea({ value, onChange, references, avatars }: {
+  value: string; onChange: (v: string) => void;
+  references: RefCard[]; avatars: AvatarCard[];
+}) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [mentionQuery, setMentionQuery] = useState<{ query: string; start: number } | null>(null);
+
+  const allMentions = [
+    ...references.map(r => ({ label: `@${r.label}`, type: "img"    as const, color: "#4ade80", bg: "rgba(74,222,128,.15)" })),
+    ...avatars.map(a    => ({ label: `@${a.label}`, type: "avatar" as const, color: "#fbbf24", bg: "rgba(251,191,36,.15)" })),
+  ];
+  const suggestions = mentionQuery
+    ? allMentions.filter(m => m.label.toLowerCase().includes(mentionQuery.query.toLowerCase()))
+    : [];
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    const cursor = e.target.selectionStart ?? 0;
+    onChange(val);
+    const textBefore = val.slice(0, cursor);
+    const match = textBefore.match(/@([a-z0-9]*)$/i);
+    if (match) {
+      setMentionQuery({ query: match[1], start: match.index! });
+    } else {
+      setMentionQuery(null);
+    }
+  };
+
+  const insertMention = (label: string) => {
+    if (!mentionQuery || !textareaRef.current) return;
+    const cursor = textareaRef.current.selectionStart ?? 0;
+    const before  = value.slice(0, mentionQuery.start);
+    const after   = value.slice(cursor);
+    const newVal  = before + label + " " + after;
+    onChange(newVal);
+    setMentionQuery(null);
+    setTimeout(() => {
+      const pos = mentionQuery.start + label.length + 1;
+      textareaRef.current?.setSelectionRange(pos, pos);
+      textareaRef.current?.focus();
+    }, 0);
+  };
+
+  const STYLE: React.CSSProperties = {
+    position: "absolute", inset: 0, padding: "14px 16px",
+    fontSize: 13, lineHeight: 1.65,
+    fontFamily: "ui-monospace,'JetBrains Mono','Fira Code',monospace",
+    whiteSpace: "pre-wrap", wordBreak: "break-word", overflowY: "auto",
+  };
+  const renderHighlighted = (text: string) =>
+    text.split(/(@(?:img|avatar)\d+)/g).map((part, i) => {
+      if (/^@img\d+$/.test(part)) {
+        const exists = !!references[parseInt(part.replace("@img", "")) - 1];
+        return <mark key={i} style={{ background: exists ? "rgba(34,197,94,.18)" : "rgba(255,255,255,.05)", color: exists ? "#4ade80" : "#6b7280", borderRadius: 3, padding: "0 2px" }}>{part}</mark>;
+      }
+      if (/^@avatar\d+$/.test(part)) {
+        const exists = !!avatars[parseInt(part.replace("@avatar", "")) - 1];
+        return <mark key={i} style={{ background: exists ? "rgba(251,191,36,.15)" : "rgba(255,255,255,.05)", color: exists ? "#fbbf24" : "#6b7280", borderRadius: 3, padding: "0 2px" }}>{part}</mark>;
+      }
+      return <span key={i}>{part}</span>;
+    });
+
+  return (
+    <div style={{ position: "relative", minHeight: 180 }}>
+      <div aria-hidden style={{ ...STYLE, color: "transparent", pointerEvents: "none", userSelect: "none" }}>
+        {renderHighlighted(value + "​")}
+      </div>
+      <textarea
+        ref={textareaRef}
+        value={value}
+        onChange={handleChange}
+        onKeyDown={e => {
+          if (e.key === "Escape") setMentionQuery(null);
+          if (e.key === "Enter" && suggestions.length > 0) {
+            e.preventDefault();
+            insertMention(suggestions[0].label);
+          }
+        }}
+        placeholder={"Recrie a @img1 e substitua o homem\npelo @avatar1 e troque a frase por IA GEN"}
+        style={{ ...STYLE, background: "transparent", color: "rgba(255,255,255,.72)", caretColor: "#a78bfa", resize: "none", outline: "none", border: "none", paddingBottom: 44 }}
+        className="placeholder-white/[0.15]"
+      />
+
+      {/* @mention dropdown */}
+      {mentionQuery && suggestions.length > 0 && (
+        <div
+          onMouseDown={e => e.preventDefault()}
+          style={{
+            position: "absolute", top: "calc(100% + 4px)", left: 12,
+            background: "#131318",
+            border: "1px solid rgba(255,255,255,.12)",
+            borderRadius: 10,
+            boxShadow: "0 8px 32px rgba(0,0,0,.6)",
+            overflow: "hidden",
+            zIndex: 200,
+            minWidth: 170,
+          }}
+        >
+          <div style={{ padding: "5px 10px 6px", borderBottom: "1px solid rgba(255,255,255,.06)" }}>
+            <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: ".10em", color: "rgba(255,255,255,.25)", textTransform: "uppercase" }}>Mencionar</span>
+          </div>
+          {suggestions.map(s => (
+            <button
+              key={s.label}
+              onMouseDown={e => { e.preventDefault(); insertMention(s.label); }}
+              style={{
+                display: "flex", alignItems: "center", gap: 8,
+                width: "100%", padding: "7px 10px",
+                background: "none", border: "none", cursor: "pointer", textAlign: "left",
+              }}
+              className="hover:bg-white/[0.05] transition-colors"
+            >
+              <div style={{ width: 22, height: 22, borderRadius: 6, background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", color: s.color, flexShrink: 0 }}>
+                {s.type === "img"
+                  ? <ImageIcon style={{ width: 11, height: 11 }} />
+                  : <User style={{ width: 11, height: 11 }} />
+                }
+              </div>
+              <span style={{ fontSize: 12, fontFamily: "monospace", fontWeight: 600, color: s.color }}>{s.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CountPill({ count, setCount }: { count: number; setCount: (n: number) => void }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 2, background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 10, padding: "3px 4px" }}>
+      <button onClick={() => setCount(Math.max(1, count - 1))}
+        style={{ width: 28, height: 28, borderRadius: 7, background: "rgba(255,255,255,.05)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(255,255,255,.5)", fontSize: 16, lineHeight: 1 }}
+        className="hover:bg-white/[0.09] hover:text-white transition-colors">-</button>
+      <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,.65)", minWidth: 30, textAlign: "center" }}>x{count}</span>
+      <button onClick={() => setCount(Math.min(8, count + 1))}
+        style={{ width: 28, height: 28, borderRadius: 7, background: "rgba(255,255,255,.05)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(255,255,255,.5)", fontSize: 16, lineHeight: 1 }}
+        className="hover:bg-white/[0.09] hover:text-white transition-colors">+</button>
+    </div>
+  );
+}
+
+function FormatSelector({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const current = GEN_FORMATS.find(f => f.id === value) ?? GEN_FORMATS[2];
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [open]);
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button onClick={() => setOpen(!open)}
+        style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 8px", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 8, cursor: "pointer" }}
+        className="hover:border-white/15 transition-colors">
+        <div style={{ width: current.w, height: current.h, border: "1.5px solid rgba(255,255,255,.45)", borderRadius: 2, flexShrink: 0 }} />
+        <span style={{ fontSize: 10, color: "rgba(255,255,255,.5)", fontWeight: 600, whiteSpace: "nowrap" }}>{current.id}</span>
+        <ChevronDown style={{ width: 9, height: 9, color: "rgba(255,255,255,.3)" }} />
+      </button>
+      {open && (
+        <div style={{ position: "absolute", bottom: "calc(100% + 6px)", left: 0, background: "#111117", border: "1px solid rgba(255,255,255,.10)", borderRadius: 10, boxShadow: "0 12px 40px rgba(0,0,0,.6)", overflow: "hidden", padding: "4px 0", minWidth: 130, zIndex: 100 }}>
+          {GEN_FORMATS.map(f => (
+            <button key={f.id} onClick={() => { onChange(f.id); setOpen(false); }}
+              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "7px 12px", background: f.id === value ? "rgba(124,58,237,.12)" : "none", border: "none", cursor: "pointer" }}
+              className="hover:bg-white/[0.04] transition-colors">
+              <div style={{ width: f.w, height: f.h, border: f.id === value ? "1.5px solid rgba(167,139,250,.7)" : "1.5px solid rgba(255,255,255,.35)", borderRadius: 2, flexShrink: 0 }} />
+              <span style={{ fontSize: 11, fontWeight: 600, color: f.id === value ? "#a78bfa" : "rgba(255,255,255,.55)" }}>{f.id}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function QualityToggle({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 8, padding: 2, gap: 1 }}>
+      {["2K", "4K"].map(q => (
+        <button key={q} onClick={() => onChange(q)}
+          style={{ padding: "4px 8px", borderRadius: 6, border: "none", background: value === q ? "rgba(124,58,237,.20)" : "none", color: value === q ? "#a78bfa" : "rgba(255,255,255,.35)", fontSize: 10, fontWeight: 700, cursor: "pointer", transition: "all .15s" }}>
+          {q}
+        </button>
+      ))}
     </div>
   );
 }

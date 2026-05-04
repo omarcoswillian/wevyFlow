@@ -60,7 +60,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <GlobalPalette />
       <LaunchWizard />
       <OnboardingGate />
-      <div className="h-screen overflow-hidden">{children}</div>
+      <div
+        className="h-screen overflow-hidden"
+        style={{
+          backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)",
+          backgroundSize: "24px 24px",
+        }}
+      >{children}</div>
     </AppProvider>
   );
 }
