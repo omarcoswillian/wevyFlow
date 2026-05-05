@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luana Carolina – Execução Digital – Obrigado</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        font-family: "Montserrat", sans-serif;
+        background: #f7f7f7;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /*
+       * Canvas de referência: 1920×1200px (mesmo do index.html)
+       * Escalamento: px / 1200 × 100 = vh
+       */
+
+      /* ── SEÇÃO ── */
+      .obg {
+        position: relative;
+        height: 100vh;
+        min-height: 620px;
+        overflow: hidden;
+        background: #f7f7f7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* ── FUNDO DESFOCADO ── */
+      /* inset: -8px evita o halo branco nas bordas causado pelo blur */
+      .obg__bg {
+        position: absolute;
+        inset: -8px;
+        background-image: url("https://www.figma.com/api/mcp/asset/6ab70f48-26eb-4851-a22d-99b4286a6ff3");
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+        filter: blur(2.5px);
+        pointer-events: none;
+      }
+
+      /* Overlay rgba(247,247,247,0.24) por cima do blur */
+      .obg__overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(247, 247, 247, 0.24);
+        pointer-events: none;
+      }
+
+      /* ── CORPO CENTRAL ── */
+      .obg__body {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 516px;
+      }
+
+      /* ── HEADLINE ── */
+      /* 36px / 1200px × 100 = 3vh */
+      .obg__headline {
+        font-size: min(64px, 5.33vh);
+        font-weight: 600;
+        line-height: 1.2;
+        letter-spacing: -1.04px;
+        color: #020202;
+        text-align: center;
+        white-space: nowrap;
+        margin-bottom: min(16px, 1.33vh);
+      }
+
+      /* ── BARRA DE PROGRESSO ── */
+      /* 25px / 1200px × 100 = 2.08vh */
+      .obg__progress-track {
+        width: 100%;
+        height: min(25px, 2.08vh);
+        border: 1px solid #ebb154;
+        border-radius: 17px;
+        overflow: hidden;
+        background: transparent;
+        margin-bottom: min(62px, 5.17vh);
+      }
+
+      @keyframes progress-load {
+        from { width: 0%; }
+        to   { width: 88.85%; }
+      }
+
+      .obg__progress-fill {
+        height: 100%;
+        width: 88.85%;
+        background: #ebb154;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 8px;
+        animation: progress-load 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        animation-delay: 0.3s;
+        width: 0%;
+      }
+
+      .obg__progress-label {
+        font-size: min(16px, 1.33vh);
+        font-weight: 500;
+        color: #fff;
+        line-height: 1;
+        letter-spacing: -0.36px;
+      }
+
+      /* ── CARD ── */
+      /* 208px / 1200px × 100 = 17.33vh */
+      .obg__card {
+        width: 100%;
+        min-height: min(208px, 17.33vh);
+        background: #f7f7f7;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        border-radius: 20px;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: min(14px, 1.17vh);
+        padding: min(32px, 2.67vh) min(40px, 2.08vw);
+        text-align: center;
+      }
+
+      /* 24px / 1200px × 100 = 2vh */
+      .obg__card-title {
+        font-size: min(32px, 2.67vh);
+        font-weight: 600;
+        line-height: 1.5;
+        color: #020202;
+      }
+
+      /* 16.2px / 1200px × 100 = 1.35vh */
+      .obg__card-text {
+        font-size: min(22px, 1.83vh);
+        font-weight: 400;
+        line-height: 1.4;
+        color: rgba(2, 2, 2, 0.7);
+      }
+
+      /* ════════════════════════════
+         MOBILE ≤ 768px
+         Referência: Figma 390×780px
+      ════════════════════════════ */
+      @media (max-width: 768px) {
+        /* Seção: altura mínima 780px igual ao canvas Figma */
+        .obg {
+          height: auto;
+          min-height: 780px;
+          padding: 0;
+          align-items: center;
+          justify-content: flex-start;
+        }
+
+        /* Nova imagem de fundo exclusiva para mobile */
+        .obg__bg {
+          background-image: url('https://www.figma.com/api/mcp/asset/9cdca941-dad8-4f40-ac8a-f38710c732b0');
+          background-position: center top;
+        }
+
+        /* Sem overlay no mobile */
+        .obg__overlay {
+          background: transparent;
+        }
+
+        /*
+         * Corpo: padding lateral de 18px (margem do card no Figma)
+         * padding-top: 232px posiciona o headline exatamente onde o Figma indica
+         * (headline top-edge = 50% − 145.81px − 12px ≈ 232px em canvas 780px)
+         */
+        .obg__body {
+          max-width: 100%;
+          width: 100%;
+          gap: 0;
+          align-items: center;
+          padding: 232px 18px 40px;
+        }
+
+        /* Headline: fonte 20px, padding lateral extra para afinar largura (49px − 18px = 31px) */
+        .obg__headline {
+          font-size: 20px;
+          letter-spacing: -0.2px;
+          white-space: nowrap;
+          padding: 0 31px;
+          margin-bottom: 14px;
+        }
+
+        /* Barra: mesma largura reduzida do headline */
+        .obg__progress-track {
+          height: 25px;
+          width: calc(100% - 62px);
+          margin-bottom: 32px;
+        }
+
+        .obg__progress-label {
+          font-size: 10px;
+        }
+
+        /* Card: ocupa largura total dentro do padding do body (354px) */
+        .obg__card {
+          width: 100%;
+          min-height: auto;
+          padding: 30px 20px;
+          gap: 12px;
+        }
+
+        .obg__card-title {
+          font-size: 19.8px;
+        }
+
+        .obg__card-text {
+          font-size: 14.4px;
+          line-height: 1.4;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="obg">
+      <!-- Fundo desfocado -->
+      <div class="obg__bg"></div>
+      <div class="obg__overlay"></div>
+
+      <!-- Conteúdo central -->
+      <div class="obg__body">
+        <h1 class="obg__headline">Calma, ainda faltam 1 passo…</h1>
+
+        <div class="obg__progress-track">
+          <div class="obg__progress-fill">
+            <span class="obg__progress-label">89%</span>
+          </div>
+        </div>
+
+        <div class="obg__card">
+          <h2 class="obg__card-title">Confira seu e-mail</h2>
+          <p class="obg__card-text">
+            Além disso, você acabou de receber um Guia sobre o Execução Digital
+            no seu e-mail. É importante que você abra e confira as informações
+            novas que te passei por lá.
+          </p>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

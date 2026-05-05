@@ -118,22 +118,24 @@ export async function POST(req: NextRequest) {
         const client = new GoogleGenAI({ apiKey: key });
         const model = imageModel || "gemini-3-pro-image-preview";
 
-        const interaction = await client.interactions.create({
+        const result = await client.models.generateContent({
           model,
-          input: `${prompt} Aspect ratio: 1:1.`,
-          response_modalities: ["image"],
-          stream: false,
+          contents: [{ role: "user", parts: [{ text: `${prompt} Aspect ratio: 1:1.` }] }],
+          config: { responseModalities: ["IMAGE"] },
         });
 
         let b64 = "";
         let mimeType = "image/png";
-        const outputs = (interaction as { outputs?: { type: string; data?: string; mime_type?: string }[] })?.outputs ?? [];
-        for (const out of outputs) {
-          if (out.type === "image" && out.data) {
-            b64 = out.data;
-            mimeType = out.mime_type ?? "image/png";
-            break;
+        const candidates = result.candidates ?? [];
+        for (const candidate of candidates) {
+          for (const part of candidate.content?.parts ?? []) {
+            if (part.inlineData?.data) {
+              b64 = part.inlineData.data;
+              mimeType = part.inlineData.mimeType ?? "image/png";
+              break;
+            }
           }
+          if (b64) break;
         }
 
         if (!b64) {

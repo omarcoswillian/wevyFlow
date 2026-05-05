@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luana Carolina – Execução Digital</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        font-family: "Montserrat", sans-serif;
+        background: #f7f7f7;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /*
+       * Todos os tamanhos são escalados proporcionalmente ao design original
+       * que foi feito em 1920×1200px. Usando vh (1200px = 100vh base) para
+       * que tudo se encaixe em qualquer altura de viewport sem overflow.
+       * ex: 61px / 1200px * 100 = 5.083vh
+       */
+
+      /* ── SEÇÃO ── */
+      .hero {
+        position: relative;
+        height: 100vh;
+        min-height: 620px;
+        overflow: hidden;
+        background: #f7f7f7;
+
+        /* Layout em coluna: logo no topo, conteúdo centralizado abaixo */
+        display: flex;
+        flex-direction: column;
+        padding: 19vh 0 3vh 150px; /* 19vh ≈ posição do logo no Figma */
+        gap: 0.5vh;                /* espaço entre logo e conteúdo */
+      }
+
+      /* ── FUNDO ── */
+      .hero__bg {
+        position: absolute;
+        inset: 0;
+        background-image: var(--bg-desktop);
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+        pointer-events: none;
+      }
+
+      /* ── LOGO ── */
+      .hero__logo {
+        position: relative;
+        z-index: 1;
+        flex-shrink: 0;
+        align-self: flex-start;
+        line-height: 0; /* remove espaço extra embaixo do img */
+      }
+      .hero__logo-desktop {
+        display: block;
+        width: min(250px, 20.83vh);
+        height: min(49px, 4.08vh);
+        object-fit: contain;
+        object-position: left center;
+      }
+      .hero__logo-mobile {
+        display: none;
+      }
+
+      /* ── CONTEÚDO ── */
+      .hero__content {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        max-width: min(580px, 48vw);
+      }
+
+      /* ── TÍTULO ── */
+      /* 61px / 1200px × 100 = 5.08vh */
+      .hero__headline {
+        font-size: min(61px, 5.08vh);
+        font-weight: 600;
+        line-height: 1.2;
+        letter-spacing: -1.525px;
+        color: #020202;
+        margin-bottom: min(12px, 1vh);
+      }
+      .hero__headline .accent {
+        color: #f2b938;
+      }
+
+      /* ── SUBTÍTULO ── */
+      /* 22px / 1200px × 100 = 1.83vh */
+      .hero__subtitle {
+        font-size: min(22px, 1.83vh);
+        font-weight: 400;
+        line-height: 1.4;
+        letter-spacing: -0.36px;
+        color: rgba(2, 2, 2, 0.7);
+        margin-bottom: min(40px, 3.3vh);
+        max-width: 480px;
+      }
+
+      /* ── FORMULÁRIO ── */
+      .hero__form {
+        display: flex;
+        flex-direction: column;
+        gap: min(10px, 0.83vh);
+        max-width: 460px;
+      }
+
+      /* 52px / 1200px × 100 = 4.33vh */
+      .hero__input {
+        width: 100%;
+        height: min(52px, 4.33vh);
+        background: #fff;
+        border: 1px solid rgba(112, 112, 112, 0.3);
+        border-radius: 40px;
+        padding: 0 20px;
+        font-family: "Montserrat", sans-serif;
+        font-size: min(18px, 1.5vh);
+        font-weight: 500;
+        color: #020202;
+        outline: none;
+      }
+      .hero__input::placeholder {
+        color: #999;
+      }
+
+      /* 63px / 1200px × 100 = 5.25vh */
+      .hero__btn {
+        width: 100%;
+        height: min(63px, 5.25vh);
+        background: linear-gradient(
+          63.43deg,
+          #05811a 0%,
+          #08d23e 33.33%,
+          #05811a 66.67%,
+          #08d23e 100%
+        );
+        border: none;
+        border-radius: 40px;
+        color: #fff;
+        font-family: "Montserrat", sans-serif;
+        font-size: min(18px, 1.5vh);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      .hero__btn:hover {
+        opacity: 0.9;
+      }
+
+      /* ── PRIVACIDADE ── */
+      .hero__privacy {
+        margin-top: min(10px, 0.83vh);
+        font-size: min(15px, 1.25vh);
+        font-weight: 400;
+        line-height: 1.5;
+        color: #6a6a6a;
+        text-align: center;
+        letter-spacing: -0.3px;
+        max-width: 460px;
+      }
+      .hero__privacy .dark {
+        color: #383838;
+      }
+
+      /* ════════════════════════════
+         MOBILE ≤ 768px
+      ════════════════════════════ */
+      @media (max-width: 768px) {
+        .hero {
+          height: auto;
+          min-height: 700px;
+          padding: 0;
+          gap: 0;
+          justify-content: flex-start;
+        }
+
+        /* Troca imagem */
+        .hero__bg {
+          background-image: var(--bg-mobile);
+          background-position: center top;
+          background-size: cover;
+        }
+
+        /* Logo centralizada com posição fixa para não depender da altura vh */
+        .hero__logo {
+          position: absolute;
+          top: 280px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 190px;
+          flex-shrink: 0;
+        }
+        .hero__logo .hero__logo-desktop {
+          display: none;
+        }
+        .hero__logo-mobile {
+          display: block;
+          width: 190px;
+          height: 37px;
+          object-fit: contain;
+          object-position: center center;
+        }
+
+        /* Conteúdo começa abaixo do logo (logo bottom ≈ 317px, damos 20px de margem) */
+        .hero__content {
+          max-width: 100%;
+          width: 100%;
+          flex: none;
+          padding: 337px 20px 30px;
+          align-items: center;
+          justify-content: flex-start;
+        }
+
+        .hero__headline {
+          font-size: 25.7px;
+          line-height: 30.89px;
+          letter-spacing: -0.643px;
+          text-align: center;
+          margin-bottom: 8px;
+        }
+
+        .hero__subtitle {
+          font-size: 11.7px;
+          line-height: 16.38px;
+          text-align: center;
+          margin-bottom: 14px;
+          max-width: 100%;
+        }
+
+        .hero__form {
+          max-width: 100%;
+          width: 100%;
+          gap: 10px;
+        }
+
+        .hero__input {
+          height: 36px;
+          font-size: 12px;
+          font-weight: 400;
+          padding: 0 14px;
+        }
+
+        .hero__btn {
+          height: 46px;
+          font-size: 12.5px;
+        }
+
+        .hero__privacy {
+          max-width: 100%;
+          font-size: 11px;
+          margin-top: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="hero">
+      <!-- Fundo -->
+      <div
+        class="hero__bg"
+        style="
+          --bg-desktop: url('https://www.figma.com/api/mcp/asset/5405b3c4-bc8e-40a3-930f-13fb9874e06d');
+          --bg-mobile:  url('https://www.figma.com/api/mcp/asset/14442f92-1507-4685-9a29-d19762c64be6');
+        "
+      ></div>
+
+      <!-- Logo -->
+      <div class="hero__logo">
+        <img
+          class="hero__logo-desktop"
+          src="https://www.figma.com/api/mcp/asset/e7dcd730-06b4-4852-ae40-88bb340f971e"
+          alt="Execução Digital com Luana Carolina"
+        />
+        <img
+          class="hero__logo-mobile"
+          src="https://www.figma.com/api/mcp/asset/6a3a4fe2-d910-4b3e-a6a0-d60498eb538a"
+          alt="Execução Digital com Luana Carolina"
+        />
+      </div>
+
+      <!-- Conteúdo -->
+      <div class="hero__content">
+        <h1 class="hero__headline">
+          Como criar um infoproduto<br />
+          <span class="accent">irresistível&nbsp;</span>e escalar suas<br />
+          <span class="accent">vendas</span> no digital
+        </h1>
+
+        <p class="hero__subtitle">
+          Você só precisa replicar o meu método para transformar o que já sabe
+          em um produto digital tão desejado que as pessoas vão querer comprar
+          antes mesmo de lançar (ainda que você nunca tenha vendido nada)
+        </p>
+
+        <form class="hero__form" action="#" method="post">
+          <input
+            class="hero__input"
+            type="text"
+            name="nome"
+            placeholder="Seu nome:"
+          />
+          <input
+            class="hero__input"
+            type="tel"
+            name="whatsapp"
+            placeholder="Seu whatsApp:"
+          />
+          <input
+            class="hero__input"
+            type="email"
+            name="email"
+            placeholder="Seu e-mail:"
+          />
+          <button class="hero__btn" type="submit">
+            Quero garantir o meu lugar
+          </button>
+        </form>
+
+        <p class="hero__privacy">
+          Ao clicar no botão, você concorda com nossos
+          <span class="dark">Termos de Uso e Política de Privacidade,</span>
+          incluindo o uso de cookies e o envio de comunicações.
+        </p>
+      </div>
+    </section>
+  </body>
+</html>

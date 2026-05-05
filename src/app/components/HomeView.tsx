@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   ArrowRight,
@@ -111,6 +112,9 @@ const STRATEGY_LABELS: Record<StrategyId, string> = {
 
 export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, contentOverride, activeNav, upgradeOpen: upgradeOpenProp, onUpgradeClose }: HomeViewProps) {
   const nav = onNavigate || (() => {});
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentTipo = searchParams.get("tipo") ?? "criativos";
   const { apiKey, aiProvider, aiModel, saveApiKey, clearApiKey, imageApiKey, imageProvider, imageModel, saveImageApiKey, clearImageApiKey, setShowLaunchWizard, launchKits, projects, webhookUrl, setWebhookUrl } = useAppContext();
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
@@ -341,18 +345,22 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
             {!sidebarCollapsed && lpExpanded && (
               <div className="ml-3 mt-0.5 border-l border-white/[0.06] pl-2 space-y-0.5 pb-1">
                 {([
-                  { label: "Página de vendas",   icon: <Rocket className="w-3 h-3" /> },
-                  { label: "Página de captura",  icon: <UserCheck className="w-3 h-3" /> },
-                  { label: "Página de blog",     icon: <FileText className="w-3 h-3" /> },
-                  { label: "Eventos / Workshop", icon: <Zap className="w-3 h-3" /> },
-                  { label: "Agregadora",         icon: <Globe className="w-3 h-3" /> },
-                ] as const).map((item) => (
-                  <button key={item.label} onClick={() => nav("resources")}
-                    className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] text-white/40 hover:text-white/70 hover:bg-white/[0.04] transition-colors cursor-pointer text-left">
-                    {item.icon}
-                    <span className="flex-1 truncate">{item.label}</span>
-                  </button>
-                ))}
+                  { label: "Página de vendas",   icon: <Rocket className="w-3 h-3" />,   categoria: "vendas"  },
+                  { label: "Página de captura",  icon: <UserCheck className="w-3 h-3" />, categoria: "captura" },
+                  { label: "Página de blog",     icon: <FileText className="w-3 h-3" />,  categoria: "blog"    },
+                  { label: "Eventos / Workshop", icon: <Zap className="w-3 h-3" />,       categoria: "evento"  },
+                  { label: "Agregadora",         icon: <Globe className="w-3 h-3" />,     categoria: "servico" },
+                ]).map((item) => {
+                  const isActive = activeNav === "resources" && currentTipo === item.categoria;
+                  return (
+                    <button key={item.label} onClick={() => router.push(`/resources?categoria=${item.categoria}`)}
+                      className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] cursor-pointer transition-colors text-left",
+                        isActive ? "bg-white/[0.06] text-white/80" : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]")}>
+                      {item.icon}
+                      <span className="flex-1 truncate">{item.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -381,43 +389,47 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
               <div className="ml-3 mt-0.5 border-l border-white/[0.06] pl-2 space-y-0.5 pb-1">
                 <p className="text-[8px] font-semibold text-white/20 uppercase tracking-widest px-2 pt-2 pb-0.5">Primário</p>
                 {([
-                  { label: "KV",                icon: <Fingerprint className="w-3 h-3" />,   soon: false, onClick: () => nav("marca") },
-                  { label: "Criativos",         icon: <Paintbrush className="w-3 h-3" />,     soon: false, onClick: () => nav("criativos") },
-                  { label: "Capas dos módulos", icon: <BookOpen className="w-3 h-3" />,       soon: true,  onClick: () => {} },
-                  { label: "Banner checkout",   icon: <ShoppingCart className="w-3 h-3" />,   soon: false, onClick: () => nav("criativos") },
-                ] as const).map((item) => (
-                  <button key={item.label} onClick={item.onClick} disabled={item.soon}
-                    className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] transition-colors text-left",
-                      item.soon ? "text-white/15 cursor-not-allowed" : "text-white/40 hover:text-white/70 hover:bg-white/[0.04] cursor-pointer")}>
-                    {item.soon ? <Lock className="w-3 h-3 shrink-0" /> : item.icon}
-                    <span className="flex-1 truncate">{item.label}</span>
-                    {item.soon && <span className="text-[8px] text-white/15 shrink-0">breve</span>}
-                  </button>
-                ))}
+                  { label: "KV",                icon: <Fingerprint className="w-3 h-3" />,  tipo: null,               onClick: () => nav("marca") },
+                  { label: "Criativos",         icon: <Paintbrush className="w-3 h-3" />,   tipo: "criativos",        onClick: () => router.push("/criativos?tipo=criativos") },
+                  { label: "Capas dos módulos", icon: <BookOpen className="w-3 h-3" />,      tipo: "capas-modulos",    onClick: () => router.push("/criativos?tipo=capas-modulos") },
+                  { label: "Banner checkout",   icon: <ShoppingCart className="w-3 h-3" />, tipo: "banner-checkout",  onClick: () => router.push("/criativos?tipo=banner-checkout") },
+                ]).map((item) => {
+                  const isActive = activeNav === "criativos" && item.tipo !== null && currentTipo === item.tipo;
+                  return (
+                    <button key={item.label} onClick={item.onClick}
+                      className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] cursor-pointer transition-colors text-left",
+                        isActive ? "bg-white/[0.06] text-white/80" : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]")}>
+                      {item.icon}
+                      <span className="flex-1 truncate">{item.label}</span>
+                    </button>
+                  );
+                })}
                 <p className="text-[8px] font-semibold text-white/20 uppercase tracking-widest px-2 pt-3 pb-0.5">Secundário</p>
                 {([
-                  { label: "PDF / E-book",       icon: <FileText className="w-3 h-3" />,       soon: true,  onClick: () => {} },
-                  { label: "Slide",              icon: <Monitor className="w-3 h-3" />,         soon: true,  onClick: () => {} },
-                  { label: "Thumb YouTube",      icon: <PlayCircle className="w-3 h-3" />,      soon: false, onClick: () => nav("criativos") },
-                  { label: "Capa YouTube",       icon: <Tv2 className="w-3 h-3" />,             soon: true,  onClick: () => {} },
-                  { label: "WhatsApp API",       icon: <MessageCircle className="w-3 h-3" />,   soon: false, onClick: () => nav("criativos") },
-                  { label: "Banner e-mail",      icon: <Mail className="w-3 h-3" />,            soon: true,  onClick: () => {} },
-                  { label: "Capa de formulário", icon: <ClipboardList className="w-3 h-3" />,   soon: true,  onClick: () => {} },
-                ] as const).map((item) => (
-                  <button key={item.label} onClick={item.onClick} disabled={item.soon}
-                    className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] transition-colors text-left",
-                      item.soon ? "text-white/15 cursor-not-allowed" : "text-white/40 hover:text-white/70 hover:bg-white/[0.04] cursor-pointer")}>
-                    {item.soon ? <Lock className="w-3 h-3 shrink-0" /> : item.icon}
-                    <span className="flex-1 truncate">{item.label}</span>
-                    {item.soon && <span className="text-[8px] text-white/15 shrink-0">breve</span>}
-                  </button>
-                ))}
+                  { label: "PDF / E-book",       icon: <FileText className="w-3 h-3" />,       tipo: "pdf-ebook",        onClick: () => router.push("/criativos?tipo=pdf-ebook") },
+                  { label: "Slide",              icon: <Monitor className="w-3 h-3" />,         tipo: "slide",            onClick: () => router.push("/criativos?tipo=slide") },
+                  { label: "Thumb YouTube",      icon: <PlayCircle className="w-3 h-3" />,      tipo: "thumb-youtube",    onClick: () => router.push("/criativos?tipo=thumb-youtube") },
+                  { label: "Capa YouTube",       icon: <Tv2 className="w-3 h-3" />,             tipo: "capa-youtube",     onClick: () => router.push("/criativos?tipo=capa-youtube") },
+                  { label: "WhatsApp API",       icon: <MessageCircle className="w-3 h-3" />,   tipo: "whatsapp-api",     onClick: () => router.push("/criativos?tipo=whatsapp-api") },
+                  { label: "Banner e-mail",      icon: <Mail className="w-3 h-3" />,            tipo: "banner-email",     onClick: () => router.push("/criativos?tipo=banner-email") },
+                  { label: "Capa de formulário", icon: <ClipboardList className="w-3 h-3" />,   tipo: "capa-formulario",  onClick: () => router.push("/criativos?tipo=capa-formulario") },
+                ]).map((item) => {
+                  const isActive = activeNav === "criativos" && currentTipo === item.tipo;
+                  return (
+                    <button key={item.label} onClick={item.onClick}
+                      className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] cursor-pointer transition-colors text-left",
+                        isActive ? "bg-white/[0.06] text-white/80" : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]")}>
+                      {item.icon}
+                      <span className="flex-1 truncate">{item.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
           <SidebarItem icon={<Mail className="w-4 h-4" />} label="Emails" active={activeNav === "emails"} collapsed={sidebarCollapsed} onClick={() => nav("emails")} />
           <SidebarItem icon={<UserCheck className="w-4 h-4" />} label="Leads" active={activeNav === "leads"} collapsed={sidebarCollapsed} onClick={() => nav("leads")} />
-          <SidebarItem icon={<Globe className="w-4 h-4" />} label="Publicadas" active={activeNav === "paginas"} collapsed={sidebarCollapsed} onClick={() => nav("paginas")} />
+          <SidebarItem icon={<Globe className="w-4 h-4" />} label="Domínios" active={activeNav === "paginas"} collapsed={sidebarCollapsed} onClick={() => nav("paginas")} />
 
           {!sidebarCollapsed && <div className="pt-3 pb-1"><span className="px-2 text-[9px] font-medium text-white/20 uppercase tracking-widest">Projetos</span></div>}
           {sidebarCollapsed && <div className="pt-3" />}

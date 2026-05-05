@@ -19,6 +19,7 @@ export interface TemplateItem {
   category: TemplateCategory;
   prompt: string;
   tags: string[];
+  thumbnail?: string;
 }
 
 export interface HistoryEntry {

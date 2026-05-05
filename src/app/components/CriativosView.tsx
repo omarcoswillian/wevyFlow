@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -9,6 +10,21 @@ import {
   Library, Wand2, Upload, Play, ChevronDown, MousePointer2,
 } from "lucide-react";
 import { useAppContext } from "../(app)/_context";
+
+/* ─── Design service metadata ───────────────────────────── */
+const DESIGN_SERVICE_LABELS: Record<string, string> = {
+  "criativos":       "Criativos",
+  "capas-modulos":   "Capas dos módulos",
+  "banner-checkout": "Banner de Checkout",
+  "pdf-ebook":       "PDF / E-book",
+  "slide":           "Slide",
+  "thumb-youtube":   "Thumb YouTube",
+  "capa-youtube":    "Capa YouTube",
+  "whatsapp-api":    "WhatsApp API",
+  "banner-email":    "Banner e-mail",
+  "capa-formulario": "Capa de formulário",
+};
+const DESIGN_SERVICE_KEYS = Object.keys(DESIGN_SERVICE_LABELS);
 
 /* ─── Types ─────────────────────────────────────────────── */
 interface SavedCriativo {
@@ -131,6 +147,9 @@ function BrandCarousel({ label, count, items }: {
 export function CriativosView() {
   useAppContext();
   const supabase = createClient();
+  const searchParams = useSearchParams();
+  const serviceType  = searchParams.get("tipo") ?? "criativos";
+  const serviceLabel = DESIGN_SERVICE_LABELS[serviceType] ?? "Criativos";
 
   const [mainTab, setMainTab] = useState<"gerar" | "biblioteca" | "galeria">("gerar");
 
@@ -209,11 +228,15 @@ export function CriativosView() {
     return () => document.removeEventListener("mousedown", close);
   }, [ctxMenu]);
 
-  /* load gallery */
+  /* load gallery — scoped to current service type */
   const loadGallery = useCallback(async () => {
-    const { data } = await supabase.from("criativos").select("id,format,url,headline,produto,created_at").order("created_at", { ascending: false });
+    const { data } = await supabase
+      .from("criativos")
+      .select("id,format,url,headline,produto,created_at")
+      .or(`produto.eq.${serviceType},produto.is.null`)
+      .order("created_at", { ascending: false });
     if (data) setGallery(data as SavedCriativo[]);
-  }, [supabase]);
+  }, [supabase, serviceType]);
   useEffect(() => { loadGallery(); }, [loadGallery]);
 
   /* load library */
@@ -377,7 +400,7 @@ export function CriativosView() {
       const { error: uploadErr } = await supabase.storage.from("ai-images").upload(path, file, { upsert: false });
       if (uploadErr) continue;
       const { data: { publicUrl } } = supabase.storage.from("ai-images").getPublicUrl(path);
-      await supabase.from("creative_library").insert({ user_id: user.id, url: publicUrl, name: file.name.replace(/\.[^/.]+$/, ""), format: null, tags: [] });
+      await supabase.from("creative_library").insert({ user_id: user.id, url: publicUrl, name: file.name.replace(/\.[^/.]+$/, ""), format: null, tags: [serviceType] });
     }
     await loadLibrary(); setLibraryUploading(false);
   }
@@ -395,6 +418,25 @@ export function CriativosView() {
     setGallery(prev => prev.filter(x => x.id !== c.id));
   }
 
+  const handleUsarResult = useCallback(async (result: GenResult) => {
+    if (!result.dataUrl || result.status !== "done") return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    try {
+      const fetchRes = await fetch(result.dataUrl);
+      const blob = await fetchRes.blob();
+      const ext = result.mimeType?.includes("png") ? "png" : "jpg";
+      const path = `${user.id}/criativos/${serviceType}/${Date.now()}.${ext}`;
+      const { error: storErr } = await supabase.storage.from("ai-images").upload(path, blob, { upsert: false });
+      if (storErr) return;
+      const { data: { publicUrl } } = supabase.storage.from("ai-images").getPublicUrl(path);
+      await supabase.from("criativos").insert({ user_id: user.id, url: publicUrl, format: genFormat, headline: genPrompt.slice(0, 200) || null, produto: serviceType });
+      await supabase.from("creative_library").insert({ user_id: user.id, url: publicUrl, name: `${serviceLabel} — ${new Date().toLocaleDateString("pt-BR")}`, format: genFormat, tags: [serviceType] });
+      await loadGallery();
+      await loadLibrary();
+    } catch { /* silently fail */ }
+  }, [supabase, serviceType, serviceLabel, genFormat, genPrompt, loadGallery, loadLibrary]);
+
   const filteredGallery = activeGalleryFormat === "all" ? gallery : gallery.filter(c => c.format === activeGalleryFormat);
   const hasGerarCard = !!positions["gerar"];
   const totalNodes = references.length + avatars.length + (hasGerarCard ? 1 : 0) + genResults.length;
@@ -411,7 +453,8 @@ export function CriativosView() {
     <div className="flex-1 flex flex-col overflow-hidden h-full">
 
       {/* ─── Tab bar ─────────────────────────── */}
-      <div className="px-8 pt-6 pb-4 shrink-0 flex items-center justify-end">
+      <div className="px-8 pt-6 pb-4 shrink-0 flex items-center justify-between">
+        <h2 className="text-[15px] font-semibold text-white/70 tracking-tight">{serviceLabel}</h2>
         <div className="flex items-center gap-1 bg-white/[0.03] border border-white/[0.07] rounded-xl p-1">
           {([
             { id: "biblioteca", label: "Biblioteca", icon: <Library className="w-3.5 h-3.5" />, badge: library.length },
@@ -538,7 +581,7 @@ export function CriativosView() {
                     zIndex: draggingId === result.id ? 200 : 10,
                     cursor: draggingId === result.id ? "grabbing" : "grab",
                   }} onMouseDown={e => startDrag(result.id, e)}>
-                    <NodeResultCard result={result} onDelete={() => removeResult(result.id)} />
+                    <NodeResultCard result={result} onDelete={() => removeResult(result.id)} onUsar={() => handleUsarResult(result)} />
                   </div>
                 );
               })}
@@ -705,21 +748,23 @@ export function CriativosView() {
         const extraClients = Object.keys(seedByClient).filter(c => !BRAND_ORDER.includes(c));
         const allBrands = [...BRAND_ORDER, ...extraClients].filter(b => (seedByClient[b]?.length ?? 0) > 0);
 
-        const userByClient = library.reduce<Record<string, LibraryItem[]>>((acc, l) => {
-          const key = l.name ?? "Meus uploads";
-          (acc["Meus uploads"] ??= []).push(l); return acc;
-        }, {});
+        /* user uploads: show items tagged with this service OR legacy items (no service tag) */
+        const filteredLibrary = library.filter(item => {
+          const tags = item.tags ?? [];
+          const hasServiceTag = tags.some(t => DESIGN_SERVICE_KEYS.includes(t));
+          return !hasServiceTag || tags.includes(serviceType);
+        });
 
         return (
           <div className="flex-1 overflow-y-auto pb-10 min-h-0">
             <input ref={libraryUploadRef} type="file" accept="image/*" multiple onChange={handleLibraryFileInput} className="hidden" />
 
-            {/* Meus uploads row */}
-            {library.length > 0 && (
+            {/* Meus uploads row — scoped to current service */}
+            {filteredLibrary.length > 0 && (
               <BrandCarousel
                 label="Meus uploads"
-                count={library.length}
-                items={library.map(l => ({ key: l.id, src: l.url, name: l.name ?? "" }))}
+                count={filteredLibrary.length}
+                items={filteredLibrary.map(l => ({ key: l.id, src: l.url, name: l.name ?? "" }))}
               />
             )}
 
@@ -742,8 +787,8 @@ export function CriativosView() {
               </div>
             </div>
 
-            {/* Brand carousels */}
-            {allBrands.map(brand => {
+            {/* Brand carousels — só no serviço padrão "Criativos" */}
+            {serviceType === "criativos" && allBrands.map(brand => {
               const items = seedByClient[brand] ?? [];
               return (
                 <BrandCarousel
@@ -947,7 +992,7 @@ function GerarImagemCard({
   );
 }
 
-function NodeResultCard({ result, onDelete }: { result: GenResult; onDelete: () => void }) {
+function NodeResultCard({ result, onDelete, onUsar }: { result: GenResult; onDelete: () => void; onUsar: () => void }) {
   return (
     <div style={{ background: "#0d0d11", border: "1px solid rgba(255,255,255,.08)", borderRadius: 12, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,.4)" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderBottom: "1px solid rgba(255,255,255,.06)" }}>
@@ -985,7 +1030,7 @@ function NodeResultCard({ result, onDelete }: { result: GenResult; onDelete: () 
               className="hover:text-white hover:bg-white/[0.07] transition-colors">
               <Download style={{ width: 12, height: 12 }} /> Baixar
             </button>
-            <button style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "6px 0", borderRadius: 7, background: "rgba(124,58,237,.08)", border: "1px solid rgba(124,58,237,.2)", color: "rgba(167,139,250,.7)", fontSize: 10, cursor: "pointer" }}
+            <button onClick={onUsar} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "6px 0", borderRadius: 7, background: "rgba(124,58,237,.08)", border: "1px solid rgba(124,58,237,.2)", color: "rgba(167,139,250,.7)", fontSize: 10, cursor: "pointer" }}
               className="hover:bg-purple-500/15 hover:text-purple-300 transition-colors">
               <Check style={{ width: 12, height: 12 }} /> Usar
             </button>
@@ -1055,12 +1100,15 @@ function MentionTextarea({ value, onChange, references, avatars }: {
         const exists = !!avatars[parseInt(part.replace("@avatar", "")) - 1];
         return <mark key={i} style={{ background: exists ? "rgba(251,191,36,.15)" : "rgba(255,255,255,.05)", color: exists ? "#fbbf24" : "#6b7280", borderRadius: 3, padding: "0 2px" }}>{part}</mark>;
       }
-      return <span key={i}>{part}</span>;
+      // Regular text: same color as the textarea so only the marks stand out
+      return <span key={i} style={{ color: "rgba(255,255,255,.72)" }}>{part}</span>;
     });
 
   return (
     <div style={{ position: "relative", minHeight: 180 }}>
-      <div aria-hidden style={{ ...STYLE, color: "transparent", pointerEvents: "none", userSelect: "none" }}>
+      {/* Highlight layer — sits behind the textarea and renders @mention chips.
+          The textarea is fully transparent so only this layer is visible. */}
+      <div aria-hidden style={{ ...STYLE, pointerEvents: "none", userSelect: "none" }}>
         {renderHighlighted(value + "​")}
       </div>
       <textarea
@@ -1075,7 +1123,7 @@ function MentionTextarea({ value, onChange, references, avatars }: {
           }
         }}
         placeholder={"Recrie a @img1 e substitua o homem\npelo @avatar1 e troque a frase por IA GEN"}
-        style={{ ...STYLE, background: "transparent", color: "rgba(255,255,255,.72)", caretColor: "#a78bfa", resize: "none", outline: "none", border: "none", paddingBottom: 44 }}
+        style={{ ...STYLE, background: "transparent", color: "transparent", caretColor: "#a78bfa", resize: "none", outline: "none", border: "none", paddingBottom: 44 }}
         className="placeholder-white/[0.15]"
       />
 
