@@ -93,10 +93,11 @@ function nextRefLabel() { _refCtr++; return `img${_refCtr}`; }
 function nextAvLabel()  { _avCtr++;  return `avatar${_avCtr}`; }
 
 /* ─── BrandCarousel ──────────────────────────────────────── */
-function BrandCarousel({ label, count, items }: {
+function BrandCarousel({ label, count, items, onUseAsReference }: {
   label: string;
   count: number;
   items: { key: string; src: string; name: string }[];
+  onUseAsReference?: (src: string) => void;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const scroll = (dir: -1 | 1) => {
@@ -133,8 +134,17 @@ function BrandCarousel({ label, count, items }: {
             <div key={item.key} className="group shrink-0 w-[320px] rounded-2xl overflow-hidden border border-white/[0.06] hover:border-purple-500/30 transition-all bg-white/[0.02] relative cursor-pointer" style={{ aspectRatio: "4/5" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={item.src} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div className="absolute inset-x-0 bottom-0 p-2 opacity-0 group-hover:opacity-100 bg-gradient-to-t from-black/80 transition-all">
-                <p className="text-[10px] text-white/70 truncate font-medium">{item.name}</p>
+              <div className="absolute inset-x-0 bottom-0 p-3 opacity-0 group-hover:opacity-100 bg-gradient-to-t from-black/90 via-black/40 transition-all flex flex-col gap-2">
+                {item.name && <p className="text-[10px] text-white/70 truncate font-medium">{item.name}</p>}
+                {onUseAsReference && (
+                  <button
+                    onClick={e => { e.stopPropagation(); onUseAsReference(item.src); }}
+                    className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl bg-purple-600/80 backdrop-blur-sm text-white text-[11px] font-semibold cursor-pointer hover:bg-purple-500 transition-colors"
+                  >
+                    <ImageIcon className="w-3.5 h-3.5" />
+                    Usar como referencia
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -341,6 +351,23 @@ export function CriativosView() {
     }
     setCtxMenu(null);
   };
+
+  /* ── Use as reference (from biblioteca/galeria) ── */
+  const useAsReference = useCallback(async (imageUrl: string) => {
+    const res = await fetch(imageUrl);
+    const blob = await res.blob();
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+    const label = nextRefLabel();
+    const id = crypto.randomUUID();
+    setReferences(prev => [...prev, { id, label, dataUrl }]);
+    setPositions(prev => ({ ...prev, [id]: { x: 120, y: 120 } }));
+    setMainTab("gerar");
+  }, []);
 
   /* ── References ── */
   const updateReference = (id: string, patch: Partial<RefCard>) =>
@@ -765,6 +792,7 @@ export function CriativosView() {
                 label="Meus uploads"
                 count={filteredLibrary.length}
                 items={filteredLibrary.map(l => ({ key: l.id, src: l.url, name: l.name ?? "" }))}
+                onUseAsReference={useAsReference}
               />
             )}
 
@@ -796,6 +824,7 @@ export function CriativosView() {
                   label={brand}
                   count={items.length}
                   items={items.map(s => ({ key: s.path, src: s.path, name: s.name }))}
+                  onUseAsReference={useAsReference}
                 />
               );
             })}
@@ -844,9 +873,12 @@ export function CriativosView() {
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={criativo.url} alt="criativo" className="w-full h-full object-cover group-hover:scale-105 duration-500 transition-transform" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <div className="absolute inset-x-0 bottom-0 p-3 flex gap-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
-                          <button onClick={() => downloadFromUrl(criativo.url, `criativo-${criativo.format}.png`)} className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-white/10 backdrop-blur-sm text-white/80 text-[11px] cursor-pointer hover:bg-white/20 transition-colors"><Download className="w-3.5 h-3.5" /> Baixar</button>
-                          <button onClick={() => handleDeleteGallery(criativo)} className="p-1.5 rounded-lg bg-red-500/20 backdrop-blur-sm text-red-300 cursor-pointer hover:bg-red-500/40 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                        <div className="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
+                          <button onClick={() => useAsReference(criativo.url)} className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-purple-600/80 backdrop-blur-sm text-white text-[11px] font-semibold cursor-pointer hover:bg-purple-500 transition-colors"><ImageIcon className="w-3.5 h-3.5" /> Usar como referencia</button>
+                          <div className="flex gap-2">
+                            <button onClick={() => downloadFromUrl(criativo.url, `criativo-${criativo.format}.png`)} className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-white/10 backdrop-blur-sm text-white/80 text-[11px] cursor-pointer hover:bg-white/20 transition-colors"><Download className="w-3.5 h-3.5" /> Baixar</button>
+                            <button onClick={() => handleDeleteGallery(criativo)} className="p-1.5 rounded-lg bg-red-500/20 backdrop-blur-sm text-red-300 cursor-pointer hover:bg-red-500/40 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                          </div>
                         </div>
                       </div>
                     </div>

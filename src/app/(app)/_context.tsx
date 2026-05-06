@@ -45,6 +45,7 @@ export type AppView =
   | "home"
   | "resources"
   | "criativos"
+  | "ensaio"
   | "lancamentos"
   | "emails"
   | "leads"
@@ -65,6 +66,8 @@ export function viewToPath(view: AppView, projectId?: string): string {
       return "/resources";
     case "criativos":
       return "/criativos";
+    case "ensaio":
+      return "/ensaio";
     case "lancamentos":
       return "/lancamentos";
     case "marca":

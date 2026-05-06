@@ -38,6 +38,7 @@ import {
   ClipboardList,
   Tv2,
   Lock,
+  Camera,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Platform } from "../lib/types";
@@ -129,7 +130,7 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
   const [images, setImages] = useState<{ name: string; base64: string }[]>([]);
   const [showConfig, setShowConfig] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [designExpanded, setDesignExpanded] = useState(false);
+  const [designExpanded, setDesignExpanded] = useState(activeNav === "criativos" || activeNav === "ensaio");
   const [lpExpanded, setLpExpanded] = useState(false);
   const [copyDocument, setCopyDocument] = useState("");
   const [copyFileName, setCopyFileName] = useState<string | null>(null);
@@ -372,7 +373,7 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
               className={cn(
                 "flex items-center w-full rounded-xl transition-colors cursor-pointer",
                 sidebarCollapsed ? "justify-center p-2.5" : "gap-2.5 px-2.5 py-2 text-[12px]",
-                activeNav === "criativos"
+                (activeNav === "criativos" || activeNav === "ensaio")
                   ? "bg-white/[0.06] text-[#d1d1d1]"
                   : "text-[#6b6b6b] hover:bg-white/[0.04] hover:text-[#9a9a9a]"
               )}
@@ -389,12 +390,15 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
               <div className="ml-3 mt-0.5 border-l border-white/[0.06] pl-2 space-y-0.5 pb-1">
                 <p className="text-[8px] font-semibold text-white/20 uppercase tracking-widest px-2 pt-2 pb-0.5">Primário</p>
                 {([
-                  { label: "KV",                icon: <Fingerprint className="w-3 h-3" />,  tipo: null,               onClick: () => nav("marca") },
-                  { label: "Criativos",         icon: <Paintbrush className="w-3 h-3" />,   tipo: "criativos",        onClick: () => router.push("/criativos?tipo=criativos") },
-                  { label: "Capas dos módulos", icon: <BookOpen className="w-3 h-3" />,      tipo: "capas-modulos",    onClick: () => router.push("/criativos?tipo=capas-modulos") },
-                  { label: "Banner checkout",   icon: <ShoppingCart className="w-3 h-3" />, tipo: "banner-checkout",  onClick: () => router.push("/criativos?tipo=banner-checkout") },
+                  { label: "KV",                   icon: <Fingerprint className="w-3 h-3" />,  tipo: null,               onClick: () => nav("marca") },
+                  { label: "Criativos",            icon: <Paintbrush className="w-3 h-3" />,   tipo: "criativos",        onClick: () => router.push("/criativos?tipo=criativos") },
+                  { label: "Ensaio Fotografico",   icon: <Camera className="w-3 h-3" />,        tipo: "ensaio",           onClick: () => router.push("/ensaio") },
+                  { label: "Capas dos módulos",    icon: <BookOpen className="w-3 h-3" />,      tipo: "capas-modulos",    onClick: () => router.push("/criativos?tipo=capas-modulos") },
+                  { label: "Banner checkout",      icon: <ShoppingCart className="w-3 h-3" />, tipo: "banner-checkout",  onClick: () => router.push("/criativos?tipo=banner-checkout") },
                 ]).map((item) => {
-                  const isActive = activeNav === "criativos" && item.tipo !== null && currentTipo === item.tipo;
+                  const isActive = item.tipo === "ensaio"
+                    ? activeNav === "ensaio"
+                    : activeNav === "criativos" && item.tipo !== null && currentTipo === item.tipo;
                   return (
                     <button key={item.label} onClick={item.onClick}
                       className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] cursor-pointer transition-colors text-left",
