@@ -23,6 +23,13 @@ export async function proxy(request: NextRequest) {
     }
   );
 
+  if (process.env.NODE_ENV === "development") {
+    const { pathname } = request.nextUrl;
+    if (!pathname.startsWith("/auth") && !pathname.startsWith("/api")) {
+      return supabaseResponse;
+    }
+  }
+
   // Refresh session — MUST be called before any conditional logic
   const {
     data: { user },

@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { ViewportSize } from "../../lib/types";
+import { WebflowExportModal } from "../WebflowExportModal";
 
 interface PreviewToolbarProps {
   activeTab: "preview" | "code";
@@ -11,6 +12,7 @@ interface PreviewToolbarProps {
   onViewportChange: (size: ViewportSize) => void;
   hasCode: boolean;
   code: string;
+  projectId?: string;
 }
 
 const VIEWPORTS: { id: ViewportSize; label: string; icon: React.ReactNode }[] = [
@@ -54,8 +56,10 @@ export function PreviewToolbar({
   onViewportChange,
   hasCode,
   code,
+  projectId,
 }: PreviewToolbarProps) {
   const [copied, setCopied] = useState(false);
+  const [webflowOpen, setWebflowOpen] = useState(false);
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(code);
@@ -151,7 +155,7 @@ ${code}
           </button>
           <button
             onClick={handleDownload}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-wf-primary text-white hover:bg-wf-primary-hover transition-all cursor-pointer flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-wf-surface border border-wf-border text-wf-text-muted hover:border-wf-primary hover:text-wf-primary transition-all cursor-pointer flex items-center gap-1.5"
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -160,8 +164,24 @@ ${code}
             </svg>
             Baixar HTML
           </button>
+          <button
+            onClick={() => setWebflowOpen(true)}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-wf-primary text-white hover:bg-wf-primary-hover transition-all cursor-pointer flex items-center gap-1.5"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+            Exportar Webflow
+          </button>
         </div>
       )}
+
+      <WebflowExportModal
+        open={webflowOpen}
+        onClose={() => setWebflowOpen(false)}
+        code={code}
+        projectId={projectId}
+      />
     </div>
   );
 }

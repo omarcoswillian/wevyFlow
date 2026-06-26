@@ -54,6 +54,7 @@ import { ElementorExport } from "./ElementorExport";
 import { VSLConfigPanel } from "./VSLConfigPanel";
 import { VSLConfig, deserializeConfig, serializeConfig, buildVSLInnerHtml } from "../lib/vsl";
 import { stripEditorScripts } from "../lib/strip-editor-scripts";
+import { WebflowExportModal } from "./WebflowExportModal";
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import xml from "react-syntax-highlighter/dist/esm/languages/hljs/xml";
 import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
@@ -105,6 +106,7 @@ export function WorkspaceView({
   const [showElementorExport, setShowElementorExport] = useState(false);
   const [_elementorCopied, _setElementorCopied] = useState(false);
   const [publishModalOpen, setPublishModalOpen] = useState(false);
+  const [webflowExportOpen, setWebflowExportOpen] = useState(false);
   const [publishSlug, setPublishSlug] = useState("");
   const [publishLoading, setPublishLoading] = useState(false);
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
@@ -807,6 +809,13 @@ export function WorkspaceView({
                   className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium text-white/30 hover:text-white/50 hover:bg-white/[0.05] transition-all cursor-pointer">
                   <Download className="w-3.5 h-3.5" /> HTML
                 </button>
+                <button onClick={() => setWebflowExportOpen(true)}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-all cursor-pointer shadow-sm">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                  </svg>
+                  Webflow
+                </button>
                 <button onClick={() => {
                   setPublishModalOpen(true);
                   setPublishedUrl(null);
@@ -922,6 +931,12 @@ export function WorkspaceView({
           onClose={() => setShowElementorExport(false)}
         />
       )}
+
+      <WebflowExportModal
+        open={webflowExportOpen}
+        onClose={() => setWebflowExportOpen(false)}
+        code={finalCode || code}
+      />
 
       {/* Publish Modal */}
       {publishModalOpen && (

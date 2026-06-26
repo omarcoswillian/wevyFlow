@@ -62,6 +62,15 @@ export function useProjects() {
   const supabase = useMemo(() => createClient(), []);
 
   const loadProjects = useCallback(async () => {
+    if (process.env.NODE_ENV === "development") {
+      const res = await fetch("/api/dev/projects");
+      if (res.ok) {
+        const data = await res.json();
+        setProjects(((data as ProjectWithPages[]) || []).map(mapProject));
+      }
+      return;
+    }
+
     const { data, error } = await supabase
       .from("projects")
       .select("*, project_pages(*)")

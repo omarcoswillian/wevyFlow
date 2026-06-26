@@ -6,8 +6,10 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "50mb",
     },
   },
-  // Allow larger request bodies for page import (Figma pages with inline images)
   serverExternalPackages: [],
+  httpAgentOptions: {
+    keepAlive: true,
+  },
 };
 
 export default nextConfig;

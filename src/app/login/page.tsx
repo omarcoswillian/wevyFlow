@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -14,6 +14,12 @@ export default function LoginPage() {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const supabase = createClient();
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      router.replace("/");
+    }
+  }, [router]);
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const passwordValid = password.length >= 6;

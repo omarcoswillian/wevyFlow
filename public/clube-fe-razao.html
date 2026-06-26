@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clube Fé &amp; Razão — Viva sua fé de verdade</title>
+<meta name="description" content="O movimento cristão que te ajuda a conhecer, viver e defender sua fé — ao lado de quem caminha com propósito.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400;1,9..144,500&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --midnight:#0F032D;
+  --purple:#4E2BCC;
+  --lavender:#905BF4;
+  --paper:#F1EFF6;
+  --white:#FFFFFF;
+  --ink:#140628;
+  --muted:#6B6080;
+  --muted-d:rgba(239,239,239,.62);
+  --line:rgba(20,6,40,.12);
+  --line-d:rgba(255,255,255,.14);
+
+  --sans:"Inter Tight",system-ui,sans-serif;
+  --serif:"Fraunces",Georgia,serif;
+  --maxw:1080px;
+  /* imagem do hero embutida (base64). Para trocar, substitua o data URI abaixo por url(SUA-URL) */
+  --green:#15C26B;
+  --green-d:#0Fa258;
+  --hero-img:url('https://nbnrwghtecsjejcpxkje.supabase.co/storage/v1/object/public/ai-images/clube-fe-razao/hero01.jpg');
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--midnight);color:var(--ink);
+  -webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+::selection{background:var(--purple);color:#fff}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px}
+section{padding:clamp(96px,15vh,180px) 0}
+.panel{background:var(--paper);border-radius:clamp(26px,4vw,46px);
+  margin:0 14px;overflow:hidden;position:relative;z-index:1}
+
+/* type */
+h1,h2,h3{font-family:var(--sans);font-weight:600;letter-spacing:-.035em;line-height:1.04;color:var(--ink)}
+.hero h1,.hero h2,.hero h3,.pillars h2,.pillars h3,.strip h2,.strip h3,.final h2,.final h3,.tother h2,.tother h3{color:inherit}
+.it{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.01em}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+.eyebrow::before{content:"\2602\FE0F";margin-right:8px;font-size:.95em;vertical-align:baseline}
+.mark{color:var(--purple)}
+.ul-p{color:var(--paper);background-image:linear-gradient(var(--lavender),var(--lavender));background-repeat:no-repeat;background-size:100% .16em;background-position:0 100%;padding-bottom:.05em}
+.lede{font-size:clamp(18px,2vw,21px);line-height:1.55;color:var(--muted)}
+
+
+/* links / buttons — text-forward, minimal */
+.cta{display:inline-flex;align-items:center;justify-content:center;gap:10px;width:auto;max-width:100%;
+  white-space:nowrap;font-family:var(--sans);font-weight:600;font-size:16px;letter-spacing:-.01em;
+  color:var(--white);background:var(--midnight);
+  padding:18px 30px;border-radius:6px;transition:background .3s,transform .3s,box-shadow .3s,filter .3s}
+.cta span{display:inline-flex;align-items:center;gap:9px;white-space:nowrap}
+.cta .arr{flex:0 0 auto;transition:transform .3s}
+.cta:hover{background:var(--purple);transform:translateY(-1px)}
+.cta:focus-visible{outline:2px solid var(--lavender);outline-offset:4px}
+.cta:hover .arr{transform:translate(4px,-4px)}
+.cta.brand,.cta.brand:hover{
+  color:#fff;border-radius:100px;border:1px solid rgba(255,255,255,.16);
+  padding:20px 34px;font-size:17px;
+  background:linear-gradient(135deg,#1ED675,var(--green-d));
+}
+.cta.brand{box-shadow:0 14px 40px -12px rgba(21,194,107,.5)}
+.cta.brand:hover{transform:translateY(-2px);filter:brightness(1.07);
+  box-shadow:0 20px 52px -12px rgba(21,194,107,.65)}
+
+.txtlink{display:inline-flex;align-items:center;gap:10px;font-weight:600;
+  border-bottom:1px solid var(--line);padding-bottom:3px;transition:.3s}
+.txtlink:hover{color:var(--purple);border-color:var(--purple)}
+
+/* ============ HERO ============ */
+.hero{background-color:var(--midnight);color:var(--paper);padding:0;min-height:100svh;
+  display:flex;flex-direction:column;
+  background-image:
+    linear-gradient(90deg, rgba(15,3,45,.92) 0%, rgba(15,3,45,.55) 30%, rgba(15,3,45,.08) 54%, rgba(15,3,45,0) 72%),
+    var(--hero-img);
+  background-repeat:no-repeat,no-repeat;
+  background-position:center,center right;
+  background-size:cover,cover}
+.hero-body{flex:1;display:flex;align-items:center}
+.hero-body .wrap{width:100%}
+.hero h1{font-size:clamp(46px,7.4vw,86px);font-weight:600;margin:0;line-height:.92}
+.hero h1 .l2{font-weight:400;color:rgba(239,239,239,.55)}
+.hero h1 .l2 .it{color:var(--paper);font-weight:400}
+.hero p.lede{color:var(--muted-d);max-width:30ch;margin:16px 0 40px}
+.hero-actions{display:flex;align-items:center;gap:36px;flex-wrap:wrap}
+
+.hero-foot{max-width:var(--maxw);margin:0 auto;width:100%;padding:0 32px 40px;
+  display:flex;align-items:center;gap:14px;color:var(--muted-d);font-size:13px}
+.hero-foot .ln{flex:1;height:1px;background:var(--line-d)}
+
+/* ============ MANIFESTO ============ */
+.manifesto{text-align:center}
+.manifesto h2{font-size:clamp(34px,5.5vw,68px);max-width:16ch;margin:30px auto 0;color:var(--ink)}
+.manifesto h2 .it{color:var(--purple)}
+.manifesto .lede{max-width:48ch;margin:34px auto 0}
+
+/* ============ PROBLEM ============ */
+.problem .lead-line{font-family:var(--sans);font-weight:600;font-size:clamp(22px,3vw,34px);
+  letter-spacing:-.025em;color:var(--ink);max-width:22ch;margin-bottom:56px}
+.lead-line .it{color:var(--purple)}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:38px}
+.tcell{border-top:2px solid var(--ink);padding-top:26px}
+.tcell .n{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--lavender);display:block;margin-bottom:16px}
+.tcell h3{font-size:clamp(21px,2.3vw,25px);font-weight:600;letter-spacing:-.02em;margin-bottom:12px}
+.tcell p{font-size:15px;color:var(--muted);line-height:1.6}
+.tother{margin-top:66px;background:var(--midnight);color:var(--paper);border-radius:24px;
+  padding:clamp(36px,5vw,64px);display:grid;grid-template-columns:auto 1fr;gap:clamp(28px,5vw,56px);align-items:center}
+.tother .k{font-family:var(--serif);font-style:italic;font-size:clamp(28px,4vw,46px);color:var(--lavender);line-height:1.05;white-space:nowrap}
+.tother p{font-size:clamp(17px,1.8vw,21px);line-height:1.55;color:rgba(239,239,239,.9);max-width:50ch}
+
+/* ============ PILLARS ============ */
+.pillars{background:var(--midnight);color:var(--paper)}
+.pillars .eyebrow{color:var(--lavender)}
+.pillars h2{font-size:clamp(32px,4.8vw,58px);max-width:16ch;margin:24px 0 0}
+.pillars h2 .it{color:var(--lavender)}
+.plist{margin-top:80px;border-top:1px solid var(--line-d)}
+.prow{display:grid;grid-template-columns:120px 1fr 2fr;gap:40px;align-items:start;
+  padding:44px 0;border-bottom:1px solid var(--line-d)}
+.prow .ix{font-family:var(--serif);font-style:italic;font-size:18px;color:var(--lavender);padding-top:.35em}
+.prow h3{font-size:clamp(24px,3vw,34px);font-weight:500;letter-spacing:-.03em}
+.prow p{font-size:16px;color:var(--muted-d);line-height:1.65;max-width:50ch}
+
+/* ============ MODULES ============ */
+.modules .head{text-align:center;max-width:50ch;margin:0 auto}
+.modules h2{font-size:clamp(30px,4.6vw,54px);margin:22px 0 0}
+.modules h2 .it{color:var(--purple)}
+.modules .head .lede{margin:26px auto 0;max-width:44ch}
+.mlist{margin-top:84px;border-top:1px solid var(--line)}
+.mrow{display:grid;grid-template-columns:1.4fr 2fr auto;gap:40px;align-items:start;
+  padding:34px 0;border-bottom:1px solid var(--line);transition:.3s}
+.mrow:hover{padding-left:14px}
+.mrow .mt .tag{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--lavender)}
+.mrow .mt h3{font-size:clamp(20px,2.4vw,27px);font-weight:600;margin-top:8px;letter-spacing:-.025em}
+.mrow .md{font-size:15px;color:var(--muted);line-height:1.6;padding-top:26px}
+.mrow .me{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--ink);white-space:nowrap;text-align:right;padding-top:26px}
+
+/* ============ COMMUNITY ============ */
+.community{display:grid;grid-template-columns:1fr 1fr;gap:90px;align-items:center}
+.community .eyebrow{color:var(--purple)}
+.community h2{font-size:clamp(32px,4.6vw,56px);max-width:14ch;margin:22px 0 0}
+.community h2 .it{color:var(--purple)}
+.community p{font-size:17px;color:var(--muted);line-height:1.65;margin-top:28px;max-width:42ch}
+.brand-art{width:100%;max-width:460px;aspect-ratio:1;object-fit:cover;border-radius:24px;margin-left:auto;display:block;box-shadow:0 30px 80px -34px rgba(15,3,45,.55)}
+.umb-e{font-style:normal;line-height:1;display:inline-block}
+
+/* ============ OFFER ============ */
+.offer{text-align:center}
+.offer .head{max-width:46ch;margin:0 auto}
+.offer h2{font-size:clamp(34px,5.2vw,62px);margin:22px 0 0}
+.offer h2 .it{color:var(--purple)}
+.pcard{max-width:520px;margin:74px auto 0;background:var(--white);border:1px solid var(--line);
+  border-radius:16px;text-align:left;overflow:hidden}
+.pcard .ph{padding:32px 36px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between}
+.pcard .ph .pl{font-weight:600;font-size:15px;letter-spacing:.02em}
+.pcard .ph .pl span{display:block;font-weight:400;font-size:13px;color:var(--muted);margin-top:4px}
+.pcard .ph .badge{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--purple);border:1px solid var(--line);padding:6px 12px;border-radius:100px}
+.pcard .pb{padding:36px}
+.price{display:flex;align-items:flex-end;gap:7px;margin-bottom:6px}
+.price .x{font-size:18px;font-weight:500;color:var(--muted);margin-bottom:8px}
+.price .v{font-size:64px;font-weight:600;letter-spacing:-.05em;line-height:.85}
+.price .c{font-size:22px;font-weight:600;margin-bottom:8px}
+.price-note{font-size:13px;color:var(--muted);margin-bottom:32px}
+.incl{list-style:none;display:grid;gap:14px;margin-bottom:34px}
+.incl li{display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--ink);line-height:1.45}
+.incl li .umb-e{flex:0 0 auto;font-size:15px;margin-top:1px}
+.incl .grp{font-weight:600;font-size:14px;color:var(--ink);padding-top:4px}
+.incl .sep{grid-column:1/-1;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--lavender);padding-top:6px}
+.pcard .cta{display:flex;width:fit-content;margin:4px auto 0}
+.pcard .foot{text-align:center;font-size:13px;color:var(--muted);margin-top:16px}
+
+/* ============ GUARANTEE ============ */
+.guarantee{border-top:1px solid var(--line)}
+.gline{display:grid;grid-template-columns:auto 1fr;gap:48px;align-items:center;max-width:860px;margin:0 auto}
+.gline .seven{font-family:var(--sans);font-weight:600;font-size:clamp(80px,12vw,150px);letter-spacing:-.06em;line-height:.8;color:var(--purple)}
+.gline .seven small{display:block;font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:10px;font-weight:600}
+.gline h2{font-size:clamp(24px,3.2vw,36px);margin-bottom:16px}
+.gline p{font-size:16px;color:var(--muted);line-height:1.65;max-width:52ch}
+
+/* ============ FAQ ============ */
+.faq .head{text-align:center;margin-bottom:60px}
+.faq h2{font-size:clamp(30px,4.4vw,52px);margin-top:14px}
+.flist{max-width:740px;margin:0 auto;border-top:1px solid var(--line)}
+.fitem{border-bottom:1px solid var(--line)}
+.fq{width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--ink);
+  font-family:var(--sans);font-weight:600;font-size:18px;letter-spacing:-.02em;
+  padding:28px 44px 28px 0;position:relative;transition:color .25s}
+.fq:hover{color:var(--purple)}
+.fq:focus-visible{outline:2px solid var(--lavender);outline-offset:4px}
+.fq .pm{position:absolute;right:4px;top:50%;width:16px;height:16px;transform:translateY(-50%)}
+.fq .pm::before,.fq .pm::after{content:"";position:absolute;background:var(--purple);top:50%;left:50%}
+.fq .pm::before{width:14px;height:1.5px;transform:translate(-50%,-50%)}
+.fq .pm::after{width:1.5px;height:14px;transform:translate(-50%,-50%);transition:transform .3s}
+.fitem.open .pm::after{transform:translate(-50%,-50%) scaleY(0)}
+.fa{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.fa p{padding:0 44px 28px 0;font-size:15.5px;color:var(--muted);line-height:1.65}
+
+/* ============ FINAL ============ */
+.final{background:var(--midnight);color:var(--paper);text-align:center}
+.final .eyebrow{color:var(--lavender)}
+.final h2{font-size:clamp(38px,6vw,80px);max-width:14ch;margin:26px auto 0}
+.final h2 .it{color:var(--lavender)}
+.final p{color:var(--muted-d);font-size:18px;max-width:44ch;margin:30px auto 44px}
+.final .support{margin-top:70px;padding-top:40px;border-top:1px solid var(--line-d);
+  display:flex;flex-direction:column;align-items:center;gap:18px}
+.final .support .t{font-size:14px;color:var(--muted-d)}
+.final .support .txtlink{color:var(--paper);border-color:var(--line-d)}
+.final .support .txtlink:hover{color:var(--lavender);border-color:var(--lavender)}
+
+/* ============ FOOTER ============ */
+footer{background:var(--midnight);color:var(--muted-d);padding:36px 0;font-size:13px;border-top:1px solid var(--line-d)}
+footer .wrap{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+footer .nm{font-family:var(--serif);font-style:italic;font-size:18px;color:var(--paper)}
+footer a{color:var(--paper);border-bottom:1px solid var(--line-d)}
+
+/* ============ BONUS / DEPOIMENTOS ============ */
+.strip .head{text-align:center;max-width:54ch;margin:0 auto}
+.strip h2{font-size:clamp(30px,4.4vw,52px);margin-top:16px}
+.strip h2 .it{color:var(--purple)}
+.marquee{overflow:hidden;margin-top:38px;padding:20px 0;
+  -webkit-mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+  mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.mtrack{display:flex;gap:20px;width:max-content;animation:marq 70s linear infinite}
+.marquee:hover .mtrack{animation-play-state:paused}
+.marquee.rev .mtrack{animation-direction:reverse;animation-duration:90s}
+@keyframes marq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.mtrack .mslide{height:440px;width:330px;flex:0 0 auto;border-radius:22px;
+  background-size:cover;background-position:center top;
+  transition:transform .35s cubic-bezier(.2,.8,.2,1);
+  overflow:hidden;position:relative}
+.mtrack .mslide:hover{transform:scale(1.04) translateY(-6px)}
+.depo .mtrack .mslide{height:280px;width:290px;border-radius:20px}
+.depo .marquee{overflow:visible;-webkit-mask:none;mask:none}
+.depo .mtrack{animation:none;width:100%;justify-content:center;flex-wrap:wrap}
+@media(max-width:560px){.mtrack .mslide{height:300px;width:240px}.depo .mtrack .mslide{height:220px;width:200px}}
+/* module cover cards */
+.mcov{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:26px;background:linear-gradient(0deg,rgba(5,0,15,.98) 0%,rgba(5,0,15,.82) 30%,transparent 55%)}
+.mcov-tag{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--lavender);margin-bottom:10px;display:block}
+.mcov-title{font-family:var(--sans);font-size:18px;font-weight:600;color:var(--paper);line-height:1.2;letter-spacing:-.02em;margin:0}
+.mcov-detail{font-size:11px;color:rgba(241,239,246,.45);margin-top:10px;display:block;letter-spacing:.04em}
+.mod-apol{background-color:#0F032D;background-image:url(https://nbnrwghtecsjejcpxkje.supabase.co/storage/v1/object/public/ai-images/clube-fe-razao/mod001.webp)}
+.mod-mat{background-color:#020C1A;background-image:url(https://nbnrwghtecsjejcpxkje.supabase.co/storage/v1/object/public/ai-images/clube-fe-razao/mod002.webp)}
+.mod-jgj{background-color:#180330;background-image:url(https://nbnrwghtecsjejcpxkje.supabase.co/storage/v1/object/public/ai-images/clube-fe-razao/mod003.webp)}
+.mod-pp{background-color:#02121A;background-image:url(https://nbnrwghtecsjejcpxkje.supabase.co/storage/v1/object/public/ai-images/clube-fe-razao/mod004.webp)}
+.mod-ib{background-color:#2D030F;background-image:url(https://nbnrwghtecsjejcpxkje.supabase.co/storage/v1/object/public/ai-images/clube-fe-razao/mod005.webp)}
+.mod-conv{background-color:#110B20;background-image:url(https://nbnrwghtecsjejcpxkje.supabase.co/storage/v1/object/public/ai-images/clube-fe-razao/mod006.webp)}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* responsive */
+@media(max-width:880px){
+  .threats{grid-template-columns:1fr;gap:54px}
+  .prow{grid-template-columns:1fr;gap:12px;padding:34px 0}
+  .prow .ix{font-size:15px}
+  .mrow{grid-template-columns:1fr;gap:10px;padding:28px 0}
+  .mrow .me{text-align:left;padding-top:0}
+  .mrow .md{padding-top:0}
+  .mrow:hover{padding-left:0}
+  .community{grid-template-columns:1fr;gap:54px}
+  .brand-art{margin:0 auto}
+  .gline{grid-template-columns:1fr;gap:24px;text-align:center}
+  .gline p{margin-inline:auto}
+  .gline .seven{margin:0 auto}
+}
+@media(max-width:740px){
+  .hero{
+    background-image:
+      linear-gradient(180deg, rgba(15,3,45,.1) 0%, rgba(15,3,45,.48) 40%, rgba(15,3,45,.92) 64%, var(--midnight) 100%),
+      var(--hero-img);
+    background-position:center, 72% top;
+    background-size:cover,cover}
+  .hero-body{align-items:flex-end;padding-bottom:20px}
+  .tgrid{grid-template-columns:1fr;gap:0}
+  .tcell{border-top:1px solid var(--line);padding:26px 0}
+  .tcell:first-child{border-top:2px solid var(--ink)}
+  .tother{grid-template-columns:1fr;gap:18px}
+}
+@media(max-width:560px){
+  .wrap,.hero-foot{padding-left:22px;padding-right:22px}
+  .hero h1{font-size:clamp(40px,12vw,60px)}
+  .hero-actions{gap:24px}
+  .cta.brand{font-size:15px;padding:18px 26px}
+  .panel{margin:0 8px;border-radius:22px}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+
+
+<!-- HERO -->
+<header class="hero" id="topo">
+  <div class="hero-body">
+    <div class="wrap">
+      <h1>
+        Viva sua fé<br>
+        <span class="l2">de <span class="it">verdade</span></span>
+      </h1>
+      <p class="lede">Sua <span class="ul-p">busca pela santidade</span> não precisa ser solitária.</p>
+      <div class="hero-actions">
+        <a class="cta brand" href="#oferta"><span>Faça parte desse movimento <svg class="arr" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M7 17 17 7M9 7h8v8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+      </div>
+    </div>
+  </div>
+  <div class="hero-foot"><span>Conhecer · Crescer · Caminhar junto</span><span class="ln"></span><span class="umb-e" style="font-size:20px">☂️</span></div>
+</header>
+
+<div class="panel">
+<!-- MANIFESTO -->
+<section class="manifesto">
+  <div class="wrap reveal">
+    <span class="eyebrow">O ponto de partida</span>
+    <h2>Em meio a tantos caminhos confusos, <span class="it">caminhamos com a verdade.</span></h2>
+    <p class="lede">Na busca pela santificação, enfrentamos duas grandes ameaças:</p>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem">
+  <div class="wrap">
+    <p class="lead-line reveal">Por um lado, o mundo pagão, <span class="it">que prega:</span></p>
+    <div class="tgrid reveal">
+      <div class="tcell"><span class="n">i</span><h3>O hedonismo</h3><p>A busca incessante pelo prazer e satisfação pessoal, colocando os desejos individuais acima de princípios espirituais.</p></div>
+      <div class="tcell"><span class="n">ii</span><h3>O relativismo</h3><p>A ideia de que a verdade é subjetiva e pode variar de pessoa para pessoa, negando a existência de valores absolutos.</p></div>
+      <div class="tcell"><span class="n">iii</span><h3>O materialismo</h3><p>A valorização excessiva dos bens materiais e do sucesso financeiro, priorizando o ter sobre o ser.</p></div>
+    </div>
+    <div class="tother reveal">
+      <span class="k">Por outro lado,</span>
+      <p>as falsas doutrinas, como o agnosticismo e outras teologias equivocadas, confundem nossa mente, nos afastam do verdadeiro conhecimento de Deus e nos levam a enfrentar crises de fé.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+<!-- PILLARS -->
+<section class="pillars">
+  <div class="wrap">
+    <div class="reveal"><span class="eyebrow">O caminho</span>
+      <h2>Para caminhar na verdade, <span class="it">3 pilares</span> são fundamentais.</h2>
+    </div>
+    <div class="plist">
+      <div class="prow reveal"><span class="ix">i</span><h3>Conhecimento</h3><p>Amar a Deus implica buscá-lo e conhecê-lo profundamente. Expressamos esse amor através de ações como ler a Bíblia, orar e estudar Sua Palavra. Sem conhecimento, não podemos amar verdadeiramente — o conhecimento é o alicerce indispensável da fé.</p></div>
+      <div class="prow reveal"><span class="ix">ii</span><h3>Crescimento</h3><p>O verdadeiro crescimento pessoal está na imitação de Cristo e na busca pelas virtudes, não apenas em mudanças de mentalidade. Em vez de vivermos centrados em nós mesmos e em prazeres passageiros, encontramos significado ao trilhar o caminho da santificação com a ajuda do Espírito.</p></div>
+      <div class="prow reveal"><span class="ix">iii</span><h3>Comunidade</h3><p>As pessoas ao nosso redor nos influenciam profundamente. Estar em comunhão com aqueles que buscam a semelhança com Deus nos protege das influências negativas do mundo e nos ajuda a viver uma vida com propósito, segurança e legado.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="panel">
+<!-- MODULES -->
+<section class="modules">
+  <div class="wrap">
+    <div class="head reveal"><span class="eyebrow">O que tem dentro</span>
+      <h2>E os nossos conteúdos foram feitos para te ajudar em <span class="it">cada um deles.</span></h2>
+      <p class="lede">Uma trilha completa, com novas aulas todos os meses. Tudo gravado, para assistir quando e onde quiser.</p>
+    </div>
+    <div class="mlist">
+      <div class="mrow reveal"><div class="mt"><span class="tag">Conhecimento</span><h3>Fé &amp; Razão — Apologética</h3></div><div class="md">Da introdução forense à teoria da cosmovisão. Aprenda a pensar e dar razão da sua fé com profundidade.</div><div class="me">4 módulos · 27 aulas</div></div>
+      <div class="mrow reveal"><div class="mt"><span class="tag">Crescimento</span><h3>Maturidade</h3></div><div class="md">Do vício em si mesmo à ansiedade e ao materialismo — um diagnóstico honesto e um caminho de virtude.</div><div class="me">8 aulas</div></div>
+      <div class="mrow reveal"><div class="mt"><span class="tag">Crescimento</span><h3>Já Glorificou Jesus Hoje?</h3></div><div class="md">O que está por trás das nossas quedas. Estrutura, direção e adoração no ciclo de crenças.</div><div class="me">4 aulas</div></div>
+      <div class="mrow reveal"><div class="mt"><span class="tag">Conhecimento</span><h3>Primeiros Passos do Cristão</h3></div><div class="md">O essencial sobre o Evangelho, a identidade do cristão e a vida de oração. A base para começar.</div><div class="me">3 módulos · 16 aulas</div></div>
+      <div class="mrow reveal"><div class="mt"><span class="tag">Conhecimento</span><h3>Interpretação Bíblica</h3></div><div class="md">Ferramentas para ler as Escrituras com fidelidade e chegar ao verdadeiro sentido do texto.</div><div class="me">novas aulas todo mês</div></div>
+      <div class="mrow reveal"><div class="mt"><span class="tag">Comunidade · exclusivo</span><h3>Convidados + Plano de 365 dias</h3></div><div class="md">Aulas com convidados e o plano prático de um ano para ler a Bíblia, em Notion. Só para membros.</div><div class="me">exclusivo do anual</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- BONUS -->
+<section class="strip bonus">
+  <div class="wrap head reveal">
+    <span class="eyebrow">Bônus exclusivos</span>
+    <h2>Conheça nossos convidados e <span class="it">módulos exclusivos.</span></h2>
+  </div>
+  <div class="marquee reveal"><div class="mtrack"><div class="mslide mod-apol"><div class="mcov"><span class="mcov-tag">Conhecimento</span><p class="mcov-title">Fé &amp; Razão — Apologética</p><span class="mcov-detail">4 módulos · 27 aulas</span></div></div><div class="mslide mod-mat"><div class="mcov"><span class="mcov-tag">Crescimento</span><p class="mcov-title">Maturidade</p><span class="mcov-detail">8 aulas</span></div></div><div class="mslide mod-jgj"><div class="mcov"><span class="mcov-tag">Crescimento</span><p class="mcov-title">Já Glorificou Jesus Hoje?</p><span class="mcov-detail">4 aulas</span></div></div><div class="mslide mod-pp"><div class="mcov"><span class="mcov-tag">Conhecimento</span><p class="mcov-title">Primeiros Passos do Cristão</p><span class="mcov-detail">3 módulos · 16 aulas</span></div></div><div class="mslide mod-ib"><div class="mcov"><span class="mcov-tag">Conhecimento</span><p class="mcov-title">Interpretação Bíblica</p><span class="mcov-detail">novas aulas todo mês</span></div></div><div class="mslide mod-conv"><div class="mcov"><span class="mcov-tag">Comunidade · exclusivo</span><p class="mcov-title">Convidados + Plano de 365 dias</p><span class="mcov-detail">exclusivo do anual</span></div></div><div class="mslide mod-apol"><div class="mcov"><span class="mcov-tag">Conhecimento</span><p class="mcov-title">Fé &amp; Razão — Apologética</p><span class="mcov-detail">4 módulos · 27 aulas</span></div></div><div class="mslide mod-mat"><div class="mcov"><span class="mcov-tag">Crescimento</span><p class="mcov-title">Maturidade</p><span class="mcov-detail">8 aulas</span></div></div><div class="mslide mod-jgj"><div class="mcov"><span class="mcov-tag">Crescimento</span><p class="mcov-title">Já Glorificou Jesus Hoje?</p><span class="mcov-detail">4 aulas</span></div></div><div class="mslide mod-pp"><div class="mcov"><span class="mcov-tag">Conhecimento</span><p class="mcov-title">Primeiros Passos do Cristão</p><span class="mcov-detail">3 módulos · 16 aulas</span></div></div><div class="mslide mod-ib"><div class="mcov"><span class="mcov-tag">Conhecimento</span><p class="mcov-title">Interpretação Bíblica</p><span class="mcov-detail">novas aulas todo mês</span></div></div><div class="mslide mod-conv"><div class="mcov"><span class="mcov-tag">Comunidade · exclusivo</span><p class="mcov-title">Convidados + Plano de 365 dias</p><span class="mcov-detail">exclusivo do anual</span></div></div><div class="mslide mod-apol"><div class="mcov"><span class="mcov-tag">Conhecimento</span><p class="mcov-title">Fé &amp; Razão — Apologética</p><span class="mcov-detail">4 módulos · 27 aulas</span></div></div><div class="mslide mod-mat"><div class="mcov"><span class="mcov-tag">Crescimento</span><p class="mcov-title">Maturidade</p><span class="mcov-detail">8 aulas</span></div></div><div class="mslide mod-jgj"><div class="mcov"><span class="mcov-tag">Crescimento</span><p class="mcov-title">Já Glorificou Jesus Hoje?</p><span class="mcov-detail">4 aulas</span></div></div><div class="mslide mod-pp"><div class="mcov"><span class="mcov-tag">Conhecimento</span><p class="mcov-title">Primeiros Passos do Cristão</p><span class="mcov-detail">3 módulos · 16 aulas</span></div></div><div class="mslide mod-ib"><div class="mcov"><span class="mcov-tag">Conhecimento</span><p class="mcov-title">Interpretação Bíblica</p><span class="mcov-detail">novas aulas todo mês</span></div></div><div class="mslide mod-conv"><div class="mcov"><span class="mcov-tag">Comunidade · exclusivo</span><p class="mcov-title">Convidados + Plano de 365 dias</p><span class="mcov-detail">exclusivo do anual</span></div></div></div></div>
+</section>
+
+<!-- COMMUNITY -->
+<section>
+  <div class="wrap community">
+    <div class="reveal"><span class="eyebrow">Você não caminhará sozinho</span>
+      <h2>Sob o mesmo guarda-chuva, <span class="it">o mesmo propósito.</span></h2>
+      <p>No Clube Fé e Razão, você encontrará o suporte necessário para sua caminhada cristã, independentemente da fase em que se encontra. Fará parte de uma comunidade composta por pessoas que compartilham os mesmos valores, princípios e objetivos que você. Juntos, incentivamos uns aos outros, compartilhando experiências, apoiando-nos nas dificuldades e crescendo em santidade.</p>
+    </div>
+    <div class="reveal"><img class="brand-art" src="https://nbnrwghtecsjejcpxkje.supabase.co/storage/v1/object/public/ai-images/clube-fe-razao/hero02.jpg" alt="Clube Fé & Razão — por JP Maia"></div>
+  </div>
+</section>
+
+<!-- DEPOIMENTOS -->
+<section class="strip depo">
+  <div class="wrap head reveal">
+    <span class="eyebrow">Quem já faz parte</span>
+    <h2>Caminhe com pessoas que estão debaixo do <span class="it">mesmo propósito que você.</span></h2>
+  </div>
+  <div class="marquee rev reveal"><div class="mtrack"><div class="mslide" style="background-image:url(https://nbnrwghtecsjejcpxkje.supabase.co/storage/v1/object/public/ai-images/clube-fe-razao/depo01.webp)"></div><div class="mslide" style="background-image:url(https://nbnrwghtecsjejcpxkje.supabase.co/storage/v1/object/public/ai-images/clube-fe-razao/depo02.webp)"></div><div class="mslide" style="background-image:url(https://nbnrwghtecsjejcpxkje.supabase.co/storage/v1/object/public/ai-images/clube-fe-razao/depo03.webp)"></div><div class="mslide" style="background-image:url(https://nbnrwghtecsjejcpxkje.supabase.co/storage/v1/object/public/ai-images/clube-fe-razao/depo04.webp)"></div><div class="mslide" style="background-image:url(https://nbnrwghtecsjejcpxkje.supabase.co/storage/v1/object/public/ai-images/clube-fe-razao/depo05.webp)"></div><div class="mslide" style="background-image:url(https://nbnrwghtecsjejcpxkje.supabase.co/storage/v1/object/public/ai-images/clube-fe-razao/depo06.webp)"></div></div></div>
+</section>
+
+<!-- OFFER -->
+<section class="offer" id="oferta">
+  <div class="wrap">
+    <div class="head reveal"><span class="eyebrow">Faça parte do movimento</span>
+      <h2>Faça parte <span class="it">desse movimento.</span></h2>
+    </div>
+    <div class="pcard reveal">
+      <div class="ph"><div class="pl">Plano Anual<span>Acesso por 365 dias</span></div><div class="badge">Mais escolhido</div></div>
+      <div class="pb">
+        <div class="price"><span class="x">12×</span><span class="c">R$</span><span class="v">39,90</span></div>
+        <p class="price-note">*Assinatura renovada automaticamente</p>
+        <ul class="incl">
+          <li class="grp">Cursos constantemente atualizados com novas aulas</li>
+          <li><span class="umb-e">☂️</span>Fé e Razão</li>
+          <li><span class="umb-e">☂️</span>Maturidade</li>
+          <li><span class="umb-e">☂️</span>Já Glorificou Jesus Hoje</li>
+          <li><span class="umb-e">☂️</span>Primeiros passos do cristão</li>
+          <li><span class="umb-e">☂️</span>Interpretação bíblica</li>
+          <li><span class="umb-e">☂️</span>Novas aulas todos os meses</li>
+          <li class="grp">Comunidade exclusiva do Clube</li>
+          <li class="sep">Exclusivo Anual</li>
+          <li><span class="umb-e">☂️</span>P&amp;M e o Evangelho</li>
+          <li><span class="umb-e">☂️</span>Aulas com Convidado</li>
+          <li><span class="umb-e">☂️</span>Plano prático de 365 dias para ler a Bíblia · Notion</li>
+        </ul>
+        <a class="cta brand" href="https://gr.ferazao.com.br/checkout/clube-fe-razao-anual-recorrente"><span>Quero fazer parte <svg class="arr" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M7 17 17 7M9 7h8v8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+        <p class="foot">Cartão de crédito ou Pix · acesso imediato</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GUARANTEE -->
+<section class="guarantee">
+  <div class="wrap">
+    <div class="gline reveal">
+      <div class="seven">7<small>dias de garantia</small></div>
+      <div>
+        <h2>Garantia incondicional.</h2>
+        <p>Acreditamos plenamente no valor que nossa comunidade pode agregar à sua jornada espiritual. Por isso, queremos que você se sinta totalmente seguro ao dar este passo importante. Você terá uma garantia de 7 dias para conhecer a comunidade e, se por algum motivo decidir não continuar, devolveremos o seu dinheiro dentro desse período.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="wrap">
+    <div class="head reveal"><span class="eyebrow">Ainda com dúvidas?</span><h2>Tudo o que você precisa saber.</h2></div>
+    <div class="flist reveal">
+      <div class="fitem"><button class="fq">Quais formas de pagamento?<span class="pm"></span></button><div class="fa"><p>Cartão de crédito e pix.</p></div></div>
+      <div class="fitem"><button class="fq">O conteúdo é ao vivo?<span class="pm"></span></button><div class="fa"><p>Não. No momento, você terá acesso a aulas gravadas para assistir quando e onde quiser.</p></div></div>
+      <div class="fitem"><button class="fq">E se eu tiver dúvidas?<span class="pm"></span></button><div class="fa"><p>Você poderá tirar suas dúvidas dentro da plataforma de aulas.</p></div></div>
+      <div class="fitem"><button class="fq">Até quando posso acessar as aulas?<span class="pm"></span></button><div class="fa"><p>Você poderá assistir às aulas durante os 30 dias em que seu plano estiver ativo. No plano anual, você terá 365 dias para acessar as aulas já disponíveis e as que forem disponibilizadas durante esse período.</p></div></div>
+      <div class="fitem"><button class="fq">Como eu acesso os produtos?<span class="pm"></span></button><div class="fa"><p>Ao finalizar a compra, será enviado o link com sua senha no seu e-mail.</p></div></div>
+      <div class="fitem"><button class="fq">Todos os módulos já estarão disponíveis após a compra?<span class="pm"></span></button><div class="fa"><p>Sim. Você pode acessá-los na sua área de membros.</p></div></div>
+    </div>
+  </div>
+</section>
+
+</div>
+<!-- FINAL -->
+<section class="final">
+  <div class="wrap reveal">
+    <span class="eyebrow">O próximo passo</span>
+    <h2>Sua fé merece ser <span class="it">vivida de verdade.</span></h2>
+    <p>A sua caminhada começa com uma decisão. Dê esse passo hoje — e nunca mais caminhe sozinho.</p>
+    <a class="cta brand" href="https://gr.ferazao.com.br/checkout/clube-fe-razao-anual-recorrente"><span>Entrar no Clube Fé &amp; Razão <svg class="arr" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M7 17 17 7M9 7h8v8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+    <div class="support">
+      <span class="t">Estamos à disposição para te ajudar</span>
+      <a class="txtlink" href="https://api.whatsapp.com/send/?phone=5541985366669&text=&type=phone_number&app_absent=0">Fale agora mesmo com o suporte</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap"><span class="nm">Fé &amp; Razão</span><span>Copyright 2026 © João Pedro · Feito por <a href="https://agenciaprymo.com.br">Prymo</a></span></div>
+</footer>
+
+<script>
+(function(){
+  function initReveal(){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}
+      });
+    },{threshold:0,rootMargin:'0px 0px -60px 0px'});
+    document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
+  }
+
+  function initFaq(){
+    document.querySelectorAll('.fq').forEach(function(q){
+      q.addEventListener('click',function(){
+        var it=q.closest('.fitem');
+        if(!it)return;
+        var a=it.querySelector('.fa');
+        var open=it.classList.contains('open');
+        document.querySelectorAll('.fitem.open').forEach(function(i){
+          i.classList.remove('open');
+          var fa=i.querySelector('.fa');
+          if(fa)fa.style.maxHeight='0px';
+        });
+        if(!open){
+          it.classList.add('open');
+          /* força recalcular layout antes de ler scrollHeight */
+          a.style.maxHeight='9999px';
+          var h=a.scrollHeight;
+          a.style.maxHeight='0px';
+          requestAnimationFrame(function(){a.style.maxHeight=h+'px'});
+        }
+      });
+    });
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){initReveal();initFaq()});
+  } else {
+    initReveal();
+    initFaq();
+  }
+})();
+</script>
+</body>
+</html>
