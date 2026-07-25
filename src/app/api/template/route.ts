@@ -6,6 +6,7 @@ const TEMPLATES_DIR = join(process.cwd(), "src/app/lib/ready-templates");
 const TEMPLATE_MAP: Record<string, string> = {
   "ready-luana-carolina-ed-001":          "luana-carolina-ed-001.html",
   "ready-luana-carolina-ed-001-obrigado": "luana-carolina-ed-001-obrigado.html",
+  "ready-mpi-metodo-par-ideal-v3":        "mpi-metodo-par-ideal.html",
   // Arsenal de seções (internas, não listadas nos templates)
   "ready-hero-simples":             "sections/hero-simples.html",
   "ready-urgencia":                 "sections/urgencia-countdown.html",

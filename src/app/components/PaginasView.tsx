@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
   ExternalLink, Trash2, Upload, X, Globe, Loader2, Plus,
-  Copy, Check, Zap, Pen, Link, CheckCircle2, AlertCircle, RefreshCw,
+  Copy, Check, Zap, Pen, Link, CheckCircle2, AlertCircle, RefreshCw, Package,
 } from "lucide-react";
 
 interface PublishedPage {
@@ -36,6 +36,10 @@ interface ImportState {
 }
 
 const INIT_IMPORT: ImportState = {
+  open: false, name: "", file: null, loading: false, error: "", done: false, doneSlug: "",
+};
+
+const INIT_ZIP_IMPORT: ImportState = {
   open: false, name: "", file: null, loading: false, error: "", done: false, doneSlug: "",
 };
 
@@ -73,11 +77,13 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://app.wevyflow.com";
 export default function PaginasView() {
   const supabase = createClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const zipInputRef = useRef<HTMLInputElement>(null);
 
   const [pages, setPages] = useState<PublishedPage[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [listError, setListError] = useState("");
   const [imp, setImp] = useState<ImportState>(INIT_IMPORT);
+  const [zipImp, setZipImp] = useState<ImportState>(INIT_ZIP_IMPORT);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
@@ -229,6 +235,40 @@ export default function PaginasView() {
     }
   };
 
+  const handleZipFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0] ?? null;
+    setZipImp((prev) => ({
+      ...prev,
+      file: f,
+      name: prev.name || (f ? f.name.replace(/\.zip$/i, "").replace(/[-_]/g, " ") : ""),
+      error: "",
+    }));
+  };
+
+  const handleZipImport = async () => {
+    if (!zipImp.file) { setZipImp((p) => ({ ...p, error: "Selecione o arquivo .zip." })); return; }
+    if (!zipImp.name.trim()) { setZipImp((p) => ({ ...p, error: "Informe um nome." })); return; }
+    setZipImp((p) => ({ ...p, loading: true, error: "" }));
+    try {
+      const formData = new FormData();
+      formData.append("file", zipImp.file);
+      formData.append("name", zipImp.name.trim());
+
+      const res = await fetch("/api/pages/zip-import", { method: "POST", body: formData });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Erro ao importar.");
+      setZipImp((p) => ({ ...p, loading: false, done: true, doneSlug: json.slug }));
+      fetchPages();
+    } catch (e) {
+      setZipImp((p) => ({ ...p, loading: false, error: e instanceof Error ? e.message : "Erro." }));
+    }
+  };
+
+  const closeZipImport = () => {
+    setZipImp(INIT_ZIP_IMPORT);
+    if (zipInputRef.current) zipInputRef.current.value = "";
+  };
+
   const handleDelete = async (id: string) => {
     setDeleting(true);
     try {
@@ -263,13 +303,22 @@ export default function PaginasView() {
               Conecte seu dominio proprio e gerencie suas paginas publicadas
             </p>
           </div>
-          <button
-            onClick={() => setImp((p) => ({ ...p, open: true }))}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-white/[0.12] text-white/40 hover:text-white/60 hover:border-white/25 text-[12px] font-medium transition-all cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Importar do Figma
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setZipImp((p) => ({ ...p, open: true }))}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-white/[0.12] text-white/40 hover:text-white/60 hover:border-white/25 text-[12px] font-medium transition-all cursor-pointer"
+            >
+              <Package className="w-3.5 h-3.5" />
+              Importar ZIP
+            </button>
+            <button
+              onClick={() => setImp((p) => ({ ...p, open: true }))}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-white/[0.12] text-white/40 hover:text-white/60 hover:border-white/25 text-[12px] font-medium transition-all cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Importar do Figma
+            </button>
+          </div>
         </div>
 
         {/* Custom Domain Card */}
@@ -550,6 +599,77 @@ export default function PaginasView() {
         </div>
       )}
 
+      {/* Zip Import Panel */}
+      {zipImp.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="w-full max-w-md bg-[#18181c] border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+              <h2 className="text-[13px] font-semibold">Importar pagina de vendas (ZIP)</h2>
+              <button onClick={closeZipImport} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white transition-colors cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              {zipImp.done ? (
+                <div className="space-y-4">
+                  <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
+                    <p className="text-emerald-400 text-[12px] font-semibold mb-1">Pagina importada com sucesso</p>
+                    <p className="text-white/40 text-[11px] font-mono">/p/{zipImp.doneSlug}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <a href={`/p/${zipImp.doneSlug}`} target="_blank" rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-[12px] font-semibold transition-colors">
+                      <ExternalLink className="w-3.5 h-3.5" /> Abrir pagina
+                    </a>
+                    <button onClick={closeZipImport}
+                      className="flex-1 px-4 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] text-[12px] text-white/60 font-medium transition-colors cursor-pointer">
+                      Fechar
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-[11px] text-white/40 leading-relaxed">
+                    Envie o <code className="bg-white/[0.07] px-1 py-0.5 rounded">.zip</code> com <code className="bg-white/[0.07] px-1 py-0.5 rounded">index.html</code>, <code className="bg-white/[0.07] px-1 py-0.5 rounded">styles.css</code>, <code className="bg-white/[0.07] px-1 py-0.5 rounded">script.js</code> e a pasta <code className="bg-white/[0.07] px-1 py-0.5 rounded">assets/</code>. Tudo e inserido automaticamente numa pagina publicavel.
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-white/40 mb-1.5">Arquivo .zip</label>
+                    <div onClick={() => zipInputRef.current?.click()}
+                      className="w-full border-2 border-dashed border-white/[0.08] hover:border-purple-500/40 rounded-xl p-6 text-center cursor-pointer transition-colors group">
+                      <Upload className="w-5 h-5 mx-auto mb-2 text-white/20 group-hover:text-purple-400/60 transition-colors" />
+                      {zipImp.file
+                        ? <p className="text-[12px] text-white/60">{zipImp.file.name}</p>
+                        : <p className="text-[12px] text-white/25">Clique para selecionar</p>
+                      }
+                    </div>
+                    <input ref={zipInputRef} type="file" accept=".zip" className="hidden" onChange={handleZipFileChange} />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-white/40 mb-1.5">Nome da pagina</label>
+                    <input type="text" value={zipImp.name} onChange={(e) => setZipImp((p) => ({ ...p, name: e.target.value, error: "" }))}
+                      placeholder="Ex: MPI - Metodo Par Ideal"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] focus:border-purple-500/40 focus:outline-none text-[12px] text-white placeholder-white/20 transition-colors" />
+                  </div>
+                  {zipImp.error && (
+                    <p className="text-red-400 text-[11px] bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{zipImp.error}</p>
+                  )}
+                  <div className="flex gap-2 pt-1">
+                    <button onClick={handleZipImport} disabled={zipImp.loading}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white text-[12px] font-semibold transition-colors cursor-pointer">
+                      {zipImp.loading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Importando...</> : "Importar"}
+                    </button>
+                    <button onClick={closeZipImport} disabled={zipImp.loading}
+                      className="px-4 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] text-[12px] text-white/50 font-medium transition-colors cursor-pointer">
+                      Cancelar
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Delete Confirm */}
       {deleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
@@ -625,14 +745,17 @@ function PageCard({
   appUrl: string;
 }) {
   const isFigma = page.page_type === "figma";
+  const isZip = page.page_type === "zip";
   const publicUrl = `${appUrl}/p/${page.slug}`;
 
   return (
     <div className="group bg-white/[0.02] hover:bg-white/[0.04] border border-white/[0.06] hover:border-white/[0.10] rounded-2xl p-4 transition-all flex flex-col gap-3">
       <div className="flex items-start gap-2.5">
-        <div className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center ${isFigma ? "bg-[#1abcfe]/10 border border-[#1abcfe]/20" : "bg-purple-500/10 border border-purple-500/20"}`}>
+        <div className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center ${isFigma ? "bg-[#1abcfe]/10 border border-[#1abcfe]/20" : isZip ? "bg-amber-500/10 border border-amber-500/20" : "bg-purple-500/10 border border-purple-500/20"}`}>
           {isFigma
             ? <Pen className="w-3.5 h-3.5 text-[#1abcfe]" />
+            : isZip
+            ? <Package className="w-3.5 h-3.5 text-amber-400" />
             : <Zap className="w-3.5 h-3.5 text-purple-400" />
           }
         </div>

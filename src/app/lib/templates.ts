@@ -27,4 +27,13 @@ export const TEMPLATES: TemplateItem[] = [
     prompt: "READY:ready-luana-carolina-ed-001-obrigado",
     thumbnail: "/template-previews/luana-carolina-ed-001-obrigado.png",
   },
+  {
+    id: "ready-mpi-metodo-par-ideal-v3",
+    label: "MPI · Método Par Ideal (Pronto)",
+    description: "Página de vendas completa de infoproduto: hero com CTA, recap, storytelling em etapas, bônus, seção de custo, oferta, garantia de 7 dias, autor e FAQ com accordion. Tons vinho/cream, tipografia Helvetica Neue.",
+    category: "vendas",
+    tags: ["pronto", "vendas", "mpi", "metodo par ideal", "infoproduto", "faq", "garantia", "oferta"],
+    prompt: "READY:ready-mpi-metodo-par-ideal-v3",
+    thumbnail: "/sales/mpi/assets/og.png",
+  },
 ];

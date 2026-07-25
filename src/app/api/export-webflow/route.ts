@@ -1,5 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest } from "next/server";
+import { existsSync, readFileSync } from "fs";
+import { join } from "path";
+import { stripEditorScripts } from "../../lib/strip-editor-scripts";
+import { rewriteResponsiveSelectors, cleanEditorArtifacts } from "../../lib/clean-editor-artifacts";
 
 export const maxDuration = 60;
 
@@ -34,10 +38,43 @@ function ext(mime: string) {
   return map[mime] ?? "jpg";
 }
 
+function mimeFromExt(filePath: string) {
+  const e = filePath.split(".").pop()?.toLowerCase() ?? "";
+  const map: Record<string, string> = {
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    webp: "image/webp",
+    gif: "image/gif",
+    svg: "image/svg+xml",
+  };
+  return map[e] ?? "application/octet-stream";
+}
+
+// Find every img `src="/..."` pointing at a file under /public — those only
+// resolve on WevyFlow's own domain, so once pasted into Webflow the images are
+// broken. Upload each referenced file to Supabase Storage and rewrite the src
+// to that public CDN URL instead.
+function extractLocalImagePaths(html: string) {
+  const pattern = /\ssrc="(\/(?!\/)[^"]*\.(?:jpg|jpeg|png|webp|gif|svg))"/gi;
+  const found = new Set<string>();
+  let m: RegExpExecArray | null;
+  while ((m = pattern.exec(html)) !== null) found.add(m[1]);
+  return Array.from(found);
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { html, projectId } = (await req.json()) as { html: string; projectId?: string };
-    if (!html) return Response.json({ error: "html obrigatório" }, { status: 400 });
+    const { html: rawHtml, projectId } = (await req.json()) as { html: string; projectId?: string };
+    if (!rawHtml) return Response.json({ error: "html obrigatório" }, { status: 400 });
+
+    // Editor instrumentation (data-wf-id on every element, the responsive-rules
+    // JSON sidecar) is internal to the WevyFlow workspace and massively inflates
+    // the exported markup — strip it before anything else so Webflow's 50k-char
+    // custom-code limit is measured against the real page, not editor bookkeeping.
+    let html = stripEditorScripts(rawHtml);
+    html = rewriteResponsiveSelectors(html);
+    html = cleanEditorArtifacts(html);
 
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
     const prefix = projectId ?? `tmp-${Date.now()}`;
@@ -62,29 +99,68 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Split head / body
-    const headMatch = processed.match(/<head>([\s\S]*?)<\/head>/i);
-    const bodyMatch = processed.match(/<body>([\s\S]*?)<\/body>/i);
+    // 1b. Same for images referenced by local /public path (ready-made templates
+    // use these instead of base64) — they only resolve on WevyFlow's own domain.
+    const localPaths = extractLocalImagePaths(processed);
+    let localImagesProcessed = 0;
+    for (const localPath of localPaths) {
+      const diskPath = join(process.cwd(), "public", localPath);
+      if (!existsSync(diskPath)) continue;
+      const buf = readFileSync(diskPath);
+      const mime = mimeFromExt(localPath);
+      const storagePath = `${prefix}/local${localPath}`;
 
-    let head = headMatch ? headMatch[1].trim() : "";
-    let body = bodyMatch ? bodyMatch[1].trim() : processed;
+      const { error } = await supabase.storage
+        .from("ai-images")
+        .upload(`webflow-exports/${storagePath}`, buf, { contentType: mime, upsert: true });
 
-    // 3. Extract <script> tags from head (Webflow modifies DOMContentLoaded in head custom code)
-    const scriptInHead: string[] = [];
-    head = head.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, (_m, c: string) => {
-      if (c.trim()) scriptInHead.push(c.trim());
+      if (!error) {
+        const url = `${CDN_BASE}/${storagePath}`;
+        processed = processed.split(`"${localPath}"`).join(`"${url}"`);
+        localImagesProcessed++;
+      }
+    }
+
+    // 2. Pull every <style> block and stylesheet <link> out into the "head" bucket.
+    // The editor's serialized code isn't guaranteed to be a full document — after
+    // the user edits per-breakpoint styles it comes back as a body-only fragment
+    // (plus an appended `<style id="wf-responsive-styles">` block) with no <head>
+    // wrapper at all. Scanning for style tags directly, instead of requiring a
+    // literal <head>...</head>, handles both a full document and a bare fragment.
+    const cssBlocks: string[] = [];
+    let remainder = processed.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, (_m, c: string) => {
+      if (c.trim()) cssBlocks.push(c.trim());
       return "";
-    }).trim();
+    });
+    const linkBlocks: string[] = [];
+    remainder = remainder.replace(/<link[^>]*rel=["']stylesheet["'][^>]*>/gi, (m) => {
+      linkBlocks.push(m);
+      return "";
+    });
 
-    // 4. Extract <script> tags from body
-    const scriptInBody: string[] = [];
+    let head = [...linkBlocks, cssBlocks.length ? `<style>\n${cssBlocks.join("\n")}\n</style>` : ""]
+      .filter(Boolean)
+      .join("\n")
+      .trim();
+
+    // Unwrap any leftover document shell (doctype/html/head/body tags) — only
+    // their inner content is relevant for the Webflow Embed element.
+    let body = remainder
+      .replace(/<!DOCTYPE[^>]*>/i, "")
+      .replace(/<\/?html[^>]*>/gi, "")
+      .replace(/<head[^>]*>[\s\S]*?<\/head>/i, "")
+      .replace(/<\/?body[^>]*>/gi, "")
+      .trim();
+
+    // 3. Extract <script> tags (Webflow modifies DOMContentLoaded in head custom
+    // code, so every script is merged into one "before </body>" block instead)
+    const scripts: string[] = [];
     body = body.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, (_m, c: string) => {
-      if (c.trim()) scriptInBody.push(c.trim());
+      if (c.trim()) scripts.push(c.trim());
       return "";
     }).trim();
 
-    // 5. Merge all scripts → one block for "Before </body> tag" (reliable in Webflow)
-    const allScripts = [...scriptInHead, ...scriptInBody].join("\n");
+    const allScripts = scripts.join("\n");
     const script = allScripts
       ? `<script>\n(function(){\nvar _run=function(){\n${allScripts}\n};\nif(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',_run);}else{_run();}\n})();\n</script>`
       : "";
@@ -93,7 +169,7 @@ export async function POST(req: NextRequest) {
       head,
       body,
       script,
-      imagesProcessed: images.length,
+      imagesProcessed: images.length + localImagesProcessed,
       headChars: head.length,
       bodyChars: body.length,
       scriptChars: script.length,
