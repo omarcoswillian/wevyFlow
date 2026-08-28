@@ -434,7 +434,7 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
           </div>
           <SidebarItem icon={<Mail className="w-4 h-4" />} label="Emails" active={activeNav === "emails"} collapsed={sidebarCollapsed} onClick={() => nav("emails")} />
           <SidebarItem icon={<UserCheck className="w-4 h-4" />} label="Leads" active={activeNav === "leads"} collapsed={sidebarCollapsed} onClick={() => nav("leads")} />
-          <SidebarItem icon={<Globe className="w-4 h-4" />} label="Domínios" active={activeNav === "paginas"} collapsed={sidebarCollapsed} onClick={() => nav("paginas")} />
+          <SidebarItem icon={<FileText className="w-4 h-4" />} label="Páginas" active={activeNav === "paginas"} collapsed={sidebarCollapsed} onClick={() => nav("paginas")} />
 
           {!sidebarCollapsed && <div className="pt-3 pb-1"><span className="px-2 text-[9px] font-medium text-white/20 uppercase tracking-widest">Projetos</span></div>}
           {sidebarCollapsed && <div className="pt-3" />}

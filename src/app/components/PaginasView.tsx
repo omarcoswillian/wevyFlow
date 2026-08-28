@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
   ExternalLink, Trash2, Upload, X, Globe, Loader2, Plus,
-  Copy, Check, Zap, Pen, Link, CheckCircle2, AlertCircle, RefreshCw, Package,
+  Copy, Check, Zap, Pen, Package,
 } from "lucide-react";
 
 interface PublishedPage {
@@ -15,14 +15,6 @@ interface PublishedPage {
   created_at: string;
   updated_at: string;
   views: number;
-}
-
-interface CustomDomain {
-  id: string;
-  domain: string;
-  status: "pending" | "verified" | "error";
-  verified_at: string | null;
-  updated_at: string;
 }
 
 interface ImportState {
@@ -42,8 +34,6 @@ const INIT_IMPORT: ImportState = {
 const INIT_ZIP_IMPORT: ImportState = {
   open: false, name: "", file: null, loading: false, error: "", done: false, doneSlug: "",
 };
-
-const CNAME_TARGET = "cname.wevyflow.com";
 
 function formatDate(iso: string) {
   const d = new Date(iso);
@@ -88,14 +78,6 @@ export default function PaginasView() {
   const [deleting, setDeleting] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
 
-  // Domain state
-  const [customDomain, setCustomDomain] = useState<CustomDomain | null>(null);
-  const [domainInput, setDomainInput] = useState("");
-  const [domainLoading, setDomainLoading] = useState(false);
-  const [domainVerifying, setDomainVerifying] = useState(false);
-  const [domainError, setDomainError] = useState("");
-  const [domainMsg, setDomainMsg] = useState("");
-
   const fetchPages = useCallback(async () => {
     setLoadingList(true);
     setListError("");
@@ -113,82 +95,9 @@ export default function PaginasView() {
     }
   }, [supabase]);
 
-  const fetchDomain = useCallback(async () => {
-    try {
-      const res = await fetch("/api/domains");
-      const json = await res.json();
-      if (json.domain) setCustomDomain(json.domain as CustomDomain);
-    } catch { /* silent */ }
-  }, []);
-
   useEffect(() => {
     fetchPages();
-    fetchDomain();
-  }, [fetchPages, fetchDomain]);
-
-  const handleSaveDomain = async () => {
-    if (!domainInput.trim()) return;
-    setDomainLoading(true);
-    setDomainError("");
-    setDomainMsg("");
-    try {
-      const res = await fetch("/api/domains", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ domain: domainInput.trim() }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Erro ao salvar dominio.");
-      setCustomDomain(json.domain as CustomDomain);
-      setDomainInput("");
-      setDomainMsg("Dominio salvo. Configure o DNS abaixo e clique em Verificar.");
-    } catch (e) {
-      setDomainError(e instanceof Error ? e.message : "Erro.");
-    } finally {
-      setDomainLoading(false);
-    }
-  };
-
-  const handleVerifyDomain = async () => {
-    if (!customDomain) return;
-    setDomainVerifying(true);
-    setDomainError("");
-    setDomainMsg("");
-    try {
-      const res = await fetch("/api/domains/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ domain: customDomain.domain }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Erro ao verificar.");
-      setCustomDomain((prev) => prev ? { ...prev, status: json.status, verified_at: json.verified_at ?? null } : prev);
-      if (json.verified) {
-        setDomainMsg("Dominio verificado com sucesso!");
-      } else {
-        setDomainMsg(json.dnsError || "DNS ainda nao propagou. Aguarde alguns minutos e tente novamente.");
-      }
-    } catch (e) {
-      setDomainError(e instanceof Error ? e.message : "Erro.");
-    } finally {
-      setDomainVerifying(false);
-    }
-  };
-
-  const handleRemoveDomain = async () => {
-    setDomainLoading(true);
-    setDomainError("");
-    setDomainMsg("");
-    try {
-      const res = await fetch("/api/domains", { method: "DELETE" });
-      if (!res.ok) throw new Error("Erro ao remover dominio.");
-      setCustomDomain(null);
-    } catch (e) {
-      setDomainError(e instanceof Error ? e.message : "Erro.");
-    } finally {
-      setDomainLoading(false);
-    }
-  };
+  }, [fetchPages]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null;
@@ -298,9 +207,9 @@ export default function PaginasView() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-[20px] font-bold text-white">Dominios</h1>
+            <h1 className="text-[20px] font-bold text-white">Páginas publicadas</h1>
             <p className="text-[12px] text-white/40 mt-0.5">
-              Conecte seu dominio proprio e gerencie suas paginas publicadas
+              Gerencie os links de preview das suas páginas
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -318,162 +227,6 @@ export default function PaginasView() {
               <Plus className="w-3.5 h-3.5" />
               Importar do Figma
             </button>
-          </div>
-        </div>
-
-        {/* Custom Domain Card */}
-        <div className="bg-white/[0.02] border border-white/[0.07] rounded-2xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-white/[0.05] flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.07] flex items-center justify-center shrink-0">
-              <Link className="w-3.5 h-3.5 text-white/40" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-semibold text-white">Dominio personalizado</p>
-              <p className="text-[11px] text-white/30">Suas paginas ficam acessiveis no seu proprio dominio</p>
-            </div>
-            {customDomain && (
-              <StatusBadge status={customDomain.status} />
-            )}
-          </div>
-
-          <div className="px-6 py-5 space-y-5">
-            {!customDomain ? (
-              /* — No domain yet — */
-              <div className="space-y-3">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={domainInput}
-                    onChange={(e) => { setDomainInput(e.target.value); setDomainError(""); }}
-                    onKeyDown={(e) => e.key === "Enter" && handleSaveDomain()}
-                    placeholder="meusite.com.br"
-                    className="flex-1 px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] focus:border-purple-500/40 focus:outline-none text-[12px] text-white placeholder-white/20 transition-colors font-mono"
-                  />
-                  <button
-                    onClick={handleSaveDomain}
-                    disabled={domainLoading || !domainInput.trim()}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white text-[12px] font-semibold transition-colors cursor-pointer"
-                  >
-                    {domainLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Conectar"}
-                  </button>
-                </div>
-                {domainError && (
-                  <p className="text-red-400 text-[11px] flex items-center gap-1.5">
-                    <AlertCircle className="w-3 h-3 shrink-0" />{domainError}
-                  </p>
-                )}
-                <p className="text-[11px] text-white/25 leading-relaxed">
-                  Insira apenas o dominio, sem <code className="bg-white/[0.06] px-1 rounded">https://</code>. Ex: <span className="text-white/40 font-mono">meusite.com.br</span>
-                </p>
-              </div>
-            ) : (
-              /* — Domain configured — */
-              <div className="space-y-5">
-                {/* Domain name row */}
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 flex items-center gap-2 bg-white/[0.03] border border-white/[0.06] rounded-xl px-3.5 py-2.5">
-                    <Globe className="w-3.5 h-3.5 text-white/30 shrink-0" />
-                    <span className="text-[12px] font-mono text-white/70 flex-1">{customDomain.domain}</span>
-                    {customDomain.status === "verified" && customDomain.verified_at && (
-                      <span className="text-[10px] text-white/25">verificado {formatDate(customDomain.verified_at)}</span>
-                    )}
-                  </div>
-                  <button
-                    onClick={handleVerifyDomain}
-                    disabled={domainVerifying}
-                    className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.07] text-white/50 hover:text-white text-[11px] font-medium transition-colors cursor-pointer"
-                    title="Verificar DNS"
-                  >
-                    {domainVerifying
-                      ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      : <RefreshCw className="w-3.5 h-3.5" />
-                    }
-                    Verificar
-                  </button>
-                  <button
-                    onClick={handleRemoveDomain}
-                    disabled={domainLoading}
-                    className="p-2.5 rounded-xl text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
-                    title="Remover dominio"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {/* Feedback msg */}
-                {domainMsg && (
-                  <p className={`text-[11px] flex items-center gap-1.5 ${customDomain.status === "verified" ? "text-emerald-400" : "text-amber-400"}`}>
-                    {customDomain.status === "verified"
-                      ? <CheckCircle2 className="w-3 h-3 shrink-0" />
-                      : <AlertCircle className="w-3 h-3 shrink-0" />
-                    }
-                    {domainMsg}
-                  </p>
-                )}
-                {domainError && (
-                  <p className="text-red-400 text-[11px] flex items-center gap-1.5">
-                    <AlertCircle className="w-3 h-3 shrink-0" />{domainError}
-                  </p>
-                )}
-
-                {/* DNS instructions */}
-                {customDomain.status !== "verified" && (
-                  <div className="space-y-3">
-                    <p className="text-[11px] font-medium text-white/50">Configuracao DNS necessaria</p>
-
-                    {/* CNAME row */}
-                    <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl overflow-hidden">
-                      <div className="grid grid-cols-3 gap-px bg-white/[0.04] text-[10px] font-medium text-white/30 uppercase tracking-wider">
-                        <div className="bg-[#111114] px-3.5 py-2">Tipo</div>
-                        <div className="bg-[#111114] px-3.5 py-2">Nome</div>
-                        <div className="bg-[#111114] px-3.5 py-2">Valor</div>
-                      </div>
-                      <div className="grid grid-cols-3 gap-px bg-white/[0.04]">
-                        <div className="bg-[#111114] px-3.5 py-2.5 text-[11px] font-mono text-purple-400">CNAME</div>
-                        <div className="bg-[#111114] px-3.5 py-2.5 text-[11px] font-mono text-white/60">www</div>
-                        <div className="bg-[#111114] px-3.5 py-2.5 text-[11px] font-mono text-white/60 flex items-center justify-between gap-2">
-                          <span className="truncate">{CNAME_TARGET}</span>
-                          <CopyBtn value={CNAME_TARGET} />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-3 gap-px bg-white/[0.04]">
-                        <div className="bg-[#111114] px-3.5 py-2.5 text-[11px] font-mono text-purple-400">A</div>
-                        <div className="bg-[#111114] px-3.5 py-2.5 text-[11px] font-mono text-white/60">@</div>
-                        <div className="bg-[#111114] px-3.5 py-2.5 text-[11px] font-mono text-white/60 flex items-center justify-between gap-2">
-                          <span>76.76.21.21</span>
-                          <CopyBtn value="76.76.21.21" />
-                        </div>
-                      </div>
-                    </div>
-
-                    <p className="text-[10px] text-white/25 leading-relaxed">
-                      Adicione os registros acima no painel DNS do seu provedor (Registro.br, Cloudflare, GoDaddy, etc.).
-                      A propagacao pode levar ate 24h. Clique em{" "}
-                      <span className="text-white/40">Verificar</span> apos configurar.
-                    </p>
-                  </div>
-                )}
-
-                {/* Verified — show base URL */}
-                {customDomain.status === "verified" && (
-                  <div className="bg-emerald-500/[0.06] border border-emerald-500/[0.15] rounded-xl px-4 py-3 flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-semibold text-emerald-400 mb-0.5">Dominio ativo</p>
-                      <p className="text-[11px] text-white/40 font-mono truncate">https://{customDomain.domain}</p>
-                    </div>
-                    <a
-                      href={`https://${customDomain.domain}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-auto shrink-0 p-1.5 rounded-lg text-white/30 hover:text-white transition-colors"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
 
@@ -693,45 +446,6 @@ export default function PaginasView() {
         </div>
       )}
     </div>
-  );
-}
-
-function StatusBadge({ status }: { status: "pending" | "verified" | "error" }) {
-  if (status === "verified") {
-    return (
-      <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-medium">
-        <CheckCircle2 className="w-2.5 h-2.5" /> Ativo
-      </span>
-    );
-  }
-  if (status === "error") {
-    return (
-      <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-medium">
-        <AlertCircle className="w-2.5 h-2.5" /> Erro
-      </span>
-    );
-  }
-  return (
-    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-medium">
-      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" /> Pendente
-    </span>
-  );
-}
-
-function CopyBtn({ value }: { value: string }) {
-  const [copied, setCopied] = useState(false);
-  const handleCopy = () => {
-    navigator.clipboard.writeText(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
-  return (
-    <button
-      onClick={handleCopy}
-      className="shrink-0 p-1 rounded text-white/20 hover:text-white/50 transition-colors cursor-pointer"
-    >
-      {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-    </button>
   );
 }
 
