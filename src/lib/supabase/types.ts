@@ -286,6 +286,7 @@ export type Database = {
           code: string;
           status: "pending" | "success" | "failed_refunded";
           error_message: string | null;
+          cost: number;
           created_at: string;
         };
         Insert: {
@@ -297,6 +298,7 @@ export type Database = {
           code?: string;
           status?: "pending" | "success" | "failed_refunded";
           error_message?: string | null;
+          cost?: number;
           created_at?: string;
         };
         Update: {
@@ -308,6 +310,7 @@ export type Database = {
           code?: string;
           status?: "pending" | "success" | "failed_refunded";
           error_message?: string | null;
+          cost?: number;
           created_at?: string;
         };
         Relationships: [];
@@ -425,6 +428,7 @@ export type Database = {
           p_gen_type: string;
           p_prompt: string;
           p_limit: number;
+          p_cost?: number;
         };
         Returns: {
           allowed: boolean;

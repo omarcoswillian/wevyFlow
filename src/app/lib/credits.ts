@@ -6,7 +6,27 @@ export type GenType =
   | "brand_identity"
   | "email_sequence"
   | "criativo_html"
+  | "image"
+  | "ensaio"
+  | "logo"
   | "other";
+
+// Weight per action, in credits — reflects real API cost, not "1 generation
+// = 1 credit". Calibrated against Google's published per-image pricing:
+// Nano Banana (gemini-2.5-flash-image) ~$0.039/image, Nano Banana Pro
+// (gemini-3-pro-image-preview) ~$0.134-0.24/image, vs a plain text/HTML
+// generation at a few cents. Tune here only — callers don't need to know
+// the weight, it's resolved from the action's GenType.
+const ACTION_COST: Record<GenType, number> = {
+  landing_page: 1,
+  brand_identity: 1,
+  email_sequence: 1,
+  criativo_html: 3, // creative/ad image — openai/fal/gemini, mid-tier cost
+  image: 3,         // generic image gen — same tier as criativo
+  logo: 4,          // defaults to Nano Banana Pro
+  ensaio: 6,        // Nano Banana Pro + 2 extra vision/analysis calls per image
+  other: 1,
+};
 
 export interface CreditResult {
   allowed: true;
@@ -65,6 +85,7 @@ export async function checkAndDeductCredit(
 
   const plan = PLANS[planId];
   const limit = plan.credits;
+  const cost = ACTION_COST[genType] ?? 1;
 
   // Atomic claim via Postgres advisory lock — eliminates race condition
   const { data: claim, error: rpcError } = await supabase.rpc(
@@ -74,6 +95,7 @@ export async function checkAndDeductCredit(
       p_gen_type: genType,
       p_prompt: promptSnippet.slice(0, 500),
       p_limit: limit,
+      p_cost: cost,
     }
   );
 
@@ -133,7 +155,7 @@ export async function finalizeGeneration(
 export function limitReachedResponse(result: CreditBlocked): Response {
   return Response.json(
     {
-      error: `Você atingiu seu limite mensal de ${result.limit} gerações (Plano ${result.planLabel}). Faça upgrade para continuar criando.`,
+      error: `Você atingiu seu limite mensal de ${result.limit} créditos (Plano ${result.planLabel}). Faça upgrade para continuar criando.`,
       limitReached: true,
       plan: result.plan,
       planLabel: result.planLabel,

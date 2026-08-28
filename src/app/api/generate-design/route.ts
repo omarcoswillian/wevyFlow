@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
+import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
 
 const ASPECT_MAP: Record<string, string> = {
   "1:1":   "1:1",
@@ -207,6 +208,7 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 3, delayMs = 3000): 
 export const maxDuration = 120;
 
 export async function POST(req: NextRequest) {
+  let generationId: string | undefined;
   try {
     const {
       prompt,
@@ -226,9 +228,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Prompt obrigatorio." }, { status: 400 });
     }
 
+    // This route always uses WevyFlow's own server key (no BYOK option) and
+    // previously had no auth or quota check — anyone who found the URL could
+    // trigger unlimited Nano Banana Pro generations for free.
+    const creditResult = await checkAndDeductCredit("ensaio", prompt.trim());
+    if (isCreditError(creditResult)) {
+      return NextResponse.json({ error: creditResult.error }, { status: creditResult.status });
+    }
+    if (!creditResult.allowed) {
+      return limitReachedResponse(creditResult) as NextResponse;
+    }
+    generationId = creditResult.generationId;
+    const failWithCredit = async (error: string, status: number) => {
+      await finalizeGeneration(generationId!, false, error);
+      return NextResponse.json({ error }, { status });
+    };
+
     const apiKey = process.env.GOOGLE_AI_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: "Chave Google AI nao configurada." }, { status: 400 });
+      return failWithCredit("Chave Google AI nao configurada.", 400);
     }
 
     const client = new GoogleGenAI({ apiKey });
@@ -358,19 +376,21 @@ High quality, photorealistic. Aspect ratio: ${aspectRatio}.`,
     const { b64, mimeType, blocked } = extractImage(step2.candidates);
 
     if (blocked) {
-      return NextResponse.json({ error: "Geração bloqueada pelo Google. Tente reformular o prompt ou usar imagens diferentes." }, { status: 400 });
+      return failWithCredit("Geração bloqueada pelo Google. Tente reformular o prompt ou usar imagens diferentes.", 400);
     }
     if (!b64) {
       const modelText = (step2.candidates ?? []).flatMap(c => (c.content?.parts ?? []) as Part[]).filter(p => p.text).map(p => p.text).join(" ").trim();
-      return NextResponse.json({ error: `Imagem não retornada pelo modelo${modelText ? `: ${modelText.slice(0, 200)}` : "."}` }, { status: 500 });
+      return failWithCredit(`Imagem não retornada pelo modelo${modelText ? `: ${modelText.slice(0, 200)}` : "."}`, 500);
     }
 
+    await finalizeGeneration(generationId, true);
     return NextResponse.json({ b64, mimeType });
 
   } catch (e: unknown) {
     const err = e as Error;
     const msg = String(err?.message ?? "");
     console.error("[generate-design] exception:", msg, String(err?.stack ?? "").slice(0, 400));
+    if (generationId) await finalizeGeneration(generationId, false, msg);
 
     if (msg.includes("401") || msg.includes("API_KEY") || msg.includes("invalid")) {
       return NextResponse.json({ error: "API Key Google inválida ou expirada." }, { status: 401 });

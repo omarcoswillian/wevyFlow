@@ -23,17 +23,19 @@ export async function GET() {
     const plan = PLANS[planId];
     const creditsLimit = plan.credits;
 
-    // Count this month's non-refunded generations
+    // Sum this month's non-refunded generation cost (weighted per action
+    // type — see ACTION_COST in lib/credits.ts — not a raw row count,
+    // since an image generation costs several times what a text one does).
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    const { count } = await supabase
+    const { data: rows } = await supabase
       .from("generation_history")
-      .select("id", { count: "exact", head: true })
+      .select("cost")
       .eq("user_id", user.id)
       .gte("created_at", monthStart)
       .in("status", ["pending", "success"]);
 
-    const creditsUsed = count ?? 0;
+    const creditsUsed = (rows ?? []).reduce((sum, r) => sum + (r.cost ?? 1), 0);
 
     return Response.json({
       plan: planId,

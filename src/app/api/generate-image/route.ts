@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { GoogleGenAI } from "@google/genai";
+import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
 
 const SIZE_MAP_OPENAI: Record<string, "1024x1024" | "1536x1024" | "1024x1536"> = {
   square:    "1024x1024",
@@ -21,6 +22,7 @@ const GEMINI_ASPECT: Record<string, string> = {
 };
 
 export async function POST(req: NextRequest) {
+  let generationId: string | undefined;
   try {
     const {
       prompt,
@@ -35,16 +37,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Prompt é obrigatório." }, { status: 400 });
     }
 
+    // Every image call — including BYOK — consumes a plan credit, same
+    // policy as generate-criativo. This route previously had no auth or
+    // quota check at all: anyone who found the URL could call it for free,
+    // and the Gemini branch falls back to WevyFlow's own server-side key.
+    const creditResult = await checkAndDeductCredit("image", prompt.trim());
+    if (isCreditError(creditResult)) {
+      return NextResponse.json({ error: creditResult.error }, { status: creditResult.status });
+    }
+    if (!creditResult.allowed) {
+      return limitReachedResponse(creditResult) as NextResponse;
+    }
+    generationId = creditResult.generationId;
+    const failWithCredit = async (error: string, status: number) => {
+      await finalizeGeneration(generationId!, false, error);
+      return NextResponse.json({ error }, { status });
+    };
+
     const byok = apiKey && apiKey.length > 10 ? apiKey : null;
     const key = byok ?? (imageProvider === "gemini" ? (process.env.GOOGLE_AI_API_KEY ?? null) : null);
 
     // ── Gemini 3 Pro Image (Nano Banana) path ────────────────────
     if (imageProvider === "gemini") {
       if (!key) {
-        return NextResponse.json(
-          { error: "Chave Google AI Studio não configurada. Adicione em Configurações > IA de Imagem." },
-          { status: 400 }
-        );
+        return failWithCredit("Chave Google AI Studio não configurada. Adicione em Configurações > IA de Imagem.", 400);
       }
       try {
         const client = new GoogleGenAI({ apiKey: key });
@@ -71,35 +87,33 @@ export async function POST(req: NextRequest) {
         }
 
         if (!b64) {
-          return NextResponse.json({ error: "Imagem não retornada pelo Gemini." }, { status: 500 });
+          return failWithCredit("Imagem não retornada pelo Gemini.", 500);
         }
+        await finalizeGeneration(generationId, true);
         return NextResponse.json({ b64, mimeType });
       } catch (e: unknown) {
         const msg = String((e as Error)?.message ?? "");
         console.error("[generate-image gemini]", msg);
         if (msg.includes("401") || msg.includes("API_KEY") || msg.includes("invalid")) {
-          return NextResponse.json({ error: "API Key Google inválida ou expirada." }, { status: 401 });
+          return failWithCredit("API Key Google inválida ou expirada.", 401);
         }
         if (msg.includes("429") || msg.includes("quota") || msg.includes("RESOURCE_EXHAUSTED") || msg.includes("rate") || msg.includes("too_many_requests")) {
-          return NextResponse.json({ error: "Cota Google insuficiente. Ative billing em aistudio.google.com ou troque o modelo para Gemini 2.5 Flash Image em Configurações > IA de Imagem." }, { status: 429 });
+          return failWithCredit("Cota Google insuficiente. Ative billing em aistudio.google.com ou troque o modelo para Gemini 2.5 Flash Image em Configurações > IA de Imagem.", 429);
         }
         if (msg.includes("safety") || msg.includes("block") || msg.includes("SAFETY")) {
-          return NextResponse.json({ error: "Prompt bloqueado pela política do Google. Tente reformular." }, { status: 400 });
+          return failWithCredit("Prompt bloqueado pela política do Google. Tente reformular.", 400);
         }
         if (msg.includes("not found") || msg.includes("404") || msg.includes("MODEL")) {
-          return NextResponse.json({ error: "Modelo Gemini não disponível para esta chave. Verifique o acesso." }, { status: 400 });
+          return failWithCredit("Modelo Gemini não disponível para esta chave. Verifique o acesso.", 400);
         }
-        return NextResponse.json({ error: "Erro ao gerar imagem com Gemini." }, { status: 500 });
+        return failWithCredit("Erro ao gerar imagem com Gemini.", 500);
       }
     }
 
     // ── Fal.ai path ──────────────────────────────────────────────
     if (imageProvider === "fal") {
       if (!key) {
-        return NextResponse.json(
-          { error: "Chave Fal.ai não configurada. Adicione em Configurações > IA de Imagem." },
-          { status: 400 }
-        );
+        return failWithCredit("Chave Fal.ai não configurada. Adicione em Configurações > IA de Imagem.", 400);
       }
       const model = imageModel || "fal-ai/flux-pro/v1.1";
       const dims = SIZE_MAP_FAL[size] ?? SIZE_MAP_FAL.landscape;
@@ -121,39 +135,37 @@ export async function POST(req: NextRequest) {
       if (!falRes.ok) {
         const errText = await falRes.text().catch(() => "");
         if (falRes.status === 401 || falRes.status === 403) {
-          return NextResponse.json({ error: "API Key Fal.ai inválida ou expirada." }, { status: 401 });
+          return failWithCredit("API Key Fal.ai inválida ou expirada.", 401);
         }
         if (falRes.status === 429) {
-          return NextResponse.json({ error: "Limite de requisições Fal.ai atingido. Aguarde alguns segundos." }, { status: 429 });
+          return failWithCredit("Limite de requisições Fal.ai atingido. Aguarde alguns segundos.", 429);
         }
         console.error("[generate-image fal]", falRes.status, errText);
-        return NextResponse.json({ error: "Erro ao gerar imagem com Fal.ai." }, { status: 500 });
+        return failWithCredit("Erro ao gerar imagem com Fal.ai.", 500);
       }
 
       const falData = await falRes.json();
       const imageUrl = falData?.images?.[0]?.url;
       if (!imageUrl) {
-        return NextResponse.json({ error: "Imagem não retornada pelo Fal.ai." }, { status: 500 });
+        return failWithCredit("Imagem não retornada pelo Fal.ai.", 500);
       }
 
       const imgRes = await fetch(imageUrl);
       if (!imgRes.ok) {
-        return NextResponse.json({ error: "Falha ao baixar imagem do Fal.ai." }, { status: 500 });
+        return failWithCredit("Falha ao baixar imagem do Fal.ai.", 500);
       }
       const imgBuffer = await imgRes.arrayBuffer();
       const b64 = Buffer.from(imgBuffer).toString("base64");
       const contentType = imgRes.headers.get("content-type") || "image/jpeg";
 
+      await finalizeGeneration(generationId, true);
       return NextResponse.json({ b64, mimeType: contentType });
     }
 
     // ── OpenAI path ──────────────────────────────────────────────
     const openaiKey = key;
     if (!openaiKey) {
-      return NextResponse.json(
-        { error: "Chave OpenAI não configurada. Adicione em Configurações > IA de Imagem." },
-        { status: 400 }
-      );
+      return failWithCredit("Chave OpenAI não configurada. Adicione em Configurações > IA de Imagem.", 400);
     }
 
     const openai = new OpenAI({ apiKey: openaiKey });
@@ -178,12 +190,14 @@ export async function POST(req: NextRequest) {
     }
 
     if (!b64) {
-      return NextResponse.json({ error: "Imagem não retornada pela API." }, { status: 500 });
+      return failWithCredit("Imagem não retornada pela API.", 500);
     }
 
+    await finalizeGeneration(generationId, true);
     return NextResponse.json({ b64, mimeType: "image/png" });
   } catch (e: unknown) {
     const msg = String((e as Error)?.message ?? "");
+    if (generationId) await finalizeGeneration(generationId, false, msg);
     if (msg.includes("401") || msg.includes("Incorrect API key")) return NextResponse.json({ error: "API Key inválida ou expirada." }, { status: 401 });
     if (msg.includes("402") || msg.includes("billing") || msg.includes("credit") || msg.includes("insufficient")) return NextResponse.json({ error: "Saldo insuficiente. Adicione créditos." }, { status: 402 });
     if (msg.includes("429") || msg.includes("rate limit")) return NextResponse.json({ error: "Limite de requisições atingido. Aguarde alguns segundos." }, { status: 429 });
