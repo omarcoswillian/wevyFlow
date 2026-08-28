@@ -25,6 +25,8 @@ interface ImportState {
   error: string;
   done: boolean;
   doneSlug: string;
+  importedPage?: string;
+  availablePages?: string[];
 }
 
 const INIT_IMPORT: ImportState = {
@@ -154,7 +156,10 @@ export default function PaginasView() {
     }));
   };
 
-  const handleZipImport = async () => {
+  // page: pick a specific .html from the zip (a full Webflow site export
+  // bundles one per page) — omitted on the first try, which defaults to
+  // index.html or the only page found.
+  const handleZipImport = async (page?: string) => {
     if (!zipImp.file) { setZipImp((p) => ({ ...p, error: "Selecione o arquivo .zip." })); return; }
     if (!zipImp.name.trim()) { setZipImp((p) => ({ ...p, error: "Informe um nome." })); return; }
     setZipImp((p) => ({ ...p, loading: true, error: "" }));
@@ -162,11 +167,15 @@ export default function PaginasView() {
       const formData = new FormData();
       formData.append("file", zipImp.file);
       formData.append("name", zipImp.name.trim());
+      if (page) formData.append("page", page);
 
       const res = await fetch("/api/pages/zip-import", { method: "POST", body: formData });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Erro ao importar.");
-      setZipImp((p) => ({ ...p, loading: false, done: true, doneSlug: json.slug }));
+      setZipImp((p) => ({
+        ...p, loading: false, done: true, doneSlug: json.slug,
+        importedPage: json.importedPage, availablePages: json.availablePages,
+      }));
       fetchPages();
     } catch (e) {
       setZipImp((p) => ({ ...p, loading: false, error: e instanceof Error ? e.message : "Erro." }));
@@ -368,6 +377,9 @@ export default function PaginasView() {
                   <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
                     <p className="text-emerald-400 text-[12px] font-semibold mb-1">Pagina importada com sucesso</p>
                     <p className="text-white/40 text-[11px] font-mono">/p/{zipImp.doneSlug}</p>
+                    {zipImp.importedPage && (
+                      <p className="text-white/25 text-[10px] font-mono mt-0.5">de: {zipImp.importedPage}</p>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <a href={`/p/${zipImp.doneSlug}`} target="_blank" rel="noopener noreferrer"
@@ -379,11 +391,32 @@ export default function PaginasView() {
                       Fechar
                     </button>
                   </div>
+                  {zipImp.availablePages && zipImp.availablePages.length > 1 && (
+                    <div className="pt-2 border-t border-white/[0.06] space-y-2">
+                      <p className="text-[11px] text-white/40">
+                        Esse zip tem {zipImp.availablePages.length} paginas. Importar outra do mesmo arquivo:
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {zipImp.availablePages
+                          .filter((p) => p !== zipImp.importedPage)
+                          .map((p) => (
+                            <button
+                              key={p}
+                              onClick={() => handleZipImport(p)}
+                              disabled={zipImp.loading}
+                              className="px-2.5 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.07] text-[11px] font-mono text-white/50 hover:text-white transition-colors cursor-pointer disabled:opacity-40"
+                            >
+                              {p}
+                            </button>
+                          ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <>
                   <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-[11px] text-white/40 leading-relaxed">
-                    Envie o <code className="bg-white/[0.07] px-1 py-0.5 rounded">.zip</code> com <code className="bg-white/[0.07] px-1 py-0.5 rounded">index.html</code>, <code className="bg-white/[0.07] px-1 py-0.5 rounded">styles.css</code>, <code className="bg-white/[0.07] px-1 py-0.5 rounded">script.js</code> e a pasta <code className="bg-white/[0.07] px-1 py-0.5 rounded">assets/</code>. Tudo e inserido automaticamente numa pagina publicavel.
+                    Envie o <code className="bg-white/[0.07] px-1 py-0.5 rounded">.zip</code> exportado (ex: &quot;Export Code&quot; do Webflow, ou um export estatico com HTML/CSS/JS/assets). Se tiver mais de uma pagina, importamos a <code className="bg-white/[0.07] px-1 py-0.5 rounded">index.html</code> primeiro e voce escolhe as outras depois.
                   </div>
                   <div>
                     <label className="block text-[11px] font-medium text-white/40 mb-1.5">Arquivo .zip</label>
@@ -407,7 +440,7 @@ export default function PaginasView() {
                     <p className="text-red-400 text-[11px] bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{zipImp.error}</p>
                   )}
                   <div className="flex gap-2 pt-1">
-                    <button onClick={handleZipImport} disabled={zipImp.loading}
+                    <button onClick={() => handleZipImport()} disabled={zipImp.loading}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white text-[12px] font-semibold transition-colors cursor-pointer">
                       {zipImp.loading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Importando...</> : "Importar"}
                     </button>

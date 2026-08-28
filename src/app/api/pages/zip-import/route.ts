@@ -61,28 +61,43 @@ export async function POST(req: NextRequest) {
     const form = await req.formData();
     const file = form.get("file");
     const nameField = form.get("name");
+    const pageField = form.get("page"); // optional: which .html to import when the zip has several
     if (!(file instanceof Blob))
       return Response.json({ error: "arquivo zip ausente" }, { status: 400 });
 
     const zip = await JSZip.loadAsync(await file.arrayBuffer());
 
     const entries = Object.values(zip.files).filter((f) => !f.dir);
-    const indexEntry = entries.find((f) => /(^|\/)index\.html$/i.test(f.name));
-    if (!indexEntry)
-      return Response.json({ error: "index.html nao encontrado no zip" }, { status: 400 });
+    const htmlEntries = entries.filter((f) => /\.html?$/i.test(f.name)).sort((a, b) => a.name.localeCompare(b.name));
+    if (htmlEntries.length === 0)
+      return Response.json({ error: "nenhum arquivo .html encontrado no zip" }, { status: 400 });
+
+    // Webflow's "Export Code" bundles every page of the site as its own .html
+    // file — pick the requested one, else index.html, else the first found.
+    const indexEntry =
+      (pageField && htmlEntries.find((f) => f.name === pageField)) ||
+      htmlEntries.find((f) => /(^|\/)index\.html$/i.test(f.name)) ||
+      htmlEntries[0];
 
     const root = dirname(indexEntry.name);
     let html = await indexEntry.async("string");
 
     const entryByPath = new Map(entries.map((f) => [f.name, f]));
 
-    // Inline the linked stylesheet and script, if present
-    const cssHrefMatch = html.match(/<link[^>]+rel=["']stylesheet["'][^>]*href=["']([^"']+)["'][^>]*>/i);
-    if (cssHrefMatch && !isExternal(cssHrefMatch[1])) {
-      const cssEntry = entryByPath.get(resolveRelative(root, cssHrefMatch[1]));
+    // Inline every linked stylesheet, not just the first — Webflow's export
+    // always ships 3 (normalize.css, webflow.css, <site>.css); a page missing
+    // two of them looks broken even though "the import worked". Attribute
+    // order isn't guaranteed (Webflow emits href before rel), so match the
+    // whole <link> tag and inspect it rather than requiring rel before href.
+    for (const m of [...html.matchAll(/<link\b[^>]*>/gi)]) {
+      const tag = m[0];
+      if (!/rel=["']stylesheet["']/i.test(tag)) continue;
+      const hrefMatch = tag.match(/href=["']([^"']+)["']/i);
+      if (!hrefMatch || isExternal(hrefMatch[1])) continue;
+      const cssEntry = entryByPath.get(resolveRelative(root, hrefMatch[1]));
       if (cssEntry) {
         const css = await cssEntry.async("string");
-        html = html.replace(cssHrefMatch[0], `<style>\n${css}\n</style>`);
+        html = html.replace(tag, `<style>\n${css}\n</style>`);
       }
     }
 
@@ -97,12 +112,17 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Upload remaining binary assets referenced via src="" and replace their paths with CDN URLs
+    // Upload remaining binary assets and rewrite their paths to CDN URLs —
+    // both HTML src="" attributes AND CSS url(...) references (background
+    // images, now inlined into <style> blocks above) need this.
     const storage = createServiceClient(SUPABASE_URL, SERVICE_KEY);
     const slug = buildSlug((nameField as string) || "pagina") + "-" + Date.now().toString(36);
 
     const assetRefs = new Set<string>();
     for (const m of html.matchAll(/\ssrc=["']([^"']+)["']/gi)) {
+      if (!isExternal(m[1])) assetRefs.add(m[1]);
+    }
+    for (const m of html.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/gi)) {
       if (!isExternal(m[1])) assetRefs.add(m[1]);
     }
 
@@ -121,7 +141,7 @@ export async function POST(req: NextRequest) {
         });
       if (!uploadError) {
         const url = `${SUPABASE_URL}/storage/v1/object/public/ai-images/${storagePath}`;
-        html = html.replaceAll(`"${ref}"`, `"${url}"`).replaceAll(`'${ref}'`, `'${url}'`);
+        html = html.replaceAll(`"${ref}"`, `"${url}"`).replaceAll(`'${ref}'`, `'${url}'`).replaceAll(`(${ref})`, `(${url})`);
       }
     }
 
@@ -145,7 +165,14 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: error.message }, { status: 500 });
     }
 
-    return Response.json({ id: data.id, slug: data.slug });
+    return Response.json({
+      id: data.id,
+      slug: data.slug,
+      importedPage: indexEntry.name,
+      // Lets the UI offer "importar outra página" when the zip (a full
+      // Webflow site export) bundles more than one .html file.
+      availablePages: htmlEntries.length > 1 ? htmlEntries.map((f) => f.name) : undefined,
+    });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("[zip-import] erro inesperado:", msg);
