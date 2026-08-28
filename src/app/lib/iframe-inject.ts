@@ -879,12 +879,22 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
   // Hide gear when mouse leaves the document entirely
   document.addEventListener('mouseleave', function() { hideGear(); });
 
+  // Webflow's own interactive widgets (sliders, dropdowns/FAQ accordions, tabs)
+  // bind their click handlers in the bubble phase. Since this listener runs in
+  // the capture phase, calling preventDefault/stopPropagation unconditionally
+  // would swallow the click before Webflow's runtime ever sees it — the arrow,
+  // toggle, or accordion header would visibly do nothing while editing.
+  var NATIVE_INTERACTIVE_SELECTOR = '.w-slider-arrow-left, .w-slider-arrow-right, .w-slider-nav, .w-slider-dot, .w-dropdown-toggle, .w-tab-link, .w-tab-menu, [data-w-id]';
+
   document.addEventListener('click', function(e) {
     if (!editMode) return;
     let el = e.target;
     // Click landed on an editor-internal element (gear, overlay, drop indicator)
     // or any descendant — let the native click handler (e.g. gear button) run.
     if (el.closest && el.closest('[id^="__wf"]')) return;
+    // Click landed on (or inside) a Webflow-native interactive control — let it
+    // run its own behavior instead of hijacking the click for element selection.
+    if (el.closest && el.closest(NATIVE_INTERACTIVE_SELECTOR)) return;
     e.preventDefault();
     e.stopPropagation();
     // VSL blocks: snap selection to the wrapper, not the inner svg/strong/span.

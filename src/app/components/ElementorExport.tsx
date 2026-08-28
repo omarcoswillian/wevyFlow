@@ -18,6 +18,7 @@ import {
 import { stripEditorScripts } from "../lib/strip-editor-scripts";
 import { rewriteResponsiveSelectors, cleanEditorArtifacts } from "../lib/clean-editor-artifacts";
 import { buildLeadCaptureSnippet } from "../lib/lead-capture-snippet";
+import { REVEAL_CSS, REVEAL_SCRIPT } from "../lib/reveal-animation";
 
 interface ElementorExportProps {
   code: string;
@@ -107,16 +108,6 @@ function dedupeVTurbElements(html: string): string {
     return match;
   });
 }
-
-// Self-contained reveal animation: replicates BASE_CSS/.reveal + BASE_SCRIPT
-// without depending on any window flag. Injected into the export so elements
-// inserted via the editor cards (which use class="reveal") animate on the
-// published page just like they do in the wevyflow preview.
-const REVEAL_CSS = `<style>
-.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.6s cubic-bezier(0.16,1,0.3,1),transform 0.6s cubic-bezier(0.16,1,0.3,1)}
-.reveal.is-visible{opacity:1;transform:translateY(0)}
-</style>`;
-const REVEAL_SCRIPT = `<script>(function(){var o=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('is-visible');o.unobserve(e.target);}})},{threshold:0.08,rootMargin:'0px 0px -40px 0px'});document.querySelectorAll('.reveal').forEach(function(e){o.observe(e);});})();</script>`;
 
 // Theme/Elementor CSS often collapses unknown custom elements to 0 height.
 // Force the smartplayer to keep its space and never get max-height-clipped.

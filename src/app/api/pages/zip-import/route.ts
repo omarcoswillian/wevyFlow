@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import JSZip from "jszip";
 import { NextRequest } from "next/server";
+import { addRevealToSections, injectRevealAssets } from "@/app/lib/reveal-animation";
 
 export const maxDuration = 60;
 
@@ -162,6 +163,14 @@ export async function POST(req: NextRequest) {
           .replaceAll(`(${ref})`, () => `(${url})`);
       }
     }
+
+    // Webflow's own IX2 animations only cover the handful of elements the
+    // original author explicitly configured — most imported pages otherwise
+    // render with zero entrance effect. Add the same scroll-reveal fade every
+    // WevyFlow-generated template gets, tagging each <section> (Webflow's own
+    // convention for a page's major content blocks).
+    html = addRevealToSections(html);
+    html = injectRevealAssets(html);
 
     const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
     const title = (nameField as string) || titleMatch?.[1]?.trim() || "Pagina importada";
