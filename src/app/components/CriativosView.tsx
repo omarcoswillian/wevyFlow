@@ -161,7 +161,9 @@ export function CriativosView() {
   const serviceType  = searchParams.get("tipo") ?? "criativos";
   const serviceLabel = DESIGN_SERVICE_LABELS[serviceType] ?? "Criativos";
 
-  const [mainTab, setMainTab] = useState<"gerar" | "biblioteca" | "galeria">("gerar");
+  const [mainTab, setMainTab] = useState<"gerar" | "biblioteca" | "galeria">(
+    searchParams.get("tab") === "biblioteca" ? "biblioteca" : "gerar"
+  );
 
   /* viewport (pan + zoom) */
   const [viewport, setViewport] = useState<Viewport>({ x: 0, y: 0, scale: 1 });

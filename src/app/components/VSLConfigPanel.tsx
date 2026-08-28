@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Plus, ArrowLeft, Trash2, AlertCircle, PlayCircle } from "lucide-react";
+import { Plus, ArrowLeft, Trash2, AlertCircle, PlayCircle, EyeOff } from "lucide-react";
 import {
   VSLConfig,
   PitchEntry,
@@ -18,6 +18,9 @@ interface VSLConfigPanelProps {
   initialConfig: VSLConfig | null;
   onClose: () => void;
   onSave: (config: VSLConfig) => void;
+  /** One-click: add `.esconder` to every other top-level section on the page. */
+  onHideOtherSections?: () => void;
+  hideOtherSectionsResult?: { ok: boolean; count?: number } | null;
 }
 
 interface UserRow {
@@ -46,7 +49,7 @@ function userRowsFromConfig(config: VSLConfig | null, derivedKey: string | null)
   return { derivedDelay, rows };
 }
 
-export function VSLConfigPanel({ initialConfig, onClose, onSave }: VSLConfigPanelProps) {
+export function VSLConfigPanel({ initialConfig, onClose, onSave, onHideOtherSections, hideOtherSectionsResult }: VSLConfigPanelProps) {
   const seed = initialConfig ?? emptyConfig();
   const seedIds = seed.snippet ? parseVTurbIds(seed.snippet) : null;
   const seedDerivedKey = seedIds ? pitchKeyFromTagId(seedIds.tagId) : null;
@@ -208,6 +211,30 @@ export function VSLConfigPanel({ initialConfig, onClose, onSave }: VSLConfigPane
           Elementos com classe <code className="text-purple-300">.esconder</code> aparecem
           quando a pitch toca.
         </p>
+
+        {onHideOtherSections && (
+          <div className="pt-1">
+            <button
+              onClick={onHideOtherSections}
+              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg border border-dashed border-white/[0.1] text-[10px] text-white/60 hover:text-white hover:border-purple-500/40 hover:bg-purple-500/5 cursor-pointer"
+            >
+              <EyeOff className="w-3 h-3" />
+              Esconder todas as outras seções até a pitch
+            </button>
+            {hideOtherSectionsResult && (
+              <p className={cn(
+                "text-[10px] mt-1.5 text-center",
+                hideOtherSectionsResult.ok ? "text-emerald-400/80" : "text-red-400"
+              )}>
+                {hideOtherSectionsResult.ok
+                  ? (hideOtherSectionsResult.count
+                      ? `✓ ${hideOtherSectionsResult.count} seção(ões) escondida(s).`
+                      : "Todas as seções já estavam escondidas.")
+                  : "Não encontrei o bloco na página — salve o VSL primeiro."}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Preload */}

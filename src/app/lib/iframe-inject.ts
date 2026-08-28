@@ -367,6 +367,65 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
     window.parent.postMessage({ type: 'wf-code-updated', html: serializeBody(), tree: buildTree() }, '*');
   }
 
+  // Pull the player.js URL out of a pasted VTurb snippet via plain substring
+  // search (no regex) — avoids escaping headaches inside this template literal.
+  function extractPlayerScriptUrl(snippet) {
+    const marker = 'https://scripts.converteai.net/';
+    const start = snippet.indexOf(marker);
+    if (start === -1) return null;
+    let end = snippet.indexOf('"', start);
+    const altEnd = snippet.indexOf("'", start);
+    if (altEnd !== -1 && (end === -1 || altEnd < end)) end = altEnd;
+    return end === -1 ? snippet.slice(start) : snippet.slice(start, end);
+  }
+
+  // JS twin of buildVSLInnerHtml (src/app/lib/vsl.ts) — rebuilds a VSL block's
+  // markup fresh from its stored data-wf-vsl-config, instead of trusting the
+  // live DOM. Needed because the vturb-smartplayer custom element mutates its
+  // own light DOM after the player boots (swaps its id, injects internal
+  // state), and that runtime growth must never leak into saved/exported HTML.
+  function buildVslInnerHtmlFromConfig(config) {
+    const parts = [];
+    parts.push('<style data-wf-vsl-block-style>.esconder{display:none}</style>');
+    if (config.includePreload) {
+      const playerUrl = extractPlayerScriptUrl(config.snippet || '');
+      if (playerUrl) parts.push('<link rel="preload" href="' + playerUrl + '" as="script">');
+      parts.push('<link rel="preload" href="https://scripts.converteai.net/lib/js/smartplayer-wc/v4/smartplayer.js" as="script">');
+      parts.push('<link rel="dns-prefetch" href="https://cdn.converteai.net">');
+      parts.push('<link rel="dns-prefetch" href="https://scripts.converteai.net">');
+      parts.push('<link rel="dns-prefetch" href="https://images.converteai.net">');
+      parts.push('<link rel="dns-prefetch" href="https://api.vturb.com.br">');
+    }
+    parts.push(config.snippet || '');
+    const pitches = Array.isArray(config.pitches) ? config.pitches : [];
+    const validPitches = pitches.filter(function(p) {
+      return p && String(p.id || '').trim() && isFinite(p.delaySec) && Number(p.delaySec) > 0;
+    });
+    if (validPitches.length > 0) {
+      const listPitchObj = validPitches.map(function(p) {
+        return JSON.stringify(String(p.id).trim()) + ':{delay:' + Number(p.delaySec) + '}';
+      }).join(',');
+      parts.push(
+        '<script>' +
+        '(function(){' +
+        'var scope=(document.currentScript&&document.currentScript.parentElement)||document;' +
+        'var listPitch={' + listPitchObj + '};' +
+        "var player=scope.querySelector('vturb-smartplayer');" +
+        'if(!player)return;' +
+        "var observer=new MutationObserver(function(ms){ms.forEach(function(m){var el=m.target;if(el.style.display==='block')el.style.display='flex';});});" +
+        "player.addEventListener('player:ready',function(){" +
+        "var pid=(player.getAttribute('id')||player.getAttribute('original-id')||'').replace('vid-','');" +
+        'var cfg=listPitch[pid];if(!cfg)return;' +
+        "document.querySelectorAll('.esconder').forEach(function(el){observer.observe(el,{attributes:true,attributeFilter:['style']});});" +
+        "player.displayHiddenElements(cfg.delay,['.esconder'],{persist:true});" +
+        '});' +
+        '})();' +
+        '<\\/script>'
+      );
+    }
+    return parts.join('');
+  }
+
   // Serialize body without editor overlays or wf-only attributes
   function serializeBody() {
     const clone = document.body.cloneNode(true);
@@ -379,6 +438,16 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
       const isEditScript = t.indexOf('__wf_hover') !== -1 || t.indexOf('__wf_select') !== -1;
       const isBaseScript = t.indexOf("querySelectorAll('.reveal')") !== -1 && t.indexOf('IntersectionObserver') !== -1;
       if (isEditScript || isBaseScript) s.parentNode && s.parentNode.removeChild(s);
+    });
+    // VSL blocks: rebuild from stored config rather than trusting whatever the
+    // live vturb-smartplayer has mutated itself into (see buildVslInnerHtmlFromConfig).
+    clone.querySelectorAll('[data-wf-vsl-block][data-wf-vsl-state="configured"]').forEach(function(wrapper){
+      const raw = wrapper.getAttribute('data-wf-vsl-config');
+      if (!raw) return;
+      try {
+        const config = JSON.parse(raw);
+        if (typeof config.snippet === 'string') wrapper.innerHTML = buildVslInnerHtmlFromConfig(config);
+      } catch (e) { /* malformed config — leave live content as-is */ }
     });
     return clone.innerHTML;
   }
@@ -723,6 +792,45 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
       console.log('[VSL] update complete, wrapper now contains', wrapper.children.length, 'children');
       window.parent.postMessage({ type: 'wf-vsl-update-result', ok: true, id: e.data.id }, '*');
     }
+    if (e.data.type === 'wf-vsl-hide-siblings' && typeof e.data.id === 'string') {
+      // One-click "hide every other top-level section until the pitch" — adds
+      // .esconder to every section sibling of the one containing this VSL block.
+      let wrapper = document.querySelector('[data-wf-id="' + e.data.id + '"]');
+      if (!wrapper) {
+        const allBlocks = document.querySelectorAll('[data-wf-vsl-block]');
+        if (allBlocks.length === 1) wrapper = allBlocks[0];
+      }
+      if (!wrapper) {
+        window.parent.postMessage({ type: 'wf-vsl-hide-siblings-result', ok: false, reason: 'wrapper-not-found' }, '*');
+        return;
+      }
+      // The real sections live inside <main> when the page has one — document.body
+      // itself almost always has other direct children too (meta/title tags left
+      // over from assembly, the injected base/edit <script> tags, the editor's
+      // overlay elements), so body is never a reliable "list of sections" on its
+      // own. Prefer <main>'s children; fall back to body only if there's no <main>.
+      const container = document.querySelector('main') || document.body;
+      let homeChild = null;
+      Array.prototype.forEach.call(container.children, function(child) {
+        if (child.contains(wrapper)) homeChild = child;
+      });
+      const SKIP_TAGS = { SCRIPT:1, STYLE:1, LINK:1, META:1, TITLE:1 };
+      let count = 0;
+      Array.prototype.forEach.call(container.children, function(child) {
+        if (child === homeChild) return;
+        if (child.id && child.id.indexOf('__wf') === 0) return;
+        if (SKIP_TAGS[child.tagName]) return;
+        const existing = (child.getAttribute('class') || '').trim();
+        const classes = existing ? existing.split(/\\s+/) : [];
+        if (classes.indexOf('esconder') === -1) {
+          classes.push('esconder');
+          child.setAttribute('class', classes.join(' '));
+          count++;
+        }
+      });
+      postCodeUpdated();
+      window.parent.postMessage({ type: 'wf-vsl-hide-siblings-result', ok: true, count: count }, '*');
+    }
     if (e.data.type === 'wf-load-font' && e.data.url) {
       const id = '__wf_font_' + (e.data.family || '').replace(/[^a-z0-9]/gi, '_');
       if (!document.getElementById(id)) {
@@ -812,6 +920,33 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
 
   const CONTAINER_TAGS = ['DIV','SECTION','MAIN','HEADER','FOOTER','ARTICLE','ASIDE','NAV','UL','OL','FIGURE','BODY'];
 
+  function getDropTargetAtPoint(clientX, clientY) {
+    let el = document.elementFromPoint(clientX, clientY);
+    if (!el || el.id && el.id.indexOf('__wf') === 0) return null;
+
+    // A page wrapper is not a useful insertion reference. Resolve HTML/BODY/MAIN
+    // hits to the nearest visible direct child (for example, one of main's sections).
+    while (el === document.documentElement || el === document.body || el.tagName === 'MAIN') {
+      let nearest = null;
+      let nearestDistance = Infinity;
+      for (let i = 0; i < el.children.length; i++) {
+        const child = el.children[i];
+        if (child.id && child.id.indexOf('__wf') === 0) continue;
+        if (child.tagName === 'SCRIPT' || child.tagName === 'STYLE' || child.tagName === 'LINK' || child.tagName === 'META') continue;
+        const rect = child.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) continue;
+        const distance = clientY < rect.top ? rect.top - clientY : clientY > rect.bottom ? clientY - rect.bottom : 0;
+        if (distance < nearestDistance) {
+          nearest = child;
+          nearestDistance = distance;
+        }
+      }
+      if (!nearest) break;
+      el = nearest;
+    }
+    return el;
+  }
+
   function computeDropZone(el, clientY) {
     const rect = el.getBoundingClientRect();
     const ratio = (clientY - rect.top) / rect.height;
@@ -843,8 +978,8 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
     if (!dragHtml) return;
     e.preventDefault();
     if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
-    const el = document.elementFromPoint(e.clientX, e.clientY);
-    if (!el || el.id && el.id.indexOf('__wf') === 0) return;
+    const el = getDropTargetAtPoint(e.clientX, e.clientY);
+    if (!el) return;
     const zone = computeDropZone(el, e.clientY);
     dropTarget = el;
     dropPosition = zone.pos;
@@ -860,8 +995,14 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
   });
 
   document.addEventListener('drop', function(e) {
-    if (!dragHtml || !dropTarget) return;
+    if (!dragHtml) return;
     e.preventDefault();
+
+    // Resolve the final cursor position again: dragover is throttled, so its
+    // cached target/zone can be stale by the time the user releases the mouse.
+    const target = getDropTargetAtPoint(e.clientX, e.clientY);
+    if (!target) return;
+    const zone = computeDropZone(target, e.clientY);
 
     const container = document.createElement('div');
     container.innerHTML = dragHtml.trim();
@@ -874,12 +1015,12 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
     if (!newEl) newEl = inserted[0];
     if (!newEl) return;
 
-    if (dropPosition === 'inside') {
-      dropTarget.appendChild(newEl);
-    } else if (dropPosition === 'before') {
-      dropTarget.parentElement && dropTarget.parentElement.insertBefore(newEl, dropTarget);
+    if (zone.pos === 'inside') {
+      target.appendChild(newEl);
+    } else if (zone.pos === 'before') {
+      target.parentElement && target.parentElement.insertBefore(newEl, target);
     } else {
-      dropTarget.parentElement && dropTarget.parentElement.insertBefore(newEl, dropTarget.nextSibling);
+      target.parentElement && target.parentElement.insertBefore(newEl, target.nextSibling);
     }
 
     const HEAD_TAGS = { STYLE:1, LINK:1, META:1 };

@@ -321,6 +321,7 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
           {!sidebarCollapsed && <div className="pt-3 pb-1"><span className="px-2 text-[9px] font-medium text-white/20 uppercase tracking-widest">Criar</span></div>}
           {sidebarCollapsed && <div className="pt-3" />}
 
+          <SidebarItem icon={<TrendingUp className="w-4 h-4" />} label="Lançamento pronto" active={activeNav === "lancamento-pronto"} collapsed={sidebarCollapsed} onClick={() => router.push("/lancamento-pronto")} accent />
           <SidebarItem icon={<Rocket className="w-4 h-4" />} label="Lançamentos" active={activeNav === "lancamentos"} collapsed={sidebarCollapsed} onClick={() => nav("lancamentos")} accent />
           {/* Landing Pages — accordion */}
           <div>
@@ -542,6 +543,20 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
 
             {/* ─── Hero: Prompt area ─── */}
             <div className="flex flex-col items-center justify-center px-6 py-12 min-h-[90vh]">
+              <button
+                onClick={() => router.push("/lancamento-pronto")}
+                className="group w-full max-w-[580px] mb-8 flex items-center gap-3 rounded-2xl border border-purple-500/25 bg-purple-500/[0.07] hover:bg-purple-500/[0.11] px-4 py-3.5 text-left transition-all cursor-pointer animate-fade-in-slow"
+              >
+                <div className="w-9 h-9 rounded-xl bg-purple-500/15 flex items-center justify-center shrink-0">
+                  <TrendingUp className="w-4 h-4 text-purple-300" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[12px] font-semibold text-white/85">Lançamento pronto: Luana Carolina</p>
+                  <p className="text-[11px] text-white/40">Página e criativos reais de um lançamento — replique a estrutura pro seu produto</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-purple-300/60 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+
               <h1 className="text-3xl md:text-[2.6rem] font-semibold text-center text-white mb-8 tracking-tight leading-tight animate-fade-in-slow">
                 Vamos construir seu{" "}
                 <span className="whitespace-nowrap">

@@ -55,6 +55,7 @@ import { VSLConfigPanel } from "./VSLConfigPanel";
 import { VSLConfig, deserializeConfig, serializeConfig, buildVSLInnerHtml } from "../lib/vsl";
 import { stripEditorScripts } from "../lib/strip-editor-scripts";
 import { WebflowExportModal } from "./WebflowExportModal";
+import { WordPressExportModal } from "./WordPressExportModal";
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import xml from "react-syntax-highlighter/dist/esm/languages/hljs/xml";
 import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
@@ -107,9 +108,11 @@ export function WorkspaceView({
   const [_elementorCopied, _setElementorCopied] = useState(false);
   const [publishModalOpen, setPublishModalOpen] = useState(false);
   const [webflowExportOpen, setWebflowExportOpen] = useState(false);
+  const [wordpressExportOpen, setWordpressExportOpen] = useState(false);
   const [publishSlug, setPublishSlug] = useState("");
   const [publishLoading, setPublishLoading] = useState(false);
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
+  const [publishExpiresAt, setPublishExpiresAt] = useState<string | null>(null);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishGaId, setPublishGaId] = useState("");
   const [publishFbPixel, setPublishFbPixel] = useState("");
@@ -118,6 +121,7 @@ export function WorkspaceView({
   const [publishSeoOpen, setPublishSeoOpen] = useState(false);
   const [publishTrackingOpen, setPublishTrackingOpen] = useState(false);
   const [vslDialog, setVslDialog] = useState<{ id: string; config: VSLConfig | null } | null>(null);
+  const [vslHideSiblingsResult, setVslHideSiblingsResult] = useState<{ ok: boolean; count?: number } | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -339,6 +343,7 @@ export function WorkspaceView({
       const data = await res.json();
       if (!res.ok) { setPublishError(data.error || "Erro ao publicar"); return; }
       setPublishedUrl(data.url);
+      setPublishExpiresAt(data.expiresAt ?? null);
     } catch { setPublishError("Erro de conexão"); }
     finally { setPublishLoading(false); }
   }, [publishSlug, code, finalCode, prompt, injectPublishOptions]);
@@ -385,6 +390,10 @@ export function WorkspaceView({
         if (!e.data.ok) {
           window.alert(`VSL não foi atualizado: ${e.data.reason || "erro desconhecido"}\n(detalhes no console)`);
         }
+      }
+      if (e.data.type === "wf-vsl-hide-siblings-result") {
+        console.log("[VSL] hide-siblings result from iframe", e.data);
+        setVslHideSiblingsResult({ ok: !!e.data.ok, count: e.data.count });
       }
       if (e.data.type === "wf-open-vsl-config" && typeof e.data.id === "string") {
         // Auto-enable edit mode so the iframe accepts the subsequent wf-update-vsl
@@ -493,6 +502,12 @@ export function WorkspaceView({
       config: serializeConfig(config),
     }, "*");
     setVslDialog(null);
+  }, [vslDialog]);
+
+  const handleVSLHideSiblings = useCallback(() => {
+    if (!vslDialog || !iframeRef.current?.contentWindow) return;
+    setVslHideSiblingsResult(null);
+    iframeRef.current.contentWindow.postMessage({ type: "wf-vsl-hide-siblings", id: vslDialog.id }, "*");
   }, [vslDialog]);
 
   const handleDragHtml = useCallback((html: string | null) => {
@@ -691,6 +706,8 @@ export function WorkspaceView({
               initialConfig={vslDialog.config}
               onClose={() => setVslDialog(null)}
               onSave={handleVSLSave}
+              onHideOtherSections={handleVSLHideSiblings}
+              hideOtherSectionsResult={vslHideSiblingsResult}
             />
           ) : leftPanelTab === "layers" ? (
             <LayersPanel
@@ -816,6 +833,13 @@ export function WorkspaceView({
                   </svg>
                   Webflow
                 </button>
+                <button onClick={() => setWordpressExportOpen(true)}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-[#21759b] hover:bg-[#1a5f80] text-white transition-all cursor-pointer shadow-sm">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM3.5 12c0-1.32.28-2.57.79-3.71l4.19 11.48A8.51 8.51 0 013.5 12zM12 20.5c-.85 0-1.67-.12-2.44-.35l2.6-7.55 2.66 7.29c.02.04.04.08.06.12A8.47 8.47 0 0112 20.5zm1.16-12.49c.52-.03 1-.08 1-.08.47-.06.42-.75-.05-.72 0 0-1.41.11-2.32.11-.85 0-2.29-.11-2.29-.11-.47-.02-.53.7-.05.72 0 0 .45.05.92.08l1.36 3.74-1.92 5.75-3.19-9.5c.52-.03 1-.08 1-.08.47-.06.42-.75-.05-.72 0 0-1.41.11-2.33.11-.16 0-.35 0-.56-.01A8.5 8.5 0 0112 3.5c2.06 0 3.94.79 5.35 2.08-.03 0-.07-.01-.1-.01-.85 0-1.45.74-1.45 1.53 0 .71.41 1.31.84 2.02.33.57.71 1.31.71 2.37 0 .74-.28 1.59-.65 2.79l-.85 2.85-3.09-9.11zm5.72-2.85A8.49 8.49 0 0120.5 12c0 3.28-1.92 6.11-4.7 7.43l2.85-8.24c.53-1.33.71-2.4.71-3.34 0-.34-.02-.66-.06-.94z"/>
+                  </svg>
+                  WordPress
+                </button>
                 <button onClick={() => {
                   setPublishModalOpen(true);
                   setPublishedUrl(null);
@@ -938,6 +962,13 @@ export function WorkspaceView({
         code={finalCode || code}
       />
 
+      <WordPressExportModal
+        open={wordpressExportOpen}
+        onClose={() => setWordpressExportOpen(false)}
+        code={finalCode || code}
+        title={prompt}
+      />
+
       {/* Publish Modal */}
       {publishModalOpen && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center">
@@ -950,7 +981,7 @@ export function WorkspaceView({
                 <div className="w-7 h-7 rounded-lg bg-purple-500/15 border border-purple-500/20 flex items-center justify-center">
                   <Globe className="w-3.5 h-3.5 text-purple-400" />
                 </div>
-                <h3 className="text-[14px] font-semibold text-white">Publicar página</h3>
+                <h3 className="text-[14px] font-semibold text-white">Link de preview</h3>
               </div>
               <button onClick={() => { setPublishModalOpen(false); setPublishedUrl(null); }} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/70 cursor-pointer transition-colors">
                 <X className="w-4 h-4" />
@@ -1085,6 +1116,14 @@ export function WorkspaceView({
                   {publishError && (
                     <p className="text-[11px] text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{publishError}</p>
                   )}
+
+                  <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-amber-500/[0.08] border border-amber-500/[0.15]">
+                    <EyeOff className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                    <p className="text-[10px] text-amber-400/80 leading-relaxed">
+                      Isso gera um link temporário (expira em 14 dias) pra testar e aprovar — não é a hospedagem final.
+                      Pra publicar de verdade, use os exports <strong>Webflow</strong> ou <strong>WordPress</strong>.
+                    </p>
+                  </div>
                 </div>
 
                 {/* Footer */}
@@ -1095,8 +1134,8 @@ export function WorkspaceView({
                     className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white text-[13px] font-semibold transition-colors cursor-pointer shadow-lg shadow-purple-900/30"
                   >
                     {publishLoading
-                      ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Publicando...</>
-                      : <><Globe className="w-3.5 h-3.5" /> Publicar agora</>
+                      ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Gerando...</>
+                      : <><Globe className="w-3.5 h-3.5" /> Gerar link de preview</>
                     }
                   </button>
                 </div>
@@ -1106,9 +1145,14 @@ export function WorkspaceView({
                 <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
                   <Check className="w-6 h-6 text-emerald-400" />
                 </div>
-                <p className="text-[15px] font-bold text-white mb-1">Pagina no ar!</p>
-                <p className="text-[11px] text-white/35 mb-5 font-mono break-all">{publishedUrl}</p>
-                <div className="flex gap-2">
+                <p className="text-[15px] font-bold text-white mb-1">Link de preview pronto!</p>
+                <p className="text-[11px] text-white/35 mb-1 font-mono break-all">{publishedUrl}</p>
+                {publishExpiresAt && (
+                  <p className="text-[10px] text-amber-400/70 mb-4">
+                    Expira em {new Date(publishExpiresAt).toLocaleDateString("pt-BR")} — não é hospedagem final
+                  </p>
+                )}
+                <div className="flex gap-2 mb-3">
                   <a href={publishedUrl} target="_blank" rel="noopener noreferrer"
                     className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[12px] font-semibold transition-colors">
                     <ExternalLink className="w-3.5 h-3.5" /> Abrir
@@ -1117,6 +1161,18 @@ export function WorkspaceView({
                     onClick={() => navigator.clipboard.writeText(publishedUrl)}
                     className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] text-white/60 text-[12px] font-medium transition-colors cursor-pointer">
                     <Copy className="w-3.5 h-3.5" /> Copiar URL
+                  </button>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setPublishModalOpen(false); setWebflowExportOpen(true); }}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] text-white/40 text-[11px] font-medium transition-colors cursor-pointer">
+                    Publicar no Webflow
+                  </button>
+                  <button
+                    onClick={() => { setPublishModalOpen(false); setWordpressExportOpen(true); }}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] text-white/40 text-[11px] font-medium transition-colors cursor-pointer">
+                    Publicar no WordPress
                   </button>
                 </div>
                 {(publishGaId || publishFbPixel) && (

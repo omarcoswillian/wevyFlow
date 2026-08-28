@@ -24,6 +24,11 @@ export async function POST(req: NextRequest) {
 
     const cleanSlug = slug.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
 
+    // /p/[slug] is a temporary preview/approval link, not production hosting
+    // (real publishing goes through the WordPress/Webflow export) — every
+    // (re)publish renews the 14-day window so it doesn't expire mid-edit.
+    const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+
     const { data, error } = await supabase
       .from("published_pages")
       .upsert(
@@ -34,6 +39,7 @@ export async function POST(req: NextRequest) {
           html,
           kit_id: kit_id || null,
           page_type: page_type || null,
+          expires_at: expiresAt,
           updated_at: new Date().toISOString(),
         },
         { onConflict: "slug" }
@@ -49,7 +55,7 @@ export async function POST(req: NextRequest) {
     }
 
     const url = `${process.env.NEXT_PUBLIC_APP_URL || "https://app.wevyflow.com"}/p/${cleanSlug}`;
-    return Response.json({ id: data.id, slug: cleanSlug, url });
+    return Response.json({ id: data.id, slug: cleanSlug, url, expiresAt });
   } catch (e) {
     console.error("[publish]", e);
     return Response.json({ error: "erro interno" }, { status: 500 });

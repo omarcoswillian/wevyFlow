@@ -1,90 +1,69 @@
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
+import type { Database } from "@/lib/supabase/types";
+import { buildLeadCaptureSnippet } from "@/app/lib/lead-capture-snippet";
 import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-const LEAD_CAPTURE_SCRIPT = `
-<script>
-(function(){
-  var slug = document.currentScript ? document.currentScript.getAttribute('data-slug') : '';
-  var utmParams = {};
-  try {
-    var sp = new URLSearchParams(location.search);
-    ['utm_source','utm_medium','utm_campaign'].forEach(function(k){ if(sp.get(k)) utmParams[k]=sp.get(k); });
-  } catch(e){}
-
-  function getFieldValue(form, names){
-    for(var i=0;i<names.length;i++){
-      var el = form.querySelector('[name="'+names[i]+'"], [id="'+names[i]+'"], [placeholder*="'+names[i]+'"]');
-      if(el && el.value) return el.value;
-    }
-    return null;
-  }
-
-  function collectExtra(form, skipNames){
-    var extra={};
-    form.querySelectorAll('input,select,textarea').forEach(function(el){
-      var n=el.name||el.id; if(!n||skipNames.indexOf(n)>-1) return;
-      if(el.value) extra[n]=el.value;
-    });
-    return Object.keys(extra).length ? extra : null;
-  }
-
-  document.querySelectorAll('form').forEach(function(form){
-    form.addEventListener('submit', function(e){
-      e.preventDefault();
-      var email=getFieldValue(form,['email','e-mail','seu-email','melhor-email']);
-      var phone=getFieldValue(form,['phone','telefone','whatsapp','celular','tel']);
-      var name=getFieldValue(form,['name','nome','first_name','seu-nome']);
-      if(!email && !phone) { form.submit(); return; }
-      var skip=['email','e-mail','phone','telefone','whatsapp','celular','tel','name','nome','first_name','seu-nome','seu-email','melhor-email','seu-nome'];
-      var payload=Object.assign({
-        page_slug:slug,
-        page_title:document.title,
-        name:name||null,
-        email:email||null,
-        phone:phone||null,
-        extra:collectExtra(form,skip)||null
-      }, utmParams);
-      fetch('/api/public/leads',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
-        .catch(function(){});
-      var btn=form.querySelector('[type="submit"]');
-      if(btn){ btn.disabled=true; btn.textContent='Enviado!'; }
-      var thanks=document.getElementById('wf-thanks');
-      if(thanks){ thanks.style.display='block'; form.style.display='none'; }
-    });
-  });
-})();
-</script>`;
+function notFoundPage(message: string) {
+  return new Response(
+    `<!DOCTYPE html><html><body style="font-family:sans-serif;text-align:center;padding:80px;color:#6b7280"><h2>${message}</h2></body></html>`,
+    { status: 404, headers: { "Content-Type": "text/html; charset=utf-8" } }
+  );
+}
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
   const supabase = await createClient();
 
+  // RLS only allows this anon-key client to see non-expired pages — a slug
+  // that exists but expired resolves to no rows here, same as one that
+  // never existed. Told apart below via a service-role lookup so the
+  // visitor gets an accurate message instead of a generic 404.
   const { data: page, error: qErr } = await supabase
     .from("published_pages")
-    .select("html, title, slug")
+    .select("html, title, slug, public_token")
     .eq("slug", slug)
     .maybeSingle();
 
   console.log("[/p/slug] slug:", slug, "| found:", !!page, "| error:", qErr?.message);
 
   if (!page) {
-    return new Response(
-      `<!DOCTYPE html><html><body style="font-family:sans-serif;text-align:center;padding:80px;color:#6b7280"><h2>Página não encontrada</h2></body></html>`,
-      { status: 404, headers: { "Content-Type": "text/html; charset=utf-8" } }
+    const service = createServiceClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_KEY!
+    );
+    const { data: expired } = await service
+      .from("published_pages")
+      .select("slug")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    return notFoundPage(
+      expired
+        ? "Este link de preview expirou. Peça um novo link a quem criou a página."
+        : "Página não encontrada"
     );
   }
 
-  // Increment views (fire and forget)
-  supabase.from("published_pages").update({ views: 0 }).eq("slug", slug).then(() => {});
+  // Fire-and-forget view increment via the same atomic RPC leads use —
+  // this used to be `.update({ views: 0 })`, which reset the counter to
+  // zero on every single page load instead of incrementing it.
+  supabase.rpc("increment_page_views", { p_slug: slug }).then(() => {});
 
-  // Inject lead capture script with slug embedded directly in the script tag
-  const scriptTag = LEAD_CAPTURE_SCRIPT.replace("<script>", `<script data-slug="${slug}">`);
-  const html = page.html.includes("</body>")
-    ? page.html.replace("</body>", `${scriptTag}\n</body>`)
-    : page.html + scriptTag;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || `${req.nextUrl.protocol}//${req.nextUrl.host}`;
+  const scriptTag = buildLeadCaptureSnippet(page.public_token, appUrl);
+
+  // /p/[slug] is a temporary preview/approval link, not production hosting —
+  // keep it out of search results regardless of what the page's own SEO
+  // settings say (those apply to the real export destination instead).
+  const noindexTag = `<meta name="robots" content="noindex, nofollow">`;
+  let html = page.html.includes("</head>")
+    ? page.html.replace("</head>", `${noindexTag}\n</head>`)
+    : `${noindexTag}\n${page.html}`;
+  html = html.includes("</body>") ? html.replace("</body>", `${scriptTag}\n</body>`) : html + scriptTag;
 
   return new Response(html, {
     status: 200,

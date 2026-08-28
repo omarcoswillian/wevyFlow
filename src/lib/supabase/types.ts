@@ -173,6 +173,7 @@ export type Database = {
           utm_campaign: string | null;
           referrer: string | null;
           ip: string | null;
+          source_token: string | null;
           created_at: string;
         };
         Insert: {
@@ -189,6 +190,7 @@ export type Database = {
           utm_campaign?: string | null;
           referrer?: string | null;
           ip?: string | null;
+          source_token?: string | null;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["leads"]["Insert"]>;
@@ -204,6 +206,8 @@ export type Database = {
           kit_id: string | null;
           page_type: string | null;
           views: number;
+          public_token: string;
+          expires_at: string;
           created_at: string;
           updated_at: string;
         };
@@ -216,10 +220,32 @@ export type Database = {
           kit_id?: string | null;
           page_type?: string | null;
           views?: number;
+          public_token?: string;
+          expires_at?: string;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["published_pages"]["Insert"]>;
+        Relationships: [];
+      };
+      lead_sources: {
+        Row: {
+          id: string;
+          user_id: string;
+          token: string;
+          title: string;
+          platform: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          token?: string;
+          title?: string;
+          platform?: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["lead_sources"]["Insert"]>;
         Relationships: [];
       };
       brand_kits: {

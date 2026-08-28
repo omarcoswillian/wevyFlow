@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   X,
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { stripEditorScripts } from "../lib/strip-editor-scripts";
 import { rewriteResponsiveSelectors, cleanEditorArtifacts } from "../lib/clean-editor-artifacts";
+import { buildLeadCaptureSnippet } from "../lib/lead-capture-snippet";
 
 interface ElementorExportProps {
   code: string;
@@ -803,7 +804,31 @@ export function ElementorExport({ code, fonts, onClose }: ElementorExportProps) 
     return `${fontsLink}\n${result}`;
   }, [code, fonts]);
 
-  const fullHtml = cleanedCode.includes("<!DOCTYPE") || cleanedCode.includes("<html") ? cleanedCode : `<!DOCTYPE html><html><head>${buildFontsLink(fonts)}</head><body>${cleanedCode}</body></html>`;
+  const cleanedFullHtml = cleanedCode.includes("<!DOCTYPE") || cleanedCode.includes("<html") ? cleanedCode : `<!DOCTYPE html><html><head>${buildFontsLink(fonts)}</head><body>${cleanedCode}</body></html>`;
+
+  // Get-or-create the token that routes leads from this exported page back
+  // to the dashboard, regardless of where it ends up hosted (WordPress via
+  // Elementor, Hostinger, anywhere) — see src/app/lib/lead-capture-snippet.ts.
+  const [leadToken, setLeadToken] = useState<string | null>(null);
+  useEffect(() => {
+    fetch("/api/pages/lead-source", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Export Elementor", platform: "elementor" }),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (data?.token) setLeadToken(data.token); })
+      .catch(() => {});
+  }, []);
+
+  const fullHtml = useMemo(() => {
+    if (!leadToken) return cleanedFullHtml;
+    const appUrl = typeof window !== "undefined" ? window.location.origin : "";
+    const scriptTag = buildLeadCaptureSnippet(leadToken, appUrl);
+    return cleanedFullHtml.includes("</body>")
+      ? cleanedFullHtml.replace("</body>", `${scriptTag}\n</body>`)
+      : cleanedFullHtml + scriptTag;
+  }, [cleanedFullHtml, leadToken]);
 
   const sharedCss = useMemo(() => extractStyles(fullHtml), [fullHtml]);
   const sharedJs = useMemo(() => extractScripts(fullHtml), [fullHtml]);
