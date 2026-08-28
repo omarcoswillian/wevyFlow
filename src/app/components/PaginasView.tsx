@@ -128,8 +128,8 @@ export default function PaginasView() {
       }
       let finalHtml = parsed.html as string;
       for (const [id, dataUrl] of Object.entries(compressed)) {
-        finalHtml = finalHtml.replaceAll(`'${id}'`, `'${dataUrl}'`);
-        finalHtml = finalHtml.replaceAll(`"${id}"`, `"${dataUrl}"`);
+        finalHtml = finalHtml.replaceAll(`'${id}'`, () => `'${dataUrl}'`);
+        finalHtml = finalHtml.replaceAll(`"${id}"`, () => `"${dataUrl}"`);
       }
 
       const res = await fetch("/api/pages/figma-import", {

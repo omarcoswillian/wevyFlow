@@ -283,7 +283,7 @@ export function WorkspaceView({
     if (publishMetaDesc.trim()) {
       const tag = `<meta name="description" content="${publishMetaDesc.trim().replace(/"/g, "&quot;")}">`;
       if (/<meta\s+name=["']description["']/i.test(out)) {
-        out = out.replace(/<meta\s+name=["']description["'][^>]*>/i, tag);
+        out = out.replace(/<meta\s+name=["']description["'][^>]*>/i, () => tag);
       } else {
         headInserts.push(tag);
       }
@@ -304,7 +304,7 @@ export function WorkspaceView({
     }
 
     if (headInserts.length > 0) {
-      out = out.replace(/<\/head>/i, `${headInserts.map(s => `  ${s}`).join("\n")}\n</head>`);
+      out = out.replace(/<\/head>/i, () => `${headInserts.map(s => `  ${s}`).join("\n")}\n</head>`);
     }
 
     if (publishFbPixel.trim()) {
@@ -316,7 +316,7 @@ export function WorkspaceView({
     }
 
     if (bodyInserts.length > 0 && hasBody) {
-      out = out.replace(/<\/body>/i, `${bodyInserts.map(s => `  ${s}`).join("\n")}\n</body>`);
+      out = out.replace(/<\/body>/i, () => `${bodyInserts.map(s => `  ${s}`).join("\n")}\n</body>`);
     }
 
     return out;
@@ -904,12 +904,24 @@ export function WorkspaceView({
         {/* Code */}
         {rightTab === "code" && (
           <div className="flex-1 overflow-auto">
-            <SyntaxHighlighter language="xml" style={atomOneDark} showLineNumbers
-              lineNumberStyle={{ color: "rgba(255,255,255,0.1)", fontSize: "11px", paddingRight: "16px", minWidth: "40px" }}
-              customStyle={{ background: "#0c0c10", margin: 0, padding: "20px", fontSize: "12px", lineHeight: "1.8", minHeight: "100%" }}
-              wrapLongLines>
-              {code}
-            </SyntaxHighlighter>
+            {code.length > 300_000 ? (
+              // Tokenizing huge single-line minified content (real-world
+              // scraped/exported pages easily hit multi-MB HTML) can hang the
+              // highlighter's main-thread parser for a very long time with no
+              // visible progress — looks identical to "nothing loaded". Skip
+              // straight to plain text above this size instead of guessing
+              // at a timeout.
+              <pre className="text-white/70 text-[12px] leading-relaxed p-5 whitespace-pre-wrap break-all" style={{ background: "#0c0c10", margin: 0, minHeight: "100%" }}>
+                {code}
+              </pre>
+            ) : (
+              <SyntaxHighlighter language="xml" style={atomOneDark} showLineNumbers
+                lineNumberStyle={{ color: "rgba(255,255,255,0.1)", fontSize: "11px", paddingRight: "16px", minWidth: "40px" }}
+                customStyle={{ background: "#0c0c10", margin: 0, padding: "20px", fontSize: "12px", lineHeight: "1.8", minHeight: "100%" }}
+                wrapLongLines>
+                {code}
+              </SyntaxHighlighter>
+            )}
           </div>
         )}
       </div>

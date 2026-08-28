@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     if (leadToken) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || `${req.nextUrl.protocol}//${req.nextUrl.host}`;
       const scriptTag = buildLeadCaptureSnippet(leadToken, appUrl);
-      html = html.includes("</body>") ? html.replace("</body>", `${scriptTag}\n</body>`) : html + scriptTag;
+      html = html.includes("</body>") ? html.replace("</body>", () => `${scriptTag}\n</body>`) : html + scriptTag;
     }
 
     if (!html.includes("<!DOCTYPE") && !html.includes("<html")) {

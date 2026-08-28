@@ -17,7 +17,7 @@ export function rewriteResponsiveSelectors(html: string): string {
       const classMatch = beforeAfter.match(/\sclass="([^"]*)"/i);
       if (classMatch) {
         // Append to existing class
-        const newAttrs = beforeAfter.replace(/\sclass="([^"]*)"/i, ` class="${classMatch[1]} ${cls}"`);
+        const newAttrs = beforeAfter.replace(/\sclass="([^"]*)"/i, () => ` class="${classMatch[1]} ${cls}"`);
         return `<${tag}${newAttrs} data-wf-id="wf-${n}">`;
       }
       // Prepend a class attribute

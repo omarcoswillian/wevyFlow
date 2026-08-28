@@ -80,14 +80,18 @@ export function ResourcesPage({ onSelectTemplate }: ResourcesPageProps) {
                         className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-purple-500/[0.08] via-transparent to-pink-500/[0.05] flex items-center justify-center">
-                        <Sparkles className="w-7 h-7 text-white/[0.07]" />
+                      <div className="w-full h-full bg-gradient-to-br from-purple-500/[0.08] via-transparent to-pink-500/[0.05] flex flex-col items-center justify-center gap-3 px-4 text-center">
+                        <Sparkles className="w-7 h-7 text-white/[0.12]" />
+                        <span className="text-[11px] font-medium text-white/30 leading-snug">{template.label}</span>
                       </div>
                     )}
                   </div>
 
                   {/* CTA */}
                   <div className="p-3">
+                    <p className="px-1 pb-2 text-[11px] font-medium text-white/50 truncate" title={template.label}>
+                      {template.label}
+                    </p>
                     <button
                       onClick={() => onSelectTemplate(template.prompt)}
                       className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-purple-600/[0.12] border border-purple-500/20 text-purple-300 text-[11px] font-semibold cursor-pointer hover:bg-purple-600/20 hover:border-purple-500/35 transition-all"

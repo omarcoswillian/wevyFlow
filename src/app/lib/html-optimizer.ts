@@ -181,7 +181,7 @@ function injectWebhookHandler(html: string, webhookUrl: string): string {
 </script>`.trim();
 
   if (/<\/body>/i.test(html)) {
-    return html.replace(/<\/body>/i, `${script}\n</body>`);
+    return html.replace(/<\/body>/i, () => `${script}\n</body>`);
   }
   return html + "\n" + script;
 }

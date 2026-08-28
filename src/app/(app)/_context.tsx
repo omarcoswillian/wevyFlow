@@ -663,10 +663,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     async (prompt: string) => {
       if (prompt.startsWith("READY:")) {
         const templateId = prompt.replace("READY:", "");
-        setCurrentPrompt("Template: " + templateId);
+        const templatePrompt = "Template: " + templateId;
+        setCurrentPrompt(templatePrompt);
         setCurrentPlatform("html");
         router.push("/workspace");
         setIsLoading(true);
+
+        // Explicitly picking a template from the gallery means "give me the
+        // real thing" — a stale localStorage draft from a previous (possibly
+        // broken/outdated) load of this same template must not silently win
+        // over the freshly-fetched content (WorkspaceView prefers any draft
+        // saved under this exact prompt's key).
+        try {
+          let h = 0;
+          for (let i = 0; i < templatePrompt.length; i++) h = ((h << 5) - h + templatePrompt.charCodeAt(i)) | 0;
+          localStorage.removeItem(`wf:draft:${h}`);
+        } catch { /* storage unavailable */ }
+
         try {
           const res = await fetch(`/api/template?id=${templateId}`);
           if (!res.ok) throw new Error("Template nao encontrado");

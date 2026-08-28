@@ -32,6 +32,14 @@ function b64ToBuffer(b64: string): Buffer {
   return Buffer.from(b64, "base64");
 }
 
+// A literal "</script" substring inside merged script bodies (e.g. a string
+// or regex in a minified bundle) would close this new <script> tag early,
+// dumping the rest as visible page text. Escaping the slash is safe — it's
+// just an escaped "/" inside a string/regex, same value either way.
+function escapeScriptClose(code: string): string {
+  return code.replace(/<\/(script)/gi, "<\\/$1");
+}
+
 function ext(mime: string) {
   const map: Record<string, string> = {
     "image/jpeg": "jpg",
@@ -104,8 +112,8 @@ export async function POST(req: NextRequest) {
         const filename = `wf-export-${Date.now()}-${i + 1}.${ext(mime)}`;
         try {
           const url = await uploadImageToWebflow(webflowToken!, webflowSiteId!, b64ToBuffer(b64), filename, mime);
-          processed = processed.replaceAll(`url(${full})`, `url(${url})`);
-          processed = processed.replaceAll(full, url);
+          processed = processed.replaceAll(`url(${full})`, () => `url(${url})`);
+          processed = processed.replaceAll(full, () => url);
           imagesProcessed++;
         } catch (e) {
           console.error("[export-webflow] webflow asset upload failed:", e instanceof Error ? e.message : e);
@@ -124,8 +132,8 @@ export async function POST(req: NextRequest) {
 
         if (!error) {
           const url = `${CDN_BASE}/${filename}`;
-          processed = processed.replaceAll(`url(${full})`, `url(${url})`);
-          processed = processed.replaceAll(full, url);
+          processed = processed.replaceAll(`url(${full})`, () => `url(${url})`);
+          processed = processed.replaceAll(full, () => url);
           imagesProcessed++;
         }
       }
@@ -209,7 +217,7 @@ export async function POST(req: NextRequest) {
       return "";
     }).trim();
 
-    const allScripts = scripts.join("\n");
+    const allScripts = escapeScriptClose(scripts.join("\n"));
     const wfScript = allScripts
       ? `<script>\n(function(){\nvar _run=function(){\n${allScripts}\n};\nif(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',_run);}else{_run();}\n})();\n</script>`
       : "";

@@ -98,7 +98,7 @@ export async function POST(request: Request) {
         css = css.replace(/\s*{\s*/g, "{").replace(/\s*}\s*/g, "}").replace(/\s*;\s*/g, ";").replace(/\s*:\s*/g, ":").replace(/\s*,\s*/g, ",");
         // Remove media queries for reduced-motion (not essential for refine)
         css = css.replace(/@media\s*\(prefers-reduced-motion[^}]*\{[^}]*\}\s*\}/g, "");
-        compactCode = compactCode.replace(styleMatch[0], `<style>${css}</style>`);
+        compactCode = compactCode.replace(styleMatch[0], () => `<style>${css}</style>`);
       }
 
       // If STILL too large, truncate CSS keeping only first 15k chars of it
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
         const styleMatch2 = compactCode.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
         if (styleMatch2 && styleMatch2[1].length > 15000) {
           const truncatedCss = styleMatch2[1].slice(0, 15000) + "\n/* ... CSS truncado para caber no limite ... */";
-          compactCode = compactCode.replace(styleMatch2[0], `<style>${truncatedCss}</style>`);
+          compactCode = compactCode.replace(styleMatch2[0], () => `<style>${truncatedCss}</style>`);
         }
       }
     }

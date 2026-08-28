@@ -49,6 +49,16 @@ function isExternal(url: string) {
   return /^(https?:|data:|mailto:|tel:|#)/i.test(url);
 }
 
+// A minified bundle (Lodash, Webflow's own runtime, etc.) can legitimately
+// contain the literal substring "</script" inside a string or regex literal.
+// Pasting that verbatim into a new <script> tag closes the tag right there —
+// the rest of the file becomes literal visible text on the page. Escaping
+// the slash is the standard fix and is safe: inside a string/regex "<\/" is
+// just an escaped "/", same value; it can't appear in bare executable JS.
+function escapeClosingTag(code: string, tag: "script" | "style"): string {
+  return code.replace(new RegExp(`</(${tag})`, "gi"), "<\\/$1");
+}
+
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient();
@@ -96,8 +106,12 @@ export async function POST(req: NextRequest) {
       if (!hrefMatch || isExternal(hrefMatch[1])) continue;
       const cssEntry = entryByPath.get(resolveRelative(root, hrefMatch[1]));
       if (cssEntry) {
-        const css = await cssEntry.async("string");
-        html = html.replace(tag, `<style>\n${css}\n</style>`);
+        const css = escapeClosingTag(await cssEntry.async("string"), "style");
+        // Replacer must be a FUNCTION, not a string: a plain string replacement
+        // treats "$&", "$`", "$'", "$$" as special patterns, and a real-world
+        // minified file (any sizeable one) very likely contains one of those
+        // by chance — silently corrupting the page with fragments of itself.
+        html = html.replace(tag, () => `<style>\n${css}\n</style>`);
       }
     }
 
@@ -107,8 +121,9 @@ export async function POST(req: NextRequest) {
       if (isExternal(src)) continue;
       const jsEntry = entryByPath.get(resolveRelative(root, src));
       if (jsEntry) {
-        const js = await jsEntry.async("string");
-        html = html.replace(m[0], `<script>\n${js}\n</script>`);
+        const js = escapeClosingTag(await jsEntry.async("string"), "script");
+        // Function replacer — see comment above the CSS inlining loop.
+        html = html.replace(m[0], () => `<script>\n${js}\n</script>`);
       }
     }
 
@@ -141,7 +156,10 @@ export async function POST(req: NextRequest) {
         });
       if (!uploadError) {
         const url = `${SUPABASE_URL}/storage/v1/object/public/ai-images/${storagePath}`;
-        html = html.replaceAll(`"${ref}"`, `"${url}"`).replaceAll(`'${ref}'`, `'${url}'`).replaceAll(`(${ref})`, `(${url})`);
+        html = html
+          .replaceAll(`"${ref}"`, () => `"${url}"`)
+          .replaceAll(`'${ref}'`, () => `'${url}'`)
+          .replaceAll(`(${ref})`, () => `(${url})`);
       }
     }
 

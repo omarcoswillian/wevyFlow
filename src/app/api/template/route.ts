@@ -1,5 +1,6 @@
 import { readFileSync } from "fs";
 import { join } from "path";
+import { createClient } from "@supabase/supabase-js";
 
 const TEMPLATES_DIR = join(process.cwd(), "src/app/lib/ready-templates");
 
@@ -22,20 +23,47 @@ const TEMPLATE_MAP: Record<string, string> = {
   "ready-hero-vendas-portfolio":    "sections/hero-vendas-portfolio-dark.html",
 };
 
+// Templates sourced from imported pages (e.g. a Webflow site export) live as
+// rows in published_pages instead of static files — id "ready-<slug>" maps
+// to that slug. Service-role client bypasses both RLS and the /p/[slug]
+// preview-link expiry: a template must keep working regardless of whether
+// its original preview link expired.
+async function readFromPublishedPages(slug: string): Promise<string | null> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key) return null;
+  const supabase = createClient(url, key);
+  const { data } = await supabase.from("published_pages").select("html").eq("slug", slug).maybeSingle();
+  return data?.html ?? null;
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 
-  if (!id || !TEMPLATE_MAP[id]) {
+  if (!id) {
     return Response.json({ error: "Template not found" }, { status: 404 });
   }
 
-  try {
-    const html = readFileSync(join(TEMPLATES_DIR, TEMPLATE_MAP[id]), "utf-8");
-    return new Response(html, {
-      headers: { "Content-Type": "text/html; charset=utf-8" },
-    });
-  } catch {
-    return Response.json({ error: "Template file not found" }, { status: 404 });
+  if (TEMPLATE_MAP[id]) {
+    try {
+      const html = readFileSync(join(TEMPLATES_DIR, TEMPLATE_MAP[id]), "utf-8");
+      return new Response(html, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    } catch {
+      return Response.json({ error: "Template file not found" }, { status: 404 });
+    }
   }
+
+  if (id.startsWith("ready-")) {
+    const html = await readFromPublishedPages(id.replace(/^ready-/, ""));
+    if (html) {
+      return new Response(html, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+  }
+
+  return Response.json({ error: "Template not found" }, { status: 404 });
 }
