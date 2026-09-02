@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { X, ChevronRight, ChevronLeft, Rocket, Zap, Sprout, PlayCircle, Repeat, Check, Upload, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppContext } from "../(app)/_context";
@@ -37,7 +37,7 @@ const DEFAULT_BRAND: Partial<BrandInfo> = {
 };
 
 export function LaunchWizard() {
-  const { showLaunchWizard, setShowLaunchWizard, saveLaunchKit, navigate } = useAppContext();
+  const { showLaunchWizard, setShowLaunchWizard, saveLaunchKit, navigate, launchWizardPrefill, setLaunchWizardPrefill } = useAppContext();
 
   const [wizard, setWizard] = useState<WizardState>({
     step: 1,
@@ -45,10 +45,26 @@ export function LaunchWizard() {
     selectedStrategy: null,
   });
 
+  // Ao abrir vindo do "+" da home com briefing já preenchido, pula direto pra escolha de estratégia
+  useEffect(() => {
+    if (!showLaunchWizard) return;
+    const prefill = launchWizardPrefill;
+    const brandInfo = { ...DEFAULT_BRAND, ...prefill };
+    const prefillComplete = !!(
+      prefill?.productName?.trim() &&
+      prefill?.niche?.trim() &&
+      prefill?.targetAudience?.trim() &&
+      prefill?.transformation?.trim()
+    );
+    setWizard({ step: prefillComplete ? 2 : 1, brandInfo, selectedStrategy: null });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showLaunchWizard]);
+
   const close = useCallback(() => {
     setShowLaunchWizard(false);
+    setLaunchWizardPrefill(null);
     setWizard({ step: 1, brandInfo: { ...DEFAULT_BRAND }, selectedStrategy: null });
-  }, [setShowLaunchWizard]);
+  }, [setShowLaunchWizard, setLaunchWizardPrefill]);
 
   const setBrand = useCallback((patch: Partial<BrandInfo>) => {
     setWizard((w) => ({ ...w, brandInfo: { ...w.brandInfo, ...patch } }));

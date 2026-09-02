@@ -44,7 +44,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Platform } from "../lib/types";
 import { ApiKeyModal } from "./ApiKeyModal";
 import { useAppContext } from "../(app)/_context";
-import type { LaunchKit, StrategyId } from "../lib/types-kit";
+import type { LaunchKit, StrategyId, BrandInfo } from "../lib/types-kit";
 import type { Project } from "../lib/projects";
 
 export interface GenerateData {
@@ -111,18 +111,16 @@ const STRATEGY_LABELS: Record<StrategyId, string> = {
   perpetuo: "Perpétuo",
 };
 
-export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, contentOverride, activeNav, upgradeOpen: upgradeOpenProp, onUpgradeClose }: HomeViewProps) {
+export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNavigate, onOpenSearch, contentOverride, activeNav, upgradeOpen: upgradeOpenProp, onUpgradeClose }: HomeViewProps) {
   const nav = onNavigate || (() => {});
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentTipo = searchParams.get("tipo") ?? "criativos";
-  const { apiKey, aiProvider, aiModel, saveApiKey, clearApiKey, imageApiKey, imageProvider, imageModel, saveImageApiKey, clearImageApiKey, setShowLaunchWizard, launchKits, projects, webhookUrl, setWebhookUrl } = useAppContext();
+  const { apiKey, aiProvider, aiModel, saveApiKey, clearApiKey, imageApiKey, imageProvider, imageModel, saveImageApiKey, clearImageApiKey, setShowLaunchWizard, openLaunchWizardWithPrefill, launchKits, projects, webhookUrl, setWebhookUrl } = useAppContext();
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [_platform, _setPlatform] = useState<Platform>("html");
   const [referenceUrl, setReferenceUrl] = useState("");
-  const [brandReference, _setBrandReference] = useState("");
-  const [expectations, _setExpectations] = useState("");
   const [primaryColor, setPrimaryColor] = useState("#a78bfa");
   const [secondaryColor, setSecondaryColor] = useState("#6366f1");
   const [fontChoice, setFontChoice] = useState("sora");
@@ -227,19 +225,30 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
   const clearCopyDocument = () => { setCopyDocument(""); setCopyFileName(null); setCopyError(null); setCopyUrl(""); };
 
   const handleSubmit = () => {
-    if ((!prompt.trim() && images.length === 0 && !copyDocument.trim()) || isLoading) return;
-    const briefing = [
-      produto && `Produto: ${produto}`,
-      nicho && `Nicho: ${nicho}`,
-      tipoLancamento && `Tipo de lançamento: ${tipoLancamento}`,
-      publicoAlvo && `Público-alvo: ${publicoAlvo}`,
-      promessa && `Transformação prometida: ${promessa}`,
-      mecanismo && `Mecanismo único: ${mecanismo}`,
-      preco && `Preço + âncora: ${preco}`,
-      provas && `Provas e resultados: ${provas}`,
-    ].filter(Boolean).join("\n");
-    const enrichedPrompt = briefing ? `${briefing}\n\n${prompt}`.trim() : prompt;
-    onGenerate({ prompt: enrichedPrompt, platform: "html", referenceUrl, brandReference: produto || brandReference, expectations: promessa || expectations, primaryColor, secondaryColor, fontChoice, stylePreset, images, copyDocument: copyDocument.trim() || undefined });
+    const hasAnyInput = prompt.trim() || produto.trim() || nicho.trim() || publicoAlvo.trim() || promessa.trim() || images.length > 0 || copyDocument.trim();
+    if (!hasAnyInput) return;
+
+    // Nada é gerado aqui — o briefing alimenta o Kit de Lançamento,
+    // que gera a estratégia e guia a produção de todos os ativos.
+    const prefill: Partial<BrandInfo> = {
+      productName: produto.trim() || prompt.trim().slice(0, 60),
+      niche: nicho.trim(),
+      targetAudience: publicoAlvo.trim(),
+      transformation: promessa.trim() || prompt.trim(),
+      mecanismo: mecanismo.trim() || undefined,
+      preco: preco.trim() || undefined,
+      provas: provas.trim() || undefined,
+      primaryColor,
+      secondaryColor,
+      fontChoice,
+      stylePreset,
+      referenceImages: images.length ? images.map((img) => img.base64) : undefined,
+    };
+    openLaunchWizardWithPrefill(prefill);
+
+    setPrompt(""); setProduto(""); setNicho(""); setPublicoAlvo(""); setPromessa("");
+    setMecanismo(""); setPreco(""); setProvas(""); setImages([]);
+    setShowConfig(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -551,8 +560,8 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
                   <TrendingUp className="w-4 h-4 text-purple-300" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[12px] font-semibold text-white/85">Lançamento pronto: Luana Carolina</p>
-                  <p className="text-[11px] text-white/40">Página e criativos reais de um lançamento — replique a estrutura pro seu produto</p>
+                  <p className="text-[12px] font-semibold text-white/85">Lançamentos prontos: Luana Carolina</p>
+                  <p className="text-[11px] text-white/40">Páginas, criativos e emails reais de 7 lançamentos — replique a estrutura pro seu produto</p>
                 </div>
                 <ArrowRight className="w-4 h-4 text-purple-300/60 shrink-0 group-hover:translate-x-0.5 transition-transform" />
               </button>
@@ -567,9 +576,11 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
                 </span>
               </h1>
 
-              {/* Config panel — fluxo normal, empurra a barra pra baixo */}
+              {/* Painel flutuante centralizado — não faz parte do fluxo da barra de prompt */}
               {showConfig && (
-                <div className="w-full max-w-[580px] mb-3 rounded-2xl bg-[#18181b] border border-white/[0.07] shadow-2xl shadow-black/70 animate-slide-up overflow-y-auto max-h-[62vh]">
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowConfig(false)} />
+                  <div className="relative z-10 w-full max-w-[580px] max-h-[85vh] rounded-2xl bg-[#18181b] border border-white/[0.07] shadow-2xl shadow-black/70 animate-slide-up overflow-y-auto">
 
                   {/* ── Seção 1: Briefing do produto ── */}
                   <div className="p-4 space-y-3">
@@ -753,6 +764,7 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
                     />
                     <p className="text-[9px] text-white/20 mt-1">ActiveCampaign, Mailchimp, RD Station. Formulários capturarão leads automaticamente.</p>
                   </div>
+                  </div>
                 </div>
               )}
 
@@ -776,9 +788,9 @@ export function HomeView({ onGenerate, isLoading, onNavigate, onOpenSearch, cont
                     <Rocket className="w-3 h-3 text-purple-400" />
                     <span className="text-[11px] text-purple-300 font-medium">Lançamento</span>
                   </div>
-                  <button onClick={handleSubmit} disabled={isLoading || (!prompt.trim() && !copyDocument.trim() && images.length === 0)}
-                    className={cn("shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer", isLoading || (!prompt.trim() && !copyDocument.trim() && images.length === 0) ? "bg-white/[0.05] text-white/15 cursor-not-allowed" : "bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-purple-500/30 hover:scale-105 active:scale-95")}>
-                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
+                  <button onClick={handleSubmit} disabled={!prompt.trim() && !produto.trim() && !nicho.trim() && !publicoAlvo.trim() && !promessa.trim() && !copyDocument.trim() && images.length === 0}
+                    className={cn("shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer", (!prompt.trim() && !produto.trim() && !nicho.trim() && !publicoAlvo.trim() && !promessa.trim() && !copyDocument.trim() && images.length === 0) ? "bg-white/[0.05] text-white/15 cursor-not-allowed" : "bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-purple-500/30 hover:scale-105 active:scale-95")}>
+                    <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -863,8 +875,9 @@ function KitsRow({ kits, onNew, onNavigate }: { kits: LaunchKit[]; onNew: () => 
 
       {kits.slice(0, 5).map((kit) => {
         const Icon = STRATEGY_ICONS[kit.strategyId] ?? Rocket;
-        const done = kit.assets.filter((a) => a.status === "done").length;
-        const total = kit.assets.length;
+        const emailsDone = Object.values(kit.emailSequences ?? {}).filter((seq) => seq.length > 0).length;
+        const done = kit.assets.filter((a) => a.status === "done").length + emailsDone;
+        const total = kit.assets.length + 3;
         const pct = total > 0 ? Math.round((done / total) * 100) : 0;
         const color = kit.brandInfo.primaryColor || "#a78bfa";
 

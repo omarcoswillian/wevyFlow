@@ -4,21 +4,11 @@ import { useState } from "react";
 import { Mail, Zap, Loader2, Copy, Check, ChevronDown, ChevronUp, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppContext } from "../(app)/_context";
-import type { BrandInfo } from "../lib/types-kit";
+import type { BrandInfo, EmailItem, EmailSequenceType, EmailSequences } from "../lib/types-kit";
 
-type SequenceType = "cpl" | "vendas" | "recuperacao";
+type SequenceType = EmailSequenceType;
 
-interface EmailItem {
-  subject: string;
-  subject_b?: string;
-  subject_c?: string;
-  preview: string;
-  preview_b?: string;
-  body: string;
-  cta?: string;
-  cta_b?: string;
-  ps?: string;
-}
+const EMPTY_SEQUENCES: EmailSequences = { cpl: [], vendas: [], recuperacao: [] };
 
 const TABS: { id: SequenceType; label: string; count: number; description: string }[] = [
   { id: "cpl", label: "Pré-Lançamento", count: 5, description: "Aquecimento antes do carrinho abrir" },
@@ -28,9 +18,11 @@ const TABS: { id: SequenceType; label: string; count: number; description: strin
 
 interface Props {
   brandInfo: BrandInfo;
+  sequences?: EmailSequences;
+  onChange?: (sequences: EmailSequences) => void;
 }
 
-export function EmailSequencePanel({ brandInfo }: Props) {
+export function EmailSequencePanel({ brandInfo, sequences, onChange }: Props) {
   const { apiKey, aiProvider: provider, aiModel: model } = useAppContext() as {
     apiKey: string;
     aiProvider: string;
@@ -38,9 +30,13 @@ export function EmailSequencePanel({ brandInfo }: Props) {
   };
 
   const [activeTab, setActiveTab] = useState<SequenceType>("cpl");
-  const [emails, setEmails] = useState<Record<SequenceType, EmailItem[]>>({
-    cpl: [], vendas: [], recuperacao: [],
-  });
+  const [localEmails, setLocalEmails] = useState<EmailSequences>(EMPTY_SEQUENCES);
+  const emails = sequences ?? localEmails;
+  const setEmails = (updater: (prev: EmailSequences) => EmailSequences) => {
+    const next = updater(emails);
+    if (onChange) onChange(next);
+    else setLocalEmails(next);
+  };
   const [loading, setLoading] = useState<SequenceType | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<number | null>(0);

@@ -34,7 +34,7 @@ import {
   IMAGE_STORAGE_MODEL,
 } from "../lib/image-ai-provider";
 import { NewProjectModal } from "../components/NewProjectModal";
-import type { LaunchKit } from "../lib/types-kit";
+import type { LaunchKit, BrandInfo } from "../lib/types-kit";
 import { optimizeHtml } from "../lib/html-optimizer";
 
 /* ───────────────────────────────────────────────────────────
@@ -159,6 +159,9 @@ interface AppContextValue {
   setActiveLaunchKit: (kit: LaunchKit | null) => void;
   saveLaunchKit: (kit: LaunchKit) => void;
   deleteLaunchKit: (id: string) => void;
+  launchWizardPrefill: Partial<BrandInfo> | null;
+  setLaunchWizardPrefill: (prefill: Partial<BrandInfo> | null) => void;
+  openLaunchWizardWithPrefill: (prefill: Partial<BrandInfo>) => void;
 
   // integrations
   webhookUrl: string;
@@ -224,6 +227,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     null,
   );
   const [showLaunchWizard, setShowLaunchWizard] = useState(false);
+  const [launchWizardPrefill, setLaunchWizardPrefill] = useState<Partial<BrandInfo> | null>(null);
+  const openLaunchWizardWithPrefill = useCallback((prefill: Partial<BrandInfo>) => {
+    setLaunchWizardPrefill(prefill);
+    setShowLaunchWizard(true);
+  }, []);
 
   const saveLaunchKit = useCallback((kit: LaunchKit) => {
     setLaunchKits((prev) => {
@@ -786,6 +794,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setActiveLaunchKit,
       saveLaunchKit,
       deleteLaunchKit,
+      launchWizardPrefill,
+      setLaunchWizardPrefill,
+      openLaunchWizardWithPrefill,
       webhookUrl,
       setWebhookUrl,
       navigate,
@@ -837,6 +848,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setActiveLaunchKit,
       saveLaunchKit,
       deleteLaunchKit,
+      launchWizardPrefill,
+      setLaunchWizardPrefill,
+      openLaunchWizardWithPrefill,
       webhookUrl,
       setWebhookUrl,
       navigate,

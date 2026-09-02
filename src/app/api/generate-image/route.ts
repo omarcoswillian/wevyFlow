@@ -66,22 +66,23 @@ export async function POST(req: NextRequest) {
         const client = new GoogleGenAI({ apiKey: key });
         const model = imageModel || "gemini-2.5-flash-image";
         const aspectRatio = GEMINI_ASPECT[size] ?? "16:9";
-        const promptWithAspect = `${prompt.trim()} Aspect ratio: ${aspectRatio}.`;
 
-        const interaction = await client.interactions.create({
+        const response = await client.models.generateContent({
           model,
-          input: promptWithAspect,
-          response_modalities: ["image"],
-          stream: false,
+          contents: prompt.trim(),
+          config: {
+            responseModalities: ["IMAGE"],
+            imageConfig: { aspectRatio },
+          },
         });
 
         let b64 = "";
         let mimeType = "image/png";
-        const outputs = (interaction as { outputs?: { type: string; data?: string; mime_type?: string }[] })?.outputs ?? [];
-        for (const out of outputs) {
-          if (out.type === "image" && out.data) {
-            b64 = out.data;
-            mimeType = out.mime_type ?? "image/png";
+        const parts = response.candidates?.[0]?.content?.parts ?? [];
+        for (const part of parts) {
+          if (part.inlineData?.data) {
+            b64 = part.inlineData.data;
+            mimeType = part.inlineData.mimeType ?? "image/png";
             break;
           }
         }

@@ -93,6 +93,9 @@ const FORMAT_META: Record<CreativoFormat, { icon: React.ElementType; dims: strin
   "feed-retrato":  { icon: Image,       dims: "1080 × 1350", label: "Feed Retrato"  },
   "banner-google": { icon: Globe,       dims: "300 × 250",   label: "Banner Google" },
   "email":         { icon: Mail,        dims: "600 px",      label: "E-mail"        },
+  "banner-checkout": { icon: ShoppingCart, dims: "1200 × 400",  label: "Banner Checkout" },
+  "pdf-ebook":        { icon: Image,        dims: "1600 × 2000", label: "Capa PDF"        },
+  "capa-formulario":  { icon: LayoutGrid,   dims: "1080 × 1350", label: "Capa Formulário" },
 };
 
 /* ── Status helpers ──────────────────────────────────────── */
@@ -309,8 +312,11 @@ export function LaunchHub() {
   const pages = strategy.assets.filter((a) => a.type === "page");
   const criativos = strategy.assets.filter((a) => a.type === "criativo");
 
-  const totalAssets = strategy.assets.length;
-  const doneAssets = kit.assets.filter((a) => a.status === "done").length;
+  const emailSequences = kit.emailSequences ?? { cpl: [], vendas: [], recuperacao: [] };
+  const emailSequencesDone = Object.values(emailSequences).filter((seq) => seq.length > 0).length;
+
+  const totalAssets = strategy.assets.length + 3; // + 3 sequências de e-mail (CPL, vendas, recuperação)
+  const doneAssets = kit.assets.filter((a) => a.status === "done").length + emailSequencesDone;
   const progressPct = totalAssets > 0 ? Math.round((doneAssets / totalAssets) * 100) : 0;
 
   const getInstance = (assetId: string): KitAssetInstance | undefined =>
@@ -612,8 +618,17 @@ export function LaunchHub() {
         <section>
           <div className="flex items-center gap-2 mb-3">
             <span className="text-[11px] uppercase tracking-widest text-white/30 font-semibold">Emails</span>
+            <span className="px-1.5 py-0.5 rounded-full bg-white/[0.05] text-white/40 text-[10px] font-semibold">{emailSequencesDone}/3</span>
           </div>
-          <EmailSequencePanel brandInfo={kit.brandInfo} />
+          <EmailSequencePanel
+            brandInfo={kit.brandInfo}
+            sequences={emailSequences}
+            onChange={(next) => {
+              const updated = { ...kitRef.current!, emailSequences: next, updatedAt: new Date().toISOString() };
+              saveLaunchKit(updated);
+              setActiveLaunchKit(updated);
+            }}
+          />
         </section>
 
         {/* Webhook integration section */}

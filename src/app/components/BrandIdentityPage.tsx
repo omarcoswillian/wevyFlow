@@ -4,6 +4,8 @@ import { useState, useCallback } from "react";
 import { AlertCircle } from "lucide-react";
 import { BrandWizard, type BrandDNA } from "./BrandKit/BrandWizard";
 import { BrandKitDisplay, type GeneratedLogo } from "./BrandKit/BrandKitDisplay";
+import { KvExampleShowcase } from "./BrandKit/KvExampleShowcase";
+import { KV_EXAMPLES } from "../lib/kv-examples";
 import { useAppContext } from "../(app)/_context";
 
 function getImageConfig(): { apiKey?: string; imageProvider: string; imageModel?: string } {
@@ -126,7 +128,10 @@ export function BrandIdentityPage() {
         )}
 
         {mode === "wizard" ? (
-          <BrandWizard onComplete={handleComplete} isGenerating={isGenerating} />
+          <>
+            <KvExampleShowcase example={KV_EXAMPLES[0]} />
+            <BrandWizard onComplete={handleComplete} isGenerating={isGenerating} />
+          </>
         ) : (
           dna && (
             <BrandKitDisplay

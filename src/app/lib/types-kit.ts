@@ -18,7 +18,10 @@ export type CreativoFormat =
   | "feed-quadrado"
   | "feed-retrato"
   | "banner-google"
-  | "email";
+  | "email"
+  | "banner-checkout"
+  | "pdf-ebook"
+  | "capa-formulario";
 
 export interface StrategyAsset {
   id: string;
@@ -111,6 +114,24 @@ export interface BrandIdentity {
   approvedAt?: string;
 }
 
+/* ── Email sequences ─────────────────────────────────────── */
+
+export type EmailSequenceType = "cpl" | "vendas" | "recuperacao";
+
+export interface EmailItem {
+  subject: string;
+  subject_b?: string;
+  subject_c?: string;
+  preview: string;
+  preview_b?: string;
+  body: string;
+  cta?: string;
+  cta_b?: string;
+  ps?: string;
+}
+
+export type EmailSequences = Record<EmailSequenceType, EmailItem[]>;
+
 /* ── Kit ─────────────────────────────────────────────────── */
 
 export interface LaunchKit {
@@ -119,6 +140,7 @@ export interface LaunchKit {
   brandInfo: BrandInfo;
   brandIdentity?: BrandIdentity;
   assets: KitAssetInstance[];
+  emailSequences?: EmailSequences;
   projectId?: string;
   createdAt: string;
   updatedAt: string;
