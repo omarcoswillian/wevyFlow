@@ -9,6 +9,27 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return Response.json({ error: "não autenticado" }, { status: 401 });
 
+    // Mirror the dev bypass in lib/credits.ts — otherwise the sidebar shows
+    // a real "Limite atingido" from past testing even though generation
+    // itself is unmetered locally, which reads as broken.
+    if (process.env.NODE_ENV === "development") {
+      // JSON has no Infinity (Response.json would serialize it to null and
+      // break the client's creditsUsed/creditsLimit math) — use a large
+      // finite ceiling instead.
+      const UNLIMITED = 999999;
+      return Response.json({
+        plan: "scale",
+        planLabel: "Dev (sem limite)",
+        price: 0,
+        creditsUsed: 0,
+        creditsLimit: UNLIMITED,
+        remaining: UNLIMITED,
+        month: `${new Date().toLocaleString("pt-BR", { month: "long" })} ${new Date().getFullYear()}`,
+        pagesUsed: 0,
+        pagesLimit: UNLIMITED,
+      });
+    }
+
     // Resolve plan
     let planId: PlanId = DEFAULT_PLAN;
     try {

@@ -70,6 +70,22 @@ export async function checkAndDeductCredit(
     return { error: "Faça login para continuar.", status: 401 };
   }
 
+  // Local dev only — unlimited generations for the fixed dev account (see
+  // /api/dev/auto-signin) so testing batches of creatives isn't gated by
+  // the real monthly plan quota. Never runs in production.
+  if (process.env.NODE_ENV === "development") {
+    return {
+      allowed: true,
+      generationId: "dev-bypass",
+      userId: user.id,
+      plan: "scale",
+      planLabel: "Dev (sem limite)",
+      used: 0,
+      limit: Infinity,
+      remaining: Infinity,
+    };
+  }
+
   // Resolve plan — maybeSingle() never throws on missing row
   let planId: PlanId = DEFAULT_PLAN;
   try {
@@ -137,6 +153,7 @@ export async function finalizeGeneration(
   success: boolean,
   errorMessage?: string
 ): Promise<void> {
+  if (generationId === "dev-bypass") return; // no real credit row to finalize
   try {
     const supabase = await createClient();
     const { error } = await supabase.rpc("finalize_generation", {

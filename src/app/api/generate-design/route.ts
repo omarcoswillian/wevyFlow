@@ -126,6 +126,42 @@ Be exhaustive and precise — every character of text matters.`
 }
 
 /**
+ * Text-swap edit path (no avatar): a plain "edit this image" instruction
+ * left the model free to update only some overlay elements and leave stale
+ * wording mixed with the new copy on busier layouts. Listing every overlay
+ * explicitly first — same technique as analyzeSceneForSwap — makes the
+ * model treat each one as a checklist item instead of guessing which parts
+ * "the new copy" refers to.
+ */
+async function analyzeTextOverlays(client: GoogleGenAI, refDataUrl: string): Promise<string> {
+  const { mimeType, data } = stripDataUrl(refDataUrl);
+
+  const result = await client.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [{
+      role: "user",
+      parts: [
+        {
+          text: `List every text and graphic overlay in this image, numbered. For each one include:
+- Exact wording, copied verbatim
+- Font weight and case (bold/regular, ALL CAPS/Title Case)
+- Color (hex if visible, else precise description)
+- Background treatment (filled box/pill/underline color and shape, or none)
+- Position (top-left, center, bottom-right, etc.)
+- Relative size (headline/large/medium/small/caption)
+
+Include headline, subheadline, body copy, CTA button text, captions, and any logo or badge text. Be exhaustive — do not skip small captions. Output as a numbered list only, no other commentary.`
+        },
+        { inlineData: { mimeType, data } }
+      ]
+    }],
+  });
+
+  const parts = (result.candidates?.[0]?.content?.parts ?? []) as Part[];
+  return parts.map(p => p.text ?? "").join("\n").trim();
+}
+
+/**
  * Step 1b: Analyze the avatar image to extract every fine physical detail.
  * This feeds into Step 2 so the generated person is a faithful replica,
  * not just a "similar-looking" person.
@@ -216,12 +252,18 @@ export async function POST(req: NextRequest) {
       avatarImages,
       format = "9:16",
       imageModel,
+      quality,
+      targetWidth,
+      targetHeight,
     } = await req.json() as {
       prompt: string;
       referenceImages?: string[];
       avatarImages?: string[];
       format?: string;
       imageModel?: string;
+      quality?: "1K" | "2K" | "4K";
+      targetWidth?: number;
+      targetHeight?: number;
     };
 
     if (!prompt?.trim()) {
@@ -324,11 +366,18 @@ Aspect ratio: ${aspectRatio}.`,
     } else if (hasRefs && !hasAvatars) {
       const resizedRef = await resizeIfNeeded(refImages[0]);
       const { mimeType: refMime, data: refData } = stripDataUrl(resizedRef);
+      const overlays = await withRetry(() => analyzeTextOverlays(client, resizedRef));
 
       parts = [
         {
           text: `Edit this image as requested: "${prompt.trim()}"
-Preserve everything not explicitly mentioned. Keep all text overlays, layout, lighting, color grade, and graphic elements intact.
+
+Every text/graphic overlay currently in the image:
+${overlays}
+
+Go through that list element by element. If the instruction above supplies new wording for an element, replace ONLY its text — keep its exact font weight, color, background shape/color, position, and size. If the instruction does not mention an element, leave it completely untouched. Do not leave any old wording mixed in with the new copy anywhere in the image.
+
+Preserve layout, lighting, color grade, and all non-text graphic elements exactly as they are.
 High quality, photorealistic. Aspect ratio: ${aspectRatio}.`,
         },
         { inlineData: { mimeType: refMime, data: refData } },
@@ -370,7 +419,10 @@ High quality, photorealistic. Aspect ratio: ${aspectRatio}.`,
     const step2 = await withRetry(() => client.models.generateContent({
       model,
       contents: [{ role: "user", parts }],
-      config: { responseModalities: ["TEXT", "IMAGE"] },
+      config: {
+        responseModalities: ["TEXT", "IMAGE"],
+        imageConfig: { aspectRatio, imageSize: quality ?? "2K" },
+      },
     }));
 
     const { b64, mimeType, blocked } = extractImage(step2.candidates);
@@ -383,8 +435,28 @@ High quality, photorealistic. Aspect ratio: ${aspectRatio}.`,
       return failWithCredit(`Imagem não retornada pelo modelo${modelText ? `: ${modelText.slice(0, 200)}` : "."}`, 500);
     }
 
+    // Gemini honors aspect ratio but not an exact pixel size — when the
+    // caller needs a precise deliverable (e.g. "1080x1080" for Google Ads),
+    // crop/resize to match exactly instead of shipping whatever native
+    // resolution the model returned.
+    let finalB64 = b64;
+    let finalMime = mimeType;
+    if (targetWidth && targetHeight) {
+      try {
+        const sharp = (await import("sharp")).default;
+        const resized = await sharp(Buffer.from(b64, "base64"))
+          .resize({ width: targetWidth, height: targetHeight, fit: "cover", position: "attention" })
+          .jpeg({ quality: 92 })
+          .toBuffer();
+        finalB64 = resized.toString("base64");
+        finalMime = "image/jpeg";
+      } catch (resizeErr) {
+        console.error("[generate-design] resize to target size failed:", resizeErr);
+      }
+    }
+
     await finalizeGeneration(generationId, true);
-    return NextResponse.json({ b64, mimeType });
+    return NextResponse.json({ b64: finalB64, mimeType: finalMime });
 
   } catch (e: unknown) {
     const err = e as Error;

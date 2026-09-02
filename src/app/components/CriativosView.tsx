@@ -51,12 +51,13 @@ interface CtxMenu  { x: number; y: number; cx: number; cy: number; }
 /* ─── Constants ──────────────────────────────────────────── */
 const DOT_SIZE = 24;
 
-const GEN_FORMATS: { id: string; label: string; w: number; h: number }[] = [
-  { id: "1:1",  label: "1:1",  w: 14,   h: 14    },
-  { id: "4:5",  label: "4:5",  w: 14,   h: 17.5  },
-  { id: "9:16", label: "9:16", w: 9.5,  h: 17.5  },
-  { id: "16:9", label: "16:9", w: 20,   h: 11.25 },
+const GEN_FORMATS: { id: string; label: string; w: number; h: number; pxW: number; pxH: number }[] = [
+  { id: "1:1",  label: "1080×1080", w: 14,   h: 14,    pxW: 1080, pxH: 1080 },
+  { id: "4:5",  label: "1080×1350", w: 14,   h: 17.5,  pxW: 1080, pxH: 1350 },
+  { id: "9:16", label: "1080×1920", w: 9.5,  h: 17.5,  pxW: 1080, pxH: 1920 },
+  { id: "16:9", label: "1920×1080", w: 20,   h: 11.25, pxW: 1920, pxH: 1080 },
 ];
+const MAX_BATCH_JOBS = 24;
 const GALLERY_FORMATS: { id: string; platform: string; w: number; h: number }[] = [
   { id: "youtube-thumbnail", platform: "YouTube",     w: 16,   h: 9  },
   { id: "whatsapp",          platform: "WhatsApp",    w: 1,    h: 1  },
@@ -91,6 +92,42 @@ async function downloadFromUrl(url: string, filename: string) {
 let _refCtr = 0; let _avCtr = 0;
 function nextRefLabel() { _refCtr++; return `img${_refCtr}`; }
 function nextAvLabel()  { _avCtr++;  return `avatar${_avCtr}`; }
+
+/* The Supabase dev session (marcoswill180@gmail.com, set via
+ * /api/dev/auto-signin) expires hourly like any real session, but there's
+ * no login form to re-trigger it in dev (see src/app/login/page.tsx) — so
+ * a stale session used to mean re-generating everything after manually
+ * revisiting that URL. Auto-heal instead: on a 401, silently re-signin and
+ * retry once. Production always has a real session and never 401s here.
+ *
+ * Batch generation fires several requests in parallel, so several of them
+ * can 401 at once — each independently re-running signInWithPassword races
+ * the others and only the last Set-Cookie sticks, so earlier retries still
+ * see a stale/half-rotated session. Share one in-flight re-auth call across
+ * all of them instead of letting each job trigger its own. */
+let devReauthInFlight: Promise<void> | null = null;
+function ensureDevReauth(): Promise<void> {
+  if (!devReauthInFlight) {
+    devReauthInFlight = fetch("/api/dev/auto-signin")
+      .then(() => {})
+      .catch(() => {})
+      .finally(() => { devReauthInFlight = null; });
+  }
+  return devReauthInFlight;
+}
+
+async function fetchWithDevAuth(url: string, body: object): Promise<Response> {
+  const post = () => fetch(url, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  let res = await post();
+  if (res.status === 401 && process.env.NODE_ENV === "development") {
+    await ensureDevReauth();
+    res = await post();
+  }
+  return res;
+}
 
 /* ─── BrandCarousel ──────────────────────────────────────── */
 function BrandCarousel({ label, count, items, onUseAsReference }: {
@@ -179,6 +216,8 @@ export function CriativosView() {
   const [genQuality, setGenQuality] = useState("2K");
   const [genResults, setGenResults] = useState<GenResult[]>([]);
   const [genRunning, setGenRunning] = useState(false);
+  const [genBatchMode, setGenBatchMode] = useState(false);
+  const [genBatchCopies, setGenBatchCopies] = useState<string[]>([""]);
 
   /* canvas */
   const [positions,  setPositions]  = useState<Record<string, CardPos>>({});
@@ -381,12 +420,42 @@ export function CriativosView() {
     setAvatars(prev => prev.map(a => a.id === id ? { ...a, ...patch } : a));
   const removeAvatar = (id: string) => setAvatars(prev => prev.filter(a => a.id !== id));
 
-  /* ── Generate ── */
+  /* ── Generate ──
+   * Non-batch: one job per reference image (× genCount variations each) —
+   * so N references attached always yields N distinct outputs, one per style,
+   * instead of collapsing onto whichever reference the backend picks first.
+   * Batch mode: genBatchCopies holds one entry per copy block (a dedicated
+   * field per copy, not a single textarea split on a typed "---" — that
+   * separator was one typo away from silently merging everything into one
+   * block). Each copy runs against every reference — lets someone paste a
+   * list of headlines once instead of running "Gerar" one copy at a time. */
+  const canGenerate = genBatchMode
+    ? genBatchCopies.some(c => c.trim().length > 0)
+    : genPrompt.trim().length > 0;
+
   const handleDesignGenerate = async () => {
-    if (!genPrompt.trim() || genRunning) return;
+    if (!canGenerate || genRunning) return;
     setGenRunning(true);
-    const count = Math.max(1, Math.min(8, genCount));
-    const placeholders: GenResult[] = Array.from({ length: count }, (_, i) => ({
+
+    const refImages = references.map(r => r.dataUrl).filter(Boolean) as string[];
+    const avImages  = avatars.map(a => a.dataUrl).filter(Boolean) as string[];
+    const variations = Math.max(1, Math.min(8, genCount));
+    const fmt = GEN_FORMATS.find(f => f.id === genFormat) ?? GEN_FORMATS[2];
+
+    const instructions = genBatchMode
+      ? genBatchCopies.map(s => s.trim()).filter(Boolean)
+      : [genPrompt.trim()];
+
+    type Job = { prompt: string; refImage?: string };
+    let jobs: Job[] = refImages.length > 0
+      ? instructions.flatMap(instruction =>
+          refImages.flatMap(ref =>
+            Array.from({ length: variations }, () => ({ prompt: instruction, refImage: ref }))))
+      : instructions.flatMap(instruction =>
+          Array.from({ length: variations }, () => ({ prompt: instruction })));
+    if (jobs.length > MAX_BATCH_JOBS) jobs = jobs.slice(0, MAX_BATCH_JOBS);
+
+    const placeholders: GenResult[] = jobs.map((_, i) => ({
       id: crypto.randomUUID(), label: `img${Date.now()}-${i + 1}`, status: "loading" as const,
     }));
     setGenResults(placeholders);
@@ -398,13 +467,17 @@ export function CriativosView() {
       });
       return next;
     });
-    const refImages = references.map(r => r.dataUrl).filter(Boolean) as string[];
-    const avImages  = avatars.map(a => a.dataUrl).filter(Boolean) as string[];
-    await Promise.all(placeholders.map(async (ph) => {
+    await Promise.all(placeholders.map(async (ph, i) => {
+      const job = jobs[i];
       try {
-        const res = await fetch("/api/generate-design", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: genPrompt, referenceImages: refImages, avatarImages: avImages, format: genFormat }),
+        const res = await fetchWithDevAuth("/api/generate-design", {
+          prompt: job.prompt,
+          referenceImages: job.refImage ? [job.refImage] : [],
+          avatarImages: avImages,
+          format: genFormat,
+          quality: genQuality,
+          targetWidth: fmt.pxW,
+          targetHeight: fmt.pxH,
         });
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || "Erro ao gerar.");
@@ -593,6 +666,9 @@ export function CriativosView() {
                       genCount={genCount} setGenCount={setGenCount}
                       genFormat={genFormat} setGenFormat={setGenFormat}
                       genQuality={genQuality} setGenQuality={setGenQuality}
+                      genBatchMode={genBatchMode} setGenBatchMode={setGenBatchMode}
+                      genBatchCopies={genBatchCopies} setGenBatchCopies={setGenBatchCopies}
+                      canGenerate={canGenerate}
                       genRunning={genRunning} onGenerate={handleDesignGenerate}
                       isDragging={draggingId === "gerar"}
                       onDragStart={e => startDrag("gerar", e)}
@@ -987,17 +1063,29 @@ function NodeAvatarCard({ avatar, onChange, onDelete }: {
 function GerarImagemCard({
   prompt, onChange, references, avatars,
   genCount, setGenCount, genFormat, setGenFormat, genQuality, setGenQuality,
-  genRunning, onGenerate, isDragging, onDragStart,
+  genBatchMode, setGenBatchMode, genBatchCopies, setGenBatchCopies,
+  canGenerate, genRunning, onGenerate, isDragging, onDragStart,
 }: {
   prompt: string; onChange: (v: string) => void;
   references: RefCard[]; avatars: AvatarCard[];
   genCount: number; setGenCount: (n: number) => void;
   genFormat: string; setGenFormat: (v: string) => void;
   genQuality: string; setGenQuality: (v: string) => void;
+  genBatchMode: boolean; setGenBatchMode: (v: boolean) => void;
+  genBatchCopies: string[]; setGenBatchCopies: (v: string[]) => void;
+  canGenerate: boolean;
   genRunning: boolean; onGenerate: () => void;
   isDragging: boolean; onDragStart: (e: React.MouseEvent) => void;
 }) {
-  const canGenerate = prompt.trim().length > 0 && !genRunning;
+  const batchCopiesCount = genBatchCopies.filter(c => c.trim()).length;
+  const toggleBatch = () => {
+    if (!genBatchMode && genBatchCopies.every(c => !c.trim()) && prompt.trim()) {
+      // Turning batch on with an empty list — carry over whatever was
+      // already typed in the single-prompt field instead of discarding it.
+      setGenBatchCopies([prompt]);
+    }
+    setGenBatchMode(!genBatchMode);
+  };
   return (
     <div style={{ background: "#09090e", border: "1px solid rgba(124,58,237,.35)", borderRadius: 14, overflow: "visible", boxShadow: "0 0 0 1px rgba(124,58,237,.08), 0 0 40px rgba(124,58,237,.10), 0 8px 40px rgba(0,0,0,.5)", cursor: isDragging ? "grabbing" : "default" }}>
       <div onMouseDown={onDragStart} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderBottom: "1px solid rgba(124,58,237,.15)", cursor: isDragging ? "grabbing" : "grab" }}>
@@ -1005,23 +1093,92 @@ function GerarImagemCard({
           <Wand2 style={{ width: 12, height: 12, color: "#a78bfa" }} />
         </div>
         <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,.7)", flex: 1 }}>Gerar Imagem</span>
-      </div>
-      <div onMouseDown={e => e.stopPropagation()} style={{ position: "relative", minHeight: 180 }}>
-        <MentionTextarea value={prompt} onChange={onChange} references={references} avatars={avatars} />
-        <button style={{ position: "absolute", bottom: 10, right: 12, width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(255,255,255,.25)" }}
-          className="hover:text-purple-400 hover:border-purple-500/30 hover:bg-purple-500/[0.08] transition-colors">
-          <Sparkles style={{ width: 13, height: 13 }} />
+        <button
+          onClick={toggleBatch}
+          onMouseDown={e => e.stopPropagation()}
+          title="Modo lote: uma copy por campo, gera todas contra todas as referências"
+          style={{
+            display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderRadius: 7,
+            background: genBatchMode ? "rgba(124,58,237,.22)" : "rgba(255,255,255,.04)",
+            border: genBatchMode ? "1px solid rgba(167,139,250,.4)" : "1px solid rgba(255,255,255,.08)",
+            color: genBatchMode ? "#a78bfa" : "rgba(255,255,255,.35)",
+            fontSize: 10, fontWeight: 700, cursor: "pointer", transition: "all .15s",
+          }}
+        >
+          Lote{genBatchMode && batchCopiesCount > 0 ? ` (${batchCopiesCount})` : ""}
         </button>
       </div>
-      <div onMouseDown={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderTop: "1px solid rgba(124,58,237,.12)" }}>
+      {genBatchMode ? (
+        <BatchCopyList copies={genBatchCopies} onChange={setGenBatchCopies} />
+      ) : (
+        <div onMouseDown={e => e.stopPropagation()} style={{ position: "relative", minHeight: 180 }}>
+          <MentionTextarea value={prompt} onChange={onChange} references={references} avatars={avatars} />
+          <button style={{ position: "absolute", bottom: 10, right: 12, width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(255,255,255,.25)" }}
+            className="hover:text-purple-400 hover:border-purple-500/30 hover:bg-purple-500/[0.08] transition-colors">
+            <Sparkles style={{ width: 13, height: 13 }} />
+          </button>
+        </div>
+      )}
+      <div onMouseDown={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderTop: "1px solid rgba(124,58,237,.12)", flexWrap: "wrap" }}>
         <CountPill count={genCount} setCount={setGenCount} />
         <FormatSelector value={genFormat} onChange={setGenFormat} />
         <QualityToggle value={genQuality} onChange={setGenQuality} />
-        <button onClick={onGenerate} disabled={!canGenerate}
-          style={{ marginLeft: "auto", width: 36, height: 36, borderRadius: 10, background: canGenerate ? "rgba(124,58,237,.25)" : "rgba(255,255,255,.03)", border: canGenerate ? "1px solid rgba(124,58,237,.4)" : "1px solid rgba(255,255,255,.06)", display: "flex", alignItems: "center", justifyContent: "center", cursor: canGenerate ? "pointer" : "not-allowed", color: canGenerate ? "#a78bfa" : "rgba(255,255,255,.12)", flexShrink: 0, transition: "all .15s" }}>
+        <button onClick={onGenerate} disabled={!canGenerate || genRunning}
+          style={{ marginLeft: "auto", width: 36, height: 36, borderRadius: 10, background: (canGenerate && !genRunning) ? "rgba(124,58,237,.25)" : "rgba(255,255,255,.03)", border: (canGenerate && !genRunning) ? "1px solid rgba(124,58,237,.4)" : "1px solid rgba(255,255,255,.06)", display: "flex", alignItems: "center", justifyContent: "center", cursor: (canGenerate && !genRunning) ? "pointer" : "not-allowed", color: (canGenerate && !genRunning) ? "#a78bfa" : "rgba(255,255,255,.12)", flexShrink: 0, transition: "all .15s" }}>
           {genRunning ? <Loader2 style={{ width: 14, height: 14, animation: "spin 1s linear infinite" }} /> : <Play style={{ width: 13, height: 13, marginLeft: 1 }} />}
         </button>
+        {references.length > 0 && (
+          <p style={{ width: "100%", fontSize: 9, color: "rgba(255,255,255,.25)", margin: 0 }}>
+            {genBatchMode
+              ? `${Math.max(batchCopiesCount, 1)} copy(s) × ${references.length} referência(s) × ${genCount} variação(ões)`
+              : `${references.length} referência(s) × ${genCount} variação(ões) = ${references.length * genCount} imagem(ns)`}
+          </p>
+        )}
       </div>
+    </div>
+  );
+}
+
+function BatchCopyList({ copies, onChange }: { copies: string[]; onChange: (v: string[]) => void }) {
+  const update = (i: number, v: string) => onChange(copies.map((c, idx) => idx === i ? v : c));
+  const remove = (i: number) => onChange(copies.length > 1 ? copies.filter((_, idx) => idx !== i) : [""]);
+  const add = () => onChange([...copies, ""]);
+  return (
+    <div onMouseDown={e => e.stopPropagation()} style={{ display: "flex", flexDirection: "column", gap: 8, padding: 12, maxHeight: 320, overflowY: "auto" }}>
+      {copies.map((copy, i) => (
+        <div key={i} style={{ position: "relative", background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.07)", borderRadius: 10, overflow: "hidden" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px", borderBottom: "1px solid rgba(255,255,255,.05)" }}>
+            <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".08em", color: "rgba(167,139,250,.55)", textTransform: "uppercase" }}>Copy {i + 1}</span>
+            <button onClick={() => remove(i)} style={{ color: "rgba(255,255,255,.2)", cursor: "pointer", background: "none", border: "none", padding: 2, lineHeight: 1, display: "flex" }} className="hover:text-red-400 transition-colors">
+              <X style={{ width: 12, height: 12 }} />
+            </button>
+          </div>
+          <textarea
+            value={copy}
+            onChange={e => update(i, e.target.value)}
+            placeholder="Cole a copy desta variação aqui..."
+            rows={3}
+            style={{
+              width: "100%", padding: "8px 10px", fontSize: 12, lineHeight: 1.5,
+              fontFamily: "inherit", color: "rgba(255,255,255,.75)",
+              background: "transparent", border: "none", outline: "none", resize: "vertical",
+            }}
+            className="placeholder-white/[0.2]"
+          />
+        </div>
+      ))}
+      <button
+        onClick={add}
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+          padding: "8px 0", borderRadius: 10, border: "1px dashed rgba(167,139,250,.3)",
+          background: "rgba(124,58,237,.06)", color: "rgba(167,139,250,.7)",
+          fontSize: 11, fontWeight: 600, cursor: "pointer",
+        }}
+        className="hover:bg-purple-500/[0.1] transition-colors"
+      >
+        + Adicionar copy
+      </button>
     </div>
   );
 }
