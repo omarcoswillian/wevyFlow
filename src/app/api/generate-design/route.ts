@@ -44,7 +44,7 @@ async function resizeIfNeeded(dataUrl: string): Promise<string> {
 async function analyzeSceneForSwap(
   client: GoogleGenAI,
   refDataUrl: string
-): Promise<{ sceneDesc: string; textOverlays: string }> {
+): Promise<{ sceneDesc: string; textOverlays: string; colorTreatment: string; bodyPose: string }> {
   const { mimeType, data } = stripDataUrl(refDataUrl);
 
   const result = await client.models.generateContent({
@@ -87,6 +87,12 @@ For EACH logo, icon, badge, button, divider, graphic shape:
 - Leg and foot position if visible (stance width, weight distribution)
 - Overall energy and body language (powerful, relaxed, authoritative, etc.)
 
+## COLOR TREATMENT
+State plainly, in one line: is this image full color, black-and-white/monochrome,
+duotone, sepia, or otherwise color-graded/desaturated? This is a hard constraint
+for recreation — say it unambiguously (e.g. "Black-and-white / monochrome, no
+color tint" or "Full color, warm golden grade").
+
 ## LIGHTING
 - Primary light: direction (left/right/front/back), height (high/eye-level/low), quality (hard/soft)
 - Color temperature (warm golden, cool blue, neutral daylight, etc.)
@@ -117,12 +123,21 @@ Be exhaustive and precise — every character of text matters.`
   const parts = (result.candidates?.[0]?.content?.parts ?? []) as Part[];
   const full = parts.map(p => p.text ?? "").join("\n").trim();
 
-  // Split text overlay section from the rest for separate use in Step 2
-  const textMatch = full.match(/## TEXT & GRAPHIC OVERLAYS([\s\S]*?)(?=## BODY|$)/);
+  // Split text overlay, color-treatment, and body-pose sections from the
+  // rest for separate, prioritized use in Step 2's prompt. Pose in
+  // particular — exact head angle, gaze direction, mouth/expression — is
+  // easy for the model to skim past when it's busy handling the identity
+  // swap, even with the reference image right there; calling it out
+  // explicitly in text measurably improves how closely it's followed.
+  const textMatch = full.match(/## TEXT & GRAPHIC OVERLAYS([\s\S]*?)(?=## COLOR TREATMENT|$)/);
   const textOverlays = textMatch ? textMatch[0].trim() : "";
+  const colorMatch = full.match(/## COLOR TREATMENT([\s\S]*?)(?=## LIGHTING|$)/);
+  const colorTreatment = colorMatch ? colorMatch[1].trim() : "";
+  const poseMatch = full.match(/## BODY & POSE([\s\S]*?)(?=## COLOR TREATMENT|$)/);
+  const bodyPose = poseMatch ? poseMatch[1].trim() : "";
   const sceneDesc = full;
 
-  return { sceneDesc, textOverlays };
+  return { sceneDesc, textOverlays, colorTreatment, bodyPose };
 }
 
 /**
@@ -308,57 +323,106 @@ export async function POST(req: NextRequest) {
     if (hasRefs && hasAvatars) {
       const resizedRef = await resizeIfNeeded(refImages[0]);
       const resizedAv  = await resizeIfNeeded(avImages[0]);
+      const { mimeType: refMime, data: refData } = stripDataUrl(resizedRef);
       const { mimeType: avMime, data: avData } = stripDataUrl(resizedAv);
 
       // Step 1: parallel analysis — no sequential wait
-      const [{ sceneDesc, textOverlays }, avatarDesc] = await Promise.all([
+      const [{ textOverlays, colorTreatment, bodyPose }, avatarDesc] = await Promise.all([
         withRetry(() => analyzeSceneForSwap(client, resizedRef)),
         withRetry(() => analyzeAvatarDetails(client, resizedAv)),
       ]);
 
-      // Step 2: generate — avatar image is the visual anchor, descriptions guide fidelity
-      // Text overlays are listed FIRST as the highest-priority constraint
+      // Step 2: generate. Critically, BOTH images are sent as visual input —
+      // the reference is not just described in text, it's shown directly, so
+      // pose/crop/typography/diagramming come from actually looking at it
+      // rather than from the model reconstructing them from a paragraph of
+      // English. A prior version only sent the avatar image and relied on a
+      // text description of the reference for everything else; composition
+      // and framing drifted noticeably because "extreme close crop, subject
+      // fills right two-thirds of frame" is a much weaker signal than the
+      // pixels themselves. The scene-description text (textOverlays,
+      // colorTreatment, avatarDesc) still helps pin down details a viewer
+      // could miss, but the images are now the primary source of truth.
       parts = [
         {
-          text: `You are a world-class photo compositor. Your task: place the person from the attached AVATAR IMAGE into the scene described below, with complete body replacement.
+          text: `You are a world-class photo compositor doing a precise, surgical edit — not a redesign.
 
-USER REQUEST: "${prompt.trim()}"
+You are given two images:
+• IMAGE 1 (the reference/template): the exact creative to reproduce. Its style, pose, crop/framing, background, lighting, color treatment, typography, and text diagramming are the template — copy them as precisely as if you were tracing over IMAGE 1.
+• IMAGE 2 (the avatar): the person who must appear in the output instead of the person in IMAGE 1.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ PRIORITY 1 — TEXT & GRAPHIC OVERLAYS (reproduce these EXACTLY, character by character):
+USER REQUEST (the ONLY things allowed to differ from IMAGE 1, besides the person):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+"${prompt.trim()}"
+
+MINIMAL-CHANGE POLICY:
+Reproduce IMAGE 1 exactly — same pose, same crop and framing, same camera
+angle, same background, same lighting, same color treatment, same
+typography, same text layout/diagramming, same graphic elements — except for
+two things: (1) the person is replaced with the one from IMAGE 2, and (2)
+whatever the user request above explicitly asks to change. Nothing else
+changes. If the user request mentions one specific text element (e.g. a
+button label), change ONLY that element's wording — keep its own font,
+color, size, and position — and leave every OTHER text element exactly as it
+appears in IMAGE 1, verbatim.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TEXT & GRAPHIC OVERLAYS in IMAGE 1 (reproduce verbatim UNLESS the user
+request above explicitly asks to change that specific one):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${textOverlays}
 
-Every text element above must appear in the output with IDENTICAL wording, font weight, color, size, position, and styling. Do not paraphrase, resize, recolor, or reposition any of them. These are non-negotiable design assets.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COLOR TREATMENT of IMAGE 1 (preserve exactly unless the user request explicitly asks to change it):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${colorTreatment}
+This applies to the ENTIRE output image, including the newly-placed person —
+e.g. if IMAGE 1 is black-and-white/monochrome, the person must also render
+in black-and-white/monochrome, not in color.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-FULL SCENE DESCRIPTION:
+HEAD POSE, GAZE & EXPRESSION in IMAGE 1 (the single most commonly missed
+detail — copy it onto the IMAGE 2 person exactly, do not default to a
+neutral frontal look-at-camera pose):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${sceneDesc}
+${bodyPose}
 
-━━━ AVATAR PERSON — EXACT PHYSICAL DETAILS ━━━
+━━━ AVATAR PERSON (IMAGE 2) — EXACT PHYSICAL DETAILS ━━━
 ${avatarDesc}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EXECUTION RULES:
 
-THE PERSON (from avatar image — non-negotiable):
-• Use the avatar image as the DEFINITIVE visual reference for the person
-• Reproduce EVERY physical detail: exact nail color and length, each piece of jewelry on the correct finger/ear, exact hair color/texture/volume, exact eye color, skin tone, lip color, clothing details
+THE PERSON (from IMAGE 2 — non-negotiable):
+• Use IMAGE 2 as the DEFINITIVE visual reference for the person's identity
+• Reproduce EVERY physical detail: exact nail color and length, each piece of jewelry on the correct finger/ear, exact hair color/texture/volume, exact eye color, skin tone, lip color
 • FULL BODY replacement — head, face, hair, neck, shoulders, torso, arms, hands, fingers, nails — everything. NOT a face swap.
-• Replicate the exact pose from the scene analysis: body orientation, arm position, hand placement, what they hold and how, head angle, gaze direction
-• Apply the scene's lighting onto this person: shadow direction, color temperature, specular highlights on skin
+• Copy the EXACT pose, crop, and framing from IMAGE 1, per the HEAD POSE, GAZE & EXPRESSION block above: same body orientation, same arm position, same hand placement, same head tilt and turn angle, same gaze direction (if IMAGE 1's subject looks away from camera, the output must too — do not default to direct eye contact), same mouth/facial expression, same distance/zoom level, same position within the frame — as if IMAGE 2's person had been physically photographed in IMAGE 1's exact spot, with the exact same camera never moving
+• DO NOT zoom out, zoom in, or otherwise change the camera distance. If IMAGE 1 is a tight close-up showing only the face (or face and shoulders), the output must be that SAME tight crop — do not reveal more of the body, more clothing, or more of the room than IMAGE 1 shows. If IMAGE 1 shows the full body, keep it a full body shot. Match IMAGE 1's crop boundary exactly.
+• Clothing/outfit: match IMAGE 1's styling (silhouette, color, formality) unless the user request says otherwise — and only to the extent it's actually visible within IMAGE 1's crop
+• Apply IMAGE 1's lighting AND color treatment onto this person: shadow direction, color temperature, specular highlights on skin, and — critically — the same overall color treatment as the rest of the image (see above)
 
-BACKGROUND & ENVIRONMENT (preserve exactly):
-• Every background element, color, gradient, texture, blur/bokeh, particles, atmosphere
-• Color grade, LUT style, overall exposure mood
+BACKGROUND, DEPTH & DIAGRAMMING (preserve exactly from IMAGE 1 — do not substitute a different room, backdrop, or depth of field):
+• Every background element, color, gradient, texture, blur/bokeh, particles, atmosphere — if IMAGE 1's background is a plain dark/black backdrop, the output's background must also be that same plain dark/black backdrop, not a room, wall, or furniture
+• Same depth of field / bokeh amount — do not sharpen a blurred background or blur a sharp one
+• Color grade, LUT style, overall exposure mood — do not shift these unless the user request explicitly asks to
+• Exact font choices, text sizes, and the exact position/layout of every text block relative to the photo
 
 QUALITY:
 • Photorealistic — indistinguishable from a professional original photo shoot
 • No visible compositing artifacts, no plastic skin, natural hair and skin texture
-• The person must look like they were the original subject photographed in this scene
+• The person must look like they were the original subject photographed in IMAGE 1's exact scene, through IMAGE 1's exact camera position
+
+⚠️ CRITICAL CHECKS BEFORE YOU FINISH:
+1. The face, hair, and body in your output must be IMAGE 2's person — NOT IMAGE 1's. Copying IMAGE 1 unchanged is the single most common mistake here — do not do that.
+2. The crop, camera distance, and background in your output must match IMAGE 1 exactly — NOT IMAGE 2's. If IMAGE 2 is a wider shot showing more of the room, body, or clothing than IMAGE 1 does, you must crop/frame it back down to IMAGE 1's exact boundaries. Importing IMAGE 2's background, camera angle, or zoom level is just as wrong as importing IMAGE 2's face would be right — a common failure is producing something that looks like IMAGE 2's photo with IMAGE 1's text pasted on top. That is wrong. The photo itself — angle, crop, depth, background — must look like IMAGE 1; only the identity of the person changes.
+3. Head angle, gaze direction, and facial expression must match the HEAD POSE, GAZE & EXPRESSION block above — NOT a generic neutral face looking straight at the camera. A common failure is defaulting to a plain frontal look-at-camera pose because it's "safe" — if IMAGE 1's subject has their head turned, is looking off to the side, or has a distinctive expression, the output must reproduce that specific pose, not a more standard/generic one.
 Aspect ratio: ${aspectRatio}.`,
         },
+        { text: "IMAGE 1 — the reference/template. Copy its pose, crop, background, lighting, color treatment, and all text exactly. Do NOT copy this specific person's face/body into the output." },
+        { inlineData: { mimeType: refMime, data: refData } },
+        { text: "IMAGE 2 — the avatar. This exact person (face, hair, body, skin tone) is who must appear in the output, placed into IMAGE 1's pose and scene." },
         { inlineData: { mimeType: avMime, data: avData } },
       ];
 
@@ -370,14 +434,16 @@ Aspect ratio: ${aspectRatio}.`,
 
       parts = [
         {
-          text: `Edit this image as requested: "${prompt.trim()}"
+          text: `You are doing a precise, surgical edit — not a redesign. Change ONLY what this instruction asks for; everything else must come out pixel-identical to the reference image.
+
+INSTRUCTION: "${prompt.trim()}"
 
 Every text/graphic overlay currently in the image:
 ${overlays}
 
 Go through that list element by element. If the instruction above supplies new wording for an element, replace ONLY its text — keep its exact font weight, color, background shape/color, position, and size. If the instruction does not mention an element, leave it completely untouched. Do not leave any old wording mixed in with the new copy anywhere in the image.
 
-Preserve layout, lighting, color grade, and all non-text graphic elements exactly as they are.
+Preserve layout, lighting, color grade, and all non-text graphic elements exactly as they are — including the overall color treatment (e.g. if the reference is black-and-white/monochrome, the output must also be black-and-white/monochrome; do not add color unless explicitly asked to).
 High quality, photorealistic. Aspect ratio: ${aspectRatio}.`,
         },
         { inlineData: { mimeType: refMime, data: refData } },

@@ -372,6 +372,14 @@ export function WorkspaceView({
         setSelectedElementProps(null);
         setSelectedElementId(null);
       }
+      if (e.data.type === "wf-restore-selection-failed") {
+        // The iframe reloaded and the previously-selected element no longer
+        // exists — without this, the inspector kept showing the old element
+        // while the iframe's own selection was null, so every edit silently
+        // did nothing.
+        setSelectedElementProps(null);
+        setSelectedElementId(null);
+      }
       if (e.data.type === "wf-code-updated" && typeof e.data.html === "string") {
         iframeSyncRef.current = e.data.html;
         editHistory.setValue(e.data.html);
@@ -945,6 +953,7 @@ export function WorkspaceView({
           </div>
           <VisualEditor
             elementProps={selectedElementProps}
+            selectedElementId={selectedElementId}
             viewport={viewportSize}
             onStyleChange={handleVisualStyleChange}
             onTextChange={handleVisualTextChange}

@@ -366,6 +366,46 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [saveError]);
 
+  /* Local dev only — the fixed dev session (see /api/dev/auto-signin) expires
+   * hourly like any real Supabase session, and there's no working login form
+   * in dev to re-trigger it (src/app/login/page.tsx bounces straight to "/").
+   * Patching window.fetch here — once, for the whole app — means every API
+   * call anywhere (Criativos, exports, landing pages, emails, etc.) recovers
+   * from an expired session automatically instead of only whichever single
+   * call site happens to have its own retry wrapper. Never runs outside
+   * NODE_ENV=development, so production sessions are handled normally. */
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development") return;
+    const originalFetch = window.fetch.bind(window);
+    let reauthInFlight: Promise<void> | null = null;
+    function ensureDevReauth(): Promise<void> {
+      if (!reauthInFlight) {
+        reauthInFlight = originalFetch("/api/dev/auto-signin")
+          .then(() => {})
+          .catch(() => {})
+          .finally(() => { reauthInFlight = null; });
+      }
+      return reauthInFlight;
+    }
+    window.fetch = async (...args: Parameters<typeof fetch>) => {
+      let res = await originalFetch(...args);
+      if (res.status === 401) {
+        const input = args[0];
+        const url = typeof input === "string" ? input
+          : input instanceof URL ? input.pathname
+          : (input as Request).url;
+        // Only same-origin API calls — never retry a third-party request
+        // that legitimately returns 401 (an external API, a BYOK key check).
+        if (url.startsWith("/api/") || url.startsWith(window.location.origin + "/api/")) {
+          await ensureDevReauth();
+          res = await originalFetch(...args);
+        }
+      }
+      return res;
+    };
+    return () => { window.fetch = originalFetch; };
+  }, []);
+
   /* silent auto-compaction on mount */
   useEffect(() => {
     const result = compactStorage();

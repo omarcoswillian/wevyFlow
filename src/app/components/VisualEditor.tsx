@@ -91,6 +91,7 @@ export interface ElementProps {
 
 interface VisualEditorProps {
   elementProps: ElementProps | null;
+  selectedElementId?: string | null;
   viewport?: "ultrawide" | "desktop" | "tablet" | "mobile";
   onStyleChange: (property: string, value: string) => void;
   onTextChange: (value: string) => void;
@@ -230,7 +231,7 @@ function RichContentEditor({ initialHtml, onSave }: { initialHtml: string; onSav
   );
 }
 
-export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange, onTextChange, onAttrChange, onFontLoad, onDuplicate, onDelete, onMove, onSaveComponent, onBack }: VisualEditorProps) {
+export function VisualEditor({ elementProps, selectedElementId, viewport = "desktop", onStyleChange, onTextChange, onAttrChange, onFontLoad, onDuplicate, onDelete, onMove, onSaveComponent, onBack }: VisualEditorProps) {
   const badge = VIEWPORT_BADGE[viewport] || VIEWPORT_BADGE.desktop;
   const [activeTab, setActiveTab] = useState<"style" | "settings">("style");
   const [imgGenOpen, setImgGenOpen] = useState(false);
@@ -442,8 +443,13 @@ export function VisualEditor({ elementProps, viewport = "desktop", onStyleChange
       {activeTab === "style" && (
       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-5">
         {/* Rich text editor */}
+        {/* Keyed by the element's own data-wf-id (assigned by the editor to
+            every touched element), not tag+class — two elements sharing a
+            class (repeated cards, FAQ items, slides) would otherwise
+            collide on the same key and reuse the same contenteditable DOM
+            node, showing/saving the wrong element's text. */}
         {elementProps.text !== null && (
-          <section key={"text-" + elementProps.tag + "-" + (elementProps.id || elementProps.className?.slice(0, 24))}>
+          <section key={"text-" + (selectedElementId ?? (elementProps.tag + "-" + (elementProps.id || elementProps.className?.slice(0, 24))))}>
             <Label className="flex items-center gap-1.5 mb-2">
               <Type className="w-3 h-3" /> Conteúdo
             </Label>

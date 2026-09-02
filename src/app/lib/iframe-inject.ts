@@ -223,8 +223,23 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
     };
   }
 
-  // Give each element a unique ID for targeting
+  // Give each element a unique ID for targeting. The counter must start
+  // above any "wf-N" id already present in the loaded document (a saved page
+  // reopened, an undo/redo reload, etc.) — otherwise it restarts at 0 every
+  // time this script re-runs and the next newly-touched element collides
+  // with an existing one, so selection/restoration/Layers-panel keys can
+  // silently resolve to the wrong element.
   let idCounter = 0;
+  (function seedIdCounter() {
+    const existing = document.querySelectorAll('[data-wf-id]');
+    for (let i = 0; i < existing.length; i++) {
+      const m = /^wf-(\d+)$/.exec(existing[i].dataset.wfId || '');
+      if (m) {
+        const n = parseInt(m[1], 10) + 1;
+        if (n > idCounter) idCounter = n;
+      }
+    }
+  })();
   function ensureId(el) {
     if (!el.dataset.wfId) {
       el.dataset.wfId = 'wf-' + (idCounter++);
@@ -848,6 +863,14 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
         positionOverlay(selectOverlay, el);
         selectLabel.textContent = getElementTag(el);
         window.parent.postMessage({ type: 'wf-element-selected', id: e.data.id, props: getComputedProps(el) }, '*');
+      } else {
+        // The previously-selected element is gone (reload, undo/redo, code
+        // replacement) — without this, the parent keeps showing a stale
+        // inspector for an element selectedEl no longer points at, and
+        // every style/text edit silently no-ops against a null selection.
+        selectedEl = null;
+        selectOverlay.style.display = 'none';
+        window.parent.postMessage({ type: 'wf-restore-selection-failed', id: e.data.id }, '*');
       }
     }
   });
@@ -879,12 +902,21 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
   // Hide gear when mouse leaves the document entirely
   document.addEventListener('mouseleave', function() { hideGear(); });
 
-  // Webflow's own interactive widgets (sliders, dropdowns/FAQ accordions, tabs)
-  // bind their click handlers in the bubble phase. Since this listener runs in
-  // the capture phase, calling preventDefault/stopPropagation unconditionally
-  // would swallow the click before Webflow's runtime ever sees it — the arrow,
-  // toggle, or accordion header would visibly do nothing while editing.
-  var NATIVE_INTERACTIVE_SELECTOR = '.w-slider-arrow-left, .w-slider-arrow-right, .w-slider-nav, .w-slider-dot, .w-dropdown-toggle, .w-tab-link, .w-tab-menu, [data-w-id]';
+  // Native widget controls (Webflow sliders/dropdowns/tabs, and common
+  // accordion/tab/toggle patterns from AI-generated pages) bind their click
+  // handlers in the bubble phase. Since this listener runs in the capture
+  // phase, calling preventDefault/stopPropagation unconditionally would
+  // swallow the click before that runtime ever sees it — the arrow, toggle,
+  // or accordion header would visibly do nothing while editing.
+  //
+  // IMPORTANT: this must stay a short list of actual *controls*, never a
+  // broad structural marker like Webflow's [data-w-id] — that attribute is
+  // stamped on any element bound to an IX2 interaction (hover, scroll,
+  // page-load animations), not just widget controls, and matching it via
+  // .closest() made entire ancestor subtrees of ordinary content
+  // unselectable. Shift+click always forces selection as an escape hatch
+  // for anything this list still misses.
+  var NATIVE_INTERACTIVE_SELECTOR = '.w-slider-arrow-left, .w-slider-arrow-right, .w-slider-nav, .w-slider-dot, .w-dropdown-toggle, .w-tab-link, .w-tab-menu, [data-toggle], [data-bs-toggle], [aria-expanded], [role="tab"], [onclick]';
 
   document.addEventListener('click', function(e) {
     if (!editMode) return;
@@ -892,9 +924,18 @@ export const IFRAME_VISUAL_EDIT_SCRIPT = `
     // Click landed on an editor-internal element (gear, overlay, drop indicator)
     // or any descendant — let the native click handler (e.g. gear button) run.
     if (el.closest && el.closest('[id^="__wf"]')) return;
-    // Click landed on (or inside) a Webflow-native interactive control — let it
-    // run its own behavior instead of hijacking the click for element selection.
-    if (el.closest && el.closest(NATIVE_INTERACTIVE_SELECTOR)) return;
+    // A link inside the edited page must never navigate the iframe away —
+    // that would silently kill editing until the page is reloaded — so this
+    // is checked before the interactive-control bypass below, not folded
+    // into it.
+    var linkAncestor = el.closest && el.closest('a[href]');
+    // Click landed on (or inside) a native interactive control — let it run
+    // its own behavior instead of hijacking the click for element selection,
+    // unless the user holds Shift to force-select it anyway.
+    if (!e.shiftKey && el.closest && el.closest(NATIVE_INTERACTIVE_SELECTOR)) {
+      if (linkAncestor) e.preventDefault();
+      return;
+    }
     e.preventDefault();
     e.stopPropagation();
     // VSL blocks: snap selection to the wrapper, not the inner svg/strong/span.

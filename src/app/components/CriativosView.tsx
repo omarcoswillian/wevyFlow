@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import {
   Sparkles, Download, Trash2, Loader2, AlertCircle, Check, RefreshCw,
-  ImageIcon, User, ImagePlus, X,
+  ImageIcon, User, ImagePlus, X, Pencil,
   Library, Wand2, Upload, Play, ChevronDown, MousePointer2,
 } from "lucide-react";
 import { useAppContext } from "../(app)/_context";
@@ -492,6 +492,35 @@ export function CriativosView() {
   };
   const removeResult = (id: string) => setGenResults(prev => prev.filter(r => r.id !== id));
 
+  /* ── Refine a single result in place ──
+   * Reuses the same EDIT MODE path as the main generator (one reference
+   * image, an instruction) instead of asking the model to start over — the
+   * already-generated image becomes the sole reference, so only what the
+   * instruction mentions changes. */
+  const handleRefineResult = useCallback(async (result: GenResult, instruction: string) => {
+    if (!result.dataUrl || !instruction.trim()) return;
+    const fmt = GEN_FORMATS.find(f => f.id === genFormat) ?? GEN_FORMATS[2];
+    setGenResults(prev => prev.map(r => r.id === result.id ? { ...r, status: "loading" as const } : r));
+    try {
+      const res = await fetchWithDevAuth("/api/generate-design", {
+        prompt: instruction,
+        referenceImages: [result.dataUrl],
+        avatarImages: [],
+        format: genFormat,
+        quality: genQuality,
+        targetWidth: fmt.pxW,
+        targetHeight: fmt.pxH,
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Erro ao ajustar.");
+      const dataUrl = `data:${json.mimeType};base64,${json.b64}`;
+      setGenResults(prev => prev.map(r => r.id === result.id ? { ...r, status: "done", dataUrl, mimeType: json.mimeType } : r));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erro.";
+      setGenResults(prev => prev.map(r => r.id === result.id ? { ...r, status: "error", error: msg } : r));
+    }
+  }, [genFormat, genQuality]);
+
   /* ── Library ── */
   async function uploadToLibrary(files: FileList | File[]) {
     const { data: { user } } = await supabase.auth.getUser(); if (!user) return;
@@ -686,7 +715,7 @@ export function CriativosView() {
                     zIndex: draggingId === result.id ? 200 : 10,
                     cursor: draggingId === result.id ? "grabbing" : "grab",
                   }} onMouseDown={e => startDrag(result.id, e)}>
-                    <NodeResultCard result={result} onDelete={() => removeResult(result.id)} onUsar={() => handleUsarResult(result)} />
+                    <NodeResultCard result={result} onDelete={() => removeResult(result.id)} onUsar={() => handleUsarResult(result)} onRefine={instruction => handleRefineResult(result, instruction)} />
                   </div>
                 );
               })}
@@ -1183,7 +1212,17 @@ function BatchCopyList({ copies, onChange }: { copies: string[]; onChange: (v: s
   );
 }
 
-function NodeResultCard({ result, onDelete, onUsar }: { result: GenResult; onDelete: () => void; onUsar: () => void }) {
+function NodeResultCard({ result, onDelete, onUsar, onRefine }: {
+  result: GenResult; onDelete: () => void; onUsar: () => void; onRefine: (instruction: string) => void;
+}) {
+  const [adjusting, setAdjusting] = useState(false);
+  const [adjustText, setAdjustText] = useState("");
+  const submitAdjust = () => {
+    if (!adjustText.trim()) return;
+    onRefine(adjustText);
+    setAdjustText("");
+    setAdjusting(false);
+  };
   return (
     <div style={{ background: "#0d0d11", border: "1px solid rgba(255,255,255,.08)", borderRadius: 12, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,.4)" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderBottom: "1px solid rgba(255,255,255,.06)" }}>
@@ -1215,17 +1254,50 @@ function NodeResultCard({ result, onDelete, onUsar }: { result: GenResult; onDel
         <div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={result.dataUrl} alt="" style={{ width: "100%", display: "block", maxHeight: 320, objectFit: "cover" }} />
-          <div style={{ display: "flex", gap: 6, padding: 8 }} onMouseDown={e => e.stopPropagation()}>
-            <button onClick={() => downloadDataUrl(result.dataUrl!, `design-${Date.now()}.png`)}
-              style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "6px 0", borderRadius: 7, background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)", color: "rgba(255,255,255,.4)", fontSize: 10, cursor: "pointer" }}
-              className="hover:text-white hover:bg-white/[0.07] transition-colors">
-              <Download style={{ width: 12, height: 12 }} /> Baixar
-            </button>
-            <button onClick={onUsar} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "6px 0", borderRadius: 7, background: "rgba(124,58,237,.08)", border: "1px solid rgba(124,58,237,.2)", color: "rgba(167,139,250,.7)", fontSize: 10, cursor: "pointer" }}
-              className="hover:bg-purple-500/15 hover:text-purple-300 transition-colors">
-              <Check style={{ width: 12, height: 12 }} /> Usar
-            </button>
-          </div>
+          {adjusting ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: 8 }} onMouseDown={e => e.stopPropagation()}>
+              <textarea
+                autoFocus
+                value={adjustText}
+                onChange={e => setAdjustText(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); submitAdjust(); } if (e.key === "Escape") setAdjusting(false); }}
+                placeholder="O que mudar? Ex.: troque só o botão para verde"
+                rows={2}
+                style={{ width: "100%", padding: "6px 8px", fontSize: 11, lineHeight: 1.4, fontFamily: "inherit", color: "rgba(255,255,255,.8)", background: "rgba(255,255,255,.04)", border: "1px solid rgba(124,58,237,.3)", borderRadius: 7, outline: "none", resize: "vertical" }}
+                className="placeholder-white/[0.2]"
+              />
+              <div style={{ display: "flex", gap: 6 }}>
+                <button onClick={() => { setAdjusting(false); setAdjustText(""); }}
+                  style={{ flex: 1, padding: "6px 0", borderRadius: 7, background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)", color: "rgba(255,255,255,.4)", fontSize: 10, cursor: "pointer" }}
+                  className="hover:text-white hover:bg-white/[0.07] transition-colors">
+                  Cancelar
+                </button>
+                <button onClick={submitAdjust} disabled={!adjustText.trim()}
+                  style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "6px 0", borderRadius: 7, background: adjustText.trim() ? "rgba(124,58,237,.25)" : "rgba(255,255,255,.03)", border: adjustText.trim() ? "1px solid rgba(124,58,237,.4)" : "1px solid rgba(255,255,255,.06)", color: adjustText.trim() ? "#a78bfa" : "rgba(255,255,255,.15)", fontSize: 10, cursor: adjustText.trim() ? "pointer" : "not-allowed" }}>
+                  <Sparkles style={{ width: 11, height: 11 }} /> Aplicar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: "flex", gap: 6, padding: 8 }} onMouseDown={e => e.stopPropagation()}>
+              <button onClick={() => downloadDataUrl(result.dataUrl!, `design-${Date.now()}.png`)}
+                title="Baixar"
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "6px 8px", borderRadius: 7, background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)", color: "rgba(255,255,255,.4)", fontSize: 10, cursor: "pointer" }}
+                className="hover:text-white hover:bg-white/[0.07] transition-colors">
+                <Download style={{ width: 12, height: 12 }} />
+              </button>
+              <button onClick={() => setAdjusting(true)}
+                title="Ajustar só uma parte, sem gerar do zero"
+                style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "6px 0", borderRadius: 7, background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)", color: "rgba(255,255,255,.55)", fontSize: 10, cursor: "pointer" }}
+                className="hover:text-white hover:bg-white/[0.07] transition-colors">
+                <Pencil style={{ width: 11, height: 11 }} /> Ajustar
+              </button>
+              <button onClick={onUsar} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "6px 0", borderRadius: 7, background: "rgba(124,58,237,.08)", border: "1px solid rgba(124,58,237,.2)", color: "rgba(167,139,250,.7)", fontSize: 10, cursor: "pointer" }}
+                className="hover:bg-purple-500/15 hover:text-purple-300 transition-colors">
+                <Check style={{ width: 12, height: 12 }} /> Usar
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
