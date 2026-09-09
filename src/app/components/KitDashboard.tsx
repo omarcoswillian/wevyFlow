@@ -1,6 +1,7 @@
 "use client";
 
-import { Plus, Rocket, Zap, Sprout, PlayCircle, Repeat, Trash2, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Plus, Rocket, Zap, Sprout, PlayCircle, Repeat, Trash2, ChevronRight, PenLine } from "lucide-react";
 import { useAppContext } from "../(app)/_context";
 import { LAUNCH_STRATEGIES, STRATEGY_MAP } from "../lib/launch-strategies";
 import type { LaunchKit, StrategyId } from "../lib/types-kit";
@@ -15,10 +16,25 @@ const STRATEGY_ICONS: Record<StrategyId, React.ElementType> = {
 
 
 export function KitDashboard() {
-  const { launchKits, deleteLaunchKit, setShowLaunchWizard, setActiveLaunchKit } = useAppContext();
+  const { launchKits, deleteLaunchKit, openLaunchWizardForDraft, resumeLaunchWizard } = useAppContext();
+  const router = useRouter();
+
+  const openKit = (kit: LaunchKit) => {
+    if (kit.status === "draft") {
+      // Only a draft (no strategy/briefing confirmed yet) goes to the
+      // wizard. `archived` must never go through it — closing the wizard
+      // there would silently PATCH status back to 'draft', un-archiving it
+      // by accident (see launches review item 1 / dashboard bypass).
+      resumeLaunchWizard(kit.projectId);
+    } else {
+      // `active` opens the Hub; `archived` lands on the same URL, which
+      // renders its own read-only view (see lancamentos/page.tsx).
+      router.push(`/lancamentos?projectId=${kit.projectId}`);
+    }
+  };
 
   if (launchKits.length === 0) {
-    return <EmptyState onNew={() => setShowLaunchWizard(true)} />;
+    return <EmptyState onNew={() => { openLaunchWizardForDraft({}).catch((e) => console.error(e)); }} />;
   }
 
   return (
@@ -31,7 +47,7 @@ export function KitDashboard() {
             <p className="text-[12px] text-white/40 mt-0.5">{launchKits.length} kit{launchKits.length !== 1 ? "s" : ""} criado{launchKits.length !== 1 ? "s" : ""}</p>
           </div>
           <button
-            onClick={() => setShowLaunchWizard(true)}
+            onClick={() => { openLaunchWizardForDraft({}).catch((e) => console.error(e)); }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-[12px] font-semibold transition-colors cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" /> Novo Kit
@@ -44,8 +60,8 @@ export function KitDashboard() {
             <KitCard
               key={kit.id}
               kit={kit}
-              onOpen={() => setActiveLaunchKit(kit)}
-              onDelete={() => deleteLaunchKit(kit.id)}
+              onOpen={() => openKit(kit)}
+              onDelete={() => deleteLaunchKit(kit.projectId).catch(() => {})}
             />
           ))}
         </div>
@@ -62,8 +78,10 @@ function KitCard({
   onOpen: () => void;
   onDelete: () => void;
 }) {
-  const strategy = STRATEGY_MAP[kit.strategyId];
-  const Icon = STRATEGY_ICONS[kit.strategyId] ?? Rocket;
+  const isDraft = kit.status === "draft";
+  const isArchived = kit.status === "archived";
+  const strategy = kit.strategyId ? STRATEGY_MAP[kit.strategyId] : null;
+  const Icon = (kit.strategyId && STRATEGY_ICONS[kit.strategyId]) ?? Rocket;
   const done = kit.assets.filter((a) => a.status === "done").length;
   const total = kit.assets.length;
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
@@ -74,20 +92,32 @@ function KitCard({
         className="w-full flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-colors cursor-pointer text-left"
         onClick={onOpen}
       >
-        <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 shrink-0">
-          <Icon className="w-4 h-4" />
+        <div className={`p-2.5 rounded-xl shrink-0 ${isDraft || isArchived ? "bg-white/[0.06] text-white/40" : "bg-purple-500/10 text-purple-400"}`}>
+          {isDraft ? <PenLine className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[13px] font-semibold text-white truncate">{kit.brandInfo.productName}</span>
-            <span className="text-[10px] text-white/30 shrink-0">{strategy?.label}</span>
+            <span className="text-[13px] font-semibold text-white truncate">{kit.briefing.productName || "Lançamento sem nome"}</span>
+            {isDraft ? (
+              <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-white/[0.06] text-white/40 text-[9px] font-semibold uppercase tracking-wide">Rascunho</span>
+            ) : isArchived ? (
+              <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-white/[0.06] text-white/40 text-[9px] font-semibold uppercase tracking-wide">Arquivado</span>
+            ) : (
+              <span className="text-[10px] text-white/30 shrink-0">{strategy?.label}</span>
+            )}
           </div>
-          <div className="flex items-center gap-3 mt-1.5">
-            <div className="flex-1 h-1 bg-white/[0.06] rounded-full overflow-hidden max-w-[160px]">
-              <div className="h-full bg-purple-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
+          {isDraft ? (
+            <p className="text-[10px] text-white/25 mt-1.5">Continue o briefing para ativar este lançamento</p>
+          ) : isArchived ? (
+            <p className="text-[10px] text-white/25 mt-1.5">Somente leitura</p>
+          ) : (
+            <div className="flex items-center gap-3 mt-1.5">
+              <div className="flex-1 h-1 bg-white/[0.06] rounded-full overflow-hidden max-w-[160px]">
+                <div className="h-full bg-purple-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
+              </div>
+              <span className="text-[10px] text-white/30">{done}/{total} ativos</span>
             </div>
-            <span className="text-[10px] text-white/30">{done}/{total} ativos</span>
-          </div>
+          )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <div
@@ -144,4 +174,3 @@ function EmptyState({ onNew }: { onNew: () => void }) {
     </div>
   );
 }
-

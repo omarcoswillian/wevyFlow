@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { X, ChevronRight, ChevronLeft, Rocket, Zap, Sprout, PlayCircle, Repeat, Check, Upload, ChevronDown } from "lucide-react";
+import { X, ChevronRight, ChevronLeft, Rocket, Zap, Sprout, PlayCircle, Repeat, Check, Upload, ChevronDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppContext } from "../(app)/_context";
 import { LAUNCH_STRATEGIES } from "../lib/launch-strategies";
-import type { BrandInfo, LaunchKit, StrategyId, WizardState } from "../lib/types-kit";
+import type { StrategyId } from "../lib/types-kit";
+import { emptyBriefing, type LaunchBriefing } from "../lib/launch-briefing";
 
 const STYLE_PRESETS = [
   { id: "dark-premium", label: "Dark Premium" },
@@ -29,83 +30,141 @@ const STRATEGY_ICONS: Record<StrategyId, React.ElementType> = {
   perpetuo: Repeat,
 };
 
-const DEFAULT_BRAND: Partial<BrandInfo> = {
-  primaryColor: "#a78bfa",
-  secondaryColor: "#6366f1",
-  fontChoice: "sora",
-  stylePreset: "dark-premium",
-};
+interface WizardLocalState {
+  step: 1 | 2 | 3;
+  briefing: LaunchBriefing;
+  selectedStrategy: StrategyId | null;
+}
 
 export function LaunchWizard() {
-  const { showLaunchWizard, setShowLaunchWizard, saveLaunchKit, navigate, launchWizardPrefill, setLaunchWizardPrefill } = useAppContext();
+  const {
+    showLaunchWizard, setShowLaunchWizard, navigate,
+    launchWizardProjectId, launchKits, persistLaunch, setActiveLaunchKit,
+  } = useAppContext();
 
-  const [wizard, setWizard] = useState<WizardState>({
+  const [wizard, setWizard] = useState<WizardLocalState>({
     step: 1,
-    brandInfo: { ...DEFAULT_BRAND },
+    briefing: emptyBriefing(),
     selectedStrategy: null,
   });
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  // Set synchronously the instant activation starts (before the first
+  // `await`), so close() has a way to refuse even if some other code path
+  // calls it while the backdrop/X are already disabled by `saving` — belt
+  // and suspenders against the activation-then-close race (review item C).
+  const activatingRef = useRef(false);
 
-  // Ao abrir vindo do "+" da home com briefing já preenchido, pula direto pra escolha de estratégia
+  // The draft was already persisted (server round-trip) by whoever opened
+  // this wizard (Home/KitDashboard) — this effect only loads it locally,
+  // it never creates or discards anything.
   useEffect(() => {
-    if (!showLaunchWizard) return;
-    const prefill = launchWizardPrefill;
-    const brandInfo = { ...DEFAULT_BRAND, ...prefill };
-    const prefillComplete = !!(
-      prefill?.productName?.trim() &&
-      prefill?.niche?.trim() &&
-      prefill?.targetAudience?.trim() &&
-      prefill?.transformation?.trim()
+    if (!showLaunchWizard || !launchWizardProjectId) return;
+    const existing = launchKits.find((k) => k.projectId === launchWizardProjectId);
+    const briefing = existing?.briefing ?? emptyBriefing();
+    const briefingComplete = !!(
+      briefing.productName?.trim() &&
+      briefing.niche?.trim() &&
+      briefing.targetAudience?.trim() &&
+      briefing.transformation?.trim()
     );
-    setWizard({ step: prefillComplete ? 2 : 1, brandInfo, selectedStrategy: null });
+    setWizard({
+      step: briefingComplete ? 2 : 1,
+      briefing,
+      selectedStrategy: existing?.strategyId ?? null,
+    });
+    setSaveError(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showLaunchWizard]);
+  }, [showLaunchWizard, launchWizardProjectId]);
 
-  const close = useCallback(() => {
+  const persistDraft = useCallback(async (patch: Partial<WizardLocalState> = {}): Promise<boolean> => {
+    if (!launchWizardProjectId) return false;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await persistLaunch({
+        projectId: launchWizardProjectId,
+        briefing: patch.briefing ?? wizard.briefing,
+        strategyId: patch.selectedStrategy !== undefined ? patch.selectedStrategy : wizard.selectedStrategy,
+        status: "draft",
+      });
+      return true;
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Erro ao salvar rascunho.");
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  }, [launchWizardProjectId, persistLaunch, wizard.briefing, wizard.selectedStrategy]);
+
+  const close = useCallback(async () => {
+    // Fechar não equivale a concluir — mas o que já foi digitado deve
+    // sobreviver, então salva o draft antes de esconder o modal. Se o
+    // salvamento falhar, o modal permanece aberto com o erro visível em
+    // vez de fechar e descartar o que o usuário preencheu (ver revisão
+    // do Codex, item 3). Sem projectId não há o que salvar — nesse caso
+    // (não deveria ocorrer, já que só se abre o wizard com um draft já
+    // persistido) ainda assim permite fechar, pra nunca travar o modal.
+    if (activatingRef.current) return;
+    if (launchWizardProjectId) {
+      const ok = await persistDraft();
+      if (!ok) return;
+    }
     setShowLaunchWizard(false);
-    setLaunchWizardPrefill(null);
-    setWizard({ step: 1, brandInfo: { ...DEFAULT_BRAND }, selectedStrategy: null });
-  }, [setShowLaunchWizard, setLaunchWizardPrefill]);
+    setWizard({ step: 1, briefing: emptyBriefing(), selectedStrategy: null });
+  }, [persistDraft, setShowLaunchWizard, launchWizardProjectId]);
 
-  const setBrand = useCallback((patch: Partial<BrandInfo>) => {
-    setWizard((w) => ({ ...w, brandInfo: { ...w.brandInfo, ...patch } }));
+  const setBrand = useCallback((patch: Partial<LaunchBriefing>) => {
+    setWizard((w) => ({ ...w, briefing: { ...w.briefing, ...patch } }));
   }, []);
 
-  const goNext = useCallback(() => {
+  const goNext = useCallback(async () => {
+    const ok = await persistDraft();
+    if (!ok) return; // keep the user on the current step so nothing typed is lost
     setWizard((w) => ({ ...w, step: (Math.min(w.step + 1, 3) as 1 | 2 | 3) }));
-  }, []);
+  }, [persistDraft]);
 
   const goBack = useCallback(() => {
     setWizard((w) => ({ ...w, step: (Math.max(w.step - 1, 1) as 1 | 2 | 3) }));
   }, []);
 
-  const handleConfirm = useCallback(() => {
-    if (!wizard.selectedStrategy) return;
-    const strategy = LAUNCH_STRATEGIES.find((s) => s.id === wizard.selectedStrategy)!;
-    const brand = wizard.brandInfo as BrandInfo;
-    const now = new Date().toISOString();
-    const kit: LaunchKit = {
-      id: crypto.randomUUID(),
-      strategyId: wizard.selectedStrategy,
-      brandInfo: brand,
-      assets: strategy.assets.map((a) => ({ assetId: a.id, status: "pending" })),
-      createdAt: now,
-      updatedAt: now,
-    };
-    saveLaunchKit(kit);
-    close();
-    navigate("lancamentos");
-  }, [wizard, saveLaunchKit, close, navigate]);
+  const handleConfirm = useCallback(async () => {
+    if (!wizard.selectedStrategy || !launchWizardProjectId) return;
+    activatingRef.current = true;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const launch = await persistLaunch({
+        projectId: launchWizardProjectId,
+        briefing: wizard.briefing,
+        strategyId: wizard.selectedStrategy,
+        status: "active",
+      });
+      setActiveLaunchKit(launch);
+      setShowLaunchWizard(false);
+      setWizard({ step: 1, briefing: emptyBriefing(), selectedStrategy: null });
+      navigate("lancamentos", launch.projectId);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Erro ao ativar o lançamento.");
+    } finally {
+      setSaving(false);
+      activatingRef.current = false;
+    }
+  }, [wizard, launchWizardProjectId, persistLaunch, setActiveLaunchKit, setShowLaunchWizard, navigate]);
 
   if (!showLaunchWizard) return null;
 
-  const brand = wizard.brandInfo;
+  const brand = wizard.briefing;
   const step1Valid = !!(brand.productName?.trim() && brand.niche?.trim() && brand.targetAudience?.trim() && brand.transformation?.trim());
   const step2Valid = !!wizard.selectedStrategy;
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center">
-      {/* backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={close} />
+      {/* backdrop — inert while saving/activating so a click can't race a
+          PATCH already in flight (e.g. "Criar Kit" then immediately closing
+          — see launches review item C: that could revert an
+          just-activated launch back to draft). */}
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={saving ? undefined : close} />
 
       <div className="relative z-10 w-full max-w-2xl mx-4 bg-[#0f0f14] border border-white/[0.08] rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
         {/* header */}
@@ -114,8 +173,8 @@ export function LaunchWizard() {
             <h2 className="text-[15px] font-semibold text-white">Novo Kit de Lançamento</h2>
             <p className="text-[11px] text-white/40 mt-0.5">Passo {wizard.step} de 3</p>
           </div>
-          <button onClick={close} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors cursor-pointer">
-            <X className="w-4 h-4" />
+          <button onClick={close} disabled={saving} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-wait">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
           </button>
         </div>
 
@@ -128,16 +187,21 @@ export function LaunchWizard() {
 
         {/* body */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+          {saveError && (
+            <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-[11px] text-red-400">
+              {saveError} — seus dados continuam preenchidos, tente novamente.
+            </div>
+          )}
           {wizard.step === 1 && <StepBrand brand={brand} setBrand={setBrand} />}
           {wizard.step === 2 && <StepStrategy selected={wizard.selectedStrategy} onSelect={(id) => setWizard((w) => ({ ...w, selectedStrategy: id }))} />}
-          {wizard.step === 3 && <StepConfirm brand={brand as BrandInfo} strategyId={wizard.selectedStrategy!} />}
+          {wizard.step === 3 && <StepConfirm brand={brand} strategyId={wizard.selectedStrategy!} />}
         </div>
 
         {/* footer */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-white/[0.06]">
           <button
             onClick={goBack}
-            disabled={wizard.step === 1}
+            disabled={wizard.step === 1 || saving}
             className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-medium text-white/50 hover:text-white/80 disabled:opacity-0 disabled:pointer-events-none transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-3.5 h-3.5" /> Voltar
@@ -146,17 +210,18 @@ export function LaunchWizard() {
           {wizard.step < 3 ? (
             <button
               onClick={goNext}
-              disabled={wizard.step === 1 ? !step1Valid : !step2Valid}
+              disabled={(wizard.step === 1 ? !step1Valid : !step2Valid) || saving}
               className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[12px] font-semibold transition-colors cursor-pointer"
             >
-              Continuar <ChevronRight className="w-3.5 h-3.5" />
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <>Continuar <ChevronRight className="w-3.5 h-3.5" /></>}
             </button>
           ) : (
             <button
               onClick={handleConfirm}
-              className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-[12px] font-semibold transition-colors cursor-pointer"
+              disabled={saving}
+              className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:opacity-60 text-white text-[12px] font-semibold transition-colors cursor-pointer"
             >
-              <Check className="w-3.5 h-3.5" /> Criar Kit
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Criar Kit
             </button>
           )}
         </div>
@@ -190,7 +255,7 @@ async function resizeImage(file: File): Promise<string> {
 }
 
 /* ── Step 1: Brand Info ─────────────────────────────────── */
-function StepBrand({ brand, setBrand }: { brand: Partial<BrandInfo>; setBrand: (p: Partial<BrandInfo>) => void }) {
+function StepBrand({ brand, setBrand }: { brand: Partial<LaunchBriefing>; setBrand: (p: Partial<LaunchBriefing>) => void }) {
   const [refOpen, setRefOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -406,7 +471,7 @@ function StepStrategy({ selected, onSelect }: { selected: StrategyId | null; onS
 }
 
 /* ── Step 3: Confirm ────────────────────────────────────── */
-function StepConfirm({ brand, strategyId }: { brand: BrandInfo; strategyId: StrategyId }) {
+function StepConfirm({ brand, strategyId }: { brand: LaunchBriefing; strategyId: StrategyId }) {
   const strategy = LAUNCH_STRATEGIES.find((s) => s.id === strategyId)!;
   const pages = strategy.assets.filter((a) => a.type === "page");
   const criativos = strategy.assets.filter((a) => a.type === "criativo");

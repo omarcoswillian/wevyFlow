@@ -33,7 +33,7 @@ async function callGenerateLogo(dna: BrandDNA, variant: "dark" | "light"): Promi
 }
 
 export function BrandIdentityPage() {
-  const { navigate, setShowLaunchWizard } = useAppContext();
+  const { navigate, openLaunchWizardForDraft } = useAppContext();
   const [mode, setMode] = useState<"wizard" | "display">("wizard");
   const [dna, setDna] = useState<BrandDNA | null>(null);
   const [logos, setLogos] = useState<GeneratedLogo[]>([]);
@@ -93,8 +93,8 @@ export function BrandIdentityPage() {
 
   const handleApply = useCallback(() => {
     navigate("lancamentos");
-    setShowLaunchWizard(true);
-  }, [navigate, setShowLaunchWizard]);
+    openLaunchWizardForDraft({}).catch((e) => console.error(e));
+  }, [navigate, openLaunchWizardForDraft]);
 
   return (
     <div className="flex-1 overflow-y-auto">

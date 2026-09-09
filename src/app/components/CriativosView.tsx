@@ -84,9 +84,13 @@ function downloadDataUrl(dataUrl: string, filename: string) {
   const a = document.createElement("a"); a.href = dataUrl; a.download = filename; a.click();
 }
 async function downloadFromUrl(url: string, filename: string) {
-  const res = await fetch(url); const blob = await res.blob();
+  const res = await fetch(url);
+  if (!res.ok) { alert("Não foi possível baixar essa imagem (arquivo indisponível no servidor)."); return; }
+  const blob = await res.blob();
+  if (blob.size === 0) { alert("Não foi possível baixar essa imagem (arquivo vazio no servidor)."); return; }
+  const ext = blob.type === "image/jpeg" ? "jpg" : blob.type === "image/webp" ? "webp" : "png";
   const obj = URL.createObjectURL(blob);
-  const a = document.createElement("a"); a.href = obj; a.download = filename; a.click();
+  const a = document.createElement("a"); a.href = obj; a.download = filename.replace(/\.png$/, `.${ext}`); a.click();
   URL.revokeObjectURL(obj);
 }
 let _refCtr = 0; let _avCtr = 0;
@@ -394,7 +398,7 @@ export function CriativosView() {
   };
 
   /* ── Use as reference (from biblioteca/galeria) ── */
-  const useAsReference = useCallback(async (imageUrl: string) => {
+  const addAsReference = useCallback(async (imageUrl: string) => {
     const res = await fetch(imageUrl);
     const blob = await res.blob();
     const dataUrl = await new Promise<string>((resolve, reject) => {
@@ -479,8 +483,9 @@ export function CriativosView() {
           targetWidth: fmt.pxW,
           targetHeight: fmt.pxH,
         });
-        const json = await res.json();
+        const json = await res.json() as { error?: string; b64?: string; mimeType?: string };
         if (!res.ok) throw new Error(json.error || "Erro ao gerar.");
+        if (!json.b64 || !json.mimeType) throw new Error("Imagem não retornada.");
         const dataUrl = `data:${json.mimeType};base64,${json.b64}`;
         setGenResults(prev => prev.map(r => r.id === ph.id ? { ...r, status: "done", dataUrl, mimeType: json.mimeType } : r));
       } catch (err) {
@@ -511,8 +516,9 @@ export function CriativosView() {
         targetWidth: fmt.pxW,
         targetHeight: fmt.pxH,
       });
-      const json = await res.json();
+      const json = await res.json() as { error?: string; b64?: string; mimeType?: string };
       if (!res.ok) throw new Error(json.error || "Erro ao ajustar.");
+      if (!json.b64 || !json.mimeType) throw new Error("Imagem não retornada.");
       const dataUrl = `data:${json.mimeType};base64,${json.b64}`;
       setGenResults(prev => prev.map(r => r.id === result.id ? { ...r, status: "done", dataUrl, mimeType: json.mimeType } : r));
     } catch (err) {
@@ -899,7 +905,7 @@ export function CriativosView() {
                 label="Meus uploads"
                 count={filteredLibrary.length}
                 items={filteredLibrary.map(l => ({ key: l.id, src: l.url, name: l.name ?? "" }))}
-                onUseAsReference={useAsReference}
+                onUseAsReference={addAsReference}
               />
             )}
 
@@ -931,7 +937,7 @@ export function CriativosView() {
                   label={brand}
                   count={items.length}
                   items={items.map(s => ({ key: s.path, src: s.path, name: s.name }))}
-                  onUseAsReference={useAsReference}
+                  onUseAsReference={addAsReference}
                 />
               );
             })}
@@ -981,7 +987,7 @@ export function CriativosView() {
                         <img src={criativo.url} alt="criativo" className="w-full h-full object-cover group-hover:scale-105 duration-500 transition-transform" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                         <div className="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
-                          <button onClick={() => useAsReference(criativo.url)} className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-purple-600/80 backdrop-blur-sm text-white text-[11px] font-semibold cursor-pointer hover:bg-purple-500 transition-colors"><ImageIcon className="w-3.5 h-3.5" /> Usar como referencia</button>
+                          <button onClick={() => addAsReference(criativo.url)} className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-purple-600/80 backdrop-blur-sm text-white text-[11px] font-semibold cursor-pointer hover:bg-purple-500 transition-colors"><ImageIcon className="w-3.5 h-3.5" /> Usar como referencia</button>
                           <div className="flex gap-2">
                             <button onClick={() => downloadFromUrl(criativo.url, `criativo-${criativo.format}.png`)} className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-white/10 backdrop-blur-sm text-white/80 text-[11px] cursor-pointer hover:bg-white/20 transition-colors"><Download className="w-3.5 h-3.5" /> Baixar</button>
                             <button onClick={() => handleDeleteGallery(criativo)} className="p-1.5 rounded-lg bg-red-500/20 backdrop-blur-sm text-red-300 cursor-pointer hover:bg-red-500/40 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>

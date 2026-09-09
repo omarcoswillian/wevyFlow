@@ -2,6 +2,7 @@ import { SECTIONS } from "../../lib/arsenal/sections";
 import { assembleSections } from "../../lib/arsenal/loader";
 import { resolveConfig, callOnce, startStream, iterableToReadable, parseApiError, AICallConfig } from "../../lib/ai-client";
 import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
+import { requireLaunch, launchErrorResponse } from "@/lib/launches/server";
 
 export const maxDuration = 300;
 
@@ -426,11 +427,20 @@ export async function POST(request: Request) {
     stylePreset,
     images,
     copyDocument,
+    projectId,
   } = await request.json();
 
   // Credit check — all users go through quota system
   if (!prompt && !copyDocument) {
     return Response.json({ error: "Prompt ou documento de copy é obrigatório" }, { status: 400 });
+  }
+
+  let launch: Awaited<ReturnType<typeof requireLaunch>>;
+  try {
+    launch = await requireLaunch(projectId);
+  } catch (err) {
+    const { body, status } = launchErrorResponse(err);
+    return Response.json(body, { status });
   }
 
   const creditResult = await checkAndDeductCredit("landing_page", prompt || "");
@@ -483,10 +493,25 @@ export async function POST(request: Request) {
     }
   }
 
+  // Identity facts (who/what/for whom) come from the persisted launch
+  // briefing, not from whatever the request happens to say — a launch for
+  // product A must not be usable to quietly generate a page for product B
+  // (see launches review item 3). Computed unconditionally, before any
+  // branch/await that could fail, so every code path below (replicate,
+  // copy-document, main compose, and the Promise.all failure fallback) has
+  // it available.
+  const canonicalFactsLines = [
+    launch.brandInfo.productName ? `PRODUTO (fonte de verdade — não troque por outro nome): ${launch.brandInfo.productName}` : "",
+    launch.brandInfo.niche ? `NICHO (fonte de verdade): ${launch.brandInfo.niche}` : "",
+    launch.brandInfo.targetAudience ? `PÚBLICO-ALVO (fonte de verdade): ${launch.brandInfo.targetAudience}` : "",
+    launch.brandInfo.transformation ? `TRANSFORMAÇÃO/BENEFÍCIO (fonte de verdade): ${launch.brandInfo.transformation}` : "",
+  ].filter(Boolean).join("\n");
+
   /* ── REPLICATE mode: browser render available → skip arsenal, go straight to Claude ── */
   if (browserResult) {
     const replicateMsg = [
       prompt ? `BRIEFING / PRODUTO: ${prompt}` : "Replique fielmente a página de referência.",
+      canonicalFactsLines,
       brandReference ? `MARCA: ${brandReference}` : "",
       expectations ? `SENSAÇÃO DESEJADA: ${expectations}` : "",
       primaryColor ? `COR PRIMÁRIA DO PRODUTO: ${primaryColor}` : "",
@@ -546,14 +571,38 @@ export async function POST(request: Request) {
   ].filter(Boolean).join("\n");
 
   let sectionIds: string[] = [];
-  let productContext: ProductContext = { productName: null, niche: null, mainBenefit: null, targetAudience: null, cta: null, tone: null };
+  // Seeded with the canonical facts up front (not left at all-null) so that
+  // if the Promise.all below throws before the merge on line ~590 runs,
+  // `contextLines` further down still carries the launch's real product
+  // identity instead of silently falling back to nothing (see launches
+  // review item 3 — Promise.all failure path).
+  let productContext: ProductContext = {
+    productName: launch.brandInfo.productName || null,
+    niche: launch.brandInfo.niche || null,
+    mainBenefit: launch.brandInfo.transformation || null,
+    targetAudience: launch.brandInfo.targetAudience || null,
+    cta: null,
+    tone: null,
+  };
 
   try {
     const [composeRaw, ctx] = await Promise.all([
       callOnce(aiConfig, COMPOSE_SYSTEM, composeUserMsg, 256),
       extractProductContext(aiConfig, prompt),
     ]);
-    productContext = ctx;
+    // Identity facts (who/what/for whom) come from the persisted launch
+    // briefing, not from whatever the free-text prompt happens to say — a
+    // launch for product A must not be usable to quietly generate a page
+    // for product B just by typing a different name in the prompt (see
+    // launches review item F). Task-specific instructions in `prompt`
+    // (layout, tone, sections wanted) still flow through untouched.
+    productContext = {
+      ...ctx,
+      productName: launch.brandInfo.productName || ctx.productName,
+      niche: launch.brandInfo.niche || ctx.niche,
+      targetAudience: launch.brandInfo.targetAudience || ctx.targetAudience,
+      mainBenefit: launch.brandInfo.transformation || ctx.mainBenefit,
+    };
     // Extract JSON even if there's surrounding text
     const jsonMatch = composeRaw.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
@@ -611,9 +660,14 @@ export async function POST(request: Request) {
 
   const personalizeUserMsg = [
     prompt ? `BRIEFING / ESTILO DESEJADO: ${prompt}` : "",
+    // The copy document replaces AI-written copy, not the canonical product
+    // facts — both are needed (see launches review item 3): without
+    // `contextLines` here, a copy document that doesn't spell out the
+    // product name/niche/audience left the page with none of it.
+    contextLines,
     hasCopyDocument
       ? `\nDOCUMENTO DE COPY DO CLIENTE (use este texto exatamente nas seções — não invente copy nova):\n---\n${copyDocument.trim()}\n---`
-      : contextLines,
+      : "",
     `COR PRIMÁRIA: ${primaryColor || "#FF5C00"}`,
     `COR SECUNDÁRIA: ${secondaryColor || "#E04E00"}`,
     `FONTE: ${fontChoice || "montserrat"}`,

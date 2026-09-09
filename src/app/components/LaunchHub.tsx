@@ -296,6 +296,7 @@ export function LaunchHub() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [webhookInput, setWebhookInput] = useState(webhookUrl);
   const [webhookSaved, setWebhookSaved] = useState(false);
+  const [persistError, setPersistError] = useState<string | null>(null);
   // Tracks which asset IDs are actively generating IN THIS SESSION (not persisted)
   const [localGenerating, setLocalGenerating] = useState<Set<string>>(new Set());
   // Ref-based guard to prevent double-click race — updated synchronously before setState
@@ -305,10 +306,13 @@ export function LaunchHub() {
   const kitRef = useRef(activeLaunchKit);
   kitRef.current = activeLaunchKit;
 
-  if (!activeLaunchKit) return null;
+  // LaunchHub only renders for an activated kit, and activation requires a
+  // chosen strategy (see isBriefingActivatable) — strategyId is guaranteed
+  // non-null here even though the type allows null for drafts.
+  if (!activeLaunchKit || !activeLaunchKit.strategyId) return null;
 
   const kit = activeLaunchKit;
-  const strategy = STRATEGY_MAP[kit.strategyId];
+  const strategy = STRATEGY_MAP[kit.strategyId!];
   const pages = strategy.assets.filter((a) => a.type === "page");
   const criativos = strategy.assets.filter((a) => a.type === "criativo");
 
@@ -342,10 +346,13 @@ export function LaunchHub() {
     // Mark as locally generating (in-memory only, survives re-renders but not reloads)
     setLocalGenerating((prev) => new Set([...prev, asset.id]));
 
-    // Persist "generating" status to kit so the badge shows correctly
+    // Persist "generating" status to kit so the badge shows correctly.
+    // setActiveLaunchKit happens immediately for a snappy UI; saveLaunchKit
+    // is awaited separately so a remote failure surfaces instead of being
+    // silently swallowed (see persistError banner below).
     const withGenerating = patchAsset(kitAtStart, asset.id, { status: "generating", error: undefined });
-    saveLaunchKit(withGenerating);
     setActiveLaunchKit(withGenerating);
+    saveLaunchKit(withGenerating).catch((e) => setPersistError(e instanceof Error ? e.message : "Erro ao salvar lançamento."));
 
     try {
       // If brand identity is approved, use its palette/fonts in the generation
@@ -360,6 +367,7 @@ export function LaunchHub() {
         body: JSON.stringify({
           prompt: buildAssetPrompt(kitAtStart, asset),
           platform: "html",
+          projectId: kitAtStart.projectId,
           primaryColor,
           secondaryColor,
           fontChoice,
@@ -390,14 +398,14 @@ export function LaunchHub() {
 
       // Re-read ref to get the latest kit state (other assets may have finished while we were fetching)
       const withDone = patchAsset(kitRef.current!, asset.id, { status: "done", generatedCode: html });
-      saveLaunchKit(withDone);
       setActiveLaunchKit(withDone);
+      saveLaunchKit(withDone).catch((e) => setPersistError(e instanceof Error ? e.message : "Erro ao salvar lançamento."));
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erro desconhecido";
       // Re-read ref here too so we don't overwrite other assets' results
       const withError = patchAsset(kitRef.current!, asset.id, { status: "error", error: msg });
-      saveLaunchKit(withError);
       setActiveLaunchKit(withError);
+      saveLaunchKit(withError).catch((e) => setPersistError(e instanceof Error ? e.message : "Erro ao salvar lançamento."));
     } finally {
       localGeneratingRef.current.delete(asset.id);
       setLocalGenerating((prev) => { const s = new Set(prev); s.delete(asset.id); return s; });
@@ -413,11 +421,15 @@ export function LaunchHub() {
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!confirmDelete) { setConfirmDelete(true); return; }
-    deleteLaunchKit(kit.id);
-    setActiveLaunchKit(null);
-    navigate("lancamentos");
+    try {
+      await deleteLaunchKit(kit.projectId);
+      setActiveLaunchKit(null);
+      navigate("lancamentos");
+    } catch (e) {
+      setPersistError(e instanceof Error ? e.message : "Erro ao excluir lançamento.");
+    }
   };
 
   const handleBack = () => {
@@ -445,7 +457,7 @@ export function LaunchHub() {
         <div className="flex-1 flex items-center gap-2.5 min-w-0">
           <h1 className="text-[15px] font-semibold text-white truncate">{kit.brandInfo.productName}</h1>
           <span className="shrink-0 px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[10px] font-medium">
-            {STRATEGY_LABEL[kit.strategyId]}
+            {STRATEGY_LABEL[kit.strategyId!]}
           </span>
         </div>
 
@@ -487,6 +499,13 @@ export function LaunchHub() {
         </div>
       </div>
 
+      {persistError && (
+        <div className="shrink-0 flex items-center justify-between gap-3 px-5 py-2 bg-red-500/10 border-b border-red-500/20 text-[11px] text-red-400">
+          <span>Falha ao salvar: {persistError}</span>
+          <button onClick={() => setPersistError(null)} className="shrink-0 text-red-400/60 hover:text-red-300 cursor-pointer font-medium">Fechar</button>
+        </div>
+      )}
+
       {/* ── Brief strip ── */}
       <div className="shrink-0 flex items-center gap-2 px-5 py-2.5 border-b border-white/[0.04] overflow-x-auto no-scrollbar">
         <div className="shrink-0 flex items-center gap-1.5">
@@ -519,7 +538,10 @@ export function LaunchHub() {
           </div>
           <BrandIdentityStudio
             kit={kit}
-            onUpdate={(updated) => { saveLaunchKit(updated); setActiveLaunchKit(updated); }}
+            onUpdate={(updated) => {
+              setActiveLaunchKit(updated);
+              saveLaunchKit(updated).catch((e) => setPersistError(e instanceof Error ? e.message : "Erro ao salvar identidade visual."));
+            }}
             apiKey={apiKey}
             aiProvider={aiProvider}
             aiModel={aiModel}
@@ -625,8 +647,8 @@ export function LaunchHub() {
             sequences={emailSequences}
             onChange={(next) => {
               const updated = { ...kitRef.current!, emailSequences: next, updatedAt: new Date().toISOString() };
-              saveLaunchKit(updated);
               setActiveLaunchKit(updated);
+              saveLaunchKit(updated).catch((e) => setPersistError(e instanceof Error ? e.message : "Erro ao salvar sequência de emails."));
             }}
           />
         </section>

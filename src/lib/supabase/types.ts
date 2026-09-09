@@ -131,6 +131,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      carousels: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          format: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name?: string;
+          format?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["carousels"]["Insert"]>;
+        Relationships: [];
+      };
+      carousel_slides: {
+        Row: {
+          id: string;
+          carousel_id: string;
+          position: number;
+          fabric_json: Record<string, unknown> | null;
+          thumbnail_url: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          carousel_id: string;
+          position?: number;
+          fabric_json?: Record<string, unknown> | null;
+          thumbnail_url?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["carousel_slides"]["Insert"]>;
+        Relationships: [];
+      };
       ai_images: {
         Row: {
           id: string;
@@ -343,13 +385,15 @@ export type Database = {
           id: string;
           user_id: string;
           brand_kit_id: string | null;
-          strategy_id: string;
+          strategy_id: string | null;
           brand_info: Record<string, unknown>;
           brand_identity: Record<string, unknown> | null;
           assets: unknown[];
           briefing: Record<string, unknown>;
+          email_sequences: Record<string, unknown>;
           status: "draft" | "active" | "archived";
-          project_id: string | null;
+          project_id: string;
+          client_token: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -357,13 +401,15 @@ export type Database = {
           id?: string;
           user_id: string;
           brand_kit_id?: string | null;
-          strategy_id: string;
+          strategy_id?: string | null;
           brand_info?: Record<string, unknown>;
           brand_identity?: Record<string, unknown> | null;
           assets?: unknown[];
           briefing?: Record<string, unknown>;
+          email_sequences?: Record<string, unknown>;
           status?: "draft" | "active" | "archived";
-          project_id?: string | null;
+          project_id: string;
+          client_token?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -448,6 +494,24 @@ export type Database = {
       deduct_credit: {
         Args: { p_user_id: string; p_action: string; p_tokens?: number };
         Returns: boolean;
+      };
+      save_launch: {
+        Args: {
+          p_project_id: string | null;
+          p_client_token: string | null;
+          p_briefing: Record<string, unknown>;
+          p_brand_info: Record<string, unknown>;
+          p_strategy_id: string | null;
+          p_status: "draft" | "active" | "archived" | null;
+          p_brand_kit_id?: string | null;
+          p_assets?: unknown[] | null;
+          p_brand_identity?: Record<string, unknown> | null;
+          p_email_sequences?: Record<string, unknown> | null;
+          p_clear_strategy?: boolean;
+          p_clear_brand_identity?: boolean;
+          p_clear_brand_kit_id?: boolean;
+        };
+        Returns: { out_project_id: string; out_launch_kit_id: string; out_status: string }[];
       };
     };
     Enums: Record<string, never>;

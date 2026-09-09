@@ -1,0 +1,32 @@
+[
+  {
+    "id": "luana-vergonha-vender",
+    "client": "Luana Carolina",
+    "name": "O problema não é ter vergonha de vender",
+    "format": "4:5",
+    "slides": [
+      "/library-seed/luana/carrossel-vergonha-vender/slide-1.png",
+      "/library-seed/luana/carrossel-vergonha-vender/slide-2.png",
+      "/library-seed/luana/carrossel-vergonha-vender/slide-3.png",
+      "/library-seed/luana/carrossel-vergonha-vender/slide-4.png",
+      "/library-seed/luana/carrossel-vergonha-vender/slide-5.png",
+      "/library-seed/luana/carrossel-vergonha-vender/slide-6.png",
+      "/library-seed/luana/carrossel-vergonha-vender/slide-7.jpg",
+      "/library-seed/luana/carrossel-vergonha-vender/slide-8.png"
+    ]
+  },
+  {
+    "id": "luana-metodo-spe",
+    "client": "Luana Carolina",
+    "name": "Transforme seguidores curiosos em clientes — Método SPE",
+    "format": "4:5",
+    "slides": [
+      "/library-seed/luana/carrossel-metodo-spe/slide-1.png",
+      "/library-seed/luana/carrossel-metodo-spe/slide-2.png",
+      "/library-seed/luana/carrossel-metodo-spe/slide-3.png",
+      "/library-seed/luana/carrossel-metodo-spe/slide-4.png",
+      "/library-seed/luana/carrossel-metodo-spe/slide-5.png",
+      "/library-seed/luana/carrossel-metodo-spe/slide-6.png"
+    ]
+  }
+]

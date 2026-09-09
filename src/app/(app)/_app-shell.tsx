@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AppProvider, useAppContext } from "./_context";
 import { CommandPalette } from "../components/CommandPalette";
 import { LaunchWizard } from "../components/LaunchWizard";
@@ -31,25 +31,21 @@ function GlobalPalette() {
 }
 
 function OnboardingGate() {
-  const [open, setOpen] = useState(false);
+  const { launchKits, launchKitsLoading, launchKitsError } = useAppContext();
+  const [dismissed, setDismissed] = useState(false);
 
-  useEffect(() => {
-    try {
-      const done = localStorage.getItem("wf_onboarding_done");
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (!done) setOpen(true);
-    } catch {
-      // storage unavailable
-    }
-  }, []);
+  // Derived from the server, never from a browser flag: a user only "has
+  // done onboarding" once they have at least one active (briefing complete
+  // + strategy chosen) launch. A network failure while loading must not be
+  // read as "no launch" — wait for the load to actually finish, and never
+  // force the gate open just because the load errored.
+  const hasActiveLaunch = launchKits.some((k) => k.status === "active");
+  const open = !launchKitsLoading && !launchKitsError && !hasActiveLaunch && !dismissed;
 
   return (
     <OnboardingWizard
       open={open}
-      onClose={() => {
-        try { localStorage.setItem("wf_onboarding_done", "1"); } catch {}
-        setOpen(false);
-      }}
+      onClose={() => setDismissed(true)}
     />
   );
 }

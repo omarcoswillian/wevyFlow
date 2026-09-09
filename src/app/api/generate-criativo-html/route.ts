@@ -1,5 +1,6 @@
 import { resolveConfig, startStream, iterableToReadable, parseApiError } from "../../lib/ai-client";
 import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
+import { requireLaunch, launchErrorResponse } from "@/lib/launches/server";
 
 export const maxDuration = 120;
 
@@ -90,6 +91,7 @@ export async function POST(req: Request) {
     apiKey: _apiKey,
     aiProvider: _aiProvider,
     aiModel: _aiModel,
+    projectId,
   } = await req.json();
 
   const hasBrief = headline?.trim() || produto?.trim() || chatInstruction?.trim();
@@ -102,8 +104,23 @@ export async function POST(req: Request) {
     return Response.json({ error: "Formato inválido." }, { status: 400 });
   }
 
+  let launch;
+  try {
+    launch = await requireLaunch(projectId);
+  } catch (err) {
+    const { body, status } = launchErrorResponse(err);
+    return Response.json(body, { status });
+  }
+
+  // The persisted launch's product name is the canonical source — a
+  // client-supplied `produto` can no longer silently take its place (see
+  // launches review item 6). Task-specific fields (headline/cta/cor/
+  // estilo/fase/chatInstruction/brandContext) stay exactly as the caller
+  // sent them.
+  const canonicalProduto = launch.brandInfo.productName?.trim() || produto;
+
   // Credit check — required for server-side AI calls (BYOK bypass not permitted)
-  const creditResult = await checkAndDeductCredit("criativo_html", headline || produto || "");
+  const creditResult = await checkAndDeductCredit("criativo_html", headline || canonicalProduto || "");
   if (isCreditError(creditResult)) {
     return Response.json({ error: creditResult.error }, { status: creditResult.status });
   }
@@ -117,7 +134,7 @@ export async function POST(req: Request) {
   const system = buildSystem(dims.w, dims.h);
   const userMsg = buildPrompt(
     dims.w, dims.h, dims.platform, dims.safeZone,
-    produto, headline, cta, cor, estilo, fase,
+    canonicalProduto, headline, cta, cor, estilo, fase,
     chatInstruction, brandContext,
   );
 

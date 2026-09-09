@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { toFile } from "openai/uploads";
+import { requireLaunch, launchErrorResponse } from "@/lib/launches/server";
 
 const SIZE_MAP: Record<string, "1024x1024" | "1536x1024" | "1024x1536"> = {
   square: "1024x1024",
@@ -10,13 +11,20 @@ const SIZE_MAP: Record<string, "1024x1024" | "1536x1024" | "1024x1536"> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { prompt, imageBase64, size = "landscape", quality = "medium", apiKey } = await req.json();
+    const { prompt, imageBase64, size = "landscape", quality = "medium", apiKey, projectId } = await req.json();
 
     if (!prompt?.trim()) {
       return NextResponse.json({ error: "Prompt é obrigatório." }, { status: 400 });
     }
     if (!imageBase64) {
       return NextResponse.json({ error: "Imagem de referência é obrigatória." }, { status: 400 });
+    }
+
+    try {
+      await requireLaunch(projectId);
+    } catch (err) {
+      const { body, status } = launchErrorResponse(err);
+      return NextResponse.json(body, { status });
     }
 
     const key = apiKey && apiKey.length > 20 ? apiKey : process.env.OPENAI_API_KEY;

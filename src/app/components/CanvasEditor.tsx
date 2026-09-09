@@ -7,7 +7,7 @@ import {
   X, Download, Loader2, ChevronLeft, Layers,
   Type, Square, Trash2, AlignLeft, AlignCenter, AlignRight, Italic,
   ImageIcon, Upload, Eye, EyeOff, Minus, Link, Link2Off,
-  ChevronRight, ChevronDown, Folder,
+  ChevronRight, ChevronDown, Folder, Library,
 } from "lucide-react";
 import type { CanvasTemplate, ObjDef } from "../lib/canvas-templates";
 
@@ -787,9 +787,29 @@ async function loadFigmaObjects(fab: any, fc: any, objects: unknown[]): Promise<
 }
 
 /* ─── Main component ───────────────────────────────────── */
-interface Props { template: CanvasTemplate; onClose: () => void; }
+interface Props {
+  template: CanvasTemplate;
+  onClose: () => void;
+  /** Called right before closing with the canvas' current editable state
+   *  (fabric.js JSON) and a small PNG preview — lets a caller persist the
+   *  slide instead of only offering a one-shot PNG download. */
+  onSave?: (data: { fabricJson: Record<string, unknown>; thumbnailDataUrl: string }) => void | Promise<void>;
+  /** Uploads a locally-picked image file to durable storage and resolves
+   *  its public URL. When provided, background/image uploads load from that
+   *  URL (crossOrigin-safe, so export keeps working) instead of a blob: URL
+   *  — blob URLs get revoked and can't survive a save/reload round-trip. */
+  onUploadImage?: (file: File) => Promise<string>;
+  /** Already-hosted images the user can pick as a slide background without
+   *  uploading a new file (their asset library). */
+  libraryImages?: { id: string; url: string; name: string }[];
+  /** Applied as the background the first time this slide opens (only when
+   *  it has no fabricJson yet — a slide bootstrapped from a reference
+   *  example carousel). Ignored once the slide has been saved at least
+   *  once, since template.fabricJson takes over from then on. */
+  initialBackgroundUrl?: string;
+}
 
-export function CanvasEditor({ template, onClose }: Props) {
+export function CanvasEditor({ template, onClose, onSave, onUploadImage, libraryImages, initialBackgroundUrl }: Props) {
   const canvasRef   = useRef<HTMLCanvasElement>(null);
   const fcRef       = useRef<any>(null);
   const fabRef      = useRef<any>(null);
@@ -798,11 +818,13 @@ export function CanvasEditor({ template, onClose }: Props) {
 
   const [ready, setReady]         = useState(false);
   const [exporting, setExp]       = useState(false);
+  const [saving, setSaving]       = useState(false);
   const [sel, setSel]             = useState<SelState>(EMPTY);
   const [layers, setLayers]       = useState<LayerInfo[]>([]);
   const [exportScale, setExportScale] = useState<number>(1);
   const [lockAspect, setLockAspect]   = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [showLibrary, setShowLibrary] = useState(false);
 
   const TARGET_H = template.h === 1920 ? 580 : 560;
   const scale    = TARGET_H / template.h;
@@ -889,8 +911,11 @@ export function CanvasEditor({ template, onClose }: Props) {
   useEffect(() => {
     if (!canvasRef.current) return;
     let fc: any;
+    let cancelled = false;
     (async () => {
       const fab = await import("fabric");
+      if (cancelled) return; // effect was cleaned up (e.g. React Strict Mode's mount/unmount/remount)
+      // before the dynamic import resolved — don't initialize a canvas nobody will dispose.
       fabRef.current = fab;
       fc = new fab.Canvas(canvasRef.current!, {
         width: dispW, height: dispH, backgroundColor: template.bgColor, preserveObjectStacking: true,
@@ -953,6 +978,8 @@ export function CanvasEditor({ template, onClose }: Props) {
           }
           if (obj) fc.add(obj);
         }
+
+        if (initialBackgroundUrl) setBackgroundFromUrl(initialBackgroundUrl);
       }
 
       fc.setZoom(scale);
@@ -1000,6 +1027,7 @@ export function CanvasEditor({ template, onClose }: Props) {
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
+      cancelled = true;
       fc?.dispose();
       window.removeEventListener("keydown", handleKeyDown);
     };
@@ -1241,11 +1269,25 @@ export function CanvasEditor({ template, onClose }: Props) {
   }, [rebuildLayers]);
 
   /* ── Image replace ─────────────────────────────────── */
-  const replaceBackground = useCallback((file: File) => {
+  /* Resolves the src to load an uploaded file from: a durable (crossOrigin-
+   * safe) URL via onUploadImage when provided, else a local blob: URL. Blob
+   * URLs only live for this browser session — fine for a one-off download,
+   * but a saved fabric_json referencing one would show a broken image after
+   * reload, so callers that persist state (the Carrossel editor) always
+   * pass onUploadImage. */
+  const resolveImageSrc = useCallback(async (file: File): Promise<{ src: string; durable: boolean }> => {
+    if (onUploadImage) {
+      try { return { src: await onUploadImage(file), durable: true }; } catch { /* fall through to blob */ }
+    }
+    return { src: URL.createObjectURL(file), durable: false };
+  }, [onUploadImage]);
+
+  const replaceBackground = useCallback(async (file: File) => {
     const fc = fcRef.current; const fab = fabRef.current;
     if (!fc || !fab) return;
-    const url = URL.createObjectURL(file);
+    const { src, durable } = await resolveImageSrc(file);
     const img = new window.Image();
+    if (durable) img.crossOrigin = "anonymous";
     img.onload = () => {
       const tw = template.w, th = template.h;
       const s = Math.max(tw / img.naturalWidth, th / img.naturalHeight);
@@ -1260,16 +1302,45 @@ export function CanvasEditor({ template, onClose }: Props) {
         lockMovementX: true, lockMovementY: true, lockScalingX: true, lockScalingY: true,
         name: "__background__",
       }));
-      fc.renderAll(); URL.revokeObjectURL(url);
+      fc.renderAll();
+      if (!durable) URL.revokeObjectURL(src);
+    };
+    img.src = src;
+  }, [template.w, template.h, resolveImageSrc]);
+
+  /** Sets the background straight from an already-hosted URL (library pick)
+   *  — no upload step, always crossOrigin-safe since it's never a blob. */
+  const setBackgroundFromUrl = useCallback((url: string) => {
+    const fc = fcRef.current; const fab = fabRef.current;
+    if (!fc || !fab) return;
+    const img = new window.Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const tw = template.w, th = template.h;
+      const s = Math.max(tw / img.naturalWidth, th / img.naturalHeight);
+      const cropW = tw/s, cropH = th/s;
+      const bg = fc.getObjects().find((o: any) => o.name === "__background__");
+      if (bg) fc.remove(bg);
+      fc.insertAt(0, new fab.FabricImage(img, {
+        originX: "left", originY: "top", left: 0, top: 0,
+        cropX: Math.round((img.naturalWidth - cropW) / 2), cropY: Math.round((img.naturalHeight - cropH) / 2),
+        width: Math.round(cropW), height: Math.round(cropH), scaleX: s, scaleY: s,
+        selectable: false, evented: false,
+        lockMovementX: true, lockMovementY: true, lockScalingX: true, lockScalingY: true,
+        name: "__background__",
+      }));
+      fc.renderAll();
     };
     img.src = url;
+    setShowLibrary(false);
   }, [template.w, template.h]);
 
-  const replaceSelectedImage = useCallback((file: File) => {
+  const replaceSelectedImage = useCallback(async (file: File) => {
     const o = fcRef.current?.getActiveObject();
     if (!o || o.type !== "image") return;
-    const url = URL.createObjectURL(file);
+    const { src, durable } = await resolveImageSrc(file);
     const img = new window.Image();
+    if (durable) img.crossOrigin = "anonymous";
     img.onload = () => {
       const dW = (o.width ?? img.naturalWidth) * (o.scaleX ?? 1);
       const dH = (o.height ?? img.naturalHeight) * (o.scaleY ?? 1);
@@ -1279,10 +1350,11 @@ export function CanvasEditor({ template, onClose }: Props) {
       o.set({ width: Math.round(cropW), height: Math.round(cropH),
         cropX: Math.round((img.naturalWidth - cropW) / 2),
         cropY: Math.round((img.naturalHeight - cropH) / 2), scaleX: s, scaleY: s });
-      fcRef.current.renderAll(); URL.revokeObjectURL(url);
+      fcRef.current.renderAll();
+      if (!durable) URL.revokeObjectURL(src);
     };
-    img.src = url;
-  }, []);
+    img.src = src;
+  }, [resolveImageSrc]);
 
   /* ── Layers panel ──────────────────────────────────── */
   const selectFromPanel = useCallback((layerId: string) => {
@@ -1334,6 +1406,23 @@ export function CanvasEditor({ template, onClose }: Props) {
       a.click();
     } finally { setExp(false); }
   }
+
+  /* ── Save + close ──────────────────────────────────── */
+  const handleClose = useCallback(async () => {
+    const fc = fcRef.current;
+    if (onSave && fc) {
+      setSaving(true);
+      try {
+        const fabricJson = fc.toJSON(["name"]) as Record<string, unknown>;
+        /* Full template resolution (1/scale undoes the display-size scale
+         * applied for editing) — this doubles as both the board thumbnail
+         * and the final downloadable slide, so it can't be a tiny preview. */
+        const thumbnailDataUrl = fc.toDataURL({ format: "png", multiplier: 1 / scale });
+        await onSave({ fabricJson, thumbnailDataUrl });
+      } finally { setSaving(false); }
+    }
+    onClose();
+  }, [onSave, onClose, scale]);
 
   const isBg    = sel.id === "__background__";
   const isText  = sel.type === "textbox" || sel.type === "i-text";
@@ -1410,14 +1499,14 @@ export function CanvasEditor({ template, onClose }: Props) {
 
   return (
     <>
-      <div className="fixed inset-0 z-[400] bg-black/80" onClick={onClose} />
+      <div className="fixed inset-0 z-[400] bg-black/80" onClick={handleClose} />
       <div className="fixed inset-0 z-[401] flex flex-col bg-[#0e0e11] pointer-events-auto"
         style={PANEL_FONT} onClick={(e) => e.stopPropagation()}>
 
         {/* ── Header ─────────────────────────────────── */}
         <div className="flex items-center gap-3 px-5 py-3 border-b border-white/[0.07] shrink-0">
-          <button onClick={onClose} className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.06] cursor-pointer transition-all">
-            <ChevronLeft className="w-4 h-4" />
+          <button onClick={handleClose} disabled={saving} className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.06] cursor-pointer transition-all disabled:opacity-50">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
           <div className="flex-1 min-w-0">
             <span className="text-[13px] font-semibold text-white tracking-tight">{template.name}</span>
@@ -1432,6 +1521,27 @@ export function CanvasEditor({ template, onClose }: Props) {
             <button onClick={addRect} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-white/50 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-all">
               <Square className="w-3.5 h-3.5" /> Forma
             </button>
+            {libraryImages && libraryImages.length > 0 && (
+              <div className="relative">
+                <button onClick={() => setShowLibrary(v => !v)}
+                  className={cn("flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] cursor-pointer transition-all",
+                    showLibrary ? "bg-purple-600/20 text-purple-300" : "text-white/50 hover:text-white hover:bg-white/[0.08]")}>
+                  <Library className="w-3.5 h-3.5" /> Biblioteca
+                </button>
+                {showLibrary && (
+                  <>
+                    <div className="fixed inset-0 z-[410]" onClick={() => setShowLibrary(false)} />
+                    <div className="absolute left-0 top-[calc(100%+6px)] z-[411] w-[320px] max-h-[360px] overflow-y-auto p-2 grid grid-cols-3 gap-2 rounded-xl bg-[#16161c] border border-white/[0.1] shadow-2xl shadow-black">
+                      {libraryImages.map(img => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img key={img.id} src={img.url} alt={img.name} onClick={() => setBackgroundFromUrl(img.url)}
+                          className="w-full aspect-square object-cover rounded-lg cursor-pointer ring-1 ring-white/[0.06] hover:ring-purple-500/50 transition-all" />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Export scale */}
@@ -1458,8 +1568,8 @@ export function CanvasEditor({ template, onClose }: Props) {
             {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
             {exporting ? "Exportando..." : `Baixar PNG ${exportScale > 1 ? exportScale+"x" : ""}`}
           </button>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-white/25 hover:text-white hover:bg-white/[0.06] cursor-pointer transition-all">
-            <X className="w-4 h-4" />
+          <button onClick={handleClose} disabled={saving} className="p-1.5 rounded-lg text-white/25 hover:text-white hover:bg-white/[0.06] cursor-pointer transition-all disabled:opacity-50">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
           </button>
         </div>
 

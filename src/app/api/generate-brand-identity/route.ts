@@ -2,6 +2,7 @@ import { resolveConfig, callOnce, parseApiError } from "../../lib/ai-client";
 import type { AICallConfig } from "../../lib/ai-client";
 import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
 import type { BrandInfo, BrandIdentity, BrandLogo } from "../../lib/types-kit";
+import { requireLaunch, launchErrorResponse } from "@/lib/launches/server";
 
 export const maxDuration = 90;
 
@@ -237,10 +238,17 @@ const DECORATIVE_BY_PRESET: Record<string, "flanking-lines" | "rule-below" | "ge
 };
 
 export async function POST(request: Request) {
-  const { brandInfo } = await request.json() as { brandInfo: BrandInfo };
+  const { projectId } = await request.json() as { projectId?: string };
 
-  if (!brandInfo?.productName) {
-    return Response.json({ error: "brandInfo.productName obrigatório" }, { status: 400 });
+  // Canonical brandInfo always comes from the persisted launch — a
+  // brandInfo sent in the request body is never trusted as a substitute.
+  let brandInfo: BrandInfo;
+  try {
+    const launch = await requireLaunch(projectId);
+    brandInfo = launch.brandInfo;
+  } catch (err) {
+    const { body, status } = launchErrorResponse(err);
+    return Response.json(body, { status });
   }
 
   const creditResult = await checkAndDeductCredit("brand_identity", brandInfo.productName);

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { GoogleGenAI } from "@google/genai";
 import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
+import { requireLaunch, launchErrorResponse } from "@/lib/launches/server";
 
 export interface BrandDNA {
   name: string;
@@ -98,11 +99,30 @@ export async function POST(req: NextRequest) {
       apiKey,
       imageProvider = "openai",
       imageModel,
+      projectId,
     } = await req.json();
 
     if (!dna?.name?.trim()) {
       return NextResponse.json({ error: "O nome da marca é obrigatório." }, { status: 400 });
     }
+
+    let launch: Awaited<ReturnType<typeof requireLaunch>>;
+    try {
+      launch = await requireLaunch(projectId);
+    } catch (err) {
+      const { body, status } = launchErrorResponse(err);
+      return NextResponse.json(body, { status });
+    }
+
+    // Brand identity (name/niche) comes from the persisted launch briefing,
+    // not whatever the client sent — otherwise a launch for product A could
+    // be used to render a logo for product B just by changing `dna.name` in
+    // the request (see launches review item F). Tagline, personality,
+    // voice, visual style, color, logo type and variant stay client-driven
+    // — those are this specific logo attempt's creative choices, not
+    // identity facts owned by the briefing.
+    dna.name = launch.brandInfo.productName || dna.name;
+    dna.niche = launch.brandInfo.niche || dna.niche;
 
     // Every logo call — including BYOK — consumes a plan credit, same
     // policy as generate-criativo. This route previously had no auth or

@@ -134,14 +134,18 @@ export type EmailSequences = Record<EmailSequenceType, EmailItem[]>;
 
 /* ── Kit ─────────────────────────────────────────────────── */
 
+export type LaunchStatus = "draft" | "active" | "archived";
+
 export interface LaunchKit {
-  id: string;
-  strategyId: StrategyId;
-  brandInfo: BrandInfo;
+  id: string; // launch_kits.id
+  projectId: string; // launch_kits.project_id — mandatory once persisted (1 project = 1 launch)
+  status: LaunchStatus;
+  strategyId: StrategyId | null; // null while status === "draft" and no strategy chosen yet
+  briefing: import("./launch-briefing").LaunchBriefing;
+  brandInfo: BrandInfo; // derived projection of `briefing`, kept for existing prompt builders
   brandIdentity?: BrandIdentity;
   assets: KitAssetInstance[];
   emailSequences?: EmailSequences;
-  projectId?: string;
   createdAt: string;
   updatedAt: string;
 }

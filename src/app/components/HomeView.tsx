@@ -39,12 +39,14 @@ import {
   Tv2,
   Lock,
   Camera,
+  GalleryHorizontalEnd,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Platform } from "../lib/types";
 import { ApiKeyModal } from "./ApiKeyModal";
 import { useAppContext } from "../(app)/_context";
-import type { LaunchKit, StrategyId, BrandInfo } from "../lib/types-kit";
+import type { LaunchKit, StrategyId } from "../lib/types-kit";
+import { briefingFromBrandInfoPatch } from "../lib/launch-briefing";
 import type { Project } from "../lib/projects";
 
 export interface GenerateData {
@@ -116,7 +118,10 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentTipo = searchParams.get("tipo") ?? "criativos";
-  const { apiKey, aiProvider, aiModel, saveApiKey, clearApiKey, imageApiKey, imageProvider, imageModel, saveImageApiKey, clearImageApiKey, setShowLaunchWizard, openLaunchWizardWithPrefill, launchKits, projects, webhookUrl, setWebhookUrl } = useAppContext();
+  const { apiKey, aiProvider, aiModel, saveApiKey, clearApiKey, imageApiKey, imageProvider, imageModel, saveImageApiKey, clearImageApiKey, openLaunchWizardForDraft, launchKits, projects, webhookUrl, setWebhookUrl } = useAppContext();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [creatingKit, setCreatingKit] = useState(false);
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [_platform, _setPlatform] = useState<Platform>("html");
@@ -128,7 +133,7 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
   const [images, setImages] = useState<{ name: string; base64: string }[]>([]);
   const [showConfig, setShowConfig] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [designExpanded, setDesignExpanded] = useState(activeNav === "criativos" || activeNav === "ensaio");
+  const [designExpanded, setDesignExpanded] = useState(activeNav === "criativos" || activeNav === "ensaio" || activeNav === "carrossel");
   const [lpExpanded, setLpExpanded] = useState(false);
   const [copyDocument, setCopyDocument] = useState("");
   const [copyFileName, setCopyFileName] = useState<string | null>(null);
@@ -224,13 +229,33 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
 
   const clearCopyDocument = () => { setCopyDocument(""); setCopyFileName(null); setCopyError(null); setCopyUrl(""); };
 
-  const handleSubmit = () => {
-    const hasAnyInput = prompt.trim() || produto.trim() || nicho.trim() || publicoAlvo.trim() || promessa.trim() || images.length > 0 || copyDocument.trim();
-    if (!hasAnyInput) return;
+  /** "Novo Kit" on the kits row — must go through the same persisted-draft
+   * path as the main prompt submit, never open the wizard on unsaved state
+   * (see launches audit: a bare setShowLaunchWizard(true) here left the
+   * wizard unable to save/advance, or reopened whatever launch was last
+   * active in context). */
+  const handleNewKit = async () => {
+    if (creatingKit) return;
+    setCreatingKit(true);
+    try {
+      await openLaunchWizardForDraft({});
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Erro ao criar lançamento. Tente novamente.");
+    } finally {
+      setCreatingKit(false);
+    }
+  };
 
-    // Nada é gerado aqui — o briefing alimenta o Kit de Lançamento,
-    // que gera a estratégia e guia a produção de todos os ativos.
-    const prefill: Partial<BrandInfo> = {
+  const handleSubmit = async () => {
+    const hasAnyInput = prompt.trim() || produto.trim() || nicho.trim() || publicoAlvo.trim() || promessa.trim() || images.length > 0 || copyDocument.trim();
+    if (!hasAnyInput || submitting) return;
+
+    // Nada é gerado aqui — o briefing persiste como um Lançamento (draft)
+    // e alimenta o Kit de Lançamento, que gera a estratégia e guia a
+    // produção de todos os ativos. Nenhum campo é descartado até o
+    // servidor confirmar a gravação.
+    const patch = briefingFromBrandInfoPatch({
+      description: prompt.trim() || undefined,
       productName: produto.trim() || prompt.trim().slice(0, 60),
       niche: nicho.trim(),
       targetAudience: publicoAlvo.trim(),
@@ -238,17 +263,31 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
       mecanismo: mecanismo.trim() || undefined,
       preco: preco.trim() || undefined,
       provas: provas.trim() || undefined,
+      launchType: tipoLancamento || undefined,
+      referenceUrl: referenceUrl.trim() || undefined,
+      copyDocument: copyDocument.trim() || undefined,
       primaryColor,
       secondaryColor,
       fontChoice,
       stylePreset,
       referenceImages: images.length ? images.map((img) => img.base64) : undefined,
-    };
-    openLaunchWizardWithPrefill(prefill);
+    });
 
-    setPrompt(""); setProduto(""); setNicho(""); setPublicoAlvo(""); setPromessa("");
-    setMecanismo(""); setPreco(""); setProvas(""); setImages([]);
-    setShowConfig(false);
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      await openLaunchWizardForDraft(patch);
+      // Só limpa os campos depois que o servidor confirmou a gravação do
+      // draft — uma falha de rede deixa tudo preenchido pro usuário tentar de novo.
+      setPrompt(""); setProduto(""); setNicho(""); setPublicoAlvo(""); setPromessa("");
+      setMecanismo(""); setPreco(""); setProvas(""); setImages([]);
+      setReferenceUrl(""); clearCopyDocument();
+      setShowConfig(false);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Erro ao salvar seu lançamento. Tente novamente.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -383,7 +422,7 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
               className={cn(
                 "flex items-center w-full rounded-xl transition-colors cursor-pointer",
                 sidebarCollapsed ? "justify-center p-2.5" : "gap-2.5 px-2.5 py-2 text-[12px]",
-                (activeNav === "criativos" || activeNav === "ensaio")
+                (activeNav === "criativos" || activeNav === "ensaio" || activeNav === "carrossel")
                   ? "bg-white/[0.06] text-[#d1d1d1]"
                   : "text-[#6b6b6b] hover:bg-white/[0.04] hover:text-[#9a9a9a]"
               )}
@@ -402,12 +441,15 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
                 {([
                   { label: "KV",                   icon: <Fingerprint className="w-3 h-3" />,  tipo: null,               onClick: () => nav("marca") },
                   { label: "Criativos",            icon: <Paintbrush className="w-3 h-3" />,   tipo: "criativos",        onClick: () => router.push("/criativos?tipo=criativos") },
+                  { label: "Carrossel",            icon: <GalleryHorizontalEnd className="w-3 h-3" />, tipo: "carrossel", onClick: () => router.push("/carrossel") },
                   { label: "Ensaio Fotografico",   icon: <Camera className="w-3 h-3" />,        tipo: "ensaio",           onClick: () => router.push("/ensaio") },
                   { label: "Capas dos módulos",    icon: <BookOpen className="w-3 h-3" />,      tipo: "capas-modulos",    onClick: () => router.push("/criativos?tipo=capas-modulos") },
                   { label: "Banner checkout",      icon: <ShoppingCart className="w-3 h-3" />, tipo: "banner-checkout",  onClick: () => router.push("/criativos?tipo=banner-checkout") },
                 ]).map((item) => {
                   const isActive = item.tipo === "ensaio"
                     ? activeNav === "ensaio"
+                    : item.tipo === "carrossel"
+                    ? activeNav === "carrossel"
                     : activeNav === "criativos" && item.tipo !== null && currentTipo === item.tipo;
                   return (
                     <button key={item.label} onClick={item.onClick}
@@ -788,11 +830,14 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
                     <Rocket className="w-3 h-3 text-purple-400" />
                     <span className="text-[11px] text-purple-300 font-medium">Lançamento</span>
                   </div>
-                  <button onClick={handleSubmit} disabled={!prompt.trim() && !produto.trim() && !nicho.trim() && !publicoAlvo.trim() && !promessa.trim() && !copyDocument.trim() && images.length === 0}
-                    className={cn("shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer", (!prompt.trim() && !produto.trim() && !nicho.trim() && !publicoAlvo.trim() && !promessa.trim() && !copyDocument.trim() && images.length === 0) ? "bg-white/[0.05] text-white/15 cursor-not-allowed" : "bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-purple-500/30 hover:scale-105 active:scale-95")}>
-                    <ArrowRight className="w-4 h-4" />
+                  <button onClick={handleSubmit} disabled={submitting || (!prompt.trim() && !produto.trim() && !nicho.trim() && !publicoAlvo.trim() && !promessa.trim() && !copyDocument.trim() && images.length === 0)}
+                    className={cn("shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer", (submitting || (!prompt.trim() && !produto.trim() && !nicho.trim() && !publicoAlvo.trim() && !promessa.trim() && !copyDocument.trim() && images.length === 0)) ? "bg-white/[0.05] text-white/15 cursor-not-allowed" : "bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-purple-500/30 hover:scale-105 active:scale-95")}>
+                    {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
                   </button>
                 </div>
+                {submitError && (
+                  <p className="mt-2 text-[11px] text-red-400 text-center">{submitError}</p>
+                )}
               </div>
             </div>{/* end hero */}
 
@@ -826,7 +871,7 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
                 {/* content */}
                 <div className="px-3 py-3">
                   {bottomTab === "kits" ? (
-                    <KitsRow kits={launchKits} onNew={() => setShowLaunchWizard(true)} onNavigate={() => nav("lancamentos")} />
+                    <KitsRow kits={launchKits} onNew={handleNewKit} busy={creatingKit} onNavigate={() => nav("lancamentos")} />
                   ) : (
                     <ProjectsRow projects={recentProjects} onNew={() => nav("home")} onNavigate={() => nav("projects-all")} />
                   )}
@@ -842,15 +887,15 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
 }
 
 /* ── Kits Row ────────────────────────────────────────────── */
-function KitsRow({ kits, onNew, onNavigate }: { kits: LaunchKit[]; onNew: () => void; onNavigate: () => void }) {
+function KitsRow({ kits, onNew, onNavigate, busy }: { kits: LaunchKit[]; onNew: () => void; onNavigate: () => void; busy?: boolean }) {
   if (kits.length === 0) {
     return (
       <div className="flex items-center gap-4">
         {/* new kit card */}
-        <button onClick={onNew}
-          className="flex flex-col items-center justify-center gap-2 w-[160px] h-[88px] shrink-0 rounded-xl border border-dashed border-white/[0.08] hover:border-purple-500/30 hover:bg-purple-500/[0.04] transition-all cursor-pointer group">
+        <button onClick={onNew} disabled={busy}
+          className="flex flex-col items-center justify-center gap-2 w-[160px] h-[88px] shrink-0 rounded-xl border border-dashed border-white/[0.08] hover:border-purple-500/30 hover:bg-purple-500/[0.04] transition-all cursor-pointer group disabled:opacity-50 disabled:cursor-wait">
           <div className="w-8 h-8 rounded-full bg-white/[0.04] group-hover:bg-purple-500/10 flex items-center justify-center transition-colors">
-            <Plus className="w-4 h-4 text-white/20 group-hover:text-purple-400" />
+            {busy ? <Loader2 className="w-4 h-4 text-white/30 animate-spin" /> : <Plus className="w-4 h-4 text-white/20 group-hover:text-purple-400" />}
           </div>
           <span className="text-[11px] text-white/25 group-hover:text-white/50">Novo Kit</span>
         </button>
@@ -865,16 +910,16 @@ function KitsRow({ kits, onNew, onNavigate }: { kits: LaunchKit[]; onNew: () => 
   return (
     <div className="flex items-start gap-2 overflow-x-auto scrollbar-none pb-1">
       {/* New kit button */}
-      <button onClick={onNew}
-        className="flex flex-col items-center justify-center gap-1.5 w-[130px] h-[88px] shrink-0 rounded-xl border border-dashed border-white/[0.06] hover:border-purple-500/30 hover:bg-purple-500/[0.04] transition-all cursor-pointer group">
+      <button onClick={onNew} disabled={busy}
+        className="flex flex-col items-center justify-center gap-1.5 w-[130px] h-[88px] shrink-0 rounded-xl border border-dashed border-white/[0.06] hover:border-purple-500/30 hover:bg-purple-500/[0.04] transition-all cursor-pointer group disabled:opacity-50 disabled:cursor-wait">
         <div className="w-7 h-7 rounded-full bg-white/[0.03] group-hover:bg-purple-500/10 flex items-center justify-center">
-          <Plus className="w-3.5 h-3.5 text-white/20 group-hover:text-purple-400" />
+          {busy ? <Loader2 className="w-3.5 h-3.5 text-white/30 animate-spin" /> : <Plus className="w-3.5 h-3.5 text-white/20 group-hover:text-purple-400" />}
         </div>
         <span className="text-[10px] text-white/25 group-hover:text-white/50">Novo Kit</span>
       </button>
 
       {kits.slice(0, 5).map((kit) => {
-        const Icon = STRATEGY_ICONS[kit.strategyId] ?? Rocket;
+        const Icon = (kit.strategyId ? STRATEGY_ICONS[kit.strategyId] : null) ?? Rocket;
         const emailsDone = Object.values(kit.emailSequences ?? {}).filter((seq) => seq.length > 0).length;
         const done = kit.assets.filter((a) => a.status === "done").length + emailsDone;
         const total = kit.assets.length + 3;
@@ -891,7 +936,7 @@ function KitsRow({ kits, onNew, onNavigate }: { kits: LaunchKit[]; onNew: () => 
                 <div className="p-1 rounded-md" style={{ background: `${color}25` }}>
                   <Icon className="w-3 h-3" style={{ color }} />
                 </div>
-                <span className="text-[9px] text-white/30 uppercase tracking-wider">{STRATEGY_LABELS[kit.strategyId]}</span>
+                <span className="text-[9px] text-white/30 uppercase tracking-wider">{kit.strategyId ? STRATEGY_LABELS[kit.strategyId] : "Rascunho"}</span>
               </div>
               <p className="text-[11px] font-semibold text-white/80 truncate leading-tight">{kit.brandInfo.productName}</p>
             </div>

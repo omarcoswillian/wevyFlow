@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { X, ChevronRight, ChevronLeft, Rocket, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { LaunchTypeSelector } from "../LaunchTypeSelector";
 import { useAppContext } from "../../(app)/_context";
 import { LAUNCH_STRATEGIES } from "../../lib/launch-strategies";
-import type { BrandInfo, LaunchKit, StrategyId } from "../../lib/types-kit";
+import type { StrategyId } from "../../lib/types-kit";
+import { emptyBriefing, mergeBriefing, type LaunchBriefing } from "../../lib/launch-briefing";
 
 type OnboardingStep = 1 | 2 | 3 | 4;
 
@@ -225,9 +226,11 @@ function StepStrategy({
 function StepConfirm({
   state,
   isCreating,
+  error,
 }: {
   state: OnboardingState;
   isCreating: boolean;
+  error: string | null;
 }) {
   const strategy = state.selectedStrategy
     ? LAUNCH_STRATEGIES.find((s) => s.id === state.selectedStrategy)
@@ -242,6 +245,12 @@ function StepConfirm({
         <h3 className="text-[14px] font-semibold text-white mb-1">Tudo pronto</h3>
         <p className="text-[11px] text-white/40">Revise as informacoes antes de criar o kit.</p>
       </div>
+
+      {error && (
+        <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-[11px] text-red-400">
+          {error} — seus dados continuam preenchidos, tente novamente.
+        </div>
+      )}
 
       {isCreating ? (
         <div className="flex flex-col items-center gap-4 py-8">
@@ -322,10 +331,30 @@ interface OnboardingWizardProps {
 }
 
 export function OnboardingWizard({ open, onClose }: OnboardingWizardProps) {
-  const { saveLaunchKit, navigate } = useAppContext();
+  const { persistLaunch, navigate, launchKits } = useAppContext();
   const [state, setState] = useState<OnboardingState>(DEFAULT_STATE);
   const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const clientTokenRef = useRef<string>("");
+  const draftProjectIdRef = useRef<string | null>(null);
+  // Full persisted briefing of the draft being resumed (if any) — kept
+  // separate from `state`, which only has slots for the onboarding form's
+  // own fields. Every save merges onto this instead of `emptyBriefing()`,
+  // so fields the Home form captures but onboarding doesn't show
+  // (description, mecanismo, preco, provas, referenceImages, copyDocument,
+  // logoUrl, launchType, referenceUrl) survive a resume-then-save instead
+  // of being wiped back to blank (see launches review item B).
+  const existingBriefingRef = useRef<LaunchBriefing>(emptyBriefing());
+  // Set synchronously at the very start of handleConfirm (before any
+  // `await`), mirroring LaunchWizard's defense against the same race (see
+  // review item C / item 4): without it, "Voltar" during activation returns
+  // to step 3, where the X reappears and only checks `saving` — closing
+  // there fires a draft-save that can land after the activation PATCH and
+  // silently revert the just-activated launch back to `draft`.
+  const activatingRef = useRef(false);
 
   useEffect(() => {
     createClient()
@@ -336,16 +365,99 @@ export function OnboardingWizard({ open, onClose }: OnboardingWizardProps) {
       });
   }, []);
 
+  // Resume the most recently persisted draft instead of always starting
+  // from a blank form — a previous session (or a close before this fix)
+  // may have already saved one, and silently starting over would look like
+  // data loss. Runs once per open, never re-clobbers in-progress edits.
+  useEffect(() => {
+    if (!open || draftProjectIdRef.current) return;
+    const existingDraft = launchKits.find((k) => k.status === "draft");
+    if (!existingDraft) return;
+    draftProjectIdRef.current = existingDraft.projectId;
+    existingBriefingRef.current = existingDraft.briefing;
+    const b = existingDraft.briefing;
+    setState((prev) => ({
+      ...prev,
+      productName: b.productName || prev.productName,
+      niche: b.niche || prev.niche,
+      targetAudience: b.targetAudience || prev.targetAudience,
+      transformation: b.transformation || prev.transformation,
+      primaryColor: b.primaryColor || prev.primaryColor,
+      secondaryColor: b.secondaryColor || prev.secondaryColor,
+      selectedStrategy: existingDraft.strategyId ?? prev.selectedStrategy,
+      step: (b.productName && b.niche && b.targetAudience && b.transformation ? 3 : prev.step) as OnboardingStep,
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   const patch = useCallback((p: Partial<OnboardingState>) => {
     setState((prev) => ({ ...prev, ...p }));
   }, []);
 
-  const goNext = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      step: Math.min(prev.step + 1, TOTAL_STEPS) as OnboardingStep,
-    }));
-  }, []);
+  /** Saves the current product-info fields as a draft — used by both
+   * "Continuar" and the close button, so leaving step 2 or closing the
+   * modal early never silently drops what the user typed. Runs the actual
+   * network call outside any setState updater (React may invoke an
+   * updater more than once, e.g. under Strict Mode), and the caller always
+   * awaits its result before advancing or closing. */
+  const persistDraftIfNeeded = useCallback(async (): Promise<boolean> => {
+    // Save as soon as ANY field has content — a draft can be (and often
+    // is) incomplete; only *activation* requires all four. Requiring every
+    // field before saving anything meant typing just a product name and
+    // niche, then closing/reloading, silently lost that input (see
+    // launches review item A).
+    //
+    // Once a draft is already persisted, ALWAYS save on close/advance —
+    // not just when the four text fields are non-empty. Otherwise clearing
+    // a field back to empty (or only touching color/font/style, which
+    // aren't part of `hasAnyContent`) silently fails to persist that edit,
+    // because it looks like "nothing to save" (see review pendency 5).
+    const hasAnyContent = !!(
+      state.productName.trim() || state.niche.trim() ||
+      state.targetAudience.trim() || state.transformation.trim()
+    );
+    if (!draftProjectIdRef.current && !hasAnyContent) {
+      return true; // no draft yet and nothing meaningful typed — don't create an empty one
+    }
+    if (!clientTokenRef.current) clientTokenRef.current = crypto.randomUUID();
+    // Merge onto the full previously-persisted briefing (not emptyBriefing())
+    // so fields onboarding doesn't show don't get wiped — see item B.
+    const briefing = mergeBriefing(existingBriefingRef.current, {
+      productName: state.productName,
+      niche: state.niche,
+      targetAudience: state.targetAudience,
+      transformation: state.transformation,
+      primaryColor: state.primaryColor,
+      secondaryColor: state.secondaryColor,
+      fontChoice: existingBriefingRef.current.fontChoice || "sora",
+      stylePreset: existingBriefingRef.current.stylePreset || "dark-premium",
+    });
+    setSaving(true);
+    try {
+      const launch = await persistLaunch({
+        projectId: draftProjectIdRef.current,
+        clientToken: clientTokenRef.current,
+        briefing,
+        strategyId: state.selectedStrategy ?? undefined,
+        status: "draft",
+      });
+      draftProjectIdRef.current = launch.projectId;
+      existingBriefingRef.current = launch.briefing;
+      setSaveError(null);
+      return true;
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Erro ao salvar rascunho.");
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  }, [state, persistLaunch]);
+
+  const goNext = useCallback(async () => {
+    const ok = await persistDraftIfNeeded();
+    if (!ok) return; // keep the user on the current step so nothing typed is lost
+    setState((prev) => ({ ...prev, step: Math.min(prev.step + 1, TOTAL_STEPS) as OnboardingStep }));
+  }, [persistDraftIfNeeded]);
 
   const goBack = useCallback(() => {
     setState((prev) => ({
@@ -354,43 +466,53 @@ export function OnboardingWizard({ open, onClose }: OnboardingWizardProps) {
     }));
   }, []);
 
+  const handleClose = useCallback(async () => {
+    if (activatingRef.current) return; // activation in flight — never race it with a draft-save
+    const ok = await persistDraftIfNeeded();
+    if (!ok) return; // stay open with the error visible instead of discarding the input
+    onClose();
+  }, [persistDraftIfNeeded, onClose]);
+
   const handleConfirm = useCallback(async () => {
     if (!state.selectedStrategy) return;
+    activatingRef.current = true;
     setIsCreating(true);
+    setCreateError(null);
 
-    const strategy = LAUNCH_STRATEGIES.find((s) => s.id === state.selectedStrategy)!;
-    const brand: BrandInfo = {
+    if (!clientTokenRef.current) clientTokenRef.current = crypto.randomUUID();
+
+    // Same merge-onto-existing rule as persistDraftIfNeeded (item B) — the
+    // confirm step must not discard richer briefing fields either.
+    const briefing = mergeBriefing(existingBriefingRef.current, {
       productName: state.productName,
       niche: state.niche,
       targetAudience: state.targetAudience,
       transformation: state.transformation,
       primaryColor: state.primaryColor,
       secondaryColor: state.secondaryColor,
-      fontChoice: "sora",
-      stylePreset: "dark-premium",
-    };
-    const now = new Date().toISOString();
-    const kit: LaunchKit = {
-      id: crypto.randomUUID(),
-      strategyId: state.selectedStrategy,
-      brandInfo: brand,
-      assets: strategy.assets.map((a) => ({ assetId: a.id, status: "pending" })),
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    saveLaunchKit(kit);
+      fontChoice: existingBriefingRef.current.fontChoice || "sora",
+      stylePreset: existingBriefingRef.current.stylePreset || "dark-premium",
+    });
 
     try {
-      localStorage.setItem("wf_onboarding_done", "1");
-    } catch {
-      // storage unavailable
+      const launch = await persistLaunch({
+        projectId: draftProjectIdRef.current,
+        clientToken: clientTokenRef.current,
+        briefing,
+        strategyId: state.selectedStrategy,
+        status: "active",
+      });
+      draftProjectIdRef.current = launch.projectId;
+      existingBriefingRef.current = launch.briefing;
+      onClose();
+      navigate("lancamentos", launch.projectId);
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : "Erro ao criar o lançamento.");
+    } finally {
+      activatingRef.current = false;
+      setIsCreating(false);
     }
-
-    setIsCreating(false);
-    onClose();
-    navigate("lancamentos");
-  }, [state, saveLaunchKit, navigate, onClose]);
+  }, [state, persistLaunch, navigate, onClose]);
 
   const canProceed =
     state.step === 1
@@ -421,10 +543,11 @@ export function OnboardingWizard({ open, onClose }: OnboardingWizardProps) {
           </div>
           {state.step !== 4 && (
             <button
-              onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/35 hover:text-white/60 transition-colors cursor-pointer"
+              onClick={handleClose}
+              disabled={saving || isCreating}
+              className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/35 hover:text-white/60 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-wait"
             >
-              <X className="w-4 h-4" />
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
             </button>
           )}
         </div>
@@ -444,6 +567,11 @@ export function OnboardingWizard({ open, onClose }: OnboardingWizardProps) {
 
         {/* body */}
         <div className="flex-1 overflow-y-auto px-6 py-5">
+          {saveError && state.step !== 4 && (
+            <div className="mb-4 rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-[11px] text-red-400">
+              {saveError} — seus dados continuam preenchidos, tente novamente.
+            </div>
+          )}
           {state.step === 1 && <StepWelcome userName={userName} />}
           {state.step === 2 && <StepProduct state={state} onChange={patch} />}
           {state.step === 3 && (
@@ -452,14 +580,14 @@ export function OnboardingWizard({ open, onClose }: OnboardingWizardProps) {
               onSelect={(id) => patch({ selectedStrategy: id })}
             />
           )}
-          {state.step === 4 && <StepConfirm state={state} isCreating={isCreating} />}
+          {state.step === 4 && <StepConfirm state={state} isCreating={isCreating} error={createError} />}
         </div>
 
         {/* footer */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-white/[0.06] shrink-0">
           <button
             onClick={goBack}
-            disabled={state.step === 1}
+            disabled={state.step === 1 || isCreating}
             className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-medium text-white/45 hover:text-white/75 disabled:opacity-0 disabled:pointer-events-none transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-3.5 h-3.5" /> Voltar
@@ -468,10 +596,10 @@ export function OnboardingWizard({ open, onClose }: OnboardingWizardProps) {
           {state.step < TOTAL_STEPS ? (
             <button
               onClick={goNext}
-              disabled={!canProceed}
+              disabled={!canProceed || saving}
               className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[12px] font-semibold transition-colors cursor-pointer"
             >
-              Continuar <ChevronRight className="w-3.5 h-3.5" />
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <>Continuar <ChevronRight className="w-3.5 h-3.5" /></>}
             </button>
           ) : (
             <button

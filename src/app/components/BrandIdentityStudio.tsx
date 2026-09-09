@@ -341,7 +341,7 @@ export function BrandIdentityStudio({ kit, onUpdate, apiKey, aiProvider, aiModel
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          brandInfo: kit.brandInfo,
+          projectId: kit.projectId,
           ...(apiKey ? { apiKey, aiProvider, aiModel } : {}),
         }),
       });

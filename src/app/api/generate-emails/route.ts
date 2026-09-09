@@ -1,5 +1,6 @@
 import { resolveConfig, callOnce, parseApiError } from "../../lib/ai-client";
 import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
+import { requireLaunch, launchErrorResponse } from "@/lib/launches/server";
 
 export const maxDuration = 60;
 
@@ -173,29 +174,40 @@ export type { EmailItem };
 
 export async function POST(request: Request) {
   const {
-    brandInfo,
     sequenceType,
+    projectId,
   }: {
-    brandInfo: {
-      productName: string;
-      niche: string;
-      targetAudience: string;
-      transformation: string;
-      primaryColor?: string;
-      mecanismo?: string;
-      preco?: string;
-      provas?: string;
-    };
     sequenceType: EmailSequenceType;
+    projectId?: string;
   } = await request.json();
 
-  if (!brandInfo || !sequenceType) {
-    return Response.json({ error: "brandInfo e sequenceType são obrigatórios" }, { status: 400 });
+  if (!sequenceType) {
+    return Response.json({ error: "sequenceType é obrigatório" }, { status: 400 });
   }
 
   const cfg = SEQUENCE_CONFIGS[sequenceType];
   if (!cfg) {
     return Response.json({ error: "sequenceType inválido" }, { status: 400 });
+  }
+
+  // The canonical product briefing always comes from the persisted launch —
+  // a brandInfo sent in the request body is never trusted as a substitute.
+  let brandInfo: {
+    productName: string;
+    niche: string;
+    targetAudience: string;
+    transformation: string;
+    primaryColor?: string;
+    mecanismo?: string;
+    preco?: string;
+    provas?: string;
+  };
+  try {
+    const launch = await requireLaunch(projectId);
+    brandInfo = launch.brandInfo;
+  } catch (err) {
+    const { body, status } = launchErrorResponse(err);
+    return Response.json(body, { status });
   }
 
   const creditResult = await checkAndDeductCredit("email_sequence", brandInfo.productName);

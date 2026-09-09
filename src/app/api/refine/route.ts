@@ -1,6 +1,7 @@
 import { resolveConfig, iterableToReadable, parseApiError, startStream } from "../../lib/ai-client";
 import { DESIGN_TOKENS_PROMPT } from "../../lib/design-tokens";
 import { createClient } from "@/lib/supabase/server";
+import { requireLaunch, launchErrorResponse } from "@/lib/launches/server";
 
 export const maxDuration = 300;
 
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "Faça login para refinar layouts." }, { status: 401 });
     }
 
-    const { originalCode, refinementRequest, platform, images, designContext, apiKey, aiProvider, aiModel } = await request.json();
+    const { originalCode, refinementRequest, platform, images, designContext, apiKey, aiProvider, aiModel, projectId } = await request.json();
     const aiConfig = resolveConfig(apiKey, aiProvider, aiModel);
 
     if (!originalCode || !refinementRequest) {
@@ -77,6 +78,13 @@ export async function POST(request: Request) {
         { error: "Código original e pedido de refinamento são obrigatórios" },
         { status: 400 }
       );
+    }
+
+    try {
+      await requireLaunch(projectId);
+    } catch (err) {
+      const { body, status } = launchErrorResponse(err);
+      return Response.json(body, { status });
     }
 
     // Compact the code to fit within token limits

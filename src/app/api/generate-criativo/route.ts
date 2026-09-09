@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import { toFile } from "openai/uploads";
 import { GoogleGenAI } from "@google/genai";
 import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
+import { requireLaunch, launchErrorResponse } from "@/lib/launches/server";
 
 export type CriativoFormat =
   | "youtube-thumbnail"
@@ -225,6 +226,7 @@ export async function POST(req: NextRequest) {
     chatInstruction,
     imageProvider = "openai",
     imageModel,
+    projectId,
   } = await req.json();
 
   const hasBrief = headline?.trim() || produto?.trim();
@@ -236,7 +238,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Formato inválido." }, { status: 400 });
   }
 
-  const creditResult = await checkAndDeductCredit("criativo_html", produto || headline || "");
+  let launch;
+  try {
+    launch = await requireLaunch(projectId);
+  } catch (err) {
+    const { body, status } = launchErrorResponse(err);
+    return NextResponse.json(body, { status });
+  }
+
+  // Canonical product name from the persisted launch takes precedence over
+  // a client-supplied `produto` (see launches review item 6).
+  const canonicalProduto = launch.brandInfo.productName?.trim() || produto;
+
+  const creditResult = await checkAndDeductCredit("criativo_html", canonicalProduto || headline || "");
   if (isCreditError(creditResult)) {
     return NextResponse.json({ error: creditResult.error }, { status: creditResult.status });
   }
@@ -249,7 +263,7 @@ export async function POST(req: NextRequest) {
   const key = byok ?? (imageProvider === "gemini" ? (process.env.GOOGLE_AI_API_KEY ?? null) : null);
   const criativoFormat = format as CriativoFormat;
   const config = FORMAT_CONFIG[criativoFormat];
-  const prompt = buildPrompt(criativoFormat, produto, headline, cta, cor, estilo, fase, chatInstruction);
+  const prompt = buildPrompt(criativoFormat, canonicalProduto, headline, cta, cor, estilo, fase, chatInstruction);
 
   try {
     const { b64, mimeType } = await runGeneration({

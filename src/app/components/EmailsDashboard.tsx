@@ -27,7 +27,7 @@ const EMPTY_BRAND: BrandInfo = {
 };
 
 export function EmailsDashboard() {
-  const { launchKits, setShowLaunchWizard } = useAppContext();
+  const { launchKits, openLaunchWizardForDraft } = useAppContext();
 
   const [selectedKitId, setSelectedKitId] = useState<string | "manual">(
     launchKits.length > 0 ? launchKits[0].id : "manual"
@@ -72,7 +72,7 @@ export function EmailsDashboard() {
 
           <div className="flex flex-wrap gap-2">
             {launchKits.map((kit) => {
-              const Icon = STRATEGY_ICONS[kit.strategyId] ?? Rocket;
+              const Icon = (kit.strategyId ? STRATEGY_ICONS[kit.strategyId] : null) ?? Rocket;
               return (
                 <button
                   key={kit.id}
@@ -104,7 +104,7 @@ export function EmailsDashboard() {
             </button>
 
             <button
-              onClick={() => setShowLaunchWizard(true)}
+              onClick={() => openLaunchWizardForDraft({}).catch((e) => console.error(e))}
               className="flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-white/[0.08] text-white/25 hover:text-white/50 hover:border-white/20 text-[12px] font-medium transition-all cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" /> Novo kit

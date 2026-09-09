@@ -291,6 +291,7 @@ export function useProjects() {
   return {
     projects,
     saveError,
+    loadProjects,
     createProject,
     addPageToProject,
     updatePageCode,
