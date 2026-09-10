@@ -11,6 +11,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.88.0",
     "@google/genai": "^2.20.0",
+    "@napi-rs/canvas": "^1.0.9",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.104.1",
     "class-variance-authority": "^0.7.1",

@@ -76,7 +76,7 @@ export function viewToPath(view: AppView, projectId?: string): string {
     case "lancamentos":
       return projectId ? `/lancamentos?projectId=${projectId}` : "/lancamentos";
     case "marca":
-      return "/marca";
+      return projectId ? `/marca?projectId=${projectId}` : "/marca";
     case "emails":
       return "/emails";
     case "leads":

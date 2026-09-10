@@ -172,13 +172,26 @@ FORMATO DE SAÍDA:
 
 export type { EmailItem };
 
+interface EmailBrandInfo {
+  productName: string;
+  niche: string;
+  targetAudience: string;
+  transformation: string;
+  primaryColor?: string;
+  mecanismo?: string;
+  preco?: string;
+  provas?: string;
+}
+
 export async function POST(request: Request) {
   const {
     sequenceType,
     projectId,
+    brandInfo: bodyBrandInfo,
   }: {
     sequenceType: EmailSequenceType;
     projectId?: string;
+    brandInfo?: Partial<EmailBrandInfo>;
   } = await request.json();
 
   if (!sequenceType) {
@@ -190,24 +203,25 @@ export async function POST(request: Request) {
     return Response.json({ error: "sequenceType inválido" }, { status: 400 });
   }
 
-  // The canonical product briefing always comes from the persisted launch —
-  // a brandInfo sent in the request body is never trusted as a substitute.
-  let brandInfo: {
-    productName: string;
-    niche: string;
-    targetAudience: string;
-    transformation: string;
-    primaryColor?: string;
-    mecanismo?: string;
-    preco?: string;
-    provas?: string;
-  };
-  try {
-    const launch = await requireLaunch(projectId);
-    brandInfo = launch.brandInfo;
-  } catch (err) {
-    const { body, status } = launchErrorResponse(err);
-    return Response.json(body, { status });
+  // Com projectId, o briefing canônico vem do lançamento persistido — nunca
+  // do corpo da requisição (evita um lançamento do produto A gerar emails
+  // pro produto B só trocando brandInfo). Sem projectId (geração avulsa,
+  // pedido do dono), não há lançamento pra proteger — o corpo é a única
+  // fonte possível.
+  let brandInfo: EmailBrandInfo;
+  if (projectId) {
+    try {
+      const launch = await requireLaunch(projectId);
+      brandInfo = launch.brandInfo;
+    } catch (err) {
+      const { body, status } = launchErrorResponse(err);
+      return Response.json(body, { status });
+    }
+  } else {
+    if (!bodyBrandInfo?.productName || !bodyBrandInfo?.niche || !bodyBrandInfo?.targetAudience || !bodyBrandInfo?.transformation) {
+      return Response.json({ error: "brandInfo (productName, niche, targetAudience, transformation) é obrigatório sem um lançamento." }, { status: 400 });
+    }
+    brandInfo = bodyBrandInfo as EmailBrandInfo;
   }
 
   const creditResult = await checkAndDeductCredit("email_sequence", brandInfo.productName);

@@ -114,6 +114,37 @@ export interface BrandIdentity {
   approvedAt?: string;
 }
 
+/* ── Launch assets (KV em lote, Rodada 1) ───────────────── */
+
+export type LaunchAssetType = "kv";
+
+export interface LaunchAsset {
+  id: string; // launch_assets.id
+  launchKitId: string;
+  assetType: LaunchAssetType;
+  batchId: string;
+  position: number;
+  status: AssetStatus;
+  url?: string; // derivada de storage_bucket+storage_path quando status === "done"
+  mimeType?: string;
+  width?: number;
+  height?: number;
+  variant?: "dark" | "light";
+  variationKey?: string;
+  // Agrupamento em kit (Rodada A do redesenho de KV) — todo asset asset_type
+  // 'kv' pertence a um candidato; candidateId é o mesmo pra todas as peças de
+  // um mesmo kit (hoje sempre 1 peça — logo_primary — até rodadas seguintes
+  // acrescentarem paleta/tipografia/textura/etc).
+  candidateId?: string;
+  pieceKey?: string;
+  assetRole?: string;
+  producer?: "image_ai" | "renderer";
+  errorCode?: string;
+  errorMessage?: string;
+  selectedAt?: string;
+  createdAt: string;
+}
+
 /* ── Email sequences ─────────────────────────────────────── */
 
 export type EmailSequenceType = "cpl" | "vendas" | "recuperacao";
@@ -144,6 +175,8 @@ export interface LaunchKit {
   briefing: import("./launch-briefing").LaunchBriefing;
   brandInfo: BrandInfo; // derived projection of `briefing`, kept for existing prompt builders
   brandIdentity?: BrandIdentity;
+  selectedKvAssetId?: string | null; // launch_kits.selected_kv_asset_id — KV raster aprovado, separado de brandIdentity
+  selectedKvCandidateId?: string | null; // launch_kits.selected_kv_candidate_id — kit aprovado (Rodada A); sempre setado junto com selectedKvAssetId
   assets: KitAssetInstance[];
   emailSequences?: EmailSequences;
   createdAt: string;

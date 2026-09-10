@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
-import { requireLaunch, launchErrorResponse } from "@/lib/launches/server";
 import {
   stripDataUrl, resizeIfNeeded,
   analyzeSceneForSwap, analyzeAvatarDetails, cropToPersonForIdentityRef, withRetry, extractImage,
@@ -110,7 +109,6 @@ export async function POST(req: NextRequest) {
       targetWidth,
       targetHeight,
       carouselContext,
-      projectId,
     } = await req.json() as {
       prompt: string;
       slides?: SlideInput[];
@@ -121,18 +119,10 @@ export async function POST(req: NextRequest) {
       targetWidth?: number;
       targetHeight?: number;
       carouselContext?: unknown;
-      projectId?: string;
     };
 
     if (!prompt?.trim()) {
       return NextResponse.json({ error: "Prompt obrigatorio." }, { status: 400 });
-    }
-
-    try {
-      await requireLaunch(projectId);
-    } catch (err) {
-      const { body, status } = launchErrorResponse(err);
-      return NextResponse.json(body, { status });
     }
 
     const orderedSlides = (slides ?? [])

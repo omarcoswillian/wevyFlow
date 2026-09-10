@@ -24,7 +24,7 @@ export class LaunchApiError extends Error {
 type LaunchKitRow = Database["public"]["Tables"]["launch_kits"]["Row"];
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-function isUuid(v: unknown): v is string {
+export function isUuid(v: unknown): v is string {
   return typeof v === "string" && UUID_RE.test(v);
 }
 
@@ -37,6 +37,8 @@ function rowToLaunchKit(row: LaunchKitRow): LaunchKit {
     briefing: row.briefing as unknown as LaunchBriefing,
     brandInfo: row.brand_info as unknown as LaunchKit["brandInfo"],
     brandIdentity: (row.brand_identity as unknown as LaunchKit["brandIdentity"]) ?? undefined,
+    selectedKvAssetId: row.selected_kv_asset_id ?? null,
+    selectedKvCandidateId: row.selected_kv_candidate_id ?? null,
     assets: (row.assets as LaunchKit["assets"]) ?? [],
     emailSequences: row.email_sequences as unknown as LaunchKit["emailSequences"],
     createdAt: row.created_at,
@@ -44,7 +46,7 @@ function rowToLaunchKit(row: LaunchKitRow): LaunchKit {
   };
 }
 
-async function requireAuthUser() {
+export async function requireAuthUser() {
   const supabase = await createClient();
   const {
     data: { user },

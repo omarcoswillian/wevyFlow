@@ -28,5 +28,19 @@
       "/library-seed/luana/carrossel-metodo-spe/slide-5.png",
       "/library-seed/luana/carrossel-metodo-spe/slide-6.png"
     ]
+  },
+  {
+    "id": "luana-black-dobro-de-tudo",
+    "client": "Luana Carolina",
+    "name": "Black o dobro de tudo",
+    "format": "4:5",
+    "slides": [
+      "/library-seed/luana/carrossel-black-dobro-de-tudo/slide-1.png",
+      "/library-seed/luana/carrossel-black-dobro-de-tudo/slide-2.png",
+      "/library-seed/luana/carrossel-black-dobro-de-tudo/slide-3.png",
+      "/library-seed/luana/carrossel-black-dobro-de-tudo/slide-4.png",
+      "/library-seed/luana/carrossel-black-dobro-de-tudo/slide-5.png",
+      "/library-seed/luana/carrossel-black-dobro-de-tudo/slide-6.png"
+    ]
   }
 ]

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { PLANS, DEFAULT_PLAN, type PlanId } from "./plans";
 
 export type GenType =
@@ -9,6 +10,7 @@ export type GenType =
   | "image"
   | "ensaio"
   | "logo"
+  | "kv_batch"
   | "other";
 
 // Weight per action, in credits — reflects real API cost, not "1 generation
@@ -24,6 +26,7 @@ const ACTION_COST: Record<GenType, number> = {
   criativo_html: 3, // creative/ad image — openai/fal/gemini, mid-tier cost
   image: 3,         // generic image gen — same tier as criativo
   logo: 4,          // defaults to Nano Banana Pro
+  kv_batch: 4,      // same per-image tier as logo — one KV batch candidate
   ensaio: 6,        // Nano Banana Pro + 2 extra vision/analysis calls per image
   other: 1,
 };
@@ -59,6 +62,35 @@ export function isCreditError(r: CreditCheckResult): r is CreditError {
   return "error" in r;
 }
 
+/** Resolves a user's plan + monthly credit limit from user_profiles —
+ * extracted from checkAndDeductCredit so the KV batch flow (which reserves
+ * credits via its own dedicated, server-only RPCs, not this function's
+ * single-claim RPC) can trust the same server-resolved limit instead of
+ * duplicating this lookup or trusting a client-supplied one. */
+export async function resolvePlanLimit(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string
+): Promise<{ planId: PlanId; planLabel: string; limit: number }> {
+  let planId: PlanId = DEFAULT_PLAN;
+  try {
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("plan")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (profile?.plan && profile.plan in PLANS) {
+      planId = profile.plan as PlanId;
+    }
+  } catch { /* default plan */ }
+
+  const plan = PLANS[planId];
+  return { planId, planLabel: plan.label, limit: plan.credits };
+}
+
+export function actionCost(genType: GenType): number {
+  return ACTION_COST[genType] ?? 1;
+}
+
 export async function checkAndDeductCredit(
   genType: GenType,
   promptSnippet = ""
@@ -86,25 +118,20 @@ export async function checkAndDeductCredit(
     };
   }
 
-  // Resolve plan — maybeSingle() never throws on missing row
-  let planId: PlanId = DEFAULT_PLAN;
-  try {
-    const { data: profile } = await supabase
-      .from("user_profiles")
-      .select("plan")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    if (profile?.plan && profile.plan in PLANS) {
-      planId = profile.plan as PlanId;
-    }
-  } catch { /* default plan */ }
-
-  const plan = PLANS[planId];
-  const limit = plan.credits;
+  const { planId, planLabel, limit } = await resolvePlanLimit(supabase, user.id);
   const cost = ACTION_COST[genType] ?? 1;
 
+  // claim_generation_credit is server-only now (revoked from
+  // authenticated/anon — see 20260909000001_kv_batch_generation.sql) so a
+  // client can no longer call it directly with a forged p_user_id/p_limit
+  // to lock another user's credit balance. Identity (user.id) and limit
+  // are already resolved above from the real authenticated session, so
+  // trusting them as RPC params here is safe — nothing this function
+  // hasn't already independently verified reaches the RPC.
+  const service = createServiceClient();
+
   // Atomic claim via Postgres advisory lock — eliminates race condition
-  const { data: claim, error: rpcError } = await supabase.rpc(
+  const { data: claim, error: rpcError } = await service.rpc(
     "claim_generation_credit",
     {
       p_user_id: user.id,
@@ -125,7 +152,7 @@ export async function checkAndDeductCredit(
       allowed: false,
       userId: user.id,
       plan: planId,
-      planLabel: plan.label,
+      planLabel,
       used: claim.used as number,
       limit: claim.limit as number,
     };
@@ -136,7 +163,7 @@ export async function checkAndDeductCredit(
     generationId: claim.generation_id as string,
     userId: user.id,
     plan: planId,
-    planLabel: plan.label,
+    planLabel,
     used: claim.used as number,
     limit: claim.limit as number,
     remaining: (claim.limit as number) - (claim.used as number),
@@ -155,8 +182,9 @@ export async function finalizeGeneration(
 ): Promise<void> {
   if (generationId === "dev-bypass") return; // no real credit row to finalize
   try {
-    const supabase = await createClient();
-    const { error } = await supabase.rpc("finalize_generation", {
+    // Also server-only now — see the note in checkAndDeductCredit above.
+    const service = createServiceClient();
+    const { error } = await service.rpc("finalize_generation", {
       p_id: generationId,
       p_success: success,
       p_error: errorMessage ?? null,

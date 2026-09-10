@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { CanvasEditor } from "./CanvasEditor";
 import type { CanvasTemplate } from "../lib/canvas-templates";
+import { useAppContext } from "../(app)/_context";
 
 /* ─── Types ─────────────────────────────────────────────── */
 interface Carousel {
@@ -150,6 +151,12 @@ async function downloadSlidesZip(urls: string[], baseName: string): Promise<numb
 
 /* ─── Main component ─────────────────────────────────────── */
 export function CarrosselView() {
+  // Sem isto, /api/generate-design e /api/generate-design-bleed (que exigem
+  // projectId desde a Centralização de Lançamentos, 2026-09-08) sempre
+  // falhavam com "lançamento ativo" pra quem abria Carrossel pelo menu —
+  // este componente nunca tinha lido o lançamento ativo do contexto global
+  // (mesmo achado que em CriativosView).
+  const { activeLaunchKit } = useAppContext();
   const supabase = createClient();
 
   const [mainTab, setMainTab] = useState<"biblioteca" | "gerar" | "gerados">("gerar");
@@ -644,6 +651,7 @@ export function CarrosselView() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            projectId: activeLaunchKit?.projectId,
             prompt: output.prompt.trim(),
             referenceImages: [dataUrl],
             avatarImages,
@@ -704,6 +712,7 @@ export function CarrosselView() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
+              projectId: activeLaunchKit?.projectId,
               prompt: output.prompt.trim(),
               slides: orderedGroup.map(c => ({ slideNumber: c.slideNumber, referenceImage: c.dataUrl })),
               avatarImages,
@@ -865,7 +874,7 @@ export function CarrosselView() {
       const message = err instanceof Error ? err.message : "Erro ao gerar o carrossel.";
       updateOutputNode(output.id, { generating: false, error: `${message}${missingPreviewNote}` });
     }
-  }, [avatarNodes, supabase, updateOutputNode, loadCarousels]);
+  }, [avatarNodes, supabase, updateOutputNode, loadCarousels, activeLaunchKit]);
 
   /* ── Retry one slide from its original batch reference. This intentionally
    * skips person detection: the user explicitly chose this slide for a new
@@ -891,6 +900,7 @@ export function CarrosselView() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        projectId: activeLaunchKit?.projectId,
         prompt: finalPrompt,
         referenceImages: [referenceImage],
         avatarImages,
@@ -941,7 +951,7 @@ export function CarrosselView() {
         }
       : candidate));
     loadCarousels();
-  }, [nodes, avatarNodes, supabase, loadCarousels]);
+  }, [nodes, avatarNodes, supabase, loadCarousels, activeLaunchKit]);
 
   /* ── Output (Gerar) node generation — automatic, no manual pairing, same
    * as CriativosView: the first Referência (+ first Avatar, if any) on the
@@ -984,6 +994,7 @@ export function CarrosselView() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          projectId: activeLaunchKit?.projectId,
           prompt: output.prompt.trim(),
           referenceImages: [refNode.dataUrl],
           avatarImages,
@@ -1051,7 +1062,7 @@ export function CarrosselView() {
     } catch (err) {
       updateOutputNode(outputId, { generating: false, error: err instanceof Error ? err.message : "Erro ao gerar." });
     }
-  }, [outputNodes, runCarouselBatchGeneration, refNodes, avatarNodes, nodes, supabase, updateOutputNode, loadCarousels]);
+  }, [outputNodes, runCarouselBatchGeneration, refNodes, avatarNodes, nodes, supabase, updateOutputNode, loadCarousels, activeLaunchKit]);
 
   /* ── Library management ── */
   async function uploadToLibrary(files: FileList | File[]) {

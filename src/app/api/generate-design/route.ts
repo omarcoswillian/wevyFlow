@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
-import { requireLaunch, launchErrorResponse } from "@/lib/launches/server";
 import {
   ASPECT_MAP, stripDataUrl, resizeIfNeeded, normalizeCarouselContext,
   analyzeSceneForSwap, analyzeTextOverlays, cropToPersonForIdentityRef,
@@ -24,7 +23,6 @@ export async function POST(req: NextRequest) {
       targetWidth,
       targetHeight,
       carouselContext,
-      projectId,
     } = await req.json() as {
       prompt: string;
       referenceImages?: string[];
@@ -35,18 +33,10 @@ export async function POST(req: NextRequest) {
       targetWidth?: number;
       targetHeight?: number;
       carouselContext?: unknown;
-      projectId?: string;
     };
 
     if (!prompt?.trim()) {
       return NextResponse.json({ error: "Prompt obrigatorio." }, { status: 400 });
-    }
-
-    try {
-      await requireLaunch(projectId);
-    } catch (err) {
-      const { body, status } = launchErrorResponse(err);
-      return NextResponse.json(body, { status });
     }
 
     // This route always uses WevyFlow's own server key (no BYOK option) and

@@ -329,6 +329,7 @@ export type Database = {
           status: "pending" | "success" | "failed_refunded";
           error_message: string | null;
           cost: number;
+          credit_locked: boolean;
           created_at: string;
         };
         Insert: {
@@ -341,6 +342,7 @@ export type Database = {
           status?: "pending" | "success" | "failed_refunded";
           error_message?: string | null;
           cost?: number;
+          credit_locked?: boolean;
           created_at?: string;
         };
         Update: {
@@ -353,6 +355,7 @@ export type Database = {
           status?: "pending" | "success" | "failed_refunded";
           error_message?: string | null;
           cost?: number;
+          credit_locked?: boolean;
           created_at?: string;
         };
         Relationships: [];
@@ -394,6 +397,8 @@ export type Database = {
           status: "draft" | "active" | "archived";
           project_id: string;
           client_token: string | null;
+          selected_kv_asset_id: string | null;
+          selected_kv_candidate_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -410,6 +415,8 @@ export type Database = {
           status?: "draft" | "active" | "archived";
           project_id: string;
           client_token?: string | null;
+          selected_kv_asset_id?: string | null;
+          selected_kv_candidate_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -425,6 +432,136 @@ export type Database = {
             foreignKeyName: "launch_kits_project_id_fkey";
             columns: ["project_id"];
             referencedRelation: "projects";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "launch_kits_selected_kv_asset_id_fkey";
+            columns: ["selected_kv_asset_id"];
+            referencedRelation: "launch_assets";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "launch_kits_selected_kv_candidate_id_fkey";
+            columns: ["selected_kv_candidate_id"];
+            referencedRelation: "kv_candidates";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      launch_assets: {
+        Row: {
+          id: string;
+          user_id: string;
+          launch_kit_id: string;
+          asset_type: "kv";
+          batch_id: string;
+          position: number;
+          status: "pending" | "generating" | "done" | "error";
+          storage_bucket: string | null;
+          storage_path: string | null;
+          mime_type: string | null;
+          width: number | null;
+          height: number | null;
+          variant: "dark" | "light" | null;
+          variation_key: string | null;
+          prompt_snapshot: string | null;
+          generation_config: Record<string, unknown>;
+          generation_history_id: string | null;
+          attempt_id: string;
+          client_attempt_id: string | null;
+          candidate_id: string | null;
+          piece_key: string | null;
+          asset_role: string | null;
+          producer: "image_ai" | "renderer" | null;
+          error_code: string | null;
+          error_message: string | null;
+          selected_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          launch_kit_id: string;
+          asset_type: "kv";
+          batch_id: string;
+          position: number;
+          status?: "pending" | "generating" | "done" | "error";
+          storage_bucket?: string | null;
+          storage_path?: string | null;
+          mime_type?: string | null;
+          width?: number | null;
+          height?: number | null;
+          variant?: "dark" | "light" | null;
+          variation_key?: string | null;
+          prompt_snapshot?: string | null;
+          generation_config?: Record<string, unknown>;
+          generation_history_id?: string | null;
+          attempt_id?: string;
+          client_attempt_id?: string | null;
+          candidate_id?: string | null;
+          piece_key?: string | null;
+          asset_role?: string | null;
+          producer?: "image_ai" | "renderer" | null;
+          error_code?: string | null;
+          error_message?: string | null;
+          selected_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["launch_assets"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "launch_assets_launch_kit_id_fkey";
+            columns: ["launch_kit_id"];
+            referencedRelation: "launch_kits";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "launch_assets_candidate_id_fkey";
+            columns: ["candidate_id"];
+            referencedRelation: "kv_candidates";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      kv_candidates: {
+        Row: {
+          id: string;
+          user_id: string;
+          launch_kit_id: string;
+          batch_id: string;
+          position: number;
+          direction: string | null;
+          schema_version: number;
+          manifest: Record<string, unknown>;
+          identity_spec: Record<string, unknown>;
+          context_snapshot: Record<string, unknown>;
+          selected_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          launch_kit_id: string;
+          batch_id: string;
+          position: number;
+          direction?: string | null;
+          schema_version?: number;
+          manifest?: Record<string, unknown>;
+          identity_spec?: Record<string, unknown>;
+          context_snapshot?: Record<string, unknown>;
+          selected_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["kv_candidates"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "kv_candidates_launch_kit_id_fkey";
+            columns: ["launch_kit_id"];
+            referencedRelation: "launch_kits";
             referencedColumns: ["id"];
           },
         ];
@@ -512,6 +649,113 @@ export type Database = {
           p_clear_brand_kit_id?: boolean;
         };
         Returns: { out_project_id: string; out_launch_kit_id: string; out_status: string }[];
+      };
+      select_launch_kv: {
+        Args: { p_project_id: string; p_asset_id: string };
+        Returns: {
+          out_launch_kit_id: string;
+          out_project_id: string;
+          out_selected_kv_asset_id: string;
+          out_selected_kv_candidate_id: string | null;
+        }[];
+      };
+      claim_kv_batch: {
+        Args: {
+          p_user_id: string;
+          p_launch_kit_id: string;
+          p_client_batch_id: string;
+          p_asset_type: string;
+          p_gen_type: string;
+          p_directions: string[];
+          p_prompts: string[];
+          p_generation_config: Record<string, unknown>;
+          p_cost_per_item: number;
+          p_limit: number;
+          p_skip_credit_check?: boolean;
+        };
+        Returns: {
+          created: boolean;
+          allowed?: boolean;
+          launch_kit_id?: string;
+          batch_id?: string;
+          asset_ids?: string[];
+          candidate_ids?: string[];
+          used?: number;
+          limit?: number;
+          required?: number;
+        };
+      };
+      claim_kv_candidate_retry: {
+        Args: {
+          p_user_id: string;
+          p_launch_kit_id: string;
+          p_asset_id: string;
+          p_client_attempt_id: string;
+          p_gen_type: string;
+          p_cost: number;
+          p_limit: number;
+          p_prompt: string;
+          p_skip_credit_check?: boolean;
+        };
+        Returns: {
+          allowed: boolean;
+          replay?: boolean;
+          attempt_id?: string | null;
+          generation_history_id?: string | null;
+          used?: number;
+          limit?: number;
+          required?: number;
+        };
+      };
+      acquire_kv_attempt: {
+        Args: { p_user_id: string; p_launch_kit_id: string; p_asset_id: string };
+        Returns: { attempt_id: string; generation_history_id: string | null };
+      };
+      claim_kv_piece: {
+        Args: {
+          p_user_id: string;
+          p_launch_kit_id: string;
+          p_candidate_id: string;
+          p_piece_key: string;
+          p_asset_role: string;
+          p_producer: "image_ai" | "renderer";
+          p_position: number;
+          p_gen_type: string;
+          p_prompt: string;
+          p_generation_config: Record<string, unknown>;
+          p_cost: number;
+          p_limit: number;
+          p_skip_credit_check?: boolean;
+        };
+        Returns: {
+          allowed: boolean;
+          created?: boolean;
+          asset_id?: string;
+          used?: number;
+          limit?: number;
+          required?: number;
+        };
+      };
+      finalize_kv_candidate: {
+        Args: {
+          p_user_id: string;
+          p_asset_id: string;
+          p_attempt_id: string;
+          p_generation_history_id: string | null;
+          p_success: boolean;
+          p_storage_bucket?: string | null;
+          p_storage_path?: string | null;
+          p_mime_type?: string | null;
+          p_width?: number | null;
+          p_height?: number | null;
+          p_error_code?: string | null;
+          p_error_message?: string | null;
+        };
+        Returns: { status: "applied" | "already_applied" | "stale" | "conflict" };
+      };
+      reap_stale_kv_generations: {
+        Args: { p_user_id: string; p_timeout?: string };
+        Returns: void;
       };
     };
     Enums: Record<string, never>;

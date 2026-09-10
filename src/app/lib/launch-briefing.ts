@@ -32,8 +32,30 @@ export interface LaunchBriefing {
   fontChoice: string;
   stylePreset: string;
   referenceImages: string[];
+  /** Parallel array to referenceImages — the "origin key" of each entry
+   * (a Biblioteca slide's path, or "upload:<name>:<size>:<mtime>" for a
+   * raw file upload), same length/order, same truncation. referenceImages
+   * itself only ever holds resized data URLs with no memory of where they
+   * came from, so a UI can't tell "is this specific Biblioteca thumbnail
+   * currently an active reference?" just by inspecting it — a separate,
+   * client-only "added" flag drifted from the truth the moment the 4-image
+   * cap silently dropped an older entry (achado do dono: a Biblioteca
+   * mostrava "todas adicionadas" com 7 checks enquanto o banco tinha ZERO
+   * referências salvas). This field makes that check exact and always in
+   * sync with what's actually persisted, never a separate bookkeeping
+   * array that can desync. */
+  referenceImageSources: string[];
   referenceBrands: string;
   logoUrl: string;
+  /** Fotos reais (da pessoa/produto), enviadas por upload — NUNCA geradas
+   * por IA. Diferente de referenceImages (que são só influência de estilo
+   * pro Nano Banana), estas são passadas ao Nano Banana no mockup de
+   * aplicação da KV (generateMockupCandidate, generate-logo/shared.ts) como
+   * a pessoa/produto real a preservar exatamente como fotografado — a mesma
+   * foto reaproveitada depois pelos criativos/carrossel, em vez de uma
+   * pessoa inventada a cada geração (pedido do dono: "afinal é bom pra
+   * fazermos os criativos, mockups de aplicação"). */
+  applicationPhotos: string[];
 }
 
 // Explicit, generous-but-bounded limits — reject with a validation error
@@ -56,8 +78,27 @@ export const BRIEFING_LIMITS = {
   secondaryColor: 32,
   fontChoice: 60,
   stylePreset: 60,
-  maxReferenceImages: 4,
-  maxTotalRequestBytes: 2_000_000, // ~2MB — mostly bounded by referenceImages (base64)
+  // 10 cobre um brand book inteiro (a referência "A Carreira de Ouro" tem 7
+  // peças: capa, paleta, tipografia, logo em 2 versões, texturas, mockup) —
+  // pedido do dono: "quero todas as telas", não só as mais recentes até
+  // truncar. O teto por-imagem (MAX_REFERENCE_IMAGE_BYTES, em
+  // generate-logo/shared.ts) é fixo, não derivado deste número, de propósito.
+  maxReferenceImages: 10,
+  // Menor que maxReferenceImages de propósito: são fotos curadas pra
+  // mockup (uma hero-shot já basta pra maioria dos lançamentos), não um
+  // moodboard — e cada uma soma no mesmo orçamento de bytes que
+  // referenceImages já usa.
+  maxApplicationPhotos: 2,
+  // ~4MB — mostly bounded by referenceImages (base64). Precisa caber até
+  // maxReferenceImages(10) imagens reais + as fotos de aplicação sem
+  // rejeitar o PATCH inteiro; na prática cada imagem já sai bem menor que
+  // isso (resizeImageFromUrl/resizeImageFile limitam a 1024px + JPEG .85
+  // antes de virar data URL), este é só o teto de segurança. Fica abaixo de
+  // propósito do limite de ~4.5MB de corpo de requisição do runtime
+  // serverless do Vercel (PATCH /api/launches/[id] roda como Node.js
+  // serverless function, não Server Action — o bodySizeLimit de
+  // next.config.ts não vale aqui).
+  maxTotalRequestBytes: 4_000_000,
 };
 
 export function emptyBriefing(): LaunchBriefing {
@@ -79,8 +120,10 @@ export function emptyBriefing(): LaunchBriefing {
     fontChoice: "sora",
     stylePreset: "dark-premium",
     referenceImages: [],
+    referenceImageSources: [],
     referenceBrands: "",
     logoUrl: "",
+    applicationPhotos: [],
   };
 }
 
@@ -129,13 +172,46 @@ export function validateBriefing(b: Partial<Record<keyof LaunchBriefing, unknown
     }
   }
 
+  const validReferenceImages = Array.isArray(b.referenceImages) && b.referenceImages.every((v) => typeof v === "string")
+    ? b.referenceImages
+    : undefined;
   if (b.referenceImages !== undefined) {
-    if (!Array.isArray(b.referenceImages) || b.referenceImages.some((v) => typeof v !== "string")) {
+    if (!validReferenceImages) {
       errors.push({ field: "referenceImages", message: "referenceImages deve ser uma lista de textos (data URLs)." });
-    } else if (b.referenceImages.length > BRIEFING_LIMITS.maxReferenceImages) {
+    } else if (validReferenceImages.length > BRIEFING_LIMITS.maxReferenceImages) {
       errors.push({
         field: "referenceImages",
         message: `Máximo de ${BRIEFING_LIMITS.maxReferenceImages} imagens de referência.`,
+      });
+    }
+  }
+
+  const validReferenceImageSources = Array.isArray(b.referenceImageSources) && b.referenceImageSources.every((v) => typeof v === "string")
+    ? b.referenceImageSources
+    : undefined;
+  if (b.referenceImageSources !== undefined) {
+    if (!validReferenceImageSources) {
+      errors.push({ field: "referenceImageSources", message: "referenceImageSources deve ser uma lista de textos." });
+    } else if (validReferenceImageSources.length > BRIEFING_LIMITS.maxReferenceImages) {
+      errors.push({
+        field: "referenceImageSources",
+        message: `Máximo de ${BRIEFING_LIMITS.maxReferenceImages} imagens de referência.`,
+      });
+    } else if (validReferenceImages && validReferenceImages.length !== validReferenceImageSources.length) {
+      errors.push({
+        field: "referenceImageSources",
+        message: "referenceImageSources deve ter o mesmo tamanho de referenceImages.",
+      });
+    }
+  }
+
+  if (b.applicationPhotos !== undefined) {
+    if (!Array.isArray(b.applicationPhotos) || b.applicationPhotos.some((v) => typeof v !== "string")) {
+      errors.push({ field: "applicationPhotos", message: "applicationPhotos deve ser uma lista de textos (data URLs)." });
+    } else if (b.applicationPhotos.length > BRIEFING_LIMITS.maxApplicationPhotos) {
+      errors.push({
+        field: "applicationPhotos",
+        message: `Máximo de ${BRIEFING_LIMITS.maxApplicationPhotos} fotos de aplicação.`,
       });
     }
   }

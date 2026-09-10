@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { GoogleGenAI } from "@google/genai";
 import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
-import { requireLaunch, launchErrorResponse } from "@/lib/launches/server";
 
 const SIZE_MAP_OPENAI: Record<string, "1024x1024" | "1536x1024" | "1024x1536"> = {
   square:    "1024x1024",
@@ -32,18 +31,10 @@ export async function POST(req: NextRequest) {
       apiKey,
       imageProvider = "openai",
       imageModel,
-      projectId,
     } = await req.json();
 
     if (!prompt?.trim()) {
       return NextResponse.json({ error: "Prompt é obrigatório." }, { status: 400 });
-    }
-
-    try {
-      await requireLaunch(projectId);
-    } catch (err) {
-      const { body, status } = launchErrorResponse(err);
-      return NextResponse.json(body, { status });
     }
 
     // Every image call — including BYOK — consumes a plan credit, same

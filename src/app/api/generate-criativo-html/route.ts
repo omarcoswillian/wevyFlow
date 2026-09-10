@@ -104,20 +104,23 @@ export async function POST(req: Request) {
     return Response.json({ error: "Formato inválido." }, { status: 400 });
   }
 
-  let launch;
-  try {
-    launch = await requireLaunch(projectId);
-  } catch (err) {
-    const { body, status } = launchErrorResponse(err);
-    return Response.json(body, { status });
+  let launch: Awaited<ReturnType<typeof requireLaunch>> | null = null;
+  if (projectId) {
+    try {
+      launch = await requireLaunch(projectId);
+    } catch (err) {
+      const { body, status } = launchErrorResponse(err);
+      return Response.json(body, { status });
+    }
   }
 
   // The persisted launch's product name is the canonical source — a
   // client-supplied `produto` can no longer silently take its place (see
-  // launches review item 6). Task-specific fields (headline/cta/cor/
-  // estilo/fase/chatInstruction/brandContext) stay exactly as the caller
-  // sent them.
-  const canonicalProduto = launch.brandInfo.productName?.trim() || produto;
+  // launches review item 6), only when a launch is actually in play. Sem
+  // projectId (geração avulsa, pedido do dono), `produto` é a única fonte.
+  // Task-specific fields (headline/cta/cor/estilo/fase/chatInstruction/
+  // brandContext) stay exactly as the caller sent them.
+  const canonicalProduto = launch?.brandInfo.productName?.trim() || produto;
 
   // Credit check — required for server-side AI calls (BYOK bypass not permitted)
   const creditResult = await checkAndDeductCredit("criativo_html", headline || canonicalProduto || "");

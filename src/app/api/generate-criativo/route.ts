@@ -238,17 +238,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Formato inválido." }, { status: 400 });
   }
 
-  let launch;
-  try {
-    launch = await requireLaunch(projectId);
-  } catch (err) {
-    const { body, status } = launchErrorResponse(err);
-    return NextResponse.json(body, { status });
+  let launch: Awaited<ReturnType<typeof requireLaunch>> | null = null;
+  if (projectId) {
+    try {
+      launch = await requireLaunch(projectId);
+    } catch (err) {
+      const { body, status } = launchErrorResponse(err);
+      return NextResponse.json(body, { status });
+    }
   }
 
   // Canonical product name from the persisted launch takes precedence over
-  // a client-supplied `produto` (see launches review item 6).
-  const canonicalProduto = launch.brandInfo.productName?.trim() || produto;
+  // a client-supplied `produto` (see launches review item 6) — só quando há
+  // lançamento. Sem projectId (geração avulsa), `produto` é a única fonte.
+  const canonicalProduto = launch?.brandInfo.productName?.trim() || produto;
 
   const creditResult = await checkAndDeductCredit("criativo_html", canonicalProduto || headline || "");
   if (isCreditError(creditResult)) {

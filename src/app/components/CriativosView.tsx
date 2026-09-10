@@ -196,7 +196,12 @@ function BrandCarousel({ label, count, items, onUseAsReference }: {
 
 /* ─── Main Component ─────────────────────────────────────── */
 export function CriativosView() {
-  useAppContext();
+  // achado: essa chamada já existia, mas o valor era descartado — por isso
+  // /api/generate-design (que exige projectId desde a Centralização de
+  // Lançamentos, 2026-09-08) sempre falhava com "lançamento ativo" pra quem
+  // abria Criativos pelo menu, mesmo já com um lançamento aberto em outra
+  // aba/página desta mesma sessão.
+  const { activeLaunchKit } = useAppContext();
   const supabase = createClient();
   const searchParams = useSearchParams();
   const serviceType  = searchParams.get("tipo") ?? "criativos";
@@ -475,6 +480,7 @@ export function CriativosView() {
       const job = jobs[i];
       try {
         const res = await fetchWithDevAuth("/api/generate-design", {
+          projectId: activeLaunchKit?.projectId,
           prompt: job.prompt,
           referenceImages: job.refImage ? [job.refImage] : [],
           avatarImages: avImages,
@@ -508,6 +514,7 @@ export function CriativosView() {
     setGenResults(prev => prev.map(r => r.id === result.id ? { ...r, status: "loading" as const } : r));
     try {
       const res = await fetchWithDevAuth("/api/generate-design", {
+        projectId: activeLaunchKit?.projectId,
         prompt: instruction,
         referenceImages: [result.dataUrl],
         avatarImages: [],
@@ -525,7 +532,7 @@ export function CriativosView() {
       const msg = err instanceof Error ? err.message : "Erro.";
       setGenResults(prev => prev.map(r => r.id === result.id ? { ...r, status: "error", error: msg } : r));
     }
-  }, [genFormat, genQuality]);
+  }, [genFormat, genQuality, activeLaunchKit]);
 
   /* ── Library ── */
   async function uploadToLibrary(files: FileList | File[]) {

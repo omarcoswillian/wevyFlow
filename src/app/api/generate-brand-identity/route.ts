@@ -238,17 +238,26 @@ const DECORATIVE_BY_PRESET: Record<string, "flanking-lines" | "rule-below" | "ge
 };
 
 export async function POST(request: Request) {
-  const { projectId } = await request.json() as { projectId?: string };
+  const { projectId, brandInfo: bodyBrandInfo } = await request.json() as { projectId?: string; brandInfo?: Partial<BrandInfo> };
 
-  // Canonical brandInfo always comes from the persisted launch — a
-  // brandInfo sent in the request body is never trusted as a substitute.
+  // Com projectId, o brandInfo canônico vem do lançamento persistido — nunca
+  // do corpo (evita um lançamento do produto A gerar identidade pro produto
+  // B). Sem projectId (geração avulsa, pedido do dono), não há lançamento
+  // pra proteger — o corpo é a única fonte possível.
   let brandInfo: BrandInfo;
-  try {
-    const launch = await requireLaunch(projectId);
-    brandInfo = launch.brandInfo;
-  } catch (err) {
-    const { body, status } = launchErrorResponse(err);
-    return Response.json(body, { status });
+  if (projectId) {
+    try {
+      const launch = await requireLaunch(projectId);
+      brandInfo = launch.brandInfo;
+    } catch (err) {
+      const { body, status } = launchErrorResponse(err);
+      return Response.json(body, { status });
+    }
+  } else {
+    if (!bodyBrandInfo?.productName || !bodyBrandInfo?.niche) {
+      return Response.json({ error: "brandInfo (productName, niche) é obrigatório sem um lançamento." }, { status: 400 });
+    }
+    brandInfo = bodyBrandInfo as BrandInfo;
   }
 
   const creditResult = await checkAndDeductCredit("brand_identity", brandInfo.productName);
