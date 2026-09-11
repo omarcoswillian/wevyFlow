@@ -405,7 +405,14 @@ export function CriativosView() {
   /* ── Use as reference (from biblioteca/galeria) ── */
   const addAsReference = useCallback(async (imageUrl: string) => {
     const res = await fetch(imageUrl);
+    // fetch() não rejeita em 404/403 — sem isso, uma URL quebrada (ex: um
+    // handoff externo pra uma imagem que sumiu) virava uma página de erro
+    // HTML disfarçada de referência, sem nenhum aviso pro usuário.
+    if (!res.ok) throw new Error(`Não foi possível carregar a imagem (HTTP ${res.status}).`);
+    const contentType = res.headers.get("content-type") ?? "";
+    if (!contentType.startsWith("image/")) throw new Error("O link não aponta para uma imagem.");
     const blob = await res.blob();
+    if (blob.size === 0) throw new Error("A imagem veio vazia.");
     const dataUrl = await new Promise<string>((resolve, reject) => {
       const r = new FileReader();
       r.onload = () => resolve(r.result as string);
@@ -418,6 +425,29 @@ export function CriativosView() {
     setPositions(prev => ({ ...prev, [id]: { x: 120, y: 120 } }));
     setMainTab("gerar");
   }, []);
+
+  /* ── Consume a pending "usar como referência" handoff from another route
+   * (ex: Anúncios) — reads a one-shot sessionStorage payload and imports it
+   * as a reference here. Removed BEFORE the await so React Strict Mode's
+   * double-invoke of effects in dev can't import it twice. ── */
+  const [pendingRefError, setPendingRefError] = useState<string | null>(null);
+  useEffect(() => {
+    let raw: string | null = null;
+    try {
+      raw = sessionStorage.getItem("wevyflow:pending-ad-reference");
+      if (raw) sessionStorage.removeItem("wevyflow:pending-ad-reference");
+    } catch { /* storage unavailable */ }
+    if (!raw) return;
+    (async () => {
+      try {
+        const payload = JSON.parse(raw!) as { url?: unknown };
+        if (typeof payload.url !== "string" || !payload.url) throw new Error("Referência inválida.");
+        await addAsReference(payload.url);
+      } catch (e) {
+        setPendingRefError(e instanceof Error ? e.message : "Não foi possível importar a referência do anúncio.");
+      }
+    })();
+  }, [addAsReference]);
 
   /* ── References ── */
   const updateReference = (id: string, patch: Partial<RefCard>) =>
@@ -595,6 +625,15 @@ export function CriativosView() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden h-full">
+
+      {pendingRefError && (
+        <div className="shrink-0 mx-8 mt-4 flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20">
+          <p className="text-[11px] text-red-300 flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {pendingRefError}</p>
+          <button onClick={() => setPendingRefError(null)} className="text-red-400/60 hover:text-red-300 cursor-pointer shrink-0">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* ─── Tab bar ─────────────────────────── */}
       <div className="px-8 pt-6 pb-4 shrink-0 flex items-center justify-between">

@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/page-monitors",
+      "schedule": "0 11 * * *"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 interface WebflowExportModalProps {
   open: boolean;
@@ -16,7 +16,9 @@ interface ExportResult {
   bodyBlocks: string[];
   script: string;
   imagesProcessed: number;
+  imagesFailed: number;
   usedWebflowAssets: boolean;
+  oversizedBlocks: string[];
   headChars: number;
   bodyChars: number;
   scriptChars: number;
@@ -78,6 +80,20 @@ export function WebflowExportModal({ open, onClose, code, projectId }: WebflowEx
   const [result, setResult] = useState<ExportResult | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [leadToken, setLeadToken] = useState<string | null>(null);
+  const [leadTokenFailed, setLeadTokenFailed] = useState(false);
+
+  // Guards against a slow response landing after the modal was closed (or
+  // re-run for a different page) — an obsolete response must never overwrite
+  // the state for whatever is now on screen.
+  const requestIdRef = useRef(0);
+  // A different `code` means a different page — the lead-routing token from
+  // a previous export must never be reused, or captured leads get misfiled
+  // under the wrong page in the Leads dashboard.
+  const codeRef = useRef(code);
+  if (codeRef.current !== code) {
+    codeRef.current = code;
+    if (leadToken !== null) setLeadToken(null);
+  }
 
   // Webflow account config — kept only in this browser (localStorage), never
   // sent to our database. Used per-request so exported images land on the
@@ -91,11 +107,13 @@ export function WebflowExportModal({ open, onClose, code, projectId }: WebflowEx
 
   const run = useCallback(async (opts?: { token?: string | null; siteId?: string | null }) => {
     if (!code) return;
+    const requestId = ++requestIdRef.current;
     const activeToken = opts?.token !== undefined ? opts.token : webflowToken;
     const activeSiteId = opts?.siteId !== undefined ? opts.siteId : webflowSiteId;
     setStep("processing");
     setResult(null);
     setErrorMsg("");
+    setLeadTokenFailed(false);
     try {
       // Get-or-create the token that routes leads from this exported page
       // back to the dashboard, regardless of where it ends up hosted.
@@ -108,7 +126,9 @@ export function WebflowExportModal({ open, onClose, code, projectId }: WebflowEx
         });
         if (sourceRes.ok) {
           token = ((await sourceRes.json()) as { token: string }).token;
-          setLeadToken(token);
+          if (requestId === requestIdRef.current) setLeadToken(token);
+        } else if (requestId === requestIdRef.current) {
+          setLeadTokenFailed(true);
         }
       }
 
@@ -125,9 +145,11 @@ export function WebflowExportModal({ open, onClose, code, projectId }: WebflowEx
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erro desconhecido");
+      if (requestId !== requestIdRef.current) return;
       setResult(data as ExportResult);
       setStep("done");
     } catch (e: unknown) {
+      if (requestId !== requestIdRef.current) return;
       setErrorMsg(e instanceof Error ? e.message : "Erro ao exportar");
       setStep("error");
     }
@@ -153,10 +175,13 @@ export function WebflowExportModal({ open, onClose, code, projectId }: WebflowEx
 
   useEffect(() => {
     if (!open) {
+      requestIdRef.current++;
       setStep("config");
       setConfigError("");
       setTokenInput("");
       setSites([]);
+      setResult(null);
+      setErrorMsg("");
     }
   }, [open]);
 
@@ -341,7 +366,7 @@ export function WebflowExportModal({ open, onClose, code, projectId }: WebflowEx
               {/* Stats */}
               <div className="grid grid-cols-4 gap-2">
                 {[
-                  { label: "Imagens", value: result.imagesProcessed },
+                  { label: "Imagens", value: result.imagesFailed > 0 ? `${result.imagesProcessed}/${result.imagesProcessed + result.imagesFailed}` : result.imagesProcessed },
                   { label: "CSS (head)", value: `${result.headChars.toLocaleString()}` },
                   { label: "HTML (embed)", value: `${result.bodyChars.toLocaleString()}` },
                   { label: "Script (footer)", value: `${result.scriptChars.toLocaleString()}` },
@@ -352,6 +377,27 @@ export function WebflowExportModal({ open, onClose, code, projectId }: WebflowEx
                   </div>
                 ))}
               </div>
+
+              {result.oversizedBlocks.length > 0 && (
+                <div className="rounded-xl bg-red-500/10 border border-red-500/25 px-4 py-3 text-xs text-red-300 leading-relaxed">
+                  <strong className="block mb-1">Atenção: excede o limite de 50.000 caracteres do Webflow</strong>
+                  {result.oversizedBlocks.join(", ")} — o Webflow vai recusar ou truncar esse conteúdo ao colar. Reduza o texto/CSS/JS da página antes de publicar.
+                </div>
+              )}
+
+              {webflowToken && result.imagesFailed > 0 && (
+                <div className="rounded-xl bg-red-500/10 border border-red-500/25 px-4 py-3 text-xs text-red-300 leading-relaxed">
+                  <strong className="block mb-1">{result.imagesFailed} imagem(ns) não foram enviadas para o Webflow</strong>
+                  Essas imagens ficam faltando na página exportada — confira o console ou tente novamente.
+                </div>
+              )}
+
+              {leadTokenFailed && (
+                <div className="rounded-xl bg-red-500/10 border border-red-500/25 px-4 py-3 text-xs text-red-300 leading-relaxed">
+                  <strong className="block mb-1">Captura de lead não incluída</strong>
+                  Não foi possível criar o link de rastreamento — os formulários desse bloco não vão enviar leads para o seu painel. Tente exportar novamente.
+                </div>
+              )}
 
               {result.usedWebflowAssets ? (
                 <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/25 px-4 py-3 text-xs text-emerald-300 leading-relaxed flex items-center justify-between gap-3">
@@ -383,7 +429,7 @@ export function WebflowExportModal({ open, onClose, code, projectId }: WebflowEx
                 </div>
                 <div><span className="inline-block w-5 text-wf-primary font-bold">3.</span><strong>Page Settings → Custom Code → Before &lt;/body&gt;</strong> → cola o bloco SCRIPT</div>
                 <div className="text-wf-primary pt-1">O script separado do body garante que FAQ e animações funcionem no Webflow.</div>
-                <div className="text-wf-primary">O bloco SCRIPT já inclui a captura de lead — os formulários enviam direto para o seu painel de Leads, mesmo hospedados no Webflow.</div>
+                {!leadTokenFailed && <div className="text-wf-primary">O bloco SCRIPT já inclui a captura de lead — os formulários enviam direto para o seu painel de Leads, mesmo hospedados no Webflow.</div>}
                 {result.bodyBlocks.length > 1 && (
                   <div className="text-wf-primary">A página passou de 50.000 chars, então o HTML foi dividido em {result.bodyBlocks.length} blocos — cada um vira um Embed separado, colados em sequência.</div>
                 )}

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Mail, Plus, Rocket, Zap, Sprout, PlayCircle, Repeat } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppContext } from "../(app)/_context";
-import { EmailSequencePanel } from "./EmailSequencePanel";
-import type { BrandInfo, StrategyId } from "../lib/types-kit";
+import { EmailSequencePanel, EMPTY_SEQUENCES } from "./EmailSequencePanel";
+import type { BrandInfo, EmailSequenceType, StrategyId } from "../lib/types-kit";
 
 const STRATEGY_ICONS: Record<StrategyId, React.ElementType> = {
   classico: Rocket,
@@ -26,12 +27,18 @@ const EMPTY_BRAND: BrandInfo = {
   stylePreset: "dark-premium",
 };
 
-export function EmailsDashboard() {
-  const { launchKits, openLaunchWizardForDraft } = useAppContext();
+interface EmailsDashboardProps {
+  categoria?: EmailSequenceType;
+}
+
+export function EmailsDashboard({ categoria = "cpl" }: EmailsDashboardProps) {
+  const { launchKits, openLaunchWizardForDraft, saveLaunchKit } = useAppContext();
+  const router = useRouter();
 
   const [selectedKitId, setSelectedKitId] = useState<string | "manual">(
     launchKits.length > 0 ? launchKits[0].id : "manual"
   );
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Manual form state (used when no kit is selected)
   const [manual, setManual] = useState<BrandInfo>({ ...EMPTY_BRAND });
@@ -52,14 +59,14 @@ export function EmailsDashboard() {
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="max-w-3xl mx-auto px-6 py-8">
+      <div className="px-8 py-8">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-7">
           <div>
             <h1 className="text-[20px] font-bold text-white">Sequências de Email</h1>
             <p className="text-[12px] text-white/40 mt-0.5">
-              Pré-lançamento, vendas e recuperação de carrinho
+              Pré-lançamento, vendas e revendas (carrinho abandonado)
             </p>
           </div>
         </div>
@@ -178,8 +185,24 @@ export function EmailsDashboard() {
               <span className="text-[12px] text-white/60 font-medium">{activeBrand.productName}</span>
               <span className="text-white/15">·</span>
               <span className="text-[11px] text-white/30">{activeBrand.niche}</span>
+              {!selectedKit && (
+                <span className="text-[10px] text-amber-300/70 ml-1">— manual, não fica salvo</span>
+              )}
             </div>
-            <EmailSequencePanel brandInfo={activeBrand} />
+            {saveError && (
+              <p className="text-[11px] text-red-400 mb-3">Falha ao salvar: {saveError}</p>
+            )}
+            <EmailSequencePanel
+              brandInfo={activeBrand}
+              sequences={selectedKit ? selectedKit.emailSequences ?? EMPTY_SEQUENCES : undefined}
+              onChange={selectedKit ? (next) => {
+                const updated = { ...selectedKit, emailSequences: next, updatedAt: new Date().toISOString() };
+                setSaveError(null);
+                saveLaunchKit(updated).catch((e) => setSaveError(e instanceof Error ? e.message : "erro desconhecido"));
+              } : undefined}
+              activeTab={categoria}
+              onTabChange={(tab) => router.push(`/emails?categoria=${tab}`)}
+            />
           </div>
         )}
 

@@ -801,15 +801,16 @@ export function ElementorExport({ code, fonts, onClose }: ElementorExportProps) 
   // to the dashboard, regardless of where it ends up hosted (WordPress via
   // Elementor, Hostinger, anywhere) — see src/app/lib/lead-capture-snippet.ts.
   const [leadToken, setLeadToken] = useState<string | null>(null);
+  const [leadTokenFailed, setLeadTokenFailed] = useState(false);
   useEffect(() => {
     fetch("/api/pages/lead-source", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: "Export Elementor", platform: "elementor" }),
     })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => { if (data?.token) setLeadToken(data.token); })
-      .catch(() => {});
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("lead-source failed"))))
+      .then((data) => { if (data?.token) setLeadToken(data.token); else setLeadTokenFailed(true); })
+      .catch(() => setLeadTokenFailed(true));
   }, []);
 
   const fullHtml = useMemo(() => {
@@ -1012,6 +1013,13 @@ export function ElementorExport({ code, fonts, onClose }: ElementorExportProps) 
           </div>
 
           <div className="px-5 py-5 space-y-4 max-h-[80vh] overflow-y-auto">
+            {leadTokenFailed && (
+              <div className="rounded-xl bg-red-500/10 border border-red-500/25 px-4 py-3 text-[11px] text-red-300 leading-relaxed">
+                <strong className="block mb-1">Captura de lead não incluída</strong>
+                Não foi possível criar o link de rastreamento — os formulários desse código não vão enviar leads para o seu painel. Feche e abra este export de novo pra tentar de novo.
+              </div>
+            )}
+
             {/* PRIMARY: 3-way split — copia HTML/CSS/JS separados pra colar em
                 3 lugares diferentes do WordPress. É o caminho mais confiável quando
                 o widget HTML do Elementor sanitiza scripts ou wrappa de jeito estranho. */}

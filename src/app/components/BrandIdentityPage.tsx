@@ -25,6 +25,26 @@ function getImageConfig(): { apiKey?: string; imageProvider: string; imageModel?
   }
 }
 
+/** Mesmo indicador de "gerando" do node OUTPUT em Criativos (NodeResultCard,
+ * CriativosView.tsx) — pedido do dono pra a tela de KV ficar visualmente
+ * igual às outras telas em vez do spinner cinza pelado que tinha antes. */
+function GeneratingIndicator({ label = "Gerando..." }: { label?: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-2.5">
+      <div className="relative w-8 h-8">
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{ border: "1.5px solid rgba(124,58,237,.15)", borderTopColor: "#7c3aed", animation: "spin 1s linear infinite" }}
+        />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <ImagePlus className="w-3 h-3" style={{ color: "rgba(124,58,237,.5)" }} />
+        </div>
+      </div>
+      <p className="text-[10px] text-white/20">{label}</p>
+    </div>
+  );
+}
+
 const DIRECTION_LABELS: Record<string, string> = {
   tipografica: "Tipográfica",
   geometrica: "Geométrica",
@@ -639,9 +659,8 @@ export function BrandIdentityPage({ projectId }: BrandIdentityPageProps) {
               />
             )}
             {batchState === "generating" && logoCandidates.length === 0 && (
-              <div className="flex flex-col items-center gap-3 py-24">
-                <Loader2 className="w-6 h-6 text-purple-400 animate-spin" />
-                <p className="text-[13px] text-white/40">Preparando o lote...</p>
+              <div className="py-24">
+                <GeneratingIndicator label="Preparando o lote..." />
               </div>
             )}
             {(batchState === "done" || (batchState === "generating" && logoCandidates.length > 0)) && (
@@ -704,8 +723,8 @@ export function BrandIdentityPage({ projectId }: BrandIdentityPageProps) {
               <p className="text-[11px] text-white/40 mb-4">{referenceNotice}</p>
             )}
             {loadingGerados ? (
-              <div className="flex items-center justify-center py-20">
-                <Loader2 className="w-5 h-5 text-white/30 animate-spin" />
+              <div className="py-20">
+                <GeneratingIndicator label="Carregando..." />
               </div>
             ) : doneGerados.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-20 text-center">
@@ -805,7 +824,7 @@ function KvCandidateCard({
           </div>
         )}
         {(candidate.status === "pending" || candidate.status === "generating") && (
-          <Loader2 className="w-5 h-5 text-white/30 animate-spin" />
+          <GeneratingIndicator />
         )}
         {isSelected && (
           <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/90 text-white text-[9px] font-semibold">

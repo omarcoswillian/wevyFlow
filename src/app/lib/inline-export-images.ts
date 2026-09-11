@@ -1,5 +1,21 @@
 import { existsSync, readFileSync } from "fs";
-import { join } from "path";
+import { resolve, sep } from "path";
+
+// A html `src="/../../../etc/passwd"`-style path would otherwise let
+// resolve(cwd, "public", localPath) escape the public/ directory entirely —
+// resolve it and reject anything that lands outside publicRoot.
+const PUBLIC_ROOT = resolve(process.cwd(), "public");
+function safePublicPath(localPath: string): string | null {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(localPath);
+  } catch {
+    return null;
+  }
+  const resolved = resolve(PUBLIC_ROOT, `.${decoded}`);
+  if (resolved !== PUBLIC_ROOT && !resolved.startsWith(PUBLIC_ROOT + sep)) return null;
+  return resolved;
+}
 
 function mimeFromExt(filePath: string) {
   const e = filePath.split(".").pop()?.toLowerCase() ?? "";
@@ -32,8 +48,8 @@ export function inlineLocalImages(html: string): { html: string; imagesProcessed
   let imagesProcessed = 0;
 
   for (const localPath of extractLocalImagePaths(processed)) {
-    const diskPath = join(process.cwd(), "public", localPath);
-    if (!existsSync(diskPath)) continue;
+    const diskPath = safePublicPath(localPath);
+    if (!diskPath || !existsSync(diskPath)) continue;
     const buf = readFileSync(diskPath);
     const mime = mimeFromExt(localPath);
     const dataUri = `data:${mime};base64,${buf.toString("base64")}`;

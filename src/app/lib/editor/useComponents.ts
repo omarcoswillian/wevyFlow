@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { Database } from "@/lib/supabase/types";
 
 export interface SavedComponent {
   id: string;
@@ -11,30 +13,17 @@ export interface SavedComponent {
   updatedAt: number;
 }
 
-const STORAGE_KEY = "wevyflow-components";
+type Row = Database["public"]["Tables"]["saved_components"]["Row"];
 
-function load(): SavedComponent[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function save(items: SavedComponent[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  } catch (err) {
-    console.error("[WevyFlow] Erro ao salvar componente:", err);
-  }
-}
-
-function makeId() {
-  return "cmp_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+function mapRow(row: Row): SavedComponent {
+  return {
+    id: row.id,
+    name: row.name,
+    html: row.html,
+    tag: row.tag,
+    createdAt: new Date(row.created_at).getTime(),
+    updatedAt: new Date(row.updated_at).getTime(),
+  };
 }
 
 // Strip editor-only attributes before saving so instances start clean.
@@ -46,45 +35,52 @@ function cleanHtml(html: string): string {
     .replace(/\s+data-wf-prev-display="[^"]*"/g, "");
 }
 
+/** Reusable HTML blocks the user saves from the Workspace editor's Library
+ * panel — persisted to Supabase (`saved_components`) instead of the old
+ * "wevyflow-components" localStorage key, which was lost on any browser
+ * switch/clear. Global per user, like the editor's color swatches. */
 export function useComponents() {
+  const supabase = useMemo(() => createClient(), []);
   const [components, setComponents] = useState<SavedComponent[]>([]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setComponents(load()); }, []);
+  const load = useCallback(async () => {
+    const { data } = await supabase
+      .from("saved_components")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (data) setComponents(data.map(mapRow));
+  }, [supabase]);
 
-  const add = useCallback((name: string, html: string, tag: string): SavedComponent => {
-    const now = Date.now();
-    const item: SavedComponent = {
-      id: makeId(),
-      name: name.trim() || "Sem nome",
-      html: cleanHtml(html),
-      tag,
-      createdAt: now,
-      updatedAt: now,
-    };
-    setComponents((prev) => {
-      const next = [item, ...prev];
-      save(next);
-      return next;
-    });
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    load();
+  }, [load]);
+
+  const add = useCallback(async (name: string, html: string, tag: string): Promise<SavedComponent | null> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+    const { data, error } = await supabase
+      .from("saved_components")
+      .insert({ user_id: user.id, name: name.trim() || "Sem nome", html: cleanHtml(html), tag })
+      .select()
+      .single();
+    if (error || !data) return null;
+    const item = mapRow(data);
+    setComponents((prev) => [item, ...prev]);
     return item;
-  }, []);
+  }, [supabase]);
 
-  const remove = useCallback((id: string) => {
-    setComponents((prev) => {
-      const next = prev.filter((c) => c.id !== id);
-      save(next);
-      return next;
-    });
-  }, []);
+  const remove = useCallback(async (id: string) => {
+    setComponents((prev) => prev.filter((c) => c.id !== id));
+    await supabase.from("saved_components").delete().eq("id", id);
+  }, [supabase]);
 
-  const rename = useCallback((id: string, name: string) => {
-    setComponents((prev) => {
-      const next = prev.map((c) => c.id === id ? { ...c, name: name.trim() || c.name, updatedAt: Date.now() } : c);
-      save(next);
-      return next;
-    });
-  }, []);
+  const rename = useCallback(async (id: string, name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setComponents((prev) => prev.map((c) => c.id === id ? { ...c, name: trimmed, updatedAt: Date.now() } : c));
+    await supabase.from("saved_components").update({ name: trimmed }).eq("id", id);
+  }, [supabase]);
 
   return { components, add, remove, rename };
 }

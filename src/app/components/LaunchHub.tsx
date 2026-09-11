@@ -421,23 +421,6 @@ export function LaunchHub() {
     }
   };
 
-  // Um KV ruim (ou inexistente) contamina tudo construído em cima dele — é
-  // o problema original que motivou o redesenho de KV nesta sessão. Enquanto
-  // o lançamento não tiver uma KV escolhida, todo "Gerar" de Páginas/
-  // Criativos redireciona pra lá em vez de gerar com uma identidade ainda
-  // não definida (pedido explícito do dono: "cada um deles tem que
-  // redirecionar para o lugar onde será feito").
-  const kvReady = !!kit.selectedKvAssetId;
-  const goToKv = () => navigate("marca", kit.projectId);
-  const handleGenerateAssetOrRedirect = (asset: StrategyAsset) => {
-    if (!kvReady) { goToKv(); return; }
-    handleGenerateAsset(asset);
-  };
-  const handleGenerateAllOrRedirect = (assets: StrategyAsset[]) => {
-    if (!kvReady) { goToKv(); return; }
-    handleGenerateAll(assets);
-  };
-
   const handleDelete = async () => {
     if (!confirmDelete) { setConfirmDelete(true); return; }
     try {
@@ -545,28 +528,6 @@ export function LaunchHub() {
       {/* ── Scrollable content ── */}
       <div className="flex-1 overflow-y-auto px-5 py-5 space-y-7">
 
-        {/* KV (raster key visual) — separate concept from the structured
-            brand identity below (concept/colors/fonts/logo). Codex review
-            flagged this badge as confusingly labeled "KV aprovada" while
-            actually reflecting brandIdentity.status, not selectedKvAssetId. */}
-        <section>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-[11px] uppercase tracking-widest text-white/30 font-semibold">KV</span>
-            {kit.selectedKvAssetId && (
-              <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[9px] font-semibold uppercase tracking-wide">KV escolhido</span>
-            )}
-          </div>
-          <button
-            onClick={() => navigate("marca", kit.projectId)}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] hover:border-purple-500/20 transition-colors cursor-pointer text-left"
-          >
-            <span className="text-[12px] text-white/60">
-              {kit.selectedKvAssetId ? "Ver ou trocar a KV escolhida" : "Gerar a identidade visual (KV) deste lançamento"}
-            </span>
-            <ChevronRight className="w-3.5 h-3.5 text-white/30" />
-          </button>
-        </section>
-
         {/* Brand Identity section (structured identity: concept/colors/fonts/
             logo) — a different concept from the KV raster image above. */}
         <section>
@@ -598,18 +559,13 @@ export function LaunchHub() {
               </div>
               {hasPendingPages && (
                 <button
-                  onClick={() => handleGenerateAllOrRedirect(pages)}
+                  onClick={() => handleGenerateAll(pages)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[11px] font-medium hover:bg-purple-500/20 transition-colors cursor-pointer"
                 >
                   <Zap className="w-3 h-3" /> Gerar todas
                 </button>
               )}
             </div>
-            {!kvReady && (
-              <p className="text-[11px] text-white/30 mb-3">
-                Escolha uma KV antes de gerar páginas — clique em &quot;Gerar&quot; pra ser levado até lá.
-              </p>
-            )}
             <div className="grid grid-cols-2 gap-3">
               {pages.map((asset) => (
                 <PageCard
@@ -617,7 +573,7 @@ export function LaunchHub() {
                   asset={asset}
                   instance={getInstance(asset.id)}
                   isLocallyGenerating={localGenerating.has(asset.id)}
-                  onGenerate={handleGenerateAssetOrRedirect}
+                  onGenerate={handleGenerateAsset}
                   onView={(code, label) => openCodeInWorkspace(code, label)}
                 />
               ))}
@@ -635,18 +591,13 @@ export function LaunchHub() {
               </div>
               {hasPendingCreativos && (
                 <button
-                  onClick={() => handleGenerateAllOrRedirect(criativos)}
+                  onClick={() => handleGenerateAll(criativos)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[11px] font-medium hover:bg-purple-500/20 transition-colors cursor-pointer"
                 >
                   <Zap className="w-3 h-3" /> Gerar lote
                 </button>
               )}
             </div>
-            {!kvReady && (
-              <p className="text-[11px] text-white/30 mb-3">
-                Escolha uma KV antes de gerar criativos — clique em &quot;Gerar&quot; pra ser levado até lá.
-              </p>
-            )}
             <div className="grid grid-cols-3 gap-3">
               {criativos.map((asset) => (
                 <CreativeCard
@@ -654,7 +605,7 @@ export function LaunchHub() {
                   asset={asset}
                   instance={getInstance(asset.id)}
                   isLocallyGenerating={localGenerating.has(asset.id)}
-                  onGenerate={handleGenerateAssetOrRedirect}
+                  onGenerate={handleGenerateAsset}
                   onView={(code, label) => openCodeInWorkspace(code, label)}
                 />
               ))}

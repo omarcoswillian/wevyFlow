@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { useColorSwatches } from "../../lib/editor/useColorSwatches";
 
 
 interface ColorPickerProps {
@@ -12,8 +13,6 @@ interface ColorPickerProps {
   /** Show alpha slider (default true). */
   allowAlpha?: boolean;
 }
-
-const SWATCHES_KEY = "wevyflow-color-swatches";
 
 export function ColorPicker({ value, onChange, align = "right", allowAlpha = true }: ColorPickerProps) {
   const [open, setOpen] = useState(false);
@@ -41,20 +40,16 @@ export function ColorPicker({ value, onChange, align = "right", allowAlpha = tru
     };
   }, [open]);
 
+  const { saveSwatch: persistSwatch } = useColorSwatches();
+
   const commit = useCallback((next: RGBA) => {
     setRgba(next);
     onChange(formatColor(next, allowAlpha));
   }, [onChange, allowAlpha]);
 
   const saveSwatch = useCallback(() => {
-    try {
-      const raw = localStorage.getItem(SWATCHES_KEY);
-      const list: string[] = raw ? JSON.parse(raw) : [];
-      const hex = rgbaToHex(rgba);
-      const next = [hex, ...list.filter((c) => c !== hex)].slice(0, 16);
-      localStorage.setItem(SWATCHES_KEY, JSON.stringify(next));
-    } catch {}
-  }, [rgba]);
+    persistSwatch(rgbaToHex(rgba));
+  }, [rgba, persistSwatch]);
 
   return (
     <div className="relative inline-block">
@@ -259,25 +254,8 @@ function HexInput({ value, onChange }: { value: string; onChange: (hex: string) 
 }
 
 /* ─── Swatches row (recent) ─── */
-function SwatchesRow({ current, onPick }: { current: string; onPick: (hex: string) => void }) {
-  const [swatches, setSwatches] = useState<string[]>([]);
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(SWATCHES_KEY);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (raw) setSwatches(JSON.parse(raw));
-    } catch {}
-  }, []);
-
-  // Refresh when current changes (after a commit, a save may have happened)
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(SWATCHES_KEY);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (raw) setSwatches(JSON.parse(raw));
-    } catch {}
-  }, [current]);
+function SwatchesRow({ onPick }: { current: string; onPick: (hex: string) => void }) {
+  const { swatches } = useColorSwatches();
 
   const defaults = ["#000000", "#FFFFFF", "#FF5C00", "#6366F1", "#A855F7", "#22C55E", "#EF4444", "#F59E0B"];
   const list = swatches.length > 0 ? swatches : defaults;

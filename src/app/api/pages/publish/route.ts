@@ -23,6 +23,9 @@ export async function POST(req: NextRequest) {
     }
 
     const cleanSlug = slug.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    if (!cleanSlug) {
+      return Response.json({ error: "slug inválido — use letras, números e hífens" }, { status: 400 });
+    }
 
     // /p/[slug] is a temporary preview/approval link, not production hosting
     // (real publishing goes through the WordPress/Webflow export) — every
@@ -68,6 +71,10 @@ export async function DELETE(req: NextRequest) {
   if (!user) return Response.json({ error: "não autenticado" }, { status: 401 });
 
   const { slug } = await req.json();
-  await supabase.from("published_pages").delete().eq("slug", slug).eq("user_id", user.id);
+  const { error } = await supabase.from("published_pages").delete().eq("slug", slug).eq("user_id", user.id);
+  if (error) {
+    console.error("[publish] delete failed:", error.message);
+    return Response.json({ error: error.message }, { status: 500 });
+  }
   return Response.json({ ok: true });
 }

@@ -16,10 +16,12 @@ import {
   Share2,
   PanelLeft,
   FileText,
+  Activity,
   X,
   Paintbrush,
   Rocket,
   UserCheck,
+  Megaphone,
   Zap,
   Sprout,
   PlayCircle,
@@ -29,8 +31,8 @@ import {
   Mail,
   Globe,
   TrendingUp,
+  TrendingDown,
   LogOut,
-  Fingerprint,
   BookOpen,
   ShoppingCart,
   Monitor,
@@ -40,6 +42,7 @@ import {
   Lock,
   Camera,
   GalleryHorizontalEnd,
+  Radar,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Platform } from "../lib/types";
@@ -134,6 +137,12 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
   const [showConfig, setShowConfig] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [designExpanded, setDesignExpanded] = useState(activeNav === "criativos" || activeNav === "ensaio" || activeNav === "carrossel");
+  const [anunciosExpanded, setAnunciosExpanded] = useState(activeNav === "anuncios");
+  const currentVisao = searchParams.get("visao") ?? "todos";
+  const [emailsExpanded, setEmailsExpanded] = useState(activeNav === "emails");
+  const currentCategoria = searchParams.get("categoria") ?? "cpl";
+  const [paginasExpanded, setPaginasExpanded] = useState(activeNav === "paginas");
+  const currentPaginasVisao = searchParams.get("visao") ?? "minhas";
   const [lpExpanded, setLpExpanded] = useState(false);
   const [copyDocument, setCopyDocument] = useState("");
   const [copyFileName, setCopyFileName] = useState<string | null>(null);
@@ -439,7 +448,6 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
               <div className="ml-3 mt-0.5 border-l border-white/[0.06] pl-2 space-y-0.5 pb-1">
                 <p className="text-[8px] font-semibold text-white/20 uppercase tracking-widest px-2 pt-2 pb-0.5">Primário</p>
                 {([
-                  { label: "KV",                   icon: <Fingerprint className="w-3 h-3" />,  tipo: null,               onClick: () => nav("marca") },
                   { label: "Criativos",            icon: <Paintbrush className="w-3 h-3" />,   tipo: "criativos",        onClick: () => router.push("/criativos?tipo=criativos") },
                   { label: "Carrossel",            icon: <GalleryHorizontalEnd className="w-3 h-3" />, tipo: "carrossel", onClick: () => router.push("/carrossel") },
                   { label: "Ensaio Fotografico",   icon: <Camera className="w-3 h-3" />,        tipo: "ensaio",           onClick: () => router.push("/ensaio") },
@@ -483,9 +491,130 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
               </div>
             )}
           </div>
-          <SidebarItem icon={<Mail className="w-4 h-4" />} label="Emails" active={activeNav === "emails"} collapsed={sidebarCollapsed} onClick={() => nav("emails")} />
+          {/* Anúncios — accordion próprio, fora de Design */}
+          <div>
+            <button
+              onClick={() => sidebarCollapsed ? router.push("/anuncios") : setAnunciosExpanded(p => !p)}
+              title={sidebarCollapsed ? "Anúncios" : undefined}
+              className={cn(
+                "flex items-center w-full rounded-xl transition-colors cursor-pointer",
+                sidebarCollapsed ? "justify-center p-2.5" : "gap-2.5 px-2.5 py-2 text-[12px]",
+                activeNav === "anuncios"
+                  ? "bg-white/[0.06] text-[#d1d1d1]"
+                  : "text-[#6b6b6b] hover:bg-white/[0.04] hover:text-[#9a9a9a]"
+              )}
+            >
+              <Megaphone className="w-4 h-4 shrink-0" />
+              {!sidebarCollapsed && (
+                <>
+                  <span className="flex-1 text-left">Anúncios</span>
+                  <ChevronDown className={cn("w-3 h-3 text-white/20 transition-transform duration-200", anunciosExpanded ? "rotate-0" : "-rotate-90")} />
+                </>
+              )}
+            </button>
+            {!sidebarCollapsed && anunciosExpanded && (
+              <div className="ml-3 mt-0.5 border-l border-white/[0.06] pl-2 space-y-0.5 pb-1">
+                {([
+                  { label: "Anúncios",           icon: <Megaphone className="w-3 h-3" />,      visao: "todos" },
+                  { label: "Melhores anúncios",  icon: <TrendingUp className="w-3 h-3" />,     visao: "melhores" },
+                  { label: "Piores anúncios",    icon: <TrendingDown className="w-3 h-3" />,   visao: "piores" },
+                ]).map((item) => {
+                  const isActive = activeNav === "anuncios" && currentVisao === item.visao;
+                  return (
+                    <button key={item.label} onClick={() => router.push(`/anuncios?visao=${item.visao}`)}
+                      className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] cursor-pointer transition-colors text-left",
+                        isActive ? "bg-white/[0.06] text-white/80" : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]")}>
+                      {item.icon}
+                      <span className="flex-1 truncate">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          {/* Emails — accordion próprio, mesmo padrão de Anúncios */}
+          <div>
+            <button
+              onClick={() => sidebarCollapsed ? nav("emails") : setEmailsExpanded(p => !p)}
+              title={sidebarCollapsed ? "Emails" : undefined}
+              className={cn(
+                "flex items-center w-full rounded-xl transition-colors cursor-pointer",
+                sidebarCollapsed ? "justify-center p-2.5" : "gap-2.5 px-2.5 py-2 text-[12px]",
+                activeNav === "emails"
+                  ? "bg-white/[0.06] text-[#d1d1d1]"
+                  : "text-[#6b6b6b] hover:bg-white/[0.04] hover:text-[#9a9a9a]"
+              )}
+            >
+              <Mail className="w-4 h-4 shrink-0" />
+              {!sidebarCollapsed && (
+                <>
+                  <span className="flex-1 text-left">Emails</span>
+                  <ChevronDown className={cn("w-3 h-3 text-white/20 transition-transform duration-200", emailsExpanded ? "rotate-0" : "-rotate-90")} />
+                </>
+              )}
+            </button>
+            {!sidebarCollapsed && emailsExpanded && (
+              <div className="ml-3 mt-0.5 border-l border-white/[0.06] pl-2 space-y-0.5 pb-1">
+                {([
+                  { label: "Pré-Lançamento", icon: <Rocket className="w-3 h-3" />,   categoria: "cpl" },
+                  { label: "Vendas",         icon: <Zap className="w-3 h-3" />,      categoria: "vendas" },
+                  { label: "Revendas",       icon: <Repeat className="w-3 h-3" />,   categoria: "recuperacao" },
+                ]).map((item) => {
+                  const isActive = activeNav === "emails" && currentCategoria === item.categoria;
+                  return (
+                    <button key={item.label} onClick={() => router.push(`/emails?categoria=${item.categoria}`)}
+                      className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] cursor-pointer transition-colors text-left",
+                        isActive ? "bg-white/[0.06] text-white/80" : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]")}>
+                      {item.icon}
+                      <span className="flex-1 truncate">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
           <SidebarItem icon={<UserCheck className="w-4 h-4" />} label="Leads" active={activeNav === "leads"} collapsed={sidebarCollapsed} onClick={() => nav("leads")} />
-          <SidebarItem icon={<FileText className="w-4 h-4" />} label="Páginas" active={activeNav === "paginas"} collapsed={sidebarCollapsed} onClick={() => nav("paginas")} />
+          <SidebarItem icon={<Radar className="w-4 h-4" />} label="Prospecção" active={activeNav === "prospeccao"} collapsed={sidebarCollapsed} onClick={() => nav("prospeccao")} />
+          {/* Páginas — accordion próprio, mesmo padrão de Anúncios/Emails */}
+          <div>
+            <button
+              onClick={() => sidebarCollapsed ? nav("paginas") : setPaginasExpanded(p => !p)}
+              title={sidebarCollapsed ? "Páginas" : undefined}
+              className={cn(
+                "flex items-center w-full rounded-xl transition-colors cursor-pointer",
+                sidebarCollapsed ? "justify-center p-2.5" : "gap-2.5 px-2.5 py-2 text-[12px]",
+                activeNav === "paginas"
+                  ? "bg-white/[0.06] text-[#d1d1d1]"
+                  : "text-[#6b6b6b] hover:bg-white/[0.04] hover:text-[#9a9a9a]"
+              )}
+            >
+              <FileText className="w-4 h-4 shrink-0" />
+              {!sidebarCollapsed && (
+                <>
+                  <span className="flex-1 text-left">Páginas</span>
+                  <ChevronDown className={cn("w-3 h-3 text-white/20 transition-transform duration-200", paginasExpanded ? "rotate-0" : "-rotate-90")} />
+                </>
+              )}
+            </button>
+            {!sidebarCollapsed && paginasExpanded && (
+              <div className="ml-3 mt-0.5 border-l border-white/[0.06] pl-2 space-y-0.5 pb-1">
+                {([
+                  { label: "Minhas Páginas", icon: <FileText className="w-3 h-3" />, visao: "minhas" },
+                  { label: "Monitoramento",  icon: <Activity className="w-3 h-3" />, visao: "monitoramento" },
+                ]).map((item) => {
+                  const isActive = activeNav === "paginas" && currentPaginasVisao === item.visao;
+                  return (
+                    <button key={item.label} onClick={() => router.push(`/paginas?visao=${item.visao}`)}
+                      className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] cursor-pointer transition-colors text-left",
+                        isActive ? "bg-white/[0.06] text-white/80" : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]")}>
+                      {item.icon}
+                      <span className="flex-1 truncate">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           {!sidebarCollapsed && <div className="pt-3 pb-1"><span className="px-2 text-[9px] font-medium text-white/20 uppercase tracking-widest">Projetos</span></div>}
           {sidebarCollapsed && <div className="pt-3" />}

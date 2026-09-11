@@ -1,7 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
+import { createClient as createServerClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
 import { existsSync, readFileSync } from "fs";
-import { join } from "path";
+import { resolve, sep } from "path";
 import { stripEditorScripts } from "../../lib/strip-editor-scripts";
 import { rewriteResponsiveSelectors, cleanEditorArtifacts } from "../../lib/clean-editor-artifacts";
 import { splitHtmlIntoBlocks } from "../../lib/split-html-blocks";
@@ -76,8 +77,28 @@ function extractLocalImagePaths(html: string) {
   return Array.from(found);
 }
 
+// A html `src="/../../../etc/passwd"`-style path would otherwise let
+// join(cwd, "public", localPath) escape the public/ directory entirely —
+// resolve it and reject anything that lands outside publicRoot.
+const PUBLIC_ROOT = resolve(process.cwd(), "public");
+function safePublicPath(localPath: string): string | null {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(localPath);
+  } catch {
+    return null;
+  }
+  const resolved = resolve(PUBLIC_ROOT, `.${decoded}`);
+  if (resolved !== PUBLIC_ROOT && !resolved.startsWith(PUBLIC_ROOT + sep)) return null;
+  return resolved;
+}
+
 export async function POST(req: NextRequest) {
   try {
+    const supabaseSession = await createServerClient();
+    const { data: { user } } = await supabaseSession.auth.getUser();
+    if (!user) return Response.json({ error: "não autenticado" }, { status: 401 });
+
     const { html: rawHtml, projectId, leadToken, webflowToken, webflowSiteId } = (await req.json()) as {
       html: string;
       projectId?: string;
@@ -95,13 +116,18 @@ export async function POST(req: NextRequest) {
     html = rewriteResponsiveSelectors(html);
     html = cleanEditorArtifacts(html);
 
-    const prefix = projectId ?? `tmp-${Date.now()}`;
+    // Namespaced by the authenticated user's own id, never the client-supplied
+    // projectId alone — otherwise one user could guess/reuse another user's
+    // projectId and overwrite their exported images (upload uses upsert:true).
+    const safeProjectId = projectId ? projectId.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 80) : null;
+    const prefix = `${user.id}/${safeProjectId || `tmp-${Date.now()}`}`;
     const useWebflowAssets = Boolean(webflowToken && webflowSiteId);
 
     // 1. Extract and upload all base64 images
     const images = extractBase64Images(html);
     let processed = html;
     let imagesProcessed = 0;
+    let imagesFailed = 0;
 
     if (useWebflowAssets) {
       // Real fix: upload straight to the user's own Webflow Assets — the
@@ -116,6 +142,7 @@ export async function POST(req: NextRequest) {
           processed = processed.replaceAll(full, () => url);
           imagesProcessed++;
         } catch (e) {
+          imagesFailed++;
           console.error("[export-webflow] webflow asset upload failed:", e instanceof Error ? e.message : e);
         }
       }
@@ -135,6 +162,9 @@ export async function POST(req: NextRequest) {
           processed = processed.replaceAll(`url(${full})`, () => `url(${url})`);
           processed = processed.replaceAll(full, () => url);
           imagesProcessed++;
+        } else {
+          imagesFailed++;
+          console.error("[export-webflow] storage upload failed:", error.message);
         }
       }
     }
@@ -144,8 +174,8 @@ export async function POST(req: NextRequest) {
     const localPaths = extractLocalImagePaths(processed);
     if (useWebflowAssets) {
       for (const localPath of localPaths) {
-        const diskPath = join(process.cwd(), "public", localPath);
-        if (!existsSync(diskPath)) continue;
+        const diskPath = safePublicPath(localPath);
+        if (!diskPath || !existsSync(diskPath)) continue;
         const buf = readFileSync(diskPath);
         const mime = mimeFromExt(localPath);
         const filename = localPath.split("/").pop() || `asset-${Date.now()}`;
@@ -154,14 +184,15 @@ export async function POST(req: NextRequest) {
           processed = processed.split(`"${localPath}"`).join(`"${url}"`);
           imagesProcessed++;
         } catch (e) {
+          imagesFailed++;
           console.error("[export-webflow] webflow asset upload failed:", e instanceof Error ? e.message : e);
         }
       }
     } else {
       const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
       for (const localPath of localPaths) {
-        const diskPath = join(process.cwd(), "public", localPath);
-        if (!existsSync(diskPath)) continue;
+        const diskPath = safePublicPath(localPath);
+        if (!diskPath || !existsSync(diskPath)) continue;
         const buf = readFileSync(diskPath);
         const mime = mimeFromExt(localPath);
         const storagePath = `${prefix}/local${localPath}`;
@@ -174,6 +205,9 @@ export async function POST(req: NextRequest) {
           const url = `${CDN_BASE}/${storagePath}`;
           processed = processed.split(`"${localPath}"`).join(`"${url}"`);
           imagesProcessed++;
+        } else {
+          imagesFailed++;
+          console.error("[export-webflow] storage upload failed:", error.message);
         }
       }
     }
@@ -195,7 +229,7 @@ export async function POST(req: NextRequest) {
       return "";
     });
 
-    let head = [...linkBlocks, cssBlocks.length ? `<style>\n${cssBlocks.join("\n")}\n</style>` : ""]
+    const head = [...linkBlocks, cssBlocks.length ? `<style>\n${cssBlocks.join("\n")}\n</style>` : ""]
       .filter(Boolean)
       .join("\n")
       .trim();
@@ -231,15 +265,26 @@ export async function POST(req: NextRequest) {
 
     // Webflow's Embed element hard-caps custom code at 50k chars. Pages whose
     // body exceeds that need multiple Embed elements pasted in order instead
-    // of one block that gets silently truncated when pasted.
+    // of one block that gets silently truncated when pasted. A single
+    // top-level element bigger than the limit can't be split further — flag
+    // it explicitly instead of silently returning it as if it were pasteable.
     const bodyBlocks = splitHtmlIntoBlocks(body, WEBFLOW_EMBED_LIMIT);
+    const oversizedBlocks = [
+      ...bodyBlocks.map((b, i) => ({ label: `HTML #${i + 1}`, over: b.length > WEBFLOW_EMBED_LIMIT })),
+      { label: "CSS (head)", over: head.length > WEBFLOW_EMBED_LIMIT },
+      { label: "SCRIPT", over: script.length > WEBFLOW_EMBED_LIMIT },
+    ].filter((b) => b.over).map((b) => b.label);
 
     return Response.json({
       head,
       bodyBlocks,
       script,
       imagesProcessed,
-      usedWebflowAssets: useWebflowAssets,
+      imagesFailed,
+      // Only "true" when the user asked for it AND every upload actually
+      // succeeded — a partial/total failure must never read as success.
+      usedWebflowAssets: useWebflowAssets && imagesFailed === 0,
+      oversizedBlocks,
       headChars: head.length,
       bodyChars: body.length,
       scriptChars: script.length,

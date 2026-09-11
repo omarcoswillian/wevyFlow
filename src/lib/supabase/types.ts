@@ -12,6 +12,13 @@ export type Database = {
           starred: boolean;
           thumbnail: string;
           cover_image: string;
+          domain: string;
+          description: string;
+          favicon: string;
+          seo_title: string;
+          seo_description: string;
+          seo_og_image: string;
+          seo_no_index: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -23,6 +30,13 @@ export type Database = {
           starred?: boolean;
           thumbnail?: string;
           cover_image?: string;
+          domain?: string;
+          description?: string;
+          favicon?: string;
+          seo_title?: string;
+          seo_description?: string;
+          seo_og_image?: string;
+          seo_no_index?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -34,6 +48,13 @@ export type Database = {
           starred?: boolean;
           thumbnail?: string;
           cover_image?: string;
+          domain?: string;
+          description?: string;
+          favicon?: string;
+          seo_title?: string;
+          seo_description?: string;
+          seo_og_image?: string;
+          seo_no_index?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -129,6 +150,256 @@ export type Database = {
           prompt?: string | null;
           created_at?: string;
         };
+        Relationships: [];
+      };
+      page_monitors: {
+        Row: {
+          id: string;
+          user_id: string;
+          url: string;
+          label: string | null;
+          last_checked_at: string | null;
+          http_status: number | null;
+          is_up: boolean | null;
+          response_time_ms: number | null;
+          check_error: string | null;
+          page_status: "ONLINE" | "LENTO" | "OFFLINE" | "BLOQUEADO" | "TIMEOUT" | null;
+          is_soft_404: boolean | null;
+          blocked: boolean | null;
+          block_reason: string | null;
+          ssl_status: "valid" | "expiring_soon" | "critical" | "expired" | "error" | "no_ssl" | null;
+          ssl_expires_at: string | null;
+          ssl_days_remaining: number | null;
+          ssl_issuer: string | null;
+          pagespeed_checked_at: string | null;
+          pagespeed_performance: number | null;
+          pagespeed_seo: number | null;
+          pagespeed_accessibility: number | null;
+          pagespeed_best_practices: number | null;
+          pagespeed_fcp: number | null;
+          pagespeed_lcp: number | null;
+          pagespeed_tbt: number | null;
+          pagespeed_cls: number | null;
+          pagespeed_speed_index: number | null;
+          pagespeed_error: string | null;
+          consecutive_failures: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          url: string;
+          label?: string | null;
+          last_checked_at?: string | null;
+          http_status?: number | null;
+          is_up?: boolean | null;
+          response_time_ms?: number | null;
+          check_error?: string | null;
+          consecutive_failures?: number;
+          page_status?: "ONLINE" | "LENTO" | "OFFLINE" | "BLOQUEADO" | "TIMEOUT" | null;
+          is_soft_404?: boolean | null;
+          blocked?: boolean | null;
+          block_reason?: string | null;
+          ssl_status?: "valid" | "expiring_soon" | "critical" | "expired" | "error" | "no_ssl" | null;
+          ssl_expires_at?: string | null;
+          ssl_days_remaining?: number | null;
+          ssl_issuer?: string | null;
+          pagespeed_checked_at?: string | null;
+          pagespeed_performance?: number | null;
+          pagespeed_seo?: number | null;
+          pagespeed_accessibility?: number | null;
+          pagespeed_best_practices?: number | null;
+          pagespeed_fcp?: number | null;
+          pagespeed_lcp?: number | null;
+          pagespeed_tbt?: number | null;
+          pagespeed_cls?: number | null;
+          pagespeed_speed_index?: number | null;
+          pagespeed_error?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["page_monitors"]["Insert"]>;
+        Relationships: [];
+      };
+      page_monitor_history: {
+        Row: {
+          id: string;
+          page_monitor_id: string;
+          user_id: string;
+          page_status: string;
+          http_status: number | null;
+          response_time_ms: number | null;
+          error: string | null;
+          checked_at: string;
+        };
+        Insert: {
+          id?: string;
+          page_monitor_id: string;
+          user_id: string;
+          page_status: string;
+          http_status?: number | null;
+          response_time_ms?: number | null;
+          error?: string | null;
+          checked_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["page_monitor_history"]["Insert"]>;
+        Relationships: [];
+      };
+      page_monitor_incidents: {
+        Row: {
+          id: string;
+          page_monitor_id: string;
+          user_id: string;
+          type: string;
+          message: string;
+          probable_cause: string | null;
+          consecutive_failures_at_open: number | null;
+          final_status: string | null;
+          started_at: string;
+          resolved_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          page_monitor_id: string;
+          user_id: string;
+          type: string;
+          message: string;
+          probable_cause?: string | null;
+          consecutive_failures_at_open?: number | null;
+          final_status?: string | null;
+          started_at?: string;
+          resolved_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["page_monitor_incidents"]["Insert"]>;
+        Relationships: [];
+      };
+      meta_ads_connections: {
+        Row: {
+          id: string;
+          user_id: string;
+          access_token: string;
+          token_expires_at: string | null;
+          meta_user_id: string;
+          meta_user_name: string | null;
+          available_ad_accounts: { id: string; name: string }[];
+          ad_account_id: string | null;
+          ad_account_name: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          access_token: string;
+          token_expires_at?: string | null;
+          meta_user_id: string;
+          meta_user_name?: string | null;
+          available_ad_accounts?: { id: string; name: string }[];
+          ad_account_id?: string | null;
+          ad_account_name?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["meta_ads_connections"]["Insert"]>;
+        Relationships: [];
+      };
+      ad_watch_creatives: {
+        Row: {
+          id: string;
+          user_id: string;
+          source: "mock" | "meta_ad_library" | "foreplay" | "meta_ads_api";
+          advertiser_name: string;
+          headline: string | null;
+          body: string | null;
+          thumbnail_url: string | null;
+          platforms: string[];
+          status: "active" | "inactive";
+          started_at: string;
+          stopped_at: string | null;
+          is_favorite: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          source?: "mock" | "meta_ad_library" | "foreplay" | "meta_ads_api";
+          advertiser_name: string;
+          headline?: string | null;
+          body?: string | null;
+          thumbnail_url?: string | null;
+          platforms?: string[];
+          status?: "active" | "inactive";
+          started_at: string;
+          stopped_at?: string | null;
+          is_favorite?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["ad_watch_creatives"]["Insert"]>;
+        Relationships: [];
+      };
+      saved_components: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          html: string;
+          tag: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          html: string;
+          tag: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["saved_components"]["Insert"]>;
+        Relationships: [];
+      };
+      workspace_drafts: {
+        Row: {
+          id: string;
+          user_id: string;
+          prompt: string;
+          code: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          prompt: string;
+          code: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["workspace_drafts"]["Insert"]>;
+        Relationships: [];
+      };
+      ensaios: {
+        Row: {
+          id: string;
+          user_id: string;
+          url: string;
+          style_id: string;
+          style_name: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          url: string;
+          style_id: string;
+          style_name: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["ensaios"]["Insert"]>;
         Relationships: [];
       };
       carousels: {
@@ -365,6 +636,8 @@ export type Database = {
           id: string;
           user_id: string;
           plan: string;
+          color_swatches: string[];
+          webhook_url: string;
           created_at: string;
           updated_at: string;
         };
@@ -372,6 +645,8 @@ export type Database = {
           id?: string;
           user_id: string;
           plan?: string;
+          color_swatches?: string[];
+          webhook_url?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -379,6 +654,8 @@ export type Database = {
           id?: string;
           user_id?: string;
           plan?: string;
+          color_swatches?: string[];
+          webhook_url?: string;
           updated_at?: string;
         };
         Relationships: [];

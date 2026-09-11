@@ -170,6 +170,18 @@ export function EnsaioView() {
 
   const photoInputRef = useRef<HTMLInputElement>(null);
 
+  /* ── Load previously generated ensaios from Supabase on mount — antes só
+   * viviam em useState e sumiam em qualquer refresh/navegação. ── */
+  const loadGerados = useCallback(async () => {
+    const { data } = await supabase
+      .from("ensaios")
+      .select("id,url,style_name,created_at")
+      .order("created_at", { ascending: false });
+    if (data) setResults(data.map(r => ({ id: r.id, dataUrl: r.url, styleName: r.style_name })));
+  }, [supabase]);
+
+  useEffect(() => { loadGerados(); }, [loadGerados]);
+
   /* ── Load custom photos from Supabase on mount ── */
   const loadCustomPhotos = useCallback(async () => {
     const map: Record<string, string> = {};
@@ -289,8 +301,32 @@ export function EnsaioView() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Erro na geração");
-      const dataUrl = `data:${json.mimeType};base64,${json.b64}`;
-      setResults(prev => [{ id: crypto.randomUUID(), dataUrl, styleName: selectedStyle.label }, ...prev]);
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Sessão expirada — faça login novamente.");
+
+      const byteStr = atob(json.b64);
+      const ab = new ArrayBuffer(byteStr.length);
+      const ia = new Uint8Array(ab);
+      for (let j = 0; j < byteStr.length; j++) ia[j] = byteStr.charCodeAt(j);
+      const blob = new Blob([ab], { type: json.mimeType });
+
+      const ext = json.mimeType?.includes("png") ? "png" : "jpg";
+      const path = `${user.id}/ensaio/${selectedStyle.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("ai-images")
+        .upload(path, blob, { upsert: false, contentType: json.mimeType });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage.from("ai-images").getPublicUrl(path);
+
+      const { data: row, error: insErr } = await supabase
+        .from("ensaios")
+        .insert({ user_id: user.id, url: publicUrl, style_id: selectedStyle.id, style_name: selectedStyle.label })
+        .select()
+        .single();
+      if (insErr) throw insErr;
+
+      setResults(prev => [{ id: row.id, dataUrl: row.url, styleName: row.style_name }, ...prev]);
       setTab("gerados");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro desconhecido");

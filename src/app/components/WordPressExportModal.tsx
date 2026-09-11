@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 interface WordPressExportModalProps {
   open: boolean;
@@ -24,12 +24,28 @@ export function WordPressExportModal({ open, onClose, code, title, projectId }: 
   const [errorMsg, setErrorMsg] = useState("");
   const [copied, setCopied] = useState(false);
   const [leadToken, setLeadToken] = useState<string | null>(null);
+  const [leadTokenFailed, setLeadTokenFailed] = useState(false);
+
+  // Guards against a slow response landing after the modal was closed (or
+  // re-run for a different page) — an obsolete response must never overwrite
+  // the state for whatever is now on screen.
+  const requestIdRef = useRef(0);
+  // A different `code` means a different page — the lead-routing token from
+  // a previous export must never be reused, or captured leads get misfiled
+  // under the wrong page in the Leads dashboard.
+  const codeRef = useRef(code);
+  if (codeRef.current !== code) {
+    codeRef.current = code;
+    if (leadToken !== null) setLeadToken(null);
+  }
 
   const run = useCallback(async () => {
     if (!code) return;
+    const requestId = ++requestIdRef.current;
     setStep("processing");
     setResult(null);
     setErrorMsg("");
+    setLeadTokenFailed(false);
     try {
       let token = leadToken;
       if (!token) {
@@ -40,7 +56,9 @@ export function WordPressExportModal({ open, onClose, code, title, projectId }: 
         });
         if (sourceRes.ok) {
           token = ((await sourceRes.json()) as { token: string }).token;
-          setLeadToken(token);
+          if (requestId === requestIdRef.current) setLeadToken(token);
+        } else if (requestId === requestIdRef.current) {
+          setLeadTokenFailed(true);
         }
       }
 
@@ -51,9 +69,11 @@ export function WordPressExportModal({ open, onClose, code, title, projectId }: 
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erro desconhecido");
+      if (requestId !== requestIdRef.current) return;
       setResult(data as ExportResult);
       setStep("done");
     } catch (e: unknown) {
+      if (requestId !== requestIdRef.current) return;
       setErrorMsg(e instanceof Error ? e.message : "Erro ao exportar");
       setStep("error");
     }
@@ -64,7 +84,12 @@ export function WordPressExportModal({ open, onClose, code, title, projectId }: 
   }, [open, step, run]);
 
   useEffect(() => {
-    if (!open) setStep("idle");
+    if (!open) {
+      requestIdRef.current++;
+      setStep("idle");
+      setResult(null);
+      setErrorMsg("");
+    }
   }, [open]);
 
   const handleCopy = useCallback(() => {
@@ -134,12 +159,19 @@ export function WordPressExportModal({ open, onClose, code, title, projectId }: 
                 </div>
               </div>
 
+              {leadTokenFailed && (
+                <div className="rounded-xl bg-red-500/10 border border-red-500/25 px-4 py-3 text-xs text-red-300 leading-relaxed">
+                  <strong className="block mb-1">Captura de lead não incluída</strong>
+                  Não foi possível criar o link de rastreamento — os formulários desse código não vão enviar leads para o seu painel. Tente exportar novamente.
+                </div>
+              )}
+
               <div className="rounded-xl bg-wf-primary/8 border border-wf-primary/20 px-4 py-3 text-xs text-wf-text-muted leading-relaxed space-y-1">
                 <strong className="text-wf-text block mb-2">Como publicar — precisa do plugin WevyFlow instalado no WordPress:</strong>
                 <div><span className="inline-block w-5 text-wf-primary font-bold">1.</span>No WordPress, vá em <strong>WevyFlow Pages → Nova Página</strong></div>
                 <div><span className="inline-block w-5 text-wf-primary font-bold">2.</span>Cole o código abaixo no campo <strong>&quot;Código WevyFlow&quot;</strong></div>
                 <div><span className="inline-block w-5 text-wf-primary font-bold">3.</span>Clique em <strong>Salvar/Publicar</strong> — a página fica no ar, sem tema por cima</div>
-                <div className="text-wf-primary pt-1">O código já inclui a captura de lead — os formulários enviam direto para o seu painel de Leads, mesmo hospedado fora da WevyFlow (ex: Hostinger).</div>
+                {!leadTokenFailed && <div className="text-wf-primary pt-1">O código já inclui a captura de lead — os formulários enviam direto para o seu painel de Leads, mesmo hospedado fora da WevyFlow (ex: Hostinger).</div>}
                 <div className="text-wf-primary">As imagens já vêm embutidas no próprio código — nada fica hospedado na WevyFlow, a página funciona 100% independente.</div>
               </div>
 

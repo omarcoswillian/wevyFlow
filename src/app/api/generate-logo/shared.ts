@@ -123,7 +123,16 @@ export function buildLogoPrompt(dna: BrandDNA, direction?: LogoVariationDirectio
       break;
   }
 
-  const taglineNote = tagline.trim() ? ` The brand tagline is: "${tagline.trim()}".` : "";
+  /* `dna.tagline` is actually the wizard's free-text "Instruções extras"
+   * field (KvGerarCanvas.tsx) — arbitrary client guidance like "quero algo
+   * mais dourado, com textura de papel", not an actual brand tagline to
+   * display. Framing it as `The brand tagline is: "X"` made image models
+   * render that whole sentence as literal on-canvas copy (or, worse,
+   * hallucinate an unrelated invented tagline/name instead of obeying it) —
+   * achado ao investigar KV com subtítulo = prompt bruto do usuário. */
+  const taglineNote = tagline.trim()
+    ? ` Additional guidance from the client: "${tagline.trim()}" — use this only to steer style, material, color or mood; never render this sentence itself as visible text on the design.`
+    : "";
   const directionNote = direction ? pickDirectionDescriptor(direction, logoType) : "";
   const referenceBrandsNote = referenceBrands?.trim()
     ? `Aesthetic references the client admires: ${referenceBrands.trim()}. Let their level of visual sophistication, restraint and design language inform this mark closely — this is a named list of brands, not an attached image, so lean on the mood and craft quality they're known for rather than attempting to reproduce their specific trademarked symbol from memory.`
@@ -213,7 +222,7 @@ function validateBrandDNA(dna: unknown): BrandDNA {
  * generation_config so a retry can (eventually) detect/handle a version
  * mismatch instead of silently reproducing a different prompt than its
  * batch siblings. Not enforced anywhere yet — just recorded. */
-export const LOGO_PROMPT_VERSION = "v4";
+export const LOGO_PROMPT_VERSION = "v5";
 
 const LOGO_DEFAULT_MODELS: Record<"openai" | "gemini" | "fal", string> = {
   openai: "gpt-image-1",
@@ -579,6 +588,7 @@ export function buildTexturePrompt(colors: { hex: string; usage: string }[], dir
     "A seamless, abstract brand background texture — pure material/surface, no logo, no text, no people, no icons.",
     paletteNote ? `Color palette to use: ${paletteNote}.` : "",
     "Think premium physical materials: brushed metal, foil, grain paper, fabric weave, subtle gradient, marbling, or a refined geometric pattern — pick whichever best fits the palette and mood below.",
+    "Restrained and flat, almost a solid swatch: a single material reads across the whole frame with only subtle tonal variation. Absolutely no feathers, quills, plumes, ribbons, swirls, smoke, or ornamental ink-swoosh flourishes — those read as generic AI clipart, not premium branding material.",
     directionNote,
     "Square composition, edge-to-edge, no vignette, no border, suitable for use as a background behind other brand elements.",
     "This should look like the output of a top-tier branding agency. Craft quality, not template quality.",

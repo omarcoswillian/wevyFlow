@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import {
   ChevronLeft,
@@ -36,6 +36,8 @@ import {
   EyeOff,
   ChevronDown,
   ChevronUp,
+  AlertCircle,
+  Puzzle,
 } from "lucide-react";
 import { Platform, ViewportSize } from "../lib/types";
 import { IFRAME_VISUAL_EDIT_SCRIPT } from "../lib/iframe-inject";
@@ -56,6 +58,7 @@ import { VSLConfig, deserializeConfig, serializeConfig, buildVSLInnerHtml } from
 import { stripEditorScripts } from "../lib/strip-editor-scripts";
 import { WebflowExportModal } from "./WebflowExportModal";
 import { WordPressExportModal } from "./WordPressExportModal";
+import { useWorkspaceDrafts } from "../lib/workspace-drafts";
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import xml from "react-syntax-highlighter/dist/esm/languages/hljs/xml";
 import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
@@ -93,6 +96,8 @@ export function WorkspaceView({
   const [viewportSize, setViewportSize] = useState<ViewportSize>("desktop");
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(false);
+  const { getDraft, saveDraft } = useWorkspaceDrafts();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [leftPanelTab, setLeftPanelTab] = useState<"chat" | "details" | "insert" | "layers" | "library" | "images">("layers");
   const [leftCollapsed, setLeftCollapsed] = useState(false);
@@ -105,7 +110,6 @@ export function WorkspaceView({
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [loadedFonts, setLoadedFonts] = useState<string[]>([]);
   const [showElementorExport, setShowElementorExport] = useState(false);
-  const [_elementorCopied, _setElementorCopied] = useState(false);
   const [publishModalOpen, setPublishModalOpen] = useState(false);
   const [webflowExportOpen, setWebflowExportOpen] = useState(false);
   const [wordpressExportOpen, setWordpressExportOpen] = useState(false);
@@ -162,32 +166,22 @@ export function WorkspaceView({
   const editHistory = useEditHistory("");
   const finalCode = editHistory.value;
 
-  // Draft persistence: each unique prompt gets a stable localStorage key.
+  // Draft persistence: each unique prompt maps to one row in
+  // workspace_drafts (Supabase), keyed by the exact prompt text.
   // Save = explicit user action; restore happens silently on mount when present.
-  const draftKey = useMemo(() => {
-    if (!prompt) return null;
-    let h = 0;
-    for (let i = 0; i < prompt.length; i++) h = ((h << 5) - h + prompt.charCodeAt(i)) | 0;
-    return `wf:draft:${h}`;
-  }, [prompt]);
-
-  const handleSave = useCallback(() => {
-    if (!draftKey || !finalCode) return;
+  const handleSave = useCallback(async () => {
+    if (!prompt || !finalCode) return;
     try {
-      localStorage.setItem(draftKey, finalCode);
+      await saveDraft(prompt, finalCode);
       setSaved(true);
       setTimeout(() => setSaved(false), 1800);
-    } catch (err) {
-      const isQuota = err instanceof DOMException && (err.code === 22 || err.code === 1014 || err.name === "QuotaExceededError");
+    } catch {
       // Surface the failure so the user knows the draft did NOT persist.
       // Silent failure here is what made saves "look fine" then disappear after refresh.
-      window.dispatchEvent(new CustomEvent("wevyflow-storage-error", {
-        detail: { type: isQuota ? "quota" : "unknown", message: isQuota
-          ? "Armazenamento local cheio. O draft NÃO foi salvo. Clique em Liberar espaço."
-          : "Erro ao salvar draft." },
-      }));
+      setSaveFailed(true);
+      setTimeout(() => setSaveFailed(false), 2400);
     }
-  }, [draftKey, finalCode]);
+  }, [prompt, finalCode, saveDraft]);
 
   // When streaming starts, show code tab. When done, switch to preview.
   // Respects manual tab override by the user during streaming.
@@ -201,24 +195,24 @@ export function WorkspaceView({
   }, [isStreaming, finalCode, userOverrodeTab]);
 
   useEffect(() => {
-    if (!isStreaming && code) {
+    if (isStreaming || !code) return;
+    let cancelled = false;
+    (async () => {
       // Prefer a saved draft over the freshly-loaded template, when one exists
       // for this exact prompt. Lets the user pick up where they left off.
       let initial = code;
-      if (draftKey) {
-        try {
-          const draft = localStorage.getItem(draftKey);
-          if (draft && draft.length > 0) initial = draft;
-        } catch { /* storage unavailable */ }
-      }
+      const draft = prompt ? await getDraft(prompt) : null;
+      if (cancelled) return;
+      if (draft && draft.length > 0) initial = draft;
       editHistory.reset(initial);
       if (!userOverrodeTab) {
         setRightTab("preview");
       }
-    }
+    })();
+    return () => { cancelled = true; };
     // editHistory.reset is stable
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isStreaming, code, userOverrodeTab, draftKey]);
+  }, [isStreaming, code, userOverrodeTab, prompt, getDraft]);
 
   const buildPreviewHtml = useCallback((body: string) => {
     const fontsUrl = googleFontUrl(loadedFonts);
@@ -250,8 +244,7 @@ export function WorkspaceView({
     navigator.clipboard.writeText(stripEditorScripts(finalCode || code));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code]);
+  }, [code, finalCode]);
 
   const handleDownload = useCallback(() => {
     const codeToExport = stripEditorScripts(finalCode || code);
@@ -263,10 +256,9 @@ export function WorkspaceView({
     a.download = "wevyflow-layout.html";
     a.click();
     URL.revokeObjectURL(url);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code]);
+  }, [code, finalCode]);
 
-  const _handleCopyElementor = useCallback(() => {
+  const handleOpenElementorExport = useCallback(() => {
     setShowElementorExport(true);
   }, []);
 
@@ -295,8 +287,12 @@ export function WorkspaceView({
       }
     }
 
-    if (publishGaId.trim()) {
-      const id = publishGaId.trim();
+    // GA/Pixel ids get interpolated straight into a <script> body below — an
+    // unvalidated value could break out of the JS string literal and inject
+    // arbitrary script into the published page. Accept only the real id shapes.
+    const gaId = publishGaId.trim();
+    if (gaId && /^(G|UA|AW|GT)-[A-Za-z0-9-]+$/.test(gaId)) {
+      const id = gaId;
       headInserts.push(
         `<script async src="https://www.googletagmanager.com/gtag/js?id=${id}"></script>`,
         `<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${id}');</script>`
@@ -307,8 +303,9 @@ export function WorkspaceView({
       out = out.replace(/<\/head>/i, () => `${headInserts.map(s => `  ${s}`).join("\n")}\n</head>`);
     }
 
-    if (publishFbPixel.trim()) {
-      const id = publishFbPixel.trim();
+    const pixelId = publishFbPixel.trim();
+    if (pixelId && /^\d+$/.test(pixelId)) {
+      const id = pixelId;
       bodyInserts.push(
         `<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${id}');fbq('track','PageView');</script>`,
         `<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${id}&ev=PageView&noscript=1"/></noscript>`
@@ -824,11 +821,11 @@ export function WorkspaceView({
                   {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                   {copied ? "OK!" : "Copiar"}
                 </button>
-                <button onClick={handleSave} title="Salvar draft localmente"
+                <button onClick={handleSave} title="Salvar draft"
                   className={cn("flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer",
-                    saved ? "bg-emerald-500/15 text-emerald-400" : "text-white/30 hover:text-white/50 hover:bg-white/[0.05]")}>
-                  {saved ? <Check className="w-3.5 h-3.5" /> : <Save className="w-3.5 h-3.5" />}
-                  {saved ? "Salvo!" : "Salvar"}
+                    saved ? "bg-emerald-500/15 text-emerald-400" : saveFailed ? "bg-red-500/15 text-red-400" : "text-white/30 hover:text-white/50 hover:bg-white/[0.05]")}>
+                  {saved ? <Check className="w-3.5 h-3.5" /> : saveFailed ? <AlertCircle className="w-3.5 h-3.5" /> : <Save className="w-3.5 h-3.5" />}
+                  {saved ? "Salvo!" : saveFailed ? "Erro ao salvar" : "Salvar"}
                 </button>
                 <button onClick={handleDownload}
                   className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium text-white/30 hover:text-white/50 hover:bg-white/[0.05] transition-all cursor-pointer">
@@ -847,6 +844,11 @@ export function WorkspaceView({
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM3.5 12c0-1.32.28-2.57.79-3.71l4.19 11.48A8.51 8.51 0 013.5 12zM12 20.5c-.85 0-1.67-.12-2.44-.35l2.6-7.55 2.66 7.29c.02.04.04.08.06.12A8.47 8.47 0 0112 20.5zm1.16-12.49c.52-.03 1-.08 1-.08.47-.06.42-.75-.05-.72 0 0-1.41.11-2.32.11-.85 0-2.29-.11-2.29-.11-.47-.02-.53.7-.05.72 0 0 .45.05.92.08l1.36 3.74-1.92 5.75-3.19-9.5c.52-.03 1-.08 1-.08.47-.06.42-.75-.05-.72 0 0-1.41.11-2.33.11-.16 0-.35 0-.56-.01A8.5 8.5 0 0112 3.5c2.06 0 3.94.79 5.35 2.08-.03 0-.07-.01-.1-.01-.85 0-1.45.74-1.45 1.53 0 .71.41 1.31.84 2.02.33.57.71 1.31.71 2.37 0 .74-.28 1.59-.65 2.79l-.85 2.85-3.09-9.11zm5.72-2.85A8.49 8.49 0 0120.5 12c0 3.28-1.92 6.11-4.7 7.43l2.85-8.24c.53-1.33.71-2.4.71-3.34 0-.34-.02-.66-.06-.94z"/>
                   </svg>
                   WordPress
+                </button>
+                <button onClick={handleOpenElementorExport}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-[#92003b] hover:bg-[#78002f] text-white transition-all cursor-pointer shadow-sm">
+                  <Puzzle className="w-3.5 h-3.5" />
+                  Elementor
                 </button>
                 <button onClick={() => {
                   setPublishModalOpen(true);

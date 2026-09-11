@@ -38,6 +38,8 @@ import { NewProjectModal } from "../components/NewProjectModal";
 import type { LaunchKit } from "../lib/types-kit";
 import { emptyBriefing, mergeBriefing, type LaunchBriefing } from "../lib/launch-briefing";
 import { optimizeHtml } from "../lib/html-optimizer";
+import { useWorkspaceDrafts } from "../lib/workspace-drafts";
+import { useWebhookUrl } from "../lib/webhook-url";
 
 /* ───────────────────────────────────────────────────────────
    View / Path mapping
@@ -52,6 +54,8 @@ export type AppView =
   | "lancamentos"
   | "emails"
   | "leads"
+  | "prospeccao"
+  | "anuncios"
   | "paginas"
   | "marca"
   | "projects-all"
@@ -81,6 +85,10 @@ export function viewToPath(view: AppView, projectId?: string): string {
       return "/emails";
     case "leads":
       return "/leads";
+    case "prospeccao":
+      return "/prospeccao";
+    case "anuncios":
+      return "/anuncios";
     case "paginas":
       return "/paginas";
     case "projects-all":
@@ -122,6 +130,14 @@ interface AppContextValue {
   deleteProject: (projectId: string) => void;
   deletePageFromProject: (projectId: string, pageId: string) => void;
   updateCoverImage: (projectId: string, file: File) => Promise<void>;
+  updateProjectSettings: (
+    projectId: string,
+    patch: Partial<Pick<Project, "domain" | "description" | "favicon">>,
+  ) => Promise<void>;
+  updateProjectSeo: (
+    projectId: string,
+    patch: Partial<Pick<Project, "seoTitle" | "seoDescription" | "seoOgImage" | "seoNoIndex">>,
+  ) => Promise<void>;
 
   // generation state
   generatedCode: string;
@@ -233,13 +249,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [newProjectModalOpen, setNewProjectModalOpen] = useState(false);
 
   // integrations
-  const [webhookUrl, setWebhookUrlState] = useState("");
-  const setWebhookUrl = useCallback((url: string) => {
-    try {
-      localStorage.setItem("wf_webhook_url", url);
-    } catch {}
-    setWebhookUrlState(url);
-  }, []);
+  const { webhookUrl, setWebhookUrl } = useWebhookUrl();
 
   // launch kits — persisted server-side (projects + launch_kits in Supabase,
   // see src/lib/launches/server.ts). The legacy "wf_launch_kits" localStorage
@@ -256,6 +266,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     deleteProject,
     deletePageFromProject,
     updateCoverImage,
+    updateProjectSettings,
+    updateProjectSeo,
   } = useProjects();
 
   const [launchKits, setLaunchKits] = useState<LaunchKit[]>([]);
@@ -487,7 +499,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setImageModelState(
       localStorage.getItem(IMAGE_STORAGE_MODEL) ?? "gemini-3-pro-image-preview",
     );
-    setWebhookUrlState(localStorage.getItem("wf_webhook_url") ?? "");
   }, []);
 
   const saveApiKey = useCallback(
@@ -539,6 +550,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const { addEntry } = useHistory();
+  const { deleteDraft } = useWorkspaceDrafts();
 
   /* storage error toast */
   useEffect(() => {
@@ -901,15 +913,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(true);
 
         // Explicitly picking a template from the gallery means "give me the
-        // real thing" — a stale localStorage draft from a previous (possibly
+        // real thing" — a stale draft from a previous (possibly
         // broken/outdated) load of this same template must not silently win
         // over the freshly-fetched content (WorkspaceView prefers any draft
         // saved under this exact prompt's key).
-        try {
-          let h = 0;
-          for (let i = 0; i < templatePrompt.length; i++) h = ((h << 5) - h + templatePrompt.charCodeAt(i)) | 0;
-          localStorage.removeItem(`wf:draft:${h}`);
-        } catch { /* storage unavailable */ }
+        deleteDraft(templatePrompt).catch(() => { /* best-effort */ });
 
         try {
           const res = await fetch(`/api/template?id=${templateId}`);
@@ -948,7 +956,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps
     },
-    [handleGenerate, addEntry, router],
+    [handleGenerate, addEntry, router, deleteDraft],
   );
 
   /* Manual compact — exposed via StorageToast */
@@ -989,6 +997,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       deleteProject,
       deletePageFromProject,
       updateCoverImage,
+      updateProjectSettings,
+      updateProjectSeo,
       generatedCode,
       isLoading,
       isRefining,
@@ -1048,6 +1058,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       deleteProject,
       deletePageFromProject,
       updateCoverImage,
+      updateProjectSettings,
+      updateProjectSeo,
       generatedCode,
       isLoading,
       isRefining,

@@ -8,28 +8,41 @@ import type { BrandInfo, EmailItem, EmailSequenceType, EmailSequences } from "..
 
 type SequenceType = EmailSequenceType;
 
-const EMPTY_SEQUENCES: EmailSequences = { cpl: [], vendas: [], recuperacao: [] };
+export const EMPTY_SEQUENCES: EmailSequences = { cpl: [], vendas: [], recuperacao: [] };
 
+// "recuperacao" continua sendo a chave interna (schema/banco/RPC já usam
+// esse nome — ver launch_kits.email_sequences) — só o rótulo visível virou
+// "Revendas" a pedido do dono (é a mesma sequência de carrinho abandonado).
 const TABS: { id: SequenceType; label: string; count: number; description: string }[] = [
   { id: "cpl", label: "Pré-Lançamento", count: 5, description: "Aquecimento antes do carrinho abrir" },
   { id: "vendas", label: "Vendas", count: 7, description: "Sequência durante o carrinho aberto" },
-  { id: "recuperacao", label: "Recuperação", count: 3, description: "Carrinho abandonado" },
+  { id: "recuperacao", label: "Revendas", count: 3, description: "Carrinho abandonado" },
 ];
 
 interface Props {
   brandInfo: BrandInfo;
   sequences?: EmailSequences;
   onChange?: (sequences: EmailSequences) => void;
+  /** Controlado externamente (ex: pela sub-aba do menu lateral em
+   * /emails). Sem isso, o painel usa aba interna própria — é o caso do
+   * uso dentro do Hub do lançamento, que não tem essa navegação. */
+  activeTab?: SequenceType;
+  onTabChange?: (tab: SequenceType) => void;
 }
 
-export function EmailSequencePanel({ brandInfo, sequences, onChange }: Props) {
+export function EmailSequencePanel({ brandInfo, sequences, onChange, activeTab: controlledTab, onTabChange }: Props) {
   const { apiKey, aiProvider: provider, aiModel: model } = useAppContext() as {
     apiKey: string;
     aiProvider: string;
     aiModel: string;
   };
 
-  const [activeTab, setActiveTab] = useState<SequenceType>("cpl");
+  const [internalTab, setInternalTab] = useState<SequenceType>("cpl");
+  const activeTab = controlledTab ?? internalTab;
+  const setActiveTab = (tab: SequenceType) => {
+    if (onTabChange) onTabChange(tab);
+    else setInternalTab(tab);
+  };
   const [localEmails, setLocalEmails] = useState<EmailSequences>(EMPTY_SEQUENCES);
   const emails = sequences ?? localEmails;
   const setEmails = (updater: (prev: EmailSequences) => EmailSequences) => {

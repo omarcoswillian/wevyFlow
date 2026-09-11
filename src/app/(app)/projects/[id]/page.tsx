@@ -10,6 +10,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const {
     handleGenerate, isLoading, navigate, setCommandPaletteOpen,
     projects, handleOpenPage, handleCreatePage, deletePageFromProject,
+    updateProjectSettings, updateProjectSeo,
   } = useAppContext();
 
   const project = projects.find((p) => p.id === id);
@@ -21,6 +22,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       onOpenPage={handleOpenPage}
       onCreatePage={handleCreatePage}
       onDeletePage={(pageId) => deletePageFromProject(project.id, pageId)}
+      onUpdateSettings={(patch) => updateProjectSettings(project.id, patch)}
+      onUpdateSeo={(patch) => updateProjectSeo(project.id, patch)}
     />
   ) : (
     <div className="h-full flex flex-col items-center justify-center text-center px-6 text-white/60">

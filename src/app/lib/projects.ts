@@ -24,6 +24,13 @@ export interface Project {
   createdBy: "me" | "shared";
   createdAt: number;
   updatedAt: number;
+  domain: string;
+  description: string;
+  favicon: string;
+  seoTitle: string;
+  seoDescription: string;
+  seoOgImage: string;
+  seoNoIndex: boolean;
 }
 
 type ProjectRow = Database["public"]["Tables"]["projects"]["Row"];
@@ -53,6 +60,13 @@ function mapProject(row: ProjectWithPages): Project {
     createdAt: new Date(row.created_at).getTime(),
     updatedAt: new Date(row.updated_at).getTime(),
     pages: (row.project_pages || []).map(mapPage),
+    domain: row.domain ?? "",
+    description: row.description ?? "",
+    favicon: row.favicon ?? "",
+    seoTitle: row.seo_title ?? "",
+    seoDescription: row.seo_description ?? "",
+    seoOgImage: row.seo_og_image ?? "",
+    seoNoIndex: row.seo_no_index ?? false,
   };
 }
 
@@ -288,6 +302,32 @@ export function useProjects() {
     [supabase]
   );
 
+  const updateProjectSettings = useCallback(
+    async (projectId: string, patch: Partial<Pick<Project, "domain" | "description" | "favicon">>) => {
+      setProjects((prev) => prev.map((p) => (p.id === projectId ? { ...p, ...patch } : p)));
+      const { error } = await supabase.from("projects").update(patch).eq("id", projectId);
+      if (error) setSaveError(error.message);
+    },
+    [supabase]
+  );
+
+  const updateProjectSeo = useCallback(
+    async (
+      projectId: string,
+      patch: Partial<Pick<Project, "seoTitle" | "seoDescription" | "seoOgImage" | "seoNoIndex">>
+    ) => {
+      setProjects((prev) => prev.map((p) => (p.id === projectId ? { ...p, ...patch } : p)));
+      const dbPatch: Database["public"]["Tables"]["projects"]["Update"] = {};
+      if (patch.seoTitle !== undefined) dbPatch.seo_title = patch.seoTitle;
+      if (patch.seoDescription !== undefined) dbPatch.seo_description = patch.seoDescription;
+      if (patch.seoOgImage !== undefined) dbPatch.seo_og_image = patch.seoOgImage;
+      if (patch.seoNoIndex !== undefined) dbPatch.seo_no_index = patch.seoNoIndex;
+      const { error } = await supabase.from("projects").update(dbPatch).eq("id", projectId);
+      if (error) setSaveError(error.message);
+    },
+    [supabase]
+  );
+
   return {
     projects,
     saveError,
@@ -299,6 +339,8 @@ export function useProjects() {
     deleteProject,
     deletePageFromProject,
     updateCoverImage,
+    updateProjectSettings,
+    updateProjectSeo,
   };
 }
 

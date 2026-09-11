@@ -20,16 +20,6 @@ import {
 import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 
-interface ProjectDetailPageProps {
-  project: Project;
-  onBack: () => void;
-  onOpenPage: (page: ProjectPage) => void;
-  onCreatePage: () => void;
-  onDeletePage: (pageId: string) => void;
-}
-
-type ActiveTab = "pages" | "settings" | "seo" | "publish";
-
 interface ProjectSettings {
   domain: string;
   description: string;
@@ -42,6 +32,23 @@ interface ProjectSEO {
   ogImage: string;
   noIndex: boolean;
 }
+
+interface ProjectDetailPageProps {
+  project: Project;
+  onBack: () => void;
+  onOpenPage: (page: ProjectPage) => void;
+  onCreatePage: () => void;
+  onDeletePage: (pageId: string) => void;
+  onUpdateSettings: (patch: Partial<ProjectSettings>) => void;
+  onUpdateSeo: (patch: {
+    seoTitle?: string;
+    seoDescription?: string;
+    seoOgImage?: string;
+    seoNoIndex?: boolean;
+  }) => void;
+}
+
+type ActiveTab = "pages" | "settings" | "seo" | "publish";
 
 const inputClass =
   "w-full bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2 text-[11px] text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/30";
@@ -65,47 +72,35 @@ export function ProjectDetailPage({
   onOpenPage,
   onCreatePage,
   onDeletePage,
+  onUpdateSettings,
+  onUpdateSeo,
 }: ProjectDetailPageProps) {
   const [activeTab, setActiveTab] = useState<ActiveTab>("pages");
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
-
-  const settingsKey = `wf-proj-${project.id}`;
-  const seoKey = `wf-proj-seo-${project.id}`;
+  const [exportPageId, setExportPageId] = useState<string | null>(null);
 
   const [settings, setSettings] = useState<ProjectSettings>({
-    domain: "",
-    description: "",
-    favicon: "",
+    domain: project.domain,
+    description: project.description,
+    favicon: project.favicon,
   });
   const [seo, setSeo] = useState<ProjectSEO>({
-    title: "",
-    description: "",
-    ogImage: "",
-    noIndex: false,
+    title: project.seoTitle,
+    description: project.seoDescription,
+    ogImage: project.seoOgImage,
+    noIndex: project.seoNoIndex,
   });
 
   const [savedSettings, setSavedSettings] = useState<Partial<Record<keyof ProjectSettings, boolean>>>({});
   const [savedSeo, setSavedSeo] = useState<Partial<Record<keyof ProjectSEO, boolean>>>({});
 
+  // Re-seed local edit state when navigating to a different project's page
+  // (this component can be reused across ids by the [id] route).
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(settingsKey);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (raw) setSettings(JSON.parse(raw));
-    } catch {}
-    try {
-      const raw = localStorage.getItem(seoKey);
-      if (raw) setSeo(JSON.parse(raw));
-    } catch {}
-  }, [settingsKey, seoKey]);
-
-  function saveSettings(next: ProjectSettings) {
-    localStorage.setItem(settingsKey, JSON.stringify(next));
-  }
-
-  function saveSeo(next: ProjectSEO) {
-    localStorage.setItem(seoKey, JSON.stringify(next));
-  }
+    setSettings({ domain: project.domain, description: project.description, favicon: project.favicon });
+    setSeo({ title: project.seoTitle, description: project.seoDescription, ogImage: project.seoOgImage, noIndex: project.seoNoIndex });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project.id]);
 
   function flashSettings(field: keyof ProjectSettings) {
     setSavedSettings((prev) => ({ ...prev, [field]: true }));
@@ -118,12 +113,17 @@ export function ProjectDetailPage({
   }
 
   function handleSettingsBlur(field: keyof ProjectSettings) {
-    saveSettings(settings);
+    onUpdateSettings(settings);
     flashSettings(field);
   }
 
   function handleSeoBlur(field: keyof ProjectSEO) {
-    saveSeo(seo);
+    onUpdateSeo({
+      seoTitle: seo.title,
+      seoDescription: seo.description,
+      seoOgImage: seo.ogImage,
+      seoNoIndex: seo.noIndex,
+    });
     flashSeo(field);
   }
 
@@ -135,12 +135,13 @@ export function ProjectDetailPage({
   ];
 
   function handleExportHTML() {
-    const code = project.pages[0]?.code || "";
-    const blob = new Blob([code], { type: "text/html" });
+    const page = project.pages.find((p) => p.id === exportPageId) || project.pages[0];
+    if (!page) return;
+    const blob = new Blob([page.code || ""], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${project.name}.html`;
+    a.download = `${project.name}-${page.name || "pagina"}.html`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -421,7 +422,7 @@ export function ProjectDetailPage({
                   onChange={(e) => {
                     const next = { ...seo, noIndex: e.target.checked };
                     setSeo(next);
-                    saveSeo(next);
+                    onUpdateSeo({ seoNoIndex: next.noIndex });
                     flashSeo("noIndex");
                   }}
                   className="w-4 h-4 rounded accent-purple-500 cursor-pointer"
@@ -464,12 +465,23 @@ export function ProjectDetailPage({
                   </p>
                 </div>
               </div>
+              {project.pages.length > 1 && (
+                <select
+                  value={exportPageId ?? project.pages[0]?.id ?? ""}
+                  onChange={(e) => setExportPageId(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.08] text-[12px] text-white/70 focus:outline-none focus:border-purple-500/40"
+                >
+                  {project.pages.map((page) => (
+                    <option key={page.id} value={page.id}>{page.name}</option>
+                  ))}
+                </select>
+              )}
               <button
                 onClick={handleExportHTML}
                 disabled={project.pages.length === 0}
                 className="w-full py-2 rounded-xl bg-purple-500/15 border border-purple-500/25 text-[12px] text-purple-300 font-medium hover:bg-purple-500/25 hover:border-purple-500/40 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                Exportar HTML
+                Exportar HTML{project.pages.length > 1 ? " da página selecionada" : ""}
               </button>
             </div>
           </section>
