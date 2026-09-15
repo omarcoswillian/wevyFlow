@@ -21,6 +21,19 @@ function readFileAsDataUrl(file: File): Promise<string> {
 
 interface Result { id: string; dataUrl: string; styleName: string; }
 
+/** Turns a style name into a filename-safe slug so a downloaded ensaio says
+ * which style it is instead of every file being named "ensaio.png". */
+function ensaioFilename(styleName: string, id: string): string {
+  const slug = styleName
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40) || "ensaio";
+  const shortId = id.replace(/[^a-z0-9]/gi, "").slice(-6);
+  return `wevyflow-ensaio-${slug}-${shortId}.png`;
+}
+
 /* ─── Prompt Card ─────────────────────────────────────────── */
 function PromptCard({
   style,
@@ -690,7 +703,7 @@ export function EnsaioView() {
                   <img src={r.dataUrl} alt="ensaio" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   <div className="absolute inset-x-0 bottom-0 p-3 opacity-0 group-hover:opacity-100 transition-all bg-gradient-to-t from-black/90 to-transparent flex flex-col gap-2">
                     <p className="text-[10px] text-white/50 truncate">{r.styleName}</p>
-                    <a href={r.dataUrl} download="ensaio.png"
+                    <a href={r.dataUrl} download={ensaioFilename(r.styleName, r.id)}
                       className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl bg-white/15 backdrop-blur-sm text-white text-[11px] font-medium cursor-pointer hover:bg-white/25 transition-colors">
                       <Download className="w-3.5 h-3.5" /> Baixar
                     </a>

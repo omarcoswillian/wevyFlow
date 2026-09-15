@@ -14,7 +14,6 @@ function GlobalPalette() {
     navigate,
     handleOpenProject,
     handleCreateProject,
-    handleTemplateFromResources,
   } = useAppContext();
 
   return (
@@ -25,7 +24,6 @@ function GlobalPalette() {
       onNavigate={navigate}
       onOpenProject={handleOpenProject}
       onCreateProject={handleCreateProject}
-      onSelectTemplate={handleTemplateFromResources}
     />
   );
 }

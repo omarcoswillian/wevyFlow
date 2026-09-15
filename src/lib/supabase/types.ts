@@ -362,6 +362,46 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["saved_components"]["Insert"]>;
         Relationships: [];
       };
+      copy_documents: {
+        Row: {
+          id: string;
+          user_id: string;
+          project_id: string | null;
+          type: string;
+          title: string;
+          status: string;
+          context: Record<string, unknown>;
+          options: Record<string, unknown>[];
+          selected: Record<string, unknown> | null;
+          model: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          project_id?: string | null;
+          type?: string;
+          title: string;
+          status?: string;
+          context?: Record<string, unknown>;
+          options?: Record<string, unknown>[];
+          selected?: Record<string, unknown> | null;
+          model?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["copy_documents"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "copy_documents_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: false;
+            referencedRelation: "projects";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       workspace_drafts: {
         Row: {
           id: string;

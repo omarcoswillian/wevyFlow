@@ -15,7 +15,6 @@ import {
   X,
 } from "lucide-react";
 import { Project, timeAgo } from "../lib/projects";
-import { TEMPLATES } from "../lib/templates";
 
 interface CommandPaletteProps {
   open: boolean;
@@ -25,7 +24,6 @@ interface CommandPaletteProps {
   onNavigate: (view: any) => void;
   onOpenProject: (project: Project) => void;
   onCreateProject: () => void;
-  onSelectTemplate: (prompt: string) => void;
 }
 
 interface CommandItem {
@@ -45,7 +43,6 @@ export function CommandPalette({
   onNavigate,
   onOpenProject,
   onCreateProject,
-  onSelectTemplate,
 }: CommandPaletteProps) {
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -66,7 +63,6 @@ export function CommandPalette({
   // Build command items
   const navigationItems: CommandItem[] = useMemo(() => [
     { id: "nav-home", type: "navigate", label: "Home", icon: <Home className="w-4 h-4" />, action: () => { onNavigate("home"); onClose(); } },
-    { id: "nav-resources", type: "navigate", label: "Landing Pages", description: "Templates prontos", icon: <BookOpen className="w-4 h-4" />, action: () => { onNavigate("resources"); onClose(); } },
     { id: "nav-projects", type: "navigate", label: "Todos os projetos", icon: <FolderOpen className="w-4 h-4" />, action: () => { onNavigate("projects-all"); onClose(); } },
     { id: "nav-starred", type: "navigate", label: "Favoritos", icon: <Star className="w-4 h-4" />, action: () => { onNavigate("projects-starred"); onClose(); } },
     { id: "action-new", type: "action", label: "Criar novo projeto", icon: <Plus className="w-4 h-4" />, action: () => { onCreateProject(); onClose(); } },
@@ -84,16 +80,7 @@ export function CommandPalette({
     })),
   [projects, onOpenProject, onClose]);
 
-  const templateItems: CommandItem[] = useMemo(() =>
-    TEMPLATES.slice(0, 12).map((t) => ({
-      id: `tpl-${t.id}`,
-      type: "template" as const,
-      label: t.label,
-      description: t.description.slice(0, 80),
-      icon: <FileText className="w-4 h-4" />,
-      action: () => { onSelectTemplate(t.prompt); onClose(); },
-    })),
-  [onSelectTemplate, onClose]);
+  const templateItems: CommandItem[] = [];
 
   // Filter items based on query
   const filtered = useMemo(() => {

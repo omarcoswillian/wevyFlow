@@ -7,9 +7,10 @@ import { createClient } from "@/lib/supabase/client";
 import {
   Sparkles, Download, Trash2, Loader2, AlertCircle, Check, RefreshCw,
   ImageIcon, User, ImagePlus, X, Pencil,
-  Library, Wand2, Upload, Play, ChevronDown, MousePointer2,
+  Library, Wand2, Upload, Play, ChevronDown, MousePointer2, PenTool,
 } from "lucide-react";
 import { useAppContext } from "../(app)/_context";
+import { useCopyDocuments } from "../lib/copy/useCopyDocuments";
 
 /* ─── Design service metadata ───────────────────────────── */
 const DESIGN_SERVICE_LABELS: Record<string, string> = {
@@ -43,6 +44,9 @@ interface AvatarCard { id: string; label: string; name: string; dataUrl: string 
 interface GenResult  {
   id: string; label: string; status: "loading" | "done" | "error";
   dataUrl?: string; mimeType?: string; error?: string;
+  /** The headline/instruction that produced this result — used to build a
+   * readable download filename instead of "design-<timestamp>.png". */
+  sourceText?: string;
 }
 interface CardPos { x: number; y: number; }
 interface Viewport { x: number; y: number; scale: number; }
@@ -82,6 +86,24 @@ function readFileAsDataUrl(file: File): Promise<string> {
 }
 function downloadDataUrl(dataUrl: string, filename: string) {
   const a = document.createElement("a"); a.href = dataUrl; a.download = filename; a.click();
+}
+/** Turns a headline/prompt into a short filename-safe slug, e.g. "Chega de
+ * enrolar: o teste..." → "chega-de-enrolar-o-teste" — so a downloaded image
+ * says what's in it instead of "design-1789478163299.png". */
+function slugifyForFilename(text: string, maxLen = 40): string {
+  const slug = text
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, maxLen)
+    .replace(/-+$/, "");
+  return slug || "wevyflow";
+}
+function buildImageFilename(sourceText: string | undefined, format: string, id: string): string {
+  const slug = slugifyForFilename(sourceText || "wevyflow");
+  const shortId = id.replace(/[^a-z0-9]/gi, "").slice(-6);
+  return `wevyflow-${slug}-${format.replace(":", "x")}-${shortId}.png`;
 }
 async function downloadFromUrl(url: string, filename: string) {
   const res = await fetch(url);
@@ -220,6 +242,12 @@ export function CriativosView() {
   const [references, setReferences] = useState<RefCard[]>([]);
   const [avatars,    setAvatars]    = useState<AvatarCard[]>([]);
   const [genPrompt,  setGenPrompt]  = useState("");
+  // Set only when genPrompt was populated by the Copy picker (never by manual
+  // typing) — lets the backend tell "this is a real headline+CTA pair" from
+  // "this is a freeform instruction", so it can adapt the reference's copy
+  // wholesale instead of guessing which fragment maps to which overlay. Any
+  // manual edit after picking clears it, since we can no longer trust the split.
+  const [genPromptCopy, setGenPromptCopy] = useState<{ headline: string; cta: string } | null>(null);
   const [genCount,   setGenCount]   = useState(1);
   const [genFormat,  setGenFormat]  = useState("9:16");
   const [genQuality, setGenQuality] = useState("2K");
@@ -227,6 +255,7 @@ export function CriativosView() {
   const [genRunning, setGenRunning] = useState(false);
   const [genBatchMode, setGenBatchMode] = useState(false);
   const [genBatchCopies, setGenBatchCopies] = useState<string[]>([""]);
+  const [genBatchCopiesStructured, setGenBatchCopiesStructured] = useState<({ headline: string; cta: string } | null)[]>([null]);
 
   /* canvas */
   const [positions,  setPositions]  = useState<Record<string, CardPos>>({});
@@ -481,21 +510,25 @@ export function CriativosView() {
     const variations = Math.max(1, Math.min(8, genCount));
     const fmt = GEN_FORMATS.find(f => f.id === genFormat) ?? GEN_FORMATS[2];
 
-    const instructions = genBatchMode
-      ? genBatchCopies.map(s => s.trim()).filter(Boolean)
-      : [genPrompt.trim()];
+    type Instruction = { text: string; copy: { headline: string; cta: string } | null };
+    const instructions: Instruction[] = genBatchMode
+      ? genBatchCopies
+          .map((s, i) => ({ text: s.trim(), copy: genBatchCopiesStructured[i] ?? null }))
+          .filter(inst => inst.text.length > 0)
+      : [{ text: genPrompt.trim(), copy: genPromptCopy }];
 
-    type Job = { prompt: string; refImage?: string };
+    type Job = { prompt: string; copy: { headline: string; cta: string } | null; refImage?: string };
     let jobs: Job[] = refImages.length > 0
       ? instructions.flatMap(instruction =>
           refImages.flatMap(ref =>
-            Array.from({ length: variations }, () => ({ prompt: instruction, refImage: ref }))))
+            Array.from({ length: variations }, () => ({ prompt: instruction.text, copy: instruction.copy, refImage: ref }))))
       : instructions.flatMap(instruction =>
-          Array.from({ length: variations }, () => ({ prompt: instruction })));
+          Array.from({ length: variations }, () => ({ prompt: instruction.text, copy: instruction.copy })));
     if (jobs.length > MAX_BATCH_JOBS) jobs = jobs.slice(0, MAX_BATCH_JOBS);
 
-    const placeholders: GenResult[] = jobs.map((_, i) => ({
+    const placeholders: GenResult[] = jobs.map((job, i) => ({
       id: crypto.randomUUID(), label: `img${Date.now()}-${i + 1}`, status: "loading" as const,
+      sourceText: job.copy?.headline || job.prompt,
     }));
     setGenResults(placeholders);
     setPositions(prev => {
@@ -512,6 +545,7 @@ export function CriativosView() {
         const res = await fetchWithDevAuth("/api/generate-design", {
           projectId: activeLaunchKit?.projectId,
           prompt: job.prompt,
+          copy: job.copy ?? undefined,
           referenceImages: job.refImage ? [job.refImage] : [],
           avatarImages: avImages,
           format: genFormat,
@@ -743,12 +777,14 @@ export function CriativosView() {
                     }} />
                     <GerarImagemCard
                       prompt={genPrompt} onChange={setGenPrompt}
+                      promptCopy={genPromptCopy} onChangePromptCopy={setGenPromptCopy}
                       references={references} avatars={avatars}
                       genCount={genCount} setGenCount={setGenCount}
                       genFormat={genFormat} setGenFormat={setGenFormat}
                       genQuality={genQuality} setGenQuality={setGenQuality}
                       genBatchMode={genBatchMode} setGenBatchMode={setGenBatchMode}
                       genBatchCopies={genBatchCopies} setGenBatchCopies={setGenBatchCopies}
+                      genBatchCopiesStructured={genBatchCopiesStructured} setGenBatchCopiesStructured={setGenBatchCopiesStructured}
                       canGenerate={canGenerate}
                       genRunning={genRunning} onGenerate={handleDesignGenerate}
                       isDragging={draggingId === "gerar"}
@@ -767,7 +803,7 @@ export function CriativosView() {
                     zIndex: draggingId === result.id ? 200 : 10,
                     cursor: draggingId === result.id ? "grabbing" : "grab",
                   }} onMouseDown={e => startDrag(result.id, e)}>
-                    <NodeResultCard result={result} onDelete={() => removeResult(result.id)} onUsar={() => handleUsarResult(result)} onRefine={instruction => handleRefineResult(result, instruction)} />
+                    <NodeResultCard result={result} format={genFormat} onDelete={() => removeResult(result.id)} onUsar={() => handleUsarResult(result)} onRefine={instruction => handleRefineResult(result, instruction)} />
                   </div>
                 );
               })}
@@ -1035,7 +1071,7 @@ export function CriativosView() {
                         <div className="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
                           <button onClick={() => addAsReference(criativo.url)} className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-purple-600/80 backdrop-blur-sm text-white text-[11px] font-semibold cursor-pointer hover:bg-purple-500 transition-colors"><ImageIcon className="w-3.5 h-3.5" /> Usar como referencia</button>
                           <div className="flex gap-2">
-                            <button onClick={() => downloadFromUrl(criativo.url, `criativo-${criativo.format}.png`)} className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-white/10 backdrop-blur-sm text-white/80 text-[11px] cursor-pointer hover:bg-white/20 transition-colors"><Download className="w-3.5 h-3.5" /> Baixar</button>
+                            <button onClick={() => downloadFromUrl(criativo.url, buildImageFilename(criativo.headline || criativo.produto || undefined, criativo.format, criativo.id))} className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-white/10 backdrop-blur-sm text-white/80 text-[11px] cursor-pointer hover:bg-white/20 transition-colors"><Download className="w-3.5 h-3.5" /> Baixar</button>
                             <button onClick={() => handleDeleteGallery(criativo)} className="p-1.5 rounded-lg bg-red-500/20 backdrop-blur-sm text-red-300 cursor-pointer hover:bg-red-500/40 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                           </div>
                         </div>
@@ -1142,18 +1178,21 @@ function NodeAvatarCard({ avatar, onChange, onDelete }: {
 }
 
 function GerarImagemCard({
-  prompt, onChange, references, avatars,
+  prompt, onChange, promptCopy, onChangePromptCopy, references, avatars,
   genCount, setGenCount, genFormat, setGenFormat, genQuality, setGenQuality,
   genBatchMode, setGenBatchMode, genBatchCopies, setGenBatchCopies,
+  genBatchCopiesStructured, setGenBatchCopiesStructured,
   canGenerate, genRunning, onGenerate, isDragging, onDragStart,
 }: {
   prompt: string; onChange: (v: string) => void;
+  promptCopy: { headline: string; cta: string } | null; onChangePromptCopy: (v: { headline: string; cta: string } | null) => void;
   references: RefCard[]; avatars: AvatarCard[];
   genCount: number; setGenCount: (n: number) => void;
   genFormat: string; setGenFormat: (v: string) => void;
   genQuality: string; setGenQuality: (v: string) => void;
   genBatchMode: boolean; setGenBatchMode: (v: boolean) => void;
   genBatchCopies: string[]; setGenBatchCopies: (v: string[]) => void;
+  genBatchCopiesStructured: ({ headline: string; cta: string } | null)[]; setGenBatchCopiesStructured: (v: ({ headline: string; cta: string } | null)[]) => void;
   canGenerate: boolean;
   genRunning: boolean; onGenerate: () => void;
   isDragging: boolean; onDragStart: (e: React.MouseEvent) => void;
@@ -1164,8 +1203,17 @@ function GerarImagemCard({
       // Turning batch on with an empty list — carry over whatever was
       // already typed in the single-prompt field instead of discarding it.
       setGenBatchCopies([prompt]);
+      setGenBatchCopiesStructured([promptCopy]);
     }
     setGenBatchMode(!genBatchMode);
+  };
+  // Manual edits can no longer be trusted to be a clean headline+CTA split —
+  // fall back to the freeform surgical-edit path (unchanged prior behavior).
+  const handleManualChange = (v: string) => { onChange(v); onChangePromptCopy(null); };
+  const handlePick = ({ headline, cta }: { headline: string; cta: string }) => {
+    const text = `${headline}\n${cta}`;
+    onChange(prompt.trim() ? `${prompt}\n${text}` : text);
+    onChangePromptCopy(prompt.trim() ? null : { headline, cta }); // appending onto existing text also breaks the clean split
   };
   return (
     <div style={{ background: "#09090e", border: "1px solid rgba(124,58,237,.35)", borderRadius: 14, overflow: "visible", boxShadow: "0 0 0 1px rgba(124,58,237,.08), 0 0 40px rgba(124,58,237,.10), 0 8px 40px rgba(0,0,0,.5)", cursor: isDragging ? "grabbing" : "default" }}>
@@ -1190,14 +1238,16 @@ function GerarImagemCard({
         </button>
       </div>
       {genBatchMode ? (
-        <BatchCopyList copies={genBatchCopies} onChange={setGenBatchCopies} />
+        <BatchCopyList
+          copies={genBatchCopies} onChange={setGenBatchCopies}
+          copiesStructured={genBatchCopiesStructured} onChangeStructured={setGenBatchCopiesStructured}
+        />
       ) : (
         <div onMouseDown={e => e.stopPropagation()} style={{ position: "relative", minHeight: 180 }}>
-          <MentionTextarea value={prompt} onChange={onChange} references={references} avatars={avatars} />
-          <button style={{ position: "absolute", bottom: 10, right: 12, width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(255,255,255,.25)" }}
-            className="hover:text-purple-400 hover:border-purple-500/30 hover:bg-purple-500/[0.08] transition-colors">
-            <Sparkles style={{ width: 13, height: 13 }} />
-          </button>
+          <MentionTextarea value={prompt} onChange={handleManualChange} references={references} avatars={avatars} />
+          <div style={{ position: "absolute", bottom: 10, right: 12 }}>
+            <CopyPickerButton onPick={handlePick} />
+          </div>
         </div>
       )}
       <div onMouseDown={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderTop: "1px solid rgba(124,58,237,.12)", flexWrap: "wrap" }}>
@@ -1220,23 +1270,103 @@ function GerarImagemCard({
   );
 }
 
-function BatchCopyList({ copies, onChange }: { copies: string[]; onChange: (v: string[]) => void }) {
+/* ─── Copy picker — autofill from an approved/saved Copy document ───────
+   Simple by design: picking a document inserts its chosen option (or the
+   first one, if the user hasn't picked yet) as "headline\ncta". No
+   two-level option picker, no live sync back to Copy if it changes later
+   — see memória project-copy-vs-design-architecture for the fuller plan. */
+function CopyPickerButton({ onPick, openDirection = "up" }: { onPick: (result: { headline: string; cta: string }) => void; openDirection?: "up" | "down" }) {
+  const { documents, loading } = useCopyDocuments();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [open]);
+
+  const pick = (doc: ReturnType<typeof useCopyDocuments>["documents"][number]) => {
+    const opt = doc.selected || doc.options[0];
+    if (opt) onPick({ headline: opt.headline, cta: opt.cta });
+    setOpen(false);
+  };
+
+  return (
+    <div ref={ref} onMouseDown={e => e.stopPropagation()} style={{ position: "relative" }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        title="Usar copy salva"
+        style={{ width: 28, height: 28, borderRadius: 8, background: open ? "rgba(124,58,237,.18)" : "rgba(255,255,255,.04)", border: open ? "1px solid rgba(167,139,250,.4)" : "1px solid rgba(255,255,255,.07)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: open ? "#a78bfa" : "rgba(255,255,255,.25)", flexShrink: 0 }}
+        className="hover:text-purple-400 hover:border-purple-500/30 hover:bg-purple-500/[0.08] transition-colors"
+      >
+        <PenTool style={{ width: 12, height: 12 }} />
+      </button>
+      {open && (
+        <div style={{ position: "absolute", ...(openDirection === "up" ? { bottom: "calc(100% + 6px)" } : { top: "calc(100% + 6px)" }), right: 0, width: 240, maxHeight: 260, overflowY: "auto", background: "#141418", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, boxShadow: "0 12px 32px rgba(0,0,0,.5)", zIndex: 20, padding: 6 }}>
+          <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".07em", color: "rgba(255,255,255,.25)", textTransform: "uppercase", padding: "4px 8px 6px" }}>Copy salva</p>
+          {loading ? (
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,.3)", padding: "6px 8px" }}>Carregando...</p>
+          ) : documents.length === 0 ? (
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,.3)", padding: "6px 8px", lineHeight: 1.4 }}>Nenhuma copy salva ainda. Gere uma na aba Copy.</p>
+          ) : (
+            documents.map(doc => (
+              <button
+                key={doc.id}
+                onClick={() => pick(doc)}
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, width: "100%", padding: "7px 8px", borderRadius: 7, background: "transparent", border: "none", color: "rgba(255,255,255,.7)", fontSize: 11, textAlign: "left", cursor: "pointer" }}
+                className="hover:bg-white/[0.06] transition-colors"
+              >
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.title}</span>
+                {doc.status === "approved" && <Check style={{ width: 11, height: 11, color: "#34d399", flexShrink: 0 }} />}
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BatchCopyList({ copies, onChange, copiesStructured, onChangeStructured }: {
+  copies: string[]; onChange: (v: string[]) => void;
+  copiesStructured: ({ headline: string; cta: string } | null)[]; onChangeStructured: (v: ({ headline: string; cta: string } | null)[]) => void;
+}) {
   const update = (i: number, v: string) => onChange(copies.map((c, idx) => idx === i ? v : c));
-  const remove = (i: number) => onChange(copies.length > 1 ? copies.filter((_, idx) => idx !== i) : [""]);
-  const add = () => onChange([...copies, ""]);
+  // Manual typing invalidates the structured pair for that row (see handleManualChange above).
+  const updateManual = (i: number, v: string) => {
+    update(i, v);
+    onChangeStructured(copiesStructured.map((c, idx) => idx === i ? null : c));
+  };
+  const pick = (i: number, { headline, cta }: { headline: string; cta: string }) => {
+    const existing = copies[i] ?? "";
+    update(i, existing.trim() ? `${existing}\n${headline}\n${cta}` : `${headline}\n${cta}`);
+    onChangeStructured(copiesStructured.map((c, idx) => idx === i ? (existing.trim() ? null : { headline, cta }) : c));
+  };
+  const remove = (i: number) => {
+    onChange(copies.length > 1 ? copies.filter((_, idx) => idx !== i) : [""]);
+    onChangeStructured(copiesStructured.length > 1 ? copiesStructured.filter((_, idx) => idx !== i) : [null]);
+  };
+  const add = () => { onChange([...copies, ""]); onChangeStructured([...copiesStructured, null]); };
   return (
     <div onMouseDown={e => e.stopPropagation()} style={{ display: "flex", flexDirection: "column", gap: 8, padding: 12, maxHeight: 320, overflowY: "auto" }}>
       {copies.map((copy, i) => (
         <div key={i} style={{ position: "relative", background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.07)", borderRadius: 10, overflow: "hidden" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px", borderBottom: "1px solid rgba(255,255,255,.05)" }}>
             <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".08em", color: "rgba(167,139,250,.55)", textTransform: "uppercase" }}>Copy {i + 1}</span>
-            <button onClick={() => remove(i)} style={{ color: "rgba(255,255,255,.2)", cursor: "pointer", background: "none", border: "none", padding: 2, lineHeight: 1, display: "flex" }} className="hover:text-red-400 transition-colors">
-              <X style={{ width: 12, height: 12 }} />
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <CopyPickerButton openDirection="down" onPick={(result) => pick(i, result)} />
+              <button onClick={() => remove(i)} style={{ color: "rgba(255,255,255,.2)", cursor: "pointer", background: "none", border: "none", padding: 2, lineHeight: 1, display: "flex" }} className="hover:text-red-400 transition-colors">
+                <X style={{ width: 12, height: 12 }} />
+              </button>
+            </div>
           </div>
           <textarea
             value={copy}
-            onChange={e => update(i, e.target.value)}
+            onChange={e => updateManual(i, e.target.value)}
             placeholder="Cole a copy desta variação aqui..."
             rows={3}
             style={{
@@ -1264,8 +1394,8 @@ function BatchCopyList({ copies, onChange }: { copies: string[]; onChange: (v: s
   );
 }
 
-function NodeResultCard({ result, onDelete, onUsar, onRefine }: {
-  result: GenResult; onDelete: () => void; onUsar: () => void; onRefine: (instruction: string) => void;
+function NodeResultCard({ result, format, onDelete, onUsar, onRefine }: {
+  result: GenResult; format: string; onDelete: () => void; onUsar: () => void; onRefine: (instruction: string) => void;
 }) {
   const [adjusting, setAdjusting] = useState(false);
   const [adjustText, setAdjustText] = useState("");
@@ -1332,7 +1462,7 @@ function NodeResultCard({ result, onDelete, onUsar, onRefine }: {
             </div>
           ) : (
             <div style={{ display: "flex", gap: 6, padding: 8 }} onMouseDown={e => e.stopPropagation()}>
-              <button onClick={() => downloadDataUrl(result.dataUrl!, `design-${Date.now()}.png`)}
+              <button onClick={() => downloadDataUrl(result.dataUrl!, buildImageFilename(result.sourceText, format, result.id))}
                 title="Baixar"
                 style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "6px 8px", borderRadius: 7, background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)", color: "rgba(255,255,255,.4)", fontSize: 10, cursor: "pointer" }}
                 className="hover:text-white hover:bg-white/[0.07] transition-colors">

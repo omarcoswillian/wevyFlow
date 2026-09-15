@@ -5,7 +5,8 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { Megaphone, BarChart3, Info, Search, X, TrendingUp, TrendingDown } from "lucide-react";
+import { Megaphone, BarChart3, Info, Search, X, TrendingUp, TrendingDown, Sparkles } from "lucide-react";
+import { AdCopyModal } from "./AdCopyModal";
 import { cn } from "@/lib/utils";
 import type { Database } from "@/lib/supabase/types";
 import type { AdCreative, AdFilters, DatePreset, DateRange, SortDirection, SortKey } from "./anuncios/types";
@@ -182,6 +183,7 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<"ads" | "metrics">("ads");
+  const [adCopyModalOpen, setAdCopyModalOpen] = useState(false);
   const [preset, setPreset] = useState<DatePreset>("30d");
   const [customRange, setCustomRange] = useState<DateRange | null>(null);
 
@@ -360,6 +362,13 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
             <p className="text-[11px] text-white/30">{VISAO_COPY[visao].subtitle}</p>
           </div>
         </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setAdCopyModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-medium bg-purple-500/10 border border-purple-500/20 text-purple-300 hover:bg-purple-500/20 transition-colors cursor-pointer"
+          >
+            <Sparkles className="w-3.5 h-3.5" /> Copy de anúncios
+          </button>
         <div className="flex items-center gap-1 p-1 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
           <button
             onClick={() => setActiveTab("ads")}
@@ -375,6 +384,7 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
           >
             <BarChart3 className="w-3.5 h-3.5" /> Métricas
           </button>
+        </div>
         </div>
       </div>
 
@@ -492,6 +502,10 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
           onToggleFavorite={toggleFavorite}
           onUseAsReference={useAsReference}
         />
+      )}
+
+      {adCopyModalOpen && (
+        <AdCopyModal onClose={() => setAdCopyModalOpen(false)} />
       )}
     </div>
   );

@@ -241,6 +241,149 @@ Include headline, subheadline, body copy, CTA button text, captions, and any log
 }
 
 /**
+ * Structured sibling of analyzeTextOverlays() for the ADAPT REFERENCE mode
+ * (used when the caller supplies approved copy as distinct headline/CTA
+ * fields instead of a freeform instruction — see generate-ads copy picker).
+ * The flat numbered list above is fine for a human-authored one-line edit
+ * ("troque o CTA pra X"), but it gives the model no way to know that
+ * "não sabe." and a headline fragment three lines up belong to the SAME
+ * message, or that a decorative pill shape only exists to frame one word of
+ * that headline — so a full copy swap left orphaned fragments/shapes behind.
+ * Grouping fragments into one message and linking dependent decorations to
+ * their group lets the replacement prompt treat "replace this group" as one
+ * atomic operation instead of patching text runs individually.
+ */
+export interface OverlayGroup {
+  id: string;
+  role: "headline" | "subheadline" | "cta" | "body" | "tag" | "brand_identity" | "other";
+  fullText: string;
+  containerType: "button" | "pill" | "plain_text" | "badge" | "none";
+  position: string;
+}
+
+export interface OverlayDecoration {
+  id: string;
+  description: string;
+  /** Group id this decoration exists to frame/emphasize, or null if it's
+   * independent of any specific text (e.g. a background pattern). */
+  dependsOnGroupId: string | null;
+}
+
+export interface OverlayAnalysis {
+  groups: OverlayGroup[];
+  decorations: OverlayDecoration[];
+}
+
+const EMPTY_OVERLAY_ANALYSIS: OverlayAnalysis = { groups: [], decorations: [] };
+
+export async function analyzeTextOverlayGroups(client: GoogleGenAI, refDataUrl: string): Promise<OverlayAnalysis> {
+  const { mimeType, data } = stripDataUrl(refDataUrl);
+
+  const result = await client.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [{
+      role: "user",
+      parts: [
+        {
+          text: `Analyze every text and graphic overlay in this image and group them by MESSAGE, not by isolated text run.
+
+A single headline that wraps across lines, or is visually broken by a decorative highlight/pill in the middle of the sentence, is ONE group — not several. Do not split one sentence into multiple groups just because a decoration sits inside it.
+
+For each group, output:
+- id: a short stable id like "g1", "g2"
+- role: one of "headline", "subheadline", "cta" (button/link text whose job is to drive a click), "body" (long-form paragraph), "tag" (small category/label chip), "brand_identity" (a person's name, company name, signature, or logo text), "other"
+- fullText: the complete wording of the group, copied verbatim, in reading order
+- containerType: "button" | "pill" | "plain_text" | "badge" | "none"
+- position: rough position like "top-left", "center", "bottom"
+
+Then list purely decorative elements (shapes, highlights, underlines, pills) that exist ONLY to frame/emphasize a specific word or phrase inside one of the groups above — set dependsOnGroupId to that group's id. If a decoration is independent of any text (background pattern, generic graphic), set dependsOnGroupId to null.
+
+Respond with ONLY this JSON, no markdown fences, no other commentary:
+{"groups":[{"id":"g1","role":"headline","fullText":"...","containerType":"plain_text","position":"center"}],"decorations":[{"id":"d1","description":"...","dependsOnGroupId":"g1"}]}`
+        },
+        { inlineData: { mimeType, data } }
+      ]
+    }],
+  });
+
+  const parts2 = (result.candidates?.[0]?.content?.parts ?? []) as Part[];
+  const raw = parts2.map(p => p.text ?? "").join("\n").trim();
+  const jsonMatch = raw.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    console.error("[analyzeTextOverlayGroups] no JSON in model response:", raw.slice(0, 200));
+    return EMPTY_OVERLAY_ANALYSIS;
+  }
+  try {
+    const parsed = JSON.parse(jsonMatch[0]);
+    if (!Array.isArray(parsed.groups)) return EMPTY_OVERLAY_ANALYSIS;
+    return {
+      groups: parsed.groups.filter((g: unknown): g is OverlayGroup =>
+        !!g && typeof g === "object" && typeof (g as OverlayGroup).id === "string" && typeof (g as OverlayGroup).fullText === "string"),
+      decorations: Array.isArray(parsed.decorations)
+        ? parsed.decorations.filter((d: unknown): d is OverlayDecoration =>
+            !!d && typeof d === "object" && typeof (d as OverlayDecoration).id === "string")
+        : [],
+    };
+  } catch (e) {
+    console.error("[analyzeTextOverlayGroups] JSON parse failed:", e);
+    return EMPTY_OVERLAY_ANALYSIS;
+  }
+}
+
+/**
+ * ADAPT REFERENCE mode prompt — used when the caller supplies approved copy
+ * as distinct headline/CTA fields (see analyzeTextOverlayGroups() above for
+ * why). Distinct from the surgical-edit prompt in route.ts: that one treats
+ * every overlay as independently preservable and is still what a freeform
+ * one-line instruction ("clareie o fundo") goes through — this one assumes
+ * the headline and CTA groups are being replaced WHOLESALE, and instructs
+ * the model on what to do with fragments/decorations left behind by that
+ * replacement instead of leaving it to guess.
+ */
+export function buildAdaptReferencePrompt(params: {
+  headline: string;
+  cta: string;
+  analysis: OverlayAnalysis;
+  aspectRatio: string;
+}): string {
+  const { headline, cta, analysis, aspectRatio } = params;
+  const groupsText = analysis.groups.length
+    ? analysis.groups.map(g => `- ${g.id} [${g.role}, ${g.containerType}, ${g.position}]: "${g.fullText}"`).join("\n")
+    : "(none detected — treat the whole image as having no identifiable text groups; still remove any text that isn't the approved copy below)";
+  const decorationsText = analysis.decorations.length
+    ? analysis.decorations.map(d => `- ${d.id}: ${d.description}${d.dependsOnGroupId ? ` (depends on ${d.dependsOnGroupId})` : " (independent of any text)"}`).join("\n")
+    : "(none detected)";
+
+  return `ADAPT MODE — you are replacing this reference creative's message with new approved copy. The reference supplies visual direction (layout, photography, composition, color grade) — it is NOT the source of truth for wording or identity.
+
+APPROVED COPY (use this exact wording verbatim — do not rewrite, shorten, or embellish it):
+Headline: "${headline}"
+CTA: "${cta}"
+
+REFERENCE TEXT GROUPS (each one is a complete message; replace a group WHOLESALE, never patch part of it and leave the rest):
+${groupsText}
+
+DECORATIVE ELEMENTS TIED TO REFERENCE TEXT:
+${decorationsText}
+
+RULES — follow all of these:
+1. Find the group with role "headline" (or "subheadline" if that is clearly the primary message). Replace its ENTIRE text with the approved headline above. Do not retain any word, clause, or trailing fragment of the old headline anywhere in the image — not even a partial sentence like "...não sabe." left dangling after the new text.
+2. Find the group with role "cta". Replace the text INSIDE that same button/container with the approved CTA above — it must be the button's label, not a separate line of body text floating near the button. If no button/container exists for it, place the CTA as a clearly actionable button-style element in a sensible position.
+3. For every decoration listed above that depends on the headline group: if the approved headline doesn't naturally contain a word/phrase in the same position to highlight the same way, REMOVE that decoration entirely and recompose the space cleanly. Never leave a decorative shape (pill, highlight, underline) floating with nothing left to frame.
+4. Remove every group with role "brand_identity" (a person's name, signature, or company name belonging to the reference's original client) — it does not belong to this new creative. Do not invent a replacement identity; just remove it.
+5. Every other group not covered above (tags, captions, secondary body text) stays exactly as in the reference, untouched.
+6. Reflow lines, resize the CTA container, and adjust spacing as needed so the complete approved copy fits and stays legible at its intended size. Do not shrink essential text to illegible sizes, truncate the approved copy, or leave old wording in just to preserve the original layout's exact line breaks.
+
+PRIORITY ORDER when these rules pull against matching the reference exactly:
+1. The approved copy appears complete and correct, with nothing from the old copy mixed in.
+2. Legibility at the intended display size.
+3. Clear visual hierarchy.
+4. Similarity to the reference's exact geometry (lowest priority — layout may reflow to satisfy the rules above).
+
+Preserve everything else exactly: layout language, lighting, color grade, photography, and all non-text graphic elements not covered by the rules above. Do not add claims, names, numbers, or promotional wording beyond what's in the approved copy. High quality, photorealistic. Aspect ratio: ${aspectRatio}.`;
+}
+
+/**
  * Step 1b: Analyze the avatar image to extract every fine physical detail.
  * This feeds into Step 2 so the generated person is a faithful replica,
  * not just a "similar-looking" person.

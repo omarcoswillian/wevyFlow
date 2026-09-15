@@ -47,16 +47,15 @@ import { useWebhookUrl } from "../lib/webhook-url";
    ─────────────────────────────────────────────────────────── */
 export type AppView =
   | "home"
-  | "resources"
   | "criativos"
   | "carrossel"
   | "ensaio"
   | "lancamentos"
+  | "copy"
   | "emails"
   | "leads"
   | "prospeccao"
   | "anuncios"
-  | "paginas"
   | "marca"
   | "projects-all"
   | "projects-starred"
@@ -69,8 +68,6 @@ export function viewToPath(view: AppView, projectId?: string): string {
   switch (view) {
     case "home":
       return "/";
-    case "resources":
-      return "/resources";
     case "criativos":
       return "/criativos";
     case "carrossel":
@@ -79,6 +76,8 @@ export function viewToPath(view: AppView, projectId?: string): string {
       return "/ensaio";
     case "lancamentos":
       return projectId ? `/lancamentos?projectId=${projectId}` : "/lancamentos";
+    case "copy":
+      return "/copy";
     case "marca":
       return projectId ? `/marca?projectId=${projectId}` : "/marca";
     case "emails":
@@ -89,8 +88,6 @@ export function viewToPath(view: AppView, projectId?: string): string {
       return "/prospeccao";
     case "anuncios":
       return "/anuncios";
-    case "paginas":
-      return "/paginas";
     case "projects-all":
       return "/projects";
     case "projects-starred":
@@ -215,7 +212,6 @@ interface AppContextValue {
   handleOpenPage: (page: ProjectPage) => void;
   handleCreateProject: () => void;
   handleCreatePage: () => void;
-  handleTemplateFromResources: (prompt: string) => Promise<void>;
   openCodeInWorkspace: (code: string, prompt?: string) => void;
 }
 
@@ -719,32 +715,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       router.push("/workspace");
 
       try {
-        if (data.prompt.startsWith("READY:")) {
-          const templateId = data.prompt.replace("READY:", "");
-          const res = await fetch(`/api/template?id=${templateId}`);
-          if (!res.ok) throw new Error("Template nao encontrado");
-          const rawHtml = await res.text();
-          const html = optimizeHtml(rawHtml, {
-            webhookUrl: webhookUrl || undefined,
-          });
-          setGeneratedCode(html);
-          addEntry({
-            id: crypto.randomUUID(),
-            prompt: "Template: " + templateId,
-            platform: data.platform,
-            code: html,
-            createdAt: Date.now(),
-          });
-          if (activeProjectId) {
-            addPageToProject(activeProjectId, {
-              name: "Template: " + templateId,
-              code: html,
-              platform: data.platform,
-            });
-          }
-          return;
-        }
-
         const rawCode = await streamFromAPI("/api/generate", {
           ...data,
           copyDocument: data.copyDocument || undefined,
@@ -902,63 +872,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [router],
   );
 
-  const handleTemplateFromResources = useCallback(
-    async (prompt: string) => {
-      if (prompt.startsWith("READY:")) {
-        const templateId = prompt.replace("READY:", "");
-        const templatePrompt = "Template: " + templateId;
-        setCurrentPrompt(templatePrompt);
-        setCurrentPlatform("html");
-        router.push("/workspace");
-        setIsLoading(true);
-
-        // Explicitly picking a template from the gallery means "give me the
-        // real thing" — a stale draft from a previous (possibly
-        // broken/outdated) load of this same template must not silently win
-        // over the freshly-fetched content (WorkspaceView prefers any draft
-        // saved under this exact prompt's key).
-        deleteDraft(templatePrompt).catch(() => { /* best-effort */ });
-
-        try {
-          const res = await fetch(`/api/template?id=${templateId}`);
-          if (!res.ok) throw new Error("Template nao encontrado");
-          const rawHtml = await res.text();
-          const html = optimizeHtml(rawHtml, {
-            webhookUrl: webhookUrl || undefined,
-          });
-          setGeneratedCode(html);
-          addEntry({
-            id: crypto.randomUUID(),
-            prompt: "Template: " + templateId,
-            platform: "html",
-            code: html,
-            createdAt: Date.now(),
-          });
-        } catch (err) {
-          setError(err instanceof Error ? err.message : "Erro");
-        } finally {
-          setIsLoading(false);
-        }
-        return;
-      }
-
-      handleGenerate({
-        prompt,
-        platform: "html",
-        referenceUrl: "",
-        brandReference: "",
-        expectations: "",
-        primaryColor: "#a78bfa",
-        secondaryColor: "#6366f1",
-        fontChoice: "sora",
-        stylePreset: "dark-premium",
-        images: [],
-      });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    },
-    [handleGenerate, addEntry, router, deleteDraft],
-  );
-
   /* Manual compact — exposed via StorageToast */
   const handleManualCompact = useCallback(() => {
     const compact = compactStorage();
@@ -1045,7 +958,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       handleOpenPage,
       handleCreateProject,
       handleCreatePage,
-      handleTemplateFromResources,
       openCodeInWorkspace,
     }),
     [
@@ -1106,7 +1018,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       handleOpenPage,
       handleCreateProject,
       handleCreatePage,
-      handleTemplateFromResources,
       openCodeInWorkspace,
     ],
   );

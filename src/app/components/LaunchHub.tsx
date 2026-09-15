@@ -3,16 +3,17 @@
 import { useState, useRef } from "react";
 import {
   ArrowLeft, Trash2, Clock, Loader2, CheckCircle2, AlertCircle,
-  ShoppingCart, Mail, CreditCard, Play, Video, Users, ExternalLink,
+  ShoppingCart, Mail, Users, ExternalLink,
   RefreshCw, Zap, Globe, Smartphone, Tv, Image, LayoutGrid,
-  ChevronRight, Link,
+  ChevronRight, Link, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppContext } from "../(app)/_context";
 import { STRATEGY_MAP } from "../lib/launch-strategies";
-import type { LaunchKit, KitAssetInstance, StrategyAsset, PageKind, CreativoFormat } from "../lib/types-kit";
+import type { LaunchKit, KitAssetInstance, StrategyAsset, CreativoFormat } from "../lib/types-kit";
 import { EmailSequencePanel } from "./EmailSequencePanel";
 import { BrandIdentityStudio } from "./BrandIdentityStudio";
+import { AdCopyModal } from "./AdCopyModal";
 
 /* ── Helpers ─────────────────────────────────────────────── */
 
@@ -63,9 +64,6 @@ function buildAssetPrompt(kit: LaunchKit, asset: StrategyAsset): string {
     kit.brandIdentity?.status === "approved" ? `\n${buildIdentityBlock(kit.brandIdentity)}` : "",
   ].filter(Boolean).join("\n");
 
-  if (asset.type === "page") {
-    return `${lines}\n\nCrie uma página HTML completa de alta conversão para: ${asset.label}. ${asset.description}`;
-  }
   return `${lines}\n\nCrie um criativo visual formato ${asset.format ?? "stories"} para: ${asset.label}.`;
 }
 
@@ -74,15 +72,6 @@ function buildAssetPrompt(kit: LaunchKit, asset: StrategyAsset): string {
 const STRATEGY_LABEL: Record<string, string> = {
   classico: "Clássico", meteorico: "Meteórico", semente: "Semente",
   "pago-vsl": "Pago / VSL", perpetuo: "Perpétuo",
-};
-
-const PAGE_KIND_META: Record<PageKind, { icon: React.ElementType; color: string; bg: string }> = {
-  "lp-vendas":  { icon: ShoppingCart, color: "text-purple-400",  bg: "bg-purple-500/10" },
-  "lp-captura": { icon: Mail,          color: "text-blue-400",    bg: "bg-blue-500/10"   },
-  "obrigado":   { icon: CheckCircle2,  color: "text-emerald-400", bg: "bg-emerald-500/10"},
-  "checkout":   { icon: CreditCard,    color: "text-orange-400",  bg: "bg-orange-500/10" },
-  "vsl":        { icon: Play,          color: "text-pink-400",    bg: "bg-pink-500/10"   },
-  "webinar":    { icon: Video,         color: "text-yellow-400",  bg: "bg-yellow-500/10" },
 };
 
 const FORMAT_META: Record<CreativoFormat, { icon: React.ElementType; dims: string; label: string }> = {
@@ -123,80 +112,6 @@ function StatusBadge({ status }: { status: KitAssetInstance["status"] }) {
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.04] text-white/30 text-[10px] font-medium">
       <Clock className="w-2.5 h-2.5" /> Pendente
     </span>
-  );
-}
-
-/* ── Page Card ───────────────────────────────────────────── */
-
-function PageCard({
-  asset, instance, isLocallyGenerating, onGenerate, onView,
-}: {
-  asset: StrategyAsset;
-  instance?: KitAssetInstance;
-  isLocallyGenerating: boolean;
-  onGenerate: (asset: StrategyAsset) => void;
-  onView: (code: string, label: string) => void;
-}) {
-  const stored = instance?.status ?? "pending";
-  // "generating" status from a previous session = treat as pending (stale)
-  const status = stored === "generating" && !isLocallyGenerating ? "pending" : stored;
-  const meta = PAGE_KIND_META[asset.pageKind ?? "lp-vendas"];
-  const Icon = meta.icon;
-
-  return (
-    <div className={cn(
-      "flex flex-col gap-3 p-4 rounded-xl border transition-colors",
-      "bg-[#18181b] border-white/[0.06] hover:border-white/[0.12]",
-    )}>
-      <div className="flex items-start gap-3">
-        <div className={cn("shrink-0 w-8 h-8 rounded-lg flex items-center justify-center", meta.bg)}>
-          <Icon className={cn("w-4 h-4", meta.color)} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[13px] font-semibold text-white leading-tight truncate">{asset.label}</p>
-          <p className="text-[11px] text-white/35 mt-0.5 line-clamp-1">{asset.description}</p>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-1.5 pt-1 border-t border-white/[0.04]">
-        <div className="flex items-center justify-between gap-2">
-          <StatusBadge status={status} />
-
-          {(status === "pending") && (
-            <button
-              onClick={() => onGenerate(asset)}
-              className="flex items-center gap-1 px-3 py-1 rounded-lg bg-purple-500/15 border border-purple-500/25 text-purple-300 text-[11px] font-medium hover:bg-purple-500/25 transition-colors cursor-pointer"
-            >
-              <Zap className="w-3 h-3" /> Gerar
-            </button>
-          )}
-          {status === "generating" && (
-            <button disabled className="flex items-center gap-1 px-3 py-1 rounded-lg bg-white/[0.04] text-white/20 text-[11px] cursor-not-allowed">
-              <Loader2 className="w-3 h-3 animate-spin" /> Gerando…
-            </button>
-          )}
-          {status === "done" && (
-            <button
-              onClick={() => instance?.generatedCode && onView(instance.generatedCode, asset.label)}
-              className="flex items-center gap-1 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-medium hover:bg-emerald-500/20 transition-colors cursor-pointer"
-            >
-              <ExternalLink className="w-3 h-3" /> Abrir
-            </button>
-          )}
-          {status === "error" && (
-            <button
-              onClick={() => onGenerate(asset)}
-              className="flex items-center gap-1 px-3 py-1 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[11px] font-medium hover:bg-red-500/20 transition-colors cursor-pointer"
-            >
-              <RefreshCw className="w-3 h-3" /> Tentar novamente
-            </button>
-          )}
-        </div>
-        {status === "error" && instance?.error && (
-          <p className="text-[10px] text-red-400/60 leading-snug">{instance.error}</p>
-        )}
-      </div>
-    </div>
   );
 }
 
@@ -299,6 +214,7 @@ export function LaunchHub() {
   const [persistError, setPersistError] = useState<string | null>(null);
   // Tracks which asset IDs are actively generating IN THIS SESSION (not persisted)
   const [localGenerating, setLocalGenerating] = useState<Set<string>>(new Set());
+  const [adCopyModalOpen, setAdCopyModalOpen] = useState(false);
   // Ref-based guard to prevent double-click race — updated synchronously before setState
   const localGeneratingRef = useRef<Set<string>>(new Set());
 
@@ -313,7 +229,6 @@ export function LaunchHub() {
 
   const kit = activeLaunchKit;
   const strategy = STRATEGY_MAP[kit.strategyId!];
-  const pages = strategy.assets.filter((a) => a.type === "page");
   const criativos = strategy.assets.filter((a) => a.type === "criativo");
 
   const emailSequences = kit.emailSequences ?? { cpl: [], vendas: [], recuperacao: [] };
@@ -326,10 +241,6 @@ export function LaunchHub() {
   const getInstance = (assetId: string): KitAssetInstance | undefined =>
     kit.assets.find((a) => a.assetId === assetId);
 
-  const hasPendingPages = pages.some((p) => {
-    const s = getInstance(p.id)?.status ?? "pending";
-    return s === "pending" || s === "error";
-  });
   const hasPendingCreativos = criativos.some((c) => {
     const s = getInstance(c.id)?.status ?? "pending";
     return s === "pending" || s === "error";
@@ -549,38 +460,6 @@ export function LaunchHub() {
           />
         </section>
 
-        {/* Pages section */}
-        {pages.length > 0 && (
-          <section>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] uppercase tracking-widest text-white/30 font-semibold">Páginas</span>
-                <span className="px-1.5 py-0.5 rounded-full bg-white/[0.05] text-white/40 text-[10px] font-semibold">{pages.length}</span>
-              </div>
-              {hasPendingPages && (
-                <button
-                  onClick={() => handleGenerateAll(pages)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[11px] font-medium hover:bg-purple-500/20 transition-colors cursor-pointer"
-                >
-                  <Zap className="w-3 h-3" /> Gerar todas
-                </button>
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              {pages.map((asset) => (
-                <PageCard
-                  key={asset.id}
-                  asset={asset}
-                  instance={getInstance(asset.id)}
-                  isLocallyGenerating={localGenerating.has(asset.id)}
-                  onGenerate={handleGenerateAsset}
-                  onView={(code, label) => openCodeInWorkspace(code, label)}
-                />
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* Creatives section */}
         {criativos.length > 0 && (
           <section>
@@ -589,14 +468,22 @@ export function LaunchHub() {
                 <span className="text-[11px] uppercase tracking-widest text-white/30 font-semibold">Criativos</span>
                 <span className="px-1.5 py-0.5 rounded-full bg-white/[0.05] text-white/40 text-[10px] font-semibold">{criativos.length}</span>
               </div>
-              {hasPendingCreativos && (
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => handleGenerateAll(criativos)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[11px] font-medium hover:bg-purple-500/20 transition-colors cursor-pointer"
+                  onClick={() => setAdCopyModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white/60 text-[11px] font-medium hover:bg-white/[0.08] transition-colors cursor-pointer"
                 >
-                  <Zap className="w-3 h-3" /> Gerar lote
+                  <Sparkles className="w-3 h-3" /> Copy de anúncios
                 </button>
-              )}
+                {hasPendingCreativos && (
+                  <button
+                    onClick={() => handleGenerateAll(criativos)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[11px] font-medium hover:bg-purple-500/20 transition-colors cursor-pointer"
+                  >
+                    <Zap className="w-3 h-3" /> Gerar lote
+                  </button>
+                )}
+              </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
               {criativos.map((asset) => (
@@ -707,6 +594,19 @@ export function LaunchHub() {
         </section>
 
       </div>
+
+      {adCopyModalOpen && (
+        <AdCopyModal
+          onClose={() => setAdCopyModalOpen(false)}
+          projectId={kit.projectId}
+          launchFacts={{
+            productName: kit.brandInfo.productName,
+            niche: kit.brandInfo.niche,
+            targetAudience: kit.brandInfo.targetAudience,
+            transformation: kit.brandInfo.transformation,
+          }}
+        />
+      )}
     </div>
   );
 }

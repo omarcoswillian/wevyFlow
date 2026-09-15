@@ -3,8 +3,9 @@ import { GoogleGenAI } from "@google/genai";
 import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
 import {
   ASPECT_MAP, stripDataUrl, resizeIfNeeded, normalizeCarouselContext,
-  analyzeSceneForSwap, analyzeTextOverlays, cropToPersonForIdentityRef,
+  analyzeSceneForSwap, analyzeTextOverlays, analyzeTextOverlayGroups, cropToPersonForIdentityRef,
   analyzeAvatarDetails, withRetry, extractImage, buildPersonSwapPrompt,
+  buildAdaptReferencePrompt,
   type Part,
 } from "./shared";
 
@@ -15,6 +16,7 @@ export async function POST(req: NextRequest) {
   try {
     const {
       prompt,
+      copy,
       referenceImages,
       avatarImages,
       format = "9:16",
@@ -25,6 +27,12 @@ export async function POST(req: NextRequest) {
       carouselContext,
     } = await req.json() as {
       prompt: string;
+      // Approved headline+CTA from the Copy picker — when present alongside
+      // a reference image (no avatar), triggers ADAPT REFERENCE mode instead
+      // of the surgical single-instruction edit. See shared.ts:
+      // buildAdaptReferencePrompt() for why this needs to be structured
+      // rather than folded into `prompt` as free text.
+      copy?: { headline: string; cta: string };
       referenceImages?: string[];
       avatarImages?: string[];
       format?: string;
@@ -158,22 +166,35 @@ USER REQUEST (the ONLY things allowed to differ from IMAGE 1, besides the person
       if (hasRefs && !hasAvatars) {
         const resizedRef = await resizeIfNeeded(refImages[0]);
         const { mimeType: refMime, data: refData } = stripDataUrl(resizedRef);
-        const overlays = await withRetry(() => analyzeTextOverlays(client, resizedRef));
+        const hasStructuredCopy = Boolean(copy?.headline?.trim() && copy?.cta?.trim());
 
-        parts = [
-          {
-            text: `You are doing a precise, surgical edit — not a redesign. Change ONLY what this instruction asks for; everything else must come out pixel-identical to the reference image.
+        const editText = hasStructuredCopy
+          // ── ADAPT REFERENCE: approved headline+CTA came from the Copy
+          // picker as distinct fields — replace those groups wholesale
+          // instead of guessing which fragment of a flat instruction string
+          // maps to which overlay (see shared.ts: buildAdaptReferencePrompt).
+          ? buildAdaptReferencePrompt({
+              headline: copy!.headline.trim(),
+              cta: copy!.cta.trim(),
+              analysis: await withRetry(() => analyzeTextOverlayGroups(client, resizedRef)),
+              aspectRatio,
+            })
+          // ── SURGICAL EDIT: a freeform one-line instruction (manual typing,
+          // or the "Ajustar" refinement flow) — unchanged from before.
+          : `You are doing a precise, surgical edit — not a redesign. Change ONLY what this instruction asks for; everything else must come out pixel-identical to the reference image.
 
 INSTRUCTION: "${prompt.trim()}"
 
 Every text/graphic overlay currently in the image:
-${overlays}
+${await withRetry(() => analyzeTextOverlays(client, resizedRef))}
 
 Go through that list element by element. If the instruction above supplies new wording for an element, replace ONLY its text — keep its exact font weight, color, background shape/color, position, and size. If the instruction does not mention an element, leave it completely untouched. Do not leave any old wording mixed in with the new copy anywhere in the image.
 
 Preserve layout, lighting, color grade, and all non-text graphic elements exactly as they are — including the overall color treatment (e.g. if the reference is black-and-white/monochrome, the output must also be black-and-white/monochrome; do not add color unless explicitly asked to).
-High quality, photorealistic. Aspect ratio: ${aspectRatio}.`,
-          },
+High quality, photorealistic. Aspect ratio: ${aspectRatio}.`;
+
+        parts = [
+          { text: editText },
           { inlineData: { mimeType: refMime, data: refData } },
         ];
 

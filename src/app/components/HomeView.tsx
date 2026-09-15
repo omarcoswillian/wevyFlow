@@ -43,6 +43,7 @@ import {
   Camera,
   GalleryHorizontalEnd,
   Radar,
+  PenTool,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Platform } from "../lib/types";
@@ -141,9 +142,6 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
   const currentVisao = searchParams.get("visao") ?? "todos";
   const [emailsExpanded, setEmailsExpanded] = useState(activeNav === "emails");
   const currentCategoria = searchParams.get("categoria") ?? "cpl";
-  const [paginasExpanded, setPaginasExpanded] = useState(activeNav === "paginas");
-  const currentPaginasVisao = searchParams.get("visao") ?? "minhas";
-  const [lpExpanded, setLpExpanded] = useState(false);
   const [copyDocument, setCopyDocument] = useState("");
   const [copyFileName, setCopyFileName] = useState<string | null>(null);
   const [copyUploading, setCopyUploading] = useState(false);
@@ -378,51 +376,8 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
           {!sidebarCollapsed && <div className="pt-3 pb-1"><span className="px-2 text-[9px] font-medium text-white/20 uppercase tracking-widest">Criar</span></div>}
           {sidebarCollapsed && <div className="pt-3" />}
 
-          <SidebarItem icon={<TrendingUp className="w-4 h-4" />} label="Lançamento pronto" active={activeNav === "lancamento-pronto"} collapsed={sidebarCollapsed} onClick={() => router.push("/lancamento-pronto")} accent />
           <SidebarItem icon={<Rocket className="w-4 h-4" />} label="Lançamentos" active={activeNav === "lancamentos"} collapsed={sidebarCollapsed} onClick={() => nav("lancamentos")} accent />
-          {/* Landing Pages — accordion */}
-          <div>
-            <button
-              onClick={() => sidebarCollapsed ? nav("resources") : setLpExpanded(p => !p)}
-              title={sidebarCollapsed ? "Landing Pages" : undefined}
-              className={cn(
-                "flex items-center w-full rounded-xl transition-colors cursor-pointer",
-                sidebarCollapsed ? "justify-center p-2.5" : "gap-2.5 px-2.5 py-2 text-[12px]",
-                activeNav === "resources"
-                  ? "bg-white/[0.06] text-[#d1d1d1]"
-                  : "text-[#6b6b6b] hover:bg-white/[0.04] hover:text-[#9a9a9a]"
-              )}
-            >
-              <Layout className="w-4 h-4 shrink-0" />
-              {!sidebarCollapsed && (
-                <>
-                  <span className="flex-1 text-left">Landing Pages</span>
-                  <ChevronDown className={cn("w-3 h-3 text-white/20 transition-transform duration-200", lpExpanded ? "rotate-0" : "-rotate-90")} />
-                </>
-              )}
-            </button>
-            {!sidebarCollapsed && lpExpanded && (
-              <div className="ml-3 mt-0.5 border-l border-white/[0.06] pl-2 space-y-0.5 pb-1">
-                {([
-                  { label: "Página de vendas",   icon: <Rocket className="w-3 h-3" />,   categoria: "vendas"  },
-                  { label: "Página de captura",  icon: <UserCheck className="w-3 h-3" />, categoria: "captura" },
-                  { label: "Página de blog",     icon: <FileText className="w-3 h-3" />,  categoria: "blog"    },
-                  { label: "Eventos / Workshop", icon: <Zap className="w-3 h-3" />,       categoria: "evento"  },
-                  { label: "Agregadora",         icon: <Globe className="w-3 h-3" />,     categoria: "servico" },
-                ]).map((item) => {
-                  const isActive = activeNav === "resources" && currentTipo === item.categoria;
-                  return (
-                    <button key={item.label} onClick={() => router.push(`/resources?categoria=${item.categoria}`)}
-                      className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] cursor-pointer transition-colors text-left",
-                        isActive ? "bg-white/[0.06] text-white/80" : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]")}>
-                      {item.icon}
-                      <span className="flex-1 truncate">{item.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          <SidebarItem icon={<PenTool className="w-4 h-4" />} label="Copy" active={activeNav === "copy"} collapsed={sidebarCollapsed} onClick={() => nav("copy")} />
           {/* Design — accordion */}
           <div>
             <button
@@ -575,46 +530,6 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
           </div>
           <SidebarItem icon={<UserCheck className="w-4 h-4" />} label="Leads" active={activeNav === "leads"} collapsed={sidebarCollapsed} onClick={() => nav("leads")} />
           <SidebarItem icon={<Radar className="w-4 h-4" />} label="Prospecção" active={activeNav === "prospeccao"} collapsed={sidebarCollapsed} onClick={() => nav("prospeccao")} />
-          {/* Páginas — accordion próprio, mesmo padrão de Anúncios/Emails */}
-          <div>
-            <button
-              onClick={() => sidebarCollapsed ? nav("paginas") : setPaginasExpanded(p => !p)}
-              title={sidebarCollapsed ? "Páginas" : undefined}
-              className={cn(
-                "flex items-center w-full rounded-xl transition-colors cursor-pointer",
-                sidebarCollapsed ? "justify-center p-2.5" : "gap-2.5 px-2.5 py-2 text-[12px]",
-                activeNav === "paginas"
-                  ? "bg-white/[0.06] text-[#d1d1d1]"
-                  : "text-[#6b6b6b] hover:bg-white/[0.04] hover:text-[#9a9a9a]"
-              )}
-            >
-              <FileText className="w-4 h-4 shrink-0" />
-              {!sidebarCollapsed && (
-                <>
-                  <span className="flex-1 text-left">Páginas</span>
-                  <ChevronDown className={cn("w-3 h-3 text-white/20 transition-transform duration-200", paginasExpanded ? "rotate-0" : "-rotate-90")} />
-                </>
-              )}
-            </button>
-            {!sidebarCollapsed && paginasExpanded && (
-              <div className="ml-3 mt-0.5 border-l border-white/[0.06] pl-2 space-y-0.5 pb-1">
-                {([
-                  { label: "Minhas Páginas", icon: <FileText className="w-3 h-3" />, visao: "minhas" },
-                  { label: "Monitoramento",  icon: <Activity className="w-3 h-3" />, visao: "monitoramento" },
-                ]).map((item) => {
-                  const isActive = activeNav === "paginas" && currentPaginasVisao === item.visao;
-                  return (
-                    <button key={item.label} onClick={() => router.push(`/paginas?visao=${item.visao}`)}
-                      className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] cursor-pointer transition-colors text-left",
-                        isActive ? "bg-white/[0.06] text-white/80" : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]")}>
-                      {item.icon}
-                      <span className="flex-1 truncate">{item.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
 
           {!sidebarCollapsed && <div className="pt-3 pb-1"><span className="px-2 text-[9px] font-medium text-white/20 uppercase tracking-widest">Projetos</span></div>}
           {sidebarCollapsed && <div className="pt-3" />}
@@ -723,20 +638,6 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
 
             {/* ─── Hero: Prompt area ─── */}
             <div className="flex flex-col items-center justify-center px-6 py-12 min-h-[90vh]">
-              <button
-                onClick={() => router.push("/lancamento-pronto")}
-                className="group w-full max-w-[580px] mb-8 flex items-center gap-3 rounded-2xl border border-purple-500/25 bg-purple-500/[0.07] hover:bg-purple-500/[0.11] px-4 py-3.5 text-left transition-all cursor-pointer animate-fade-in-slow"
-              >
-                <div className="w-9 h-9 rounded-xl bg-purple-500/15 flex items-center justify-center shrink-0">
-                  <TrendingUp className="w-4 h-4 text-purple-300" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[12px] font-semibold text-white/85">Lançamentos prontos: Luana Carolina</p>
-                  <p className="text-[11px] text-white/40">Páginas, criativos e emails reais de 7 lançamentos — replique a estrutura pro seu produto</p>
-                </div>
-                <ArrowRight className="w-4 h-4 text-purple-300/60 shrink-0 group-hover:translate-x-0.5 transition-transform" />
-              </button>
-
               <h1 className="text-3xl md:text-[2.6rem] font-semibold text-center text-white mb-8 tracking-tight leading-tight animate-fade-in-slow">
                 Vamos construir seu{" "}
                 <span className="whitespace-nowrap">
