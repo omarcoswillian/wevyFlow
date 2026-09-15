@@ -1,15 +1,7 @@
 export type StrategyId = "classico" | "meteorico" | "semente" | "pago-vsl" | "perpetuo";
-export type AssetType = "page" | "criativo";
+export type AssetType = "criativo";
 export type AssetStatus = "pending" | "generating" | "done" | "error";
 export type WizardStep = 1 | 2 | 3;
-
-export type PageKind =
-  | "lp-vendas"
-  | "lp-captura"
-  | "obrigado"
-  | "checkout"
-  | "vsl"
-  | "webinar";
 
 export type CreativoFormat =
   | "thumb-yt"
@@ -28,7 +20,6 @@ export interface StrategyAsset {
   label: string;
   description: string;
   type: AssetType;
-  pageKind?: PageKind;
   format?: CreativoFormat;
 }
 

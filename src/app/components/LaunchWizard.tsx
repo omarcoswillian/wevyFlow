@@ -473,7 +473,6 @@ function StepStrategy({ selected, onSelect }: { selected: StrategyId | null; onS
 /* ── Step 3: Confirm ────────────────────────────────────── */
 function StepConfirm({ brand, strategyId }: { brand: LaunchBriefing; strategyId: StrategyId }) {
   const strategy = LAUNCH_STRATEGIES.find((s) => s.id === strategyId)!;
-  const pages = strategy.assets.filter((a) => a.type === "page");
   const criativos = strategy.assets.filter((a) => a.type === "criativo");
 
   return (
@@ -488,11 +487,10 @@ function StepConfirm({ brand, strategyId }: { brand: LaunchBriefing; strategyId:
         <Row label="Nicho" value={brand.niche} />
         <Row label="Público" value={brand.targetAudience} />
         <Row label="Estratégia" value={strategy.label} />
-        <Row label="Total de ativos" value={`${strategy.assets.length} (${pages.length} páginas · ${criativos.length} criativos)`} />
+        <Row label="Total de ativos" value={`${strategy.assets.length} criativos`} />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <AssetSummary title="Páginas" items={pages.map((a) => a.label)} />
+      <div className="grid grid-cols-1 gap-3">
         <AssetSummary title="Criativos" items={criativos.map((a) => a.label)} />
       </div>
     </div>

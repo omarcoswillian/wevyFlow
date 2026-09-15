@@ -1,5 +1,3 @@
-import { SECTIONS } from "../../lib/arsenal/sections";
-import { assembleSections } from "../../lib/arsenal/loader";
 import { resolveConfig, callOnce, startStream, iterableToReadable, parseApiError, AICallConfig } from "../../lib/ai-client";
 import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
 import { requireLaunch, launchErrorResponse } from "@/lib/launches/server";
@@ -128,32 +126,6 @@ async function renderWithBrowser(url: string): Promise<BrowserRenderResult | nul
   } catch {
     return null;
   }
-}
-
-/* ─────────────────────────────────────────────────────────────
-   Step 1 — COMPOSE: Claude picks section IDs
-   ───────────────────────────────────────────────────────────── */
-const COMPOSE_SYSTEM = `Você é um arquiteto de landing pages de alta conversão para infoprodutores brasileiros.
-Dado um briefing, escolha 5 a 8 IDs de seções do catálogo para montar a página ideal.
-
-REGRAS OBRIGATÓRIAS:
-- Sempre incluir exatamente 1 hero (primeiro da lista) — escolha o mais adequado ao produto
-- Incluir urgencia-countdown APENAS em páginas de vendas com prazo/lançamento
-- Para páginas de vendas completas incluir: numeros-stats, beneficios-grid, autoridade-expert, depoimentos-grid, garantia-section, oferta-preco
-- Para produtos com metodologia clara incluir: processo-steps após hero
-- Para ofertas com bônus incluir: bonus-stack antes de oferta-preco
-- Para páginas de captura usar: hero-captura-*, numeros-stats, depoimentos-grid (máx 4 seções)
-- CTA intermediário (cta-intermediario) em páginas longas de vendas (mais de 6 seções)
-- faq-accordion sempre no final de vendas (antes de oferta-preco quando há urgência de fechamento)
-- Ordem lógica de conversão: hero → processo/beneficios → autoridade → numeros → depoimentos → bonus → oferta → garantia → faq
-- Combinar o estilo do briefing com o campo "themes" do catálogo
-- Responder APENAS com JSON válido: {"sectionIds":["id1","id2",...]}
-- Zero texto fora do JSON`;
-
-function buildCatalogText(): string {
-  return SECTIONS.map(s =>
-    `${s.id} | ${s.kind} | themes:${s.themes.join(",")} | suits:${s.suits.join(",")} | ${s.description}`
-  ).join("\n");
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -316,75 +288,22 @@ function getVisualPatterns(stylePreset: string, primaryColor: string): string {
 }
 
 function buildPersonalizeSystem(stylePreset: string, primaryColor: string): string {
-  return `Você é um copywriter sênior especialista em páginas de vendas de alta conversão para o mercado digital brasileiro, com mais de 20 anos de experiência escrevendo landing pages para infoprodutos, lançamentos e perpétuos que faturaram milhões. Você entende que página não vende — copy vende. Ninguém compra layout: as pessoas compram promessa, desejo e medo.
+  return `Você é um diretor de arte sênior especializado em criativos visuais (banners, thumbnails, stories, posts) para o mercado digital brasileiro. Você recebe o briefing de um produto/lançamento e gera UM único ativo visual em HTML/CSS autocontido — não uma página de vendas com múltiplas seções.
 
-Quando uma imagem de referência for fornecida (screenshot de uma página existente):
-- ANALISE o screenshot antes de tudo: conte as seções, identifique o layout de cada uma, cores, tipografia e elementos visuais.
-- Replique FIELMENTE o layout, paleta de cores, tipografia, espaçamentos, seções e hierarquia visual.
-- Adapte apenas o copy para o produto do briefing — NUNCA a estrutura.
-- PROIBIDO adicionar seções que não existem na referência.
-- A referência visual tem prioridade ABSOLUTA sobre qualquer outra instrução de estilo ou criatividade.
-
-Receberá um HTML composto de múltiplas seções com dois tipos de copy:
-1. Marcadores [INSERIR: algo] — substitua pelo conteúdo real
-2. Copy de demonstração hardcoded — reescreva para o produto do usuário
-
-ETAPA 1 — DIAGNÓSTICO INTERNO DA OFERTA (faça isso antes de escrever qualquer linha)
-Analise mentalmente o briefing e mapeie:
-• Promessa principal: o que o leitor terá, em quanto tempo, de forma específica e mensurável
-• Avatar real: quem é esse leitor, sua situação atual, o que já tentou e falhou
-• Dor central: não a dor genérica do nicho — a dor específica que mantém esse avatar acordado às 2h da manhã
-• Desejo dominante: a transformação que ele REALMENTE quer (não o que diz querer superficialmente)
-• Medo silencioso: "não vai funcionar pra mim também", "vou começar e desistir de novo", "sou diferente dos outros casos"
-• Mecanismo único: o que torna ESTA solução diferente de tudo que ele já tentou antes — o porquê funciona quando o resto falhou
-• Inimigo comum: a causa externa do problema (dietas de restrição, planilhas complicadas, gurus genéricos, o mercado, o sistema)
-• As 5 objeções em ordem de aparição na jornada de leitura da página
-
-ETAPA 2 — ARQUITETURA DE PERSUASÃO (cada bloco responde à objeção que surge após o anterior)
-1. Headline + sub-headline: promessa específica + mecanismo único. Para o scroll em menos de 3 segundos.
-2. Identificação com a dor: espelhe a dor COM AS PALAVRAS que o avatar usa — ele precisa sentir "isso foi escrito pra mim". Nunca use jargões do produto.
-3. Solução e mecanismo único: o que faz isso funcionar quando tudo que ele tentou antes falhou.
-4. O que é o produto: entrega tangível, módulos, formato, acesso.
-5. Para quem é / para quem não é: inclui e exclui com precisão — aumenta confiança e desejo.
-6. Prova social: depoimentos com resultados específicos e mensuráveis, ANTES da decisão de preço.
-7. Stack de valor + ancoragem: mostre o valor total antes de revelar o preço final.
-8. Garantia: não é cláusula jurídica, é argumento de venda. Inverta o risco completamente.
-9. FAQ / objeções: as 3-5 objeções mais prováveis respondidas de forma que convertem.
-10. CTA final + urgência legítima: um motivo claro e crível para agir AGORA, não amanhã.
-
-REGRAS DE COPY:
-• Cada bloco termina com uma ponte para o próximo — nunca deixe o leitor sem razão para continuar scrollando
-• Pelo menos 3 CTAs ao longo da página com ângulos diferentes (transformação, medo de perder, lógica)
-• Botões sempre na primeira pessoa: "Quero [resultado específico]" — nunca "Comprar agora" ou "Saiba mais"
-• Ancoragem de preço sempre antes do número final
-• Urgência real e crível — nunca fabricada ou óbvia
-• Frases curtas, parágrafos de no máximo 3 linhas, ritmo de scroll vertical
-• Nomeie a dor com as palavras do avatar, nunca com termos técnicos do produto
-• Depoimentos ficcionais mas verossímeis: resultados específicos, nomes e cargos plausíveis do nicho
+Quando uma imagem de referência for fornecida, use-a como guia de estilo (cores, composição, tom visual) — adapte o conteúdo ao produto do briefing.
 
 ${getVisualPatterns(stylePreset, primaryColor)}
 
 REGRAS TÉCNICAS INVIOLÁVEIS:
 1. Retorne APENAS o HTML completo. ZERO texto explicativo, markdown ou crases.
-2. Preserve a estrutura HTML (tags, classes, layout) — MAS ADAPTE cores de fundo, texto e bordas ao estilo selecionado acima.
-3. Substitua TODOS os [INSERIR: ...] — nunca deixe nenhum marcador.
-4. Copy em Português Brasileiro. Sem CLT e sem clichês de marketing vazio.
-5. ZERO emojis. Use SVG icons quando necessário.
-6. Nunca invente nomes reais de pessoas — use nomes ficcionais plausíveis do nicho.
-7. Primeiro caractere da resposta = "<"
-8. NUNCA use a fonte Unbounded. Padrão: Montserrat ou Sora.
-9. Números em depoimentos sempre específicos: "340% de aumento" não "melhorou muito".
-10. Quando usar animação em CTAs, adicione o @keyframes no <style>.
-
-LIMITE DE TAMANHO — OBRIGATÓRIO:
-O HTML final deve ter no máximo 500 linhas de código. CSS inline: eficiente, sem repetição. Uma regra CSS serve várias seções. Textos de seção: máximo 3 parágrafos ou 5 itens de lista por bloco. Seja denso e preciso — não verboso.
-
-REGRAS DE PERFORMANCE (PageSpeed 99):
-11. Uma única tag <link> de fontes no <head> com preconnect hints antes.
-12. loading="lazy" decoding="async" em todas as <img> exceto o primeiro hero.
-13. O primeiro <img> do hero: loading="eager" fetchpriority="high".
-14. defer em todo <script src="..."> não crítico.
-15. Zero dependências externas além do Google Fonts.`;
+2. Gere um único elemento raiz com dimensões fixas apropriadas ao formato pedido no briefing (ex.: thumbnail de YouTube ≈ 1280×720, stories ≈ 1080×1920, post quadrado ≈ 1080×1080, banner de checkout ≈ 1200×400) — todo CSS em <style> no <head>, sem depender de viewport.
+3. Copy em Português Brasileiro, curta e direta — um criativo tem no máximo uma headline, um subtítulo curto e um CTA. Sem clichês de marketing vazio.
+4. ZERO emojis. Use SVG icons quando necessário.
+5. Nunca invente nomes reais de pessoas — use nomes ficcionais plausíveis do nicho quando precisar de um depoimento curto.
+6. Primeiro caractere da resposta = "<"
+7. NUNCA use a fonte Unbounded. Padrão: Montserrat ou Sora.
+8. Zero dependências externas além do Google Fonts. Zero JavaScript, a menos que o briefing peça uma animação simples via CSS.
+9. O HTML final deve ter no máximo 150 linhas de código — um criativo é denso e visual, não um documento longo.`;
 }
 
 const COPY_MODE_SYSTEM = `Você é um especialista em landing pages. O usuário forneceu a copy completa e quer que você distribua esse texto exato nas seções do HTML.
@@ -562,24 +481,9 @@ export async function POST(request: Request) {
     });
   }
 
-  /* ── Steps 0 + 1 in parallel: Hydration (context extraction) + Compose (section selection) ── */
-  const catalogText = buildCatalogText();
-  const hasCopyDoc = typeof copyDocument === "string" && copyDocument.trim().length > 0;
-  const composeUserMsg = [
-    `CATÁLOGO:\n${catalogText}`,
-    `BRIEFING:`,
-    `- Descrição: ${prompt || "(sem descrição — usar documento de copy)"}`,
-    `- Estilo: ${stylePreset || "dark-premium"}`,
-    `- Plataforma: ${platform || "html"}`,
-    referenceUrl ? `- Referência visual: ${referenceUrl}` : "",
-    brandReference ? `- Marca de referência: ${brandReference}` : "",
-    expectations ? `- Expectativas: ${expectations}` : "",
-    hasCopyDoc ? `- Documento de copy fornecido: SIM (escolha seções que absorvam o conteúdo completo: hero, benefícios, depoimentos, oferta, FAQ)` : "",
-  ].filter(Boolean).join("\n");
-
-  let sectionIds: string[] = [];
+  /* ── Step 0: Hydration (context extraction) ── */
   // Seeded with the canonical facts up front (not left at all-null) so that
-  // if the Promise.all below throws before the merge on line ~590 runs,
+  // if extractProductContext below throws before the merge runs,
   // `contextLines` further down still carries the launch's real product
   // identity instead of silently falling back to nothing (see launches
   // review item 3 — Promise.all failure path).
@@ -593,10 +497,7 @@ export async function POST(request: Request) {
   };
 
   try {
-    const [composeRaw, ctx] = await Promise.all([
-      callOnce(aiConfig, COMPOSE_SYSTEM, composeUserMsg, 256),
-      extractProductContext(aiConfig, prompt),
-    ]);
+    const ctx = await extractProductContext(aiConfig, prompt);
     // Identity facts (who/what/for whom) come from the persisted launch
     // briefing, not from whatever the free-text prompt happens to say — a
     // launch for product A must not be usable to quietly generate a page
@@ -610,46 +511,11 @@ export async function POST(request: Request) {
       targetAudience: launch?.brandInfo.targetAudience || ctx.targetAudience,
       mainBenefit: launch?.brandInfo.transformation || ctx.mainBenefit,
     };
-    // Extract JSON even if there's surrounding text
-    const jsonMatch = composeRaw.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      const parsed = JSON.parse(jsonMatch[0]);
-      if (Array.isArray(parsed.sectionIds) && parsed.sectionIds.length > 0) {
-        sectionIds = parsed.sectionIds;
-      }
-    }
   } catch (e) {
-    console.error("[compose] error:", e);
+    console.error("[hydration] error:", e);
   }
 
-  // Fallback section list
-  if (sectionIds.length === 0) {
-    const p = prompt.toLowerCase();
-    if (p.includes("captura") || p.includes("lead") || p.includes("inscri")) {
-      sectionIds = ["hero-captura-conversao", "numeros-stats", "depoimentos-grid", "faq-accordion"];
-    } else if (p.includes("saas") || p.includes("software") || p.includes("ferramenta")) {
-      sectionIds = ["hero-vendas-saas", "numeros-stats", "beneficios-grid", "processo-steps", "depoimentos-grid", "oferta-preco", "garantia-section", "faq-accordion"];
-    } else {
-      sectionIds = ["hero-simples", "numeros-stats", "beneficios-grid", "para-quem-e", "autoridade-expert", "depoimentos-grid", "bonus-stack", "oferta-preco", "garantia-section", "faq-accordion"];
-    }
-  }
-
-  /* ── Step 2: Assemble ── */
-  let assembledHtml: string;
-  try {
-    // Filter out any IDs that don't exist in the catalog
-    const validIds = SECTIONS.map(s => s.id);
-    sectionIds = sectionIds.filter(id => validIds.includes(id));
-    if (sectionIds.length === 0) {
-      sectionIds = ["hero-simples", "para-quem-e", "depoimentos-grid", "oferta-preco", "faq-accordion"];
-    }
-    assembledHtml = assembleSections(sectionIds);
-  } catch (e) {
-    console.error("[assemble] error:", e);
-    assembledHtml = assembleSections(["hero-simples", "para-quem-e", "depoimentos-grid", "oferta-preco", "faq-accordion"]);
-  }
-
-  /* ── Step 3: Personalize (streaming) ── */
+  /* ── Step 1: Personalize (streaming) — freeform generation, no section catalog ── */
   const imagePart = images && Array.isArray(images) && images.length > 0
     ? `\nIMGS: ${images.length} imagem(ns) enviada(s) — use-as como <img src="DADO_BASE64"> no layout.`
     : "";
@@ -683,7 +549,6 @@ export async function POST(request: Request) {
     expectations ? `SENSAÇÃO DESEJADA: ${expectations}` : "",
     referenceContext,
     imagePart,
-    `\nHTML PARA PERSONALIZAR:\n${assembledHtml}`,
   ].filter(Boolean).join("\n");
 
   // Start the streaming request BEFORE returning Response — lets us return a

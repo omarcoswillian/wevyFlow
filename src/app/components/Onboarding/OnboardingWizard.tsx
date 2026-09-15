@@ -236,7 +236,6 @@ function StepConfirm({
     ? LAUNCH_STRATEGIES.find((s) => s.id === state.selectedStrategy)
     : null;
 
-  const pages = strategy?.assets.filter((a) => a.type === "page") ?? [];
   const criativos = strategy?.assets.filter((a) => a.type === "criativo") ?? [];
 
   return (
@@ -268,7 +267,7 @@ function StepConfirm({
               {
                 label: "Total de ativos",
                 value: strategy
-                  ? `${strategy.assets.length} (${pages.length} paginas · ${criativos.length} criativos)`
+                  ? `${strategy.assets.length} criativos`
                   : "",
               },
             ].map(({ label, value }) =>
@@ -295,9 +294,8 @@ function StepConfirm({
           </div>
 
           {strategy && (
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2">
               {[
-                { title: "Paginas", items: pages.map((a) => a.label) },
                 { title: "Criativos", items: criativos.map((a) => a.label) },
               ].map(({ title, items }) => (
                 <div
