@@ -1,4 +1,5 @@
 import { resolveConfig, callOnce, type AICallConfig } from "../ai-client";
+import { CIALDINI_PRINCIPLES_BLOCK } from "./persuasion-principles";
 
 export interface AdCopyFacts {
   productName?: string;
@@ -42,7 +43,9 @@ REGRAS:
 - Copy em Português Brasileiro. Zero emojis. Zero clichês vazios ("transforme sua vida", "não perca essa chance única").
 - PROIBIDO inventar números, resultados, depoimentos, garantia ou prazo de escassez que não estejam no briefing fornecido. Se o briefing não tiver um dado concreto pra um ângulo, use uma variação genérica desse ângulo sem inventar o dado — nunca insira um número ou fato que não veio do briefing.
 - Responda APENAS com JSON válido no formato: {"options":[{"headline":"...","cta":"...","angle":"..."}]}
-- Zero texto fora do JSON.`;
+- Zero texto fora do JSON.
+
+${CIALDINI_PRINCIPLES_BLOCK}`;
 }
 
 function buildUserMessage(facts: AdCopyFacts): string {

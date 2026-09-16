@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import { toFile } from "openai/uploads";
 import { GoogleGenAI } from "@google/genai";
 import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
-import { requireLaunch, launchErrorResponse } from "@/lib/launches/server";
+import { requireLaunch, launchErrorResponse, resolveLaunchStyle } from "@/lib/launches/server";
 
 export type CriativoFormat =
   | "youtube-thumbnail"
@@ -252,6 +252,11 @@ export async function POST(req: NextRequest) {
   // a client-supplied `produto` (see launches review item 6) — só quando há
   // lançamento. Sem projectId (geração avulsa), `produto` é a única fonte.
   const canonicalProduto = launch?.brandInfo.productName?.trim() || produto;
+  // Same precedence for cor — the launch's resolved style (approved brand
+  // identity when present, briefing color otherwise) wins over a
+  // client-supplied `cor`, so this criativo matches the same palette as the
+  // launch's landing page instead of deciding its own color in isolation.
+  const canonicalCor = (launch ? resolveLaunchStyle(launch).primaryColor : "") || cor;
 
   const creditResult = await checkAndDeductCredit("criativo_html", canonicalProduto || headline || "");
   if (isCreditError(creditResult)) {
@@ -266,7 +271,7 @@ export async function POST(req: NextRequest) {
   const key = byok ?? (imageProvider === "gemini" ? (process.env.GOOGLE_AI_API_KEY ?? null) : null);
   const criativoFormat = format as CriativoFormat;
   const config = FORMAT_CONFIG[criativoFormat];
-  const prompt = buildPrompt(criativoFormat, canonicalProduto, headline, cta, cor, estilo, fase, chatInstruction);
+  const prompt = buildPrompt(criativoFormat, canonicalProduto, headline, cta, canonicalCor, estilo, fase, chatInstruction);
 
   try {
     const { b64, mimeType } = await runGeneration({

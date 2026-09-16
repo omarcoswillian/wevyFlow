@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/types";
 import { isBriefingActivatable, isValidStrategyId, toBrandInfo } from "@/app/lib/launch-briefing";
 import type { LaunchBriefing } from "@/app/lib/launch-briefing";
-import type { LaunchKit, LaunchStatus, StrategyId } from "@/app/lib/types-kit";
+import type { BrandIdentity, LaunchKit, LaunchStatus, StrategyId } from "@/app/lib/types-kit";
 
 /** Machine-readable next step for the UI to link to directly, alongside the
  * human-readable message — added so a 409 body isn't just a dead end (see
@@ -214,6 +214,7 @@ export interface RequiredLaunch {
   launchKitId: string;
   briefing: LaunchBriefing;
   brandInfo: LaunchKit["brandInfo"];
+  brandIdentity: LaunchKit["brandIdentity"];
   strategyId: StrategyId | null;
 }
 
@@ -269,7 +270,65 @@ export async function requireLaunch(projectId: unknown): Promise<RequiredLaunch>
     launchKitId: kit.id,
     briefing,
     brandInfo: kit.brand_info as unknown as LaunchKit["brandInfo"],
+    brandIdentity: (kit.brand_identity as unknown as LaunchKit["brandIdentity"]) ?? undefined,
     strategyId,
+  };
+}
+
+/* ── Single source of truth for a launch's visual style ─────────────────
+ * Every generator (landing page, criativo, copy) that used to receive raw
+ * primaryColor/secondaryColor/fontChoice from the client — or duplicate
+ * this exact fallback chain client-side (see LaunchHub.tsx buildIdentityBlock
+ * / buildAssetPrompt before this) — should resolve style through here
+ * instead. Approved brand identity (5-color palette, 2 fonts, logo, concept)
+ * wins when it exists; the briefing's basic style choice (set once in the
+ * launch wizard) is the fallback. Mirrors the resolution LaunchHub already
+ * did in the browser, moved server-side so new callers inherit it for free
+ * instead of having to reimplement it. */
+export interface LaunchStyle {
+  primaryColor: string;
+  secondaryColor: string;
+  fontChoice: string;
+  stylePreset: string;
+  /** Prompt-ready block with the full approved identity (accent/light/dark
+   * colors, body font, logo, concept, personality words) — empty string when
+   * there's no approved identity yet, since colors/fontChoice/stylePreset
+   * above already cover the briefing-only case. */
+  identityBlock: string;
+}
+
+export function resolveLaunchStyle(launch: RequiredLaunch): LaunchStyle {
+  const identity: BrandIdentity | null =
+    launch.brandIdentity?.status === "approved" ? launch.brandIdentity : null;
+
+  const primary = identity?.colors.find((c) => c.usage === "primary");
+  const secondary = identity?.colors.find((c) => c.usage === "secondary");
+  const accent = identity?.colors.find((c) => c.usage === "accent");
+  const light = identity?.colors.find((c) => c.usage === "light");
+  const dark = identity?.colors.find((c) => c.usage === "dark");
+  const displayFont = identity?.fonts.find((f) => f.usage === "display");
+  const bodyFont = identity?.fonts.find((f) => f.usage === "body");
+
+  const identityBlock = identity
+    ? [
+        "IDENTIDADE VISUAL APROVADA (use fielmente):",
+        accent ? `Cor de destaque/CTA: ${accent.hex} (${accent.name})` : "",
+        light ? `Cor clara/fundo light: ${light.hex}` : "",
+        dark ? `Cor escura/texto: ${dark.hex}` : "",
+        bodyFont ? `Fonte de corpo: ${bodyFont.name}` : "",
+        identity.concept ? `Conceito da marca: ${identity.concept}` : "",
+        identity.words.length ? `Palavras-chave da marca: ${identity.words.join(", ")}` : "",
+      ]
+        .filter(Boolean)
+        .join("\n")
+    : "";
+
+  return {
+    primaryColor: primary?.hex ?? launch.brandInfo.primaryColor,
+    secondaryColor: secondary?.hex ?? launch.brandInfo.secondaryColor,
+    fontChoice: displayFont?.name ?? launch.brandInfo.fontChoice,
+    stylePreset: launch.brandInfo.stylePreset,
+    identityBlock,
   };
 }
 

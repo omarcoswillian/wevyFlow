@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireLaunch, launchErrorResponse } from "@/lib/launches/server";
+import type { BrandIdentity } from "../../../lib/types-kit";
 import { parseApiError } from "../../../lib/ai-client";
 import { generateAdCopy, type AdCopyFacts } from "../../../lib/copy/generate-ads";
 
@@ -26,6 +27,15 @@ export async function POST(request: Request) {
   if (projectId) {
     try {
       const launch = await requireLaunch(projectId);
+      // Approved brand identity carries the brand's voice (concept + personality
+      // words) — used as the tone default only when the caller didn't ask for a
+      // specific one, same "launch is source of truth, client can still steer
+      // per-generation" precedent as the style resolution in generate/route.ts.
+      const identity: BrandIdentity | undefined =
+        launch.brandIdentity?.status === "approved" ? launch.brandIdentity : undefined;
+      const identityTone = identity
+        ? [identity.concept, identity.words.join(", ")].filter(Boolean).join(" — ")
+        : undefined;
       facts = {
         productName: launch.brandInfo.productName,
         niche: launch.brandInfo.niche,
@@ -33,7 +43,7 @@ export async function POST(request: Request) {
         transformation: launch.brandInfo.transformation,
         price: launch.brandInfo.preco,
         provas: launch.brandInfo.provas,
-        tone,
+        tone: tone || identityTone,
       };
     } catch (err) {
       const { body: errBody, status } = launchErrorResponse(err);

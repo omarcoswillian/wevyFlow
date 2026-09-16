@@ -1,6 +1,7 @@
 import { resolveConfig, callOnce, parseApiError } from "../../lib/ai-client";
 import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
 import { requireLaunch, launchErrorResponse } from "@/lib/launches/server";
+import { CIALDINI_PRINCIPLES_BLOCK } from "../../lib/copy/persuasion-principles";
 
 export const maxDuration = 60;
 
@@ -156,6 +157,8 @@ ETAPA 2 — ARQUITETURA DE CADA EMAIL (estrutura obrigatória):
 7. P.S. ESTRATÉGICO
    — Reforça o benefício principal OU cria urgência final OU quebra a última objeção
    — 1-2 linhas. Nunca genérico ("Qualquer dúvida me chame").
+
+${CIALDINI_PRINCIPLES_BLOCK}
 
 REGRAS ABSOLUTAS:
 1. Responda APENAS com JSON válido no formato abaixo — sem texto antes ou depois

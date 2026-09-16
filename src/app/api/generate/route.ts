@@ -1,6 +1,7 @@
 import { resolveConfig, callOnce, startStream, iterableToReadable, parseApiError, AICallConfig } from "../../lib/ai-client";
 import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
-import { requireLaunch, launchErrorResponse } from "@/lib/launches/server";
+import { requireLaunch, launchErrorResponse, resolveLaunchStyle } from "@/lib/launches/server";
+import { CIALDINI_PRINCIPLES_BLOCK } from "../../lib/copy/persuasion-principles";
 
 export const maxDuration = 300;
 
@@ -294,6 +295,8 @@ Quando uma imagem de referência for fornecida, use-a como guia de estilo (cores
 
 ${getVisualPatterns(stylePreset, primaryColor)}
 
+${CIALDINI_PRINCIPLES_BLOCK}
+
 REGRAS TÉCNICAS INVIOLÁVEIS:
 1. Retorne APENAS o HTML completo. ZERO texto explicativo, markdown ou crases.
 2. Gere um único elemento raiz com dimensões fixas apropriadas ao formato pedido no briefing (ex.: thumbnail de YouTube ≈ 1280×720, stories ≈ 1080×1920, post quadrado ≈ 1080×1080, banner de checkout ≈ 1200×400) — todo CSS em <style> no <head>, sem depender de viewport.
@@ -433,6 +436,18 @@ export async function POST(request: Request) {
     launch?.brandInfo.transformation ? `TRANSFORMAÇÃO/BENEFÍCIO (fonte de verdade): ${launch.brandInfo.transformation}` : "",
   ].filter(Boolean).join("\n");
 
+  // Style facts follow the same rule as the identity facts above: when a
+  // launch exists, its resolved style (approved brand identity when
+  // present, briefing style otherwise — see resolveLaunchStyle) is the
+  // source of truth, not whatever color/font the client request happens to
+  // carry. Without a launch (avulsa generation), the request body remains
+  // the only source, same as before.
+  const launchStyle = launch ? resolveLaunchStyle(launch) : null;
+  const canonicalPrimaryColor = launchStyle?.primaryColor || primaryColor || "#FF5C00";
+  const canonicalSecondaryColor = launchStyle?.secondaryColor || secondaryColor || "#E04E00";
+  const canonicalFontChoice = launchStyle?.fontChoice || fontChoice || "montserrat";
+  const canonicalStylePreset = launchStyle?.stylePreset || stylePreset || "dark-premium";
+
   /* ── REPLICATE mode: browser render available → skip arsenal, go straight to Claude ── */
   if (browserResult) {
     const replicateMsg = [
@@ -440,8 +455,9 @@ export async function POST(request: Request) {
       canonicalFactsLines,
       brandReference ? `MARCA: ${brandReference}` : "",
       expectations ? `SENSAÇÃO DESEJADA: ${expectations}` : "",
-      primaryColor ? `COR PRIMÁRIA DO PRODUTO: ${primaryColor}` : "",
-      fontChoice ? `FONTE PREFERIDA: ${fontChoice}` : "",
+      `COR PRIMÁRIA DO PRODUTO: ${canonicalPrimaryColor}`,
+      `FONTE PREFERIDA: ${canonicalFontChoice}`,
+      launchStyle?.identityBlock || "",
       `\nURL DE REFERÊNCIA: ${referenceUrl}`,
       browserResult.title ? `TÍTULO DA PÁGINA: ${browserResult.title}` : "",
       (() => {
@@ -541,10 +557,11 @@ export async function POST(request: Request) {
     hasCopyDocument
       ? `\nDOCUMENTO DE COPY DO CLIENTE (use este texto exatamente nas seções — não invente copy nova):\n---\n${copyDocument.trim()}\n---`
       : "",
-    `COR PRIMÁRIA: ${primaryColor || "#FF5C00"}`,
-    `COR SECUNDÁRIA: ${secondaryColor || "#E04E00"}`,
-    `FONTE: ${fontChoice || "montserrat"}`,
-    `ESTILO: ${stylePreset || "dark-premium"}`,
+    `COR PRIMÁRIA: ${canonicalPrimaryColor}`,
+    `COR SECUNDÁRIA: ${canonicalSecondaryColor}`,
+    `FONTE: ${canonicalFontChoice}`,
+    `ESTILO: ${canonicalStylePreset}`,
+    launchStyle?.identityBlock || "",
     brandReference ? `MARCA DE REFERÊNCIA: ${brandReference}` : "",
     expectations ? `SENSAÇÃO DESEJADA: ${expectations}` : "",
     referenceContext,
@@ -563,7 +580,7 @@ export async function POST(request: Request) {
   try {
     gen = await startStream(
       aiConfig,
-      hasCopyDocument ? COPY_MODE_SYSTEM : buildPersonalizeSystem(stylePreset || "dark-premium", primaryColor || "#FF5C00"),
+      hasCopyDocument ? COPY_MODE_SYSTEM : buildPersonalizeSystem(canonicalStylePreset, canonicalPrimaryColor),
       personalizeUserMsg,
       64000,
       allImages.length > 0 ? allImages : undefined
