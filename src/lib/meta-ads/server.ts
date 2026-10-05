@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { isMetaTokenKeyConfigured } from "@/lib/meta-ads/crypto";
 
 /** Bumped roughly twice a year by Meta — v26.0 is current as of 2026-07-29.
  * Old versions keep working for ~2 years after release, so this doesn't
@@ -15,7 +16,7 @@ export const META_OAUTH_SCOPE = "ads_read";
 export const META_STATE_COOKIE = "wf_meta_oauth_state";
 
 export function isMetaAdsConfigured(): boolean {
-  return !!process.env.META_APP_ID && !!process.env.META_APP_SECRET;
+  return !!process.env.META_APP_ID && !!process.env.META_APP_SECRET && isMetaTokenKeyConfigured();
 }
 
 export function getMetaAppCredentials(): { appId: string; appSecret: string } {

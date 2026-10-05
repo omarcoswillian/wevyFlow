@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createServiceClient } from "@/lib/supabase/service";
+import { encryptToken } from "@/lib/meta-ads/crypto";
 import {
   requireAuthUser,
   getMetaAppCredentials,
@@ -10,7 +11,7 @@ import {
 } from "@/lib/meta-ads/server";
 
 interface MetaTokenResponse { access_token: string; token_type?: string; expires_in?: number }
-interface MetaMeResponse { id: string; name?: string }
+interface MetaMeResponse { id: string; name?: string; picture?: { data?: { url?: string; is_silhouette?: boolean } } }
 interface MetaAdAccount { id: string; account_id?: string; name?: string }
 interface MetaAdAccountsResponse { data: MetaAdAccount[] }
 interface MetaErrorEnvelope { error?: { message?: string } }
@@ -72,7 +73,7 @@ export async function GET(request: NextRequest) {
 
     // 3) identidade + contas de anúncio que essa pessoa administra
     const meUrl = new URL(`${META_GRAPH_BASE}/me`);
-    meUrl.searchParams.set("fields", "id,name");
+    meUrl.searchParams.set("fields", "id,name,picture.type(large)");
     meUrl.searchParams.set("access_token", accessToken);
     const me = await metaFetch<MetaMeResponse>(meUrl);
 
@@ -85,12 +86,31 @@ export async function GET(request: NextRequest) {
     const autoSelected = accounts.length === 1 ? accounts[0] : null;
 
     const service = createServiceClient();
+
+    // Reconectar com OUTRA conta Meta sobrescreve meta_user_id; sem isso, um
+    // pedido de exclusão da identidade anterior não acharia mais a conexão e
+    // os dados importados dela ficariam órfãos. Apaga-os antes de trocar.
+    const { data: previous } = await service
+      .from("meta_ads_connections")
+      .select("meta_user_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (previous && previous.meta_user_id !== me.id) {
+      const { error: purgeErr } = await service
+        .from("ad_watch_creatives")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("source", "meta_ads_api");
+      if (purgeErr) throw new Error(purgeErr.message);
+    }
+
     const { error: dbErr } = await service.from("meta_ads_connections").upsert({
       user_id: user.id,
-      access_token: accessToken,
+      access_token: encryptToken(accessToken, user.id),
       token_expires_at: expiresAt,
       meta_user_id: me.id,
       meta_user_name: me.name ?? null,
+      meta_user_picture_url: me.picture?.data?.url ?? null,
       available_ad_accounts: accounts,
       ad_account_id: autoSelected?.id ?? null,
       ad_account_name: autoSelected?.name ?? null,

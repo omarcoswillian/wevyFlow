@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { decryptToken } from "@/lib/meta-ads/crypto";
 import { requireAuthUser, metaAdsErrorResponse, META_GRAPH_BASE } from "@/lib/meta-ads/server";
 
 export async function POST() {
@@ -7,25 +8,38 @@ export async function POST() {
     const { user } = await requireAuthUser();
     const service = createServiceClient();
 
-    const { data } = await service
+    const { data, error: selErr } = await service
       .from("meta_ads_connections")
       .select("access_token, meta_user_id")
       .eq("user_id", user.id)
       .maybeSingle();
+    if (selErr) throw new Error(selErr.message);
 
+    // O dado do usuário sai primeiro e é o que define sucesso: se apagar
+    // falhar, devolvemos erro (nada de "ok" com token ainda guardado).
+    const { error: delErr } = await service.from("meta_ads_connections").delete().eq("user_id", user.id);
+    if (delErr) throw new Error(delErr.message);
+
+    // Dados importados da Marketing API saem junto com a conexão.
+    const { error: adsErr } = await service
+      .from("ad_watch_creatives")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("source", "meta_ads_api");
+    if (adsErr) throw new Error(adsErr.message);
+
+    // Revogar do lado da Meta é best-effort: o token pode já ter expirado ou
+    // sido revogado pelo usuário, ou não decifrar (chave trocada). Em todo
+    // caso a conexão local já foi removida.
+    let revoked = false;
     if (data) {
-      // Revoga o token do lado da Meta também — best-effort, não impede a
-      // desconexão do lado da WevyFlow se a chamada falhar (token já pode
-      // ter expirado/sido revogado manualmente pelo usuário).
       try {
         const revokeUrl = new URL(`${META_GRAPH_BASE}/${data.meta_user_id}/permissions`);
-        revokeUrl.searchParams.set("access_token", data.access_token);
-        await fetch(revokeUrl, { method: "DELETE" });
+        revokeUrl.searchParams.set("access_token", decryptToken(data.access_token, user.id));
+        revoked = (await fetch(revokeUrl, { method: "DELETE" })).ok;
       } catch { /* best-effort */ }
     }
-
-    await service.from("meta_ads_connections").delete().eq("user_id", user.id);
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, revoked });
   } catch (err) {
     const { body, status } = metaAdsErrorResponse(err);
     return NextResponse.json(body, { status });

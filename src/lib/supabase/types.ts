@@ -282,9 +282,11 @@ export type Database = {
           token_expires_at: string | null;
           meta_user_id: string;
           meta_user_name: string | null;
+          meta_user_picture_url: string | null;
           available_ad_accounts: { id: string; name: string }[];
           ad_account_id: string | null;
           ad_account_name: string | null;
+          last_synced_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -295,13 +297,33 @@ export type Database = {
           token_expires_at?: string | null;
           meta_user_id: string;
           meta_user_name?: string | null;
+          meta_user_picture_url?: string | null;
           available_ad_accounts?: { id: string; name: string }[];
           ad_account_id?: string | null;
           ad_account_name?: string | null;
+          last_synced_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["meta_ads_connections"]["Insert"]>;
+        Relationships: [];
+      };
+      meta_data_deletion_requests: {
+        Row: {
+          confirmation_code: string;
+          kind: "deletion" | "deauthorize";
+          status: "completed" | "failed";
+          connections_deleted: number;
+          created_at: string;
+        };
+        Insert: {
+          confirmation_code: string;
+          kind: "deletion" | "deauthorize";
+          status?: "completed" | "failed";
+          connections_deleted?: number;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["meta_data_deletion_requests"]["Insert"]>;
         Relationships: [];
       };
       ad_watch_creatives: {
@@ -318,6 +340,8 @@ export type Database = {
           started_at: string;
           stopped_at: string | null;
           is_favorite: boolean;
+          external_id: string | null;
+          meta_ad_account_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -334,6 +358,8 @@ export type Database = {
           started_at: string;
           stopped_at?: string | null;
           is_favorite?: boolean;
+          external_id?: string | null;
+          meta_ad_account_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -922,6 +948,10 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: {
+      delete_meta_user_data: {
+        Args: { p_meta_user_id: string; p_kind: string; p_confirmation_code: string };
+        Returns: number;
+      };
       claim_generation_credit: {
         Args: {
           p_user_id: string;

@@ -28,7 +28,7 @@ const META_ERROR_LABELS: Record<string, string> = {
  * roadmap de Ads). Enquanto META_APP_ID/META_APP_SECRET não estiverem
  * configurados (App Review da Meta ainda em andamento), mostra um estado
  * informativo em vez de um botão quebrado. */
-export function MetaAdsConnectionCard() {
+export function MetaAdsConnectionCard({ onConnectionChange }: { onConnectionChange?: () => void }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<MetaAdsStatus | null>(null);
@@ -76,6 +76,7 @@ export function MetaAdsConnectionCard() {
     try {
       await fetch("/api/integrations/meta-ads/disconnect", { method: "POST" });
       await loadStatus();
+      onConnectionChange?.();
       setNotice({ type: "success", text: "Meta Ads desconectado." });
     } catch {
       setNotice({ type: "error", text: "Não deu pra desconectar — tenta de novo." });
@@ -95,6 +96,7 @@ export function MetaAdsConnectionCard() {
       });
       if (!res.ok) throw new Error();
       await loadStatus();
+      onConnectionChange?.();
     } catch {
       setNotice({ type: "error", text: "Não deu pra selecionar essa conta — tenta de novo." });
     } finally {

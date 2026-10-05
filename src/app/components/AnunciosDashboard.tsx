@@ -15,6 +15,7 @@ import { AdDateRangeFilter } from "./anuncios/AdDateRangeFilter";
 import { AdsTable } from "./anuncios/AdsTable";
 import { AdPreviewModal } from "./anuncios/AdPreviewModal";
 import { MetaAdsConnectionCard } from "./anuncios/MetaAdsConnectionCard";
+import { MetaProfileBadge, type MetaProfile } from "./anuncios/MetaProfileBadge";
 
 const AdsMetrics = dynamic(() => import("./anuncios/AdsMetrics"), {
   ssr: false,
@@ -190,6 +191,9 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
   const [creatives, setCreatives] = useState<AdCreative[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [metaConnected, setMetaConnected] = useState(false);
+  const [metaProfile, setMetaProfile] = useState<MetaProfile | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
 
   const [filters, setFilters] = useState<AdFilters>(EMPTY_FILTERS);
@@ -213,8 +217,30 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setError("Sessão expirada — faça login novamente."); return; }
 
+      // Conta Meta conectada e escolhida: sincroniza os anúncios reais (que
+      // também apaga os de demonstração) e nunca semeia mock.
+      let metaLive = false;
+      try {
+        const st = (await (await fetch("/api/integrations/meta-ads/status")).json()) as {
+          connected?: boolean; adAccountId?: string | null; adAccountName?: string | null; metaUserName?: string | null; metaUserPicture?: string | null;
+        };
+        metaLive = !!(st.connected && st.adAccountId);
+        setMetaProfile(st.connected
+          ? { name: st.metaUserName ?? null, picture: st.metaUserPicture ?? null, adAccountName: st.adAccountName ?? null }
+          : null);
+      } catch { /* sem status: segue como não conectado */ }
+      setMetaConnected(metaLive);
+      setSyncError(null);
+      if (metaLive) {
+        const res = await fetch("/api/integrations/meta-ads/sync", { method: "POST" });
+        if (!res.ok) {
+          const body = (await res.json().catch(() => ({}))) as { error?: string };
+          setSyncError(body.error ?? "Não foi possível sincronizar com a Meta agora.");
+        }
+      }
+
       let rows = await fetchAllCreatives(supabase);
-      if (rows.length === 0) {
+      if (rows.length === 0 && !metaLive) {
         rows = await seedMockCreatives(supabase, user.id);
       }
       const loadedAt = Date.now();
@@ -385,12 +411,29 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
             <BarChart3 className="w-3.5 h-3.5" /> Métricas
           </button>
         </div>
+        {metaProfile && <MetaProfileBadge profile={metaProfile} />}
         </div>
       </div>
 
       <div className="shrink-0 mx-8 mt-4">
-        <MetaAdsConnectionCard />
+        <MetaAdsConnectionCard onConnectionChange={load} />
       </div>
+
+      {syncError && (
+        <div className="shrink-0 mx-8 mt-4 flex items-start gap-2.5 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20">
+          <Info className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+          <p className="text-[11px] text-red-300 leading-relaxed">{syncError}</p>
+        </div>
+      )}
+
+      {metaConnected && !syncError && !loading && creatives.length === 0 && (
+        <div className="shrink-0 mx-8 mt-4 flex items-start gap-2.5 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <Info className="w-4 h-4 text-white/30 shrink-0 mt-0.5" />
+          <p className="text-[11px] text-white/45 leading-relaxed">
+            Conta conectada, mas ainda sem anúncios criados nela. Campanhas em rascunho não aparecem aqui — assim que você publicar um anúncio, ele entra na próxima atualização.
+          </p>
+        </div>
+      )}
 
       {hasMockData && (
         <div className="shrink-0 mx-8 mt-4 flex items-start gap-2.5 px-4 py-3 rounded-xl bg-amber-500/[0.06] border border-amber-500/20">
