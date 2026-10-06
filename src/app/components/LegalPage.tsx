@@ -5,6 +5,8 @@ import { LEGAL } from "../lib/legal";
 export function LegalPage({ title, intro, children }: { title: string; intro: string; children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#0a0a0e] text-white/80" style={{ fontFamily: "var(--font-sora), system-ui, sans-serif" }}>
+      {/* globals.css trava o body em overflow:hidden (o app é um editor de tela cheia); páginas de leitura precisam rolar. */}
+      <style>{`body { overflow: auto !important; }`}</style>
       <header className="border-b border-white/[0.06]">
         <div className="max-w-3xl mx-auto px-6 py-5 flex items-center justify-between gap-4">
           <Link href="/" className="text-[15px] font-semibold text-white tracking-tight">{LEGAL.product}</Link>
