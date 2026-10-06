@@ -1491,7 +1491,17 @@ function MentionTextarea({ value, onChange, references, avatars }: {
   references: RefCard[]; avatars: AvatarCard[];
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const [mentionQuery, setMentionQuery] = useState<{ query: string; start: number } | null>(null);
+
+  // A camada de destaque fica atrás do campo e precisa rolar junto com ele.
+  const syncScroll = () => {
+    if (overlayRef.current && textareaRef.current) {
+      overlayRef.current.scrollTop = textareaRef.current.scrollTop;
+      overlayRef.current.scrollLeft = textareaRef.current.scrollLeft;
+    }
+  };
+  useEffect(syncScroll, [value]);
 
   const allMentions = [
     ...references.map(r => ({ label: `@${r.label}`, type: "img"    as const, color: "#4ade80", bg: "rgba(74,222,128,.15)" })),
@@ -1529,21 +1539,26 @@ function MentionTextarea({ value, onChange, references, avatars }: {
     }, 0);
   };
 
+  // As duas camadas (destaque e campo) precisam ter geometria IDÊNTICA: mesma
+  // fonte, padding e largura útil, senão o texto/cursor desalinham do destaque.
+  // Por isso nenhuma mostra barra de rolagem (a barra mudaria a largura útil de
+  // uma só) e o destaque não usa padding horizontal (ver renderHighlighted).
   const STYLE: React.CSSProperties = {
-    position: "absolute", inset: 0, padding: "14px 16px",
-    fontSize: 13, lineHeight: 1.65,
+    position: "absolute", inset: 0, padding: "14px 16px 44px",
+    fontSize: 13, lineHeight: 1.65, letterSpacing: "normal",
     fontFamily: "ui-monospace,'JetBrains Mono','Fira Code',monospace",
-    whiteSpace: "pre-wrap", wordBreak: "break-word", overflowY: "auto",
+    whiteSpace: "pre-wrap", wordBreak: "break-word", overflowWrap: "break-word",
+    overflowY: "auto", scrollbarWidth: "none",
   };
   const renderHighlighted = (text: string) =>
     text.split(/(@(?:img|avatar)\d+)/g).map((part, i) => {
       if (/^@img\d+$/.test(part)) {
         const exists = !!references[parseInt(part.replace("@img", "")) - 1];
-        return <mark key={i} style={{ background: exists ? "rgba(34,197,94,.18)" : "rgba(255,255,255,.05)", color: exists ? "#4ade80" : "#6b7280", borderRadius: 3, padding: "0 2px" }}>{part}</mark>;
+        return <mark key={i} style={{ background: exists ? "rgba(34,197,94,.18)" : "rgba(255,255,255,.05)", boxShadow: `0 0 0 2px ${exists ? "rgba(34,197,94,.18)" : "rgba(255,255,255,.05)"}`, color: exists ? "#4ade80" : "#6b7280", borderRadius: 3, padding: 0 }}>{part}</mark>;
       }
       if (/^@avatar\d+$/.test(part)) {
         const exists = !!avatars[parseInt(part.replace("@avatar", "")) - 1];
-        return <mark key={i} style={{ background: exists ? "rgba(251,191,36,.15)" : "rgba(255,255,255,.05)", color: exists ? "#fbbf24" : "#6b7280", borderRadius: 3, padding: "0 2px" }}>{part}</mark>;
+        return <mark key={i} style={{ background: exists ? "rgba(251,191,36,.15)" : "rgba(255,255,255,.05)", boxShadow: `0 0 0 2px ${exists ? "rgba(251,191,36,.15)" : "rgba(255,255,255,.05)"}`, color: exists ? "#fbbf24" : "#6b7280", borderRadius: 3, padding: 0 }}>{part}</mark>;
       }
       // Regular text: same color as the textarea so only the marks stand out
       return <span key={i} style={{ color: "rgba(255,255,255,.72)" }}>{part}</span>;
@@ -1553,13 +1568,14 @@ function MentionTextarea({ value, onChange, references, avatars }: {
     <div style={{ position: "relative", minHeight: 180 }}>
       {/* Highlight layer — sits behind the textarea and renders @mention chips.
           The textarea is fully transparent so only this layer is visible. */}
-      <div aria-hidden style={{ ...STYLE, pointerEvents: "none", userSelect: "none" }}>
+      <div ref={overlayRef} aria-hidden style={{ ...STYLE, overflow: "hidden", pointerEvents: "none", userSelect: "none" }}>
         {renderHighlighted(value + "​")}
       </div>
       <textarea
         ref={textareaRef}
         value={value}
         onChange={handleChange}
+        onScroll={syncScroll}
         onKeyDown={e => {
           if (e.key === "Escape") setMentionQuery(null);
           if (e.key === "Enter" && suggestions.length > 0) {
@@ -1568,8 +1584,8 @@ function MentionTextarea({ value, onChange, references, avatars }: {
           }
         }}
         placeholder={"Recrie a @img1 e substitua o homem\npelo @avatar1 e troque a frase por IA GEN"}
-        style={{ ...STYLE, background: "transparent", color: "transparent", caretColor: "#a78bfa", resize: "none", outline: "none", border: "none", paddingBottom: 44 }}
-        className="placeholder-white/[0.15]"
+        style={{ ...STYLE, background: "transparent", color: "transparent", caretColor: "#a78bfa", resize: "none", outline: "none", border: "none" }}
+        className="placeholder-white/[0.15] [&::-webkit-scrollbar]:hidden"
       />
 
       {/* @mention dropdown */}
