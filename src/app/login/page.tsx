@@ -190,6 +190,14 @@ export default function LoginPage() {
               <span className="wf-safe-dot" />
               <span className="wf-safe-text">Conexão segura e criptografada</span>
             </div>
+
+            <p className="wf-meta" style={{ marginTop: 12 }}>
+              <a href="/privacidade" className="wf-link">Privacidade</a>
+              {" · "}
+              <a href="/termos" className="wf-link">Termos</a>
+              {" · "}
+              <a href="/exclusao-de-dados" className="wf-link">Exclusão de dados</a>
+            </p>
           </div>
         </section>
       </main>

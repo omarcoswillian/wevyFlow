@@ -41,7 +41,11 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/auth") ||
     pathname.startsWith("/api") ||
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/p/");
+    pathname.startsWith("/p/") ||
+    // Páginas legais: precisam abrir sem login (exigidas pelo Google e pela Meta).
+    pathname === "/privacidade" ||
+    pathname === "/termos" ||
+    pathname === "/exclusao-de-dados";
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
