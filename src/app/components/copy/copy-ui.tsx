@@ -207,3 +207,98 @@ export function AdPreview({ option, pageName }: { option: AdCopyOption; pageName
     </div>
   );
 }
+
+/* ── Carrosséis e Thumbs ─────────────────────────────────── */
+
+/** Texto copiável de uma opção: carrossel inclui os slides. */
+export function optionToText(o: AdCopyOption): string {
+  if (o.slides?.length) {
+    return [`Capa: ${o.headline}`, ...o.slides.map((s, i) => `Slide ${i + 2}: ${s}`), `Final: ${o.cta}`].join("\n");
+  }
+  return o.cta ? `${o.headline}\n${o.cta}` : o.headline;
+}
+
+export function optionsToTextFor(options: AdCopyOption[]): string {
+  return options.map((o, i) => `${i + 1}. ${optionToText(o).replace(/\n/g, "\n   ")}`).join("\n\n");
+}
+
+/** Cartão de opção de Carrossel ou Thumb: ângulo, headline (capa ou texto da thumb),
+ * slides numerados quando houver e CTA/complemento. */
+export function ContentOptionCard({ option, selected, copied, onCopy, onSelect }: {
+  option: AdCopyOption; selected?: boolean; copied?: boolean; onCopy: () => void; onSelect?: () => void;
+}) {
+  const tone = angleTone(option.angle);
+  return (
+    <div className={cn("rounded-2xl border p-4 transition-colors flex flex-col",
+      selected ? "border-purple-500/50 bg-purple-500/[0.07]" : "border-white/[0.07] bg-white/[0.025] hover:border-white/[0.14] hover:bg-white/[0.04]")}>
+      <div className="flex items-center justify-between gap-2 mb-2.5">
+        <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold", tone.chip)}>
+          <span className={cn("w-1.5 h-1.5 rounded-full", tone.dot)} />
+          {angleShortLabel(option.angle)}
+        </span>
+        {selected && <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-purple-300"><CheckCircle2 className="w-3 h-3" /> Escolhida</span>}
+      </div>
+
+      <p className="text-[15px] font-semibold text-white leading-[1.3] tracking-[-0.01em]">{option.headline}</p>
+
+      {option.slides && option.slides.length > 0 && (
+        <ol className="mt-3 space-y-1.5">
+          {option.slides.map((s, i) => (
+            <li key={i} className="flex gap-2 text-[12px] text-white/60 leading-snug">
+              <span className="shrink-0 w-4 text-right text-white/25 tabular-nums">{i + 2}</span>
+              <span>{s}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+
+      {option.cta && <div className="mt-3"><CtaPill text={option.cta} /></div>}
+
+      <div className="mt-3.5 pt-3 border-t border-white/[0.05] flex items-center justify-between gap-3">
+        <span className="text-[10px] text-white/30">
+          {option.slides ? `${option.slides.length + 2} slides` : `${option.headline.length} caracteres`}
+        </span>
+        <div className="flex items-center gap-1">
+          <button onClick={onCopy} aria-label="Copiar"
+            className={cn("inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-medium transition-colors cursor-pointer",
+              copied ? "bg-emerald-500/15 text-emerald-300" : "text-white/40 hover:text-white/70 hover:bg-white/[0.06]")}>
+            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}{copied ? "Copiado" : "Copiar"}
+          </button>
+          {onSelect && (
+            <button onClick={onSelect}
+              className={cn("px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-colors cursor-pointer",
+                selected ? "bg-purple-500/25 text-purple-200" : "bg-white/[0.06] text-white/60 hover:bg-white/[0.1] hover:text-white")}>
+              {selected ? "Desmarcar" : "Escolher"}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Mock de thumbnail 16:9: o texto como o público vai ver, com o selo no canto. */
+export function ThumbPreview({ option }: { option: AdCopyOption }) {
+  return (
+    <div className="relative aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-[#2a1747] via-[#171021] to-[#0b0911] flex items-center px-6 border border-white/[0.08]">
+      <p className="max-w-[75%] text-[26px] leading-[1.05] font-extrabold text-white uppercase tracking-[-0.02em]">{option.headline}</p>
+      {option.cta && <span className="absolute top-3 right-3 px-2 py-1 rounded bg-yellow-400 text-black text-[11px] font-extrabold uppercase">{option.cta}</span>}
+      <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-white text-[10px] font-semibold">12:34</span>
+    </div>
+  );
+}
+
+/** Faixa de slides 4:5 do carrossel, na ordem de leitura. */
+export function CarouselPreview({ option }: { option: AdCopyOption }) {
+  const slides = [option.headline, ...(option.slides ?? []), option.cta];
+  return (
+    <div className="flex gap-2.5 overflow-x-auto pb-2">
+      {slides.map((text, i) => (
+        <div key={i} className="shrink-0 w-[150px] aspect-[4/5] rounded-xl border border-white/[0.08] bg-gradient-to-b from-[#1d1530] to-[#0f0c18] p-3 flex flex-col">
+          <span className="text-[9px] text-white/25 tabular-nums">{i + 1}/{slides.length}</span>
+          <p className={cn("flex-1 flex items-center text-white leading-snug", i === 0 ? "text-[14px] font-bold" : i === slides.length - 1 ? "text-[12px] font-semibold text-purple-200" : "text-[11px] text-white/80")}>{text}</p>
+        </div>
+      ))}
+    </div>
+  );
+}

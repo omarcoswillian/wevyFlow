@@ -6,7 +6,7 @@ type Service = ReturnType<typeof createServiceClient>;
 /** Mídia dos anúncios da Meta: o servidor baixa (nunca o navegador) e guarda uma
  * cópia no nosso Storage, porque as URLs da CDN da Meta expiram e não têm CORS. */
 
-const ALLOWED_HOST_SUFFIXES = [".fbcdn.net", ".facebook.com", ".fbsbx.com", ".cdninstagram.com", ".instagram.com"];
+const ALLOWED_HOST_SUFFIXES = [".fbcdn.net", ".facebook.com", ".fbsbx.com", ".cdninstagram.com", ".instagram.com", ".ytimg.com"];
 export const MAX_IMAGE_BYTES = 10_000_000;
 /** Vídeo vai inline pra IA, então fica bem abaixo do limite de ~100 MB do corpo. */
 export const MAX_VIDEO_BYTES = 20_000_000;
@@ -21,7 +21,7 @@ export function isAllowedMetaMediaUrl(raw: string): boolean {
   }
 }
 
-async function downloadLimited(url: string, maxBytes: number, accept: "image" | "video"): Promise<{ buffer: Buffer; contentType: string }> {
+export async function downloadLimited(url: string, maxBytes: number, accept: "image" | "video"): Promise<{ buffer: Buffer; contentType: string }> {
   // Só hosts da Meta e sem seguir redirect: o campo vem da API, mas não é motivo pra
   // o servidor buscar qualquer endereço.
   if (!isAllowedMetaMediaUrl(url)) throw new MetaAdsApiError("Endereço de mídia não permitido.", 400);
@@ -120,8 +120,8 @@ export async function fetchAdVideo(videoId: string, token: string): Promise<{ bu
 }
 
 /** Apaga as cópias de mídia de anúncios de um usuário (desconexão/exclusão de dados). */
-export async function deleteAdMedia(service: Service, userId: string): Promise<void> {
-  const folder = `${userId}/ads`;
+export async function deleteAdMedia(service: Service, userId: string, sub: "ads" | "yt" = "ads"): Promise<void> {
+  const folder = `${userId}/${sub}`;
   const { data } = await service.storage.from(BUCKET).list(folder, { limit: 1000 });
   if (data?.length) await service.storage.from(BUCKET).remove(data.map((f) => `${folder}/${f.name}`));
 }

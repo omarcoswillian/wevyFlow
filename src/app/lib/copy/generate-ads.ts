@@ -15,6 +15,8 @@ export interface AdCopyOption {
   headline: string;
   cta: string;
   angle: string;
+  /** Só em carrosséis: textos dos slides depois da capa, na ordem. */
+  slides?: string[];
 }
 
 const HEADLINE_MAX = 70;

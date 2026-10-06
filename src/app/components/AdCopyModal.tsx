@@ -3,9 +3,9 @@
 import { useState, useCallback } from "react";
 import { X, Megaphone, Sparkles, Copy, Check, Loader2, AlertCircle, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useCopyDocuments } from "../lib/copy/useCopyDocuments";
+import { useCopyDocuments, type CopyType } from "../lib/copy/useCopyDocuments";
 import type { AdCopyOption } from "../lib/copy/generate-ads";
-import { CopyOptionCard, optionsToText } from "./copy/copy-ui";
+import { CopyOptionCard, ContentOptionCard, optionToText, optionsToTextFor } from "./copy/copy-ui";
 
 interface LaunchFacts {
   productName: string;
@@ -14,14 +14,23 @@ interface LaunchFacts {
   transformation: string;
 }
 
+const TIPO_COPY: Record<CopyType, { modalTitle: string; saveTitle: string; button: string }> = {
+  ads: { modalTitle: "Copy de anúncios", saveTitle: "Anúncios", button: "Gerar copy" },
+  carrossel: { modalTitle: "Copy de carrossel", saveTitle: "Carrossel", button: "Gerar carrosséis" },
+  thumb: { modalTitle: "Texto de thumb", saveTitle: "Thumb", button: "Gerar textos de thumb" },
+};
+
 interface AdCopyModalProps {
+  /** Pasta da copy: criativos (ads), carrossel ou thumb. */
+  tipo?: CopyType;
   onClose: () => void;
   /** When provided, facts come from the launch briefing (read-only) instead of a free-form form. */
   projectId?: string;
   launchFacts?: LaunchFacts;
 }
 
-export function AdCopyModal({ onClose, projectId, launchFacts }: AdCopyModalProps) {
+export function AdCopyModal({ tipo = "ads", onClose, projectId, launchFacts }: AdCopyModalProps) {
+  const labels = TIPO_COPY[tipo];
   const isLaunchMode = Boolean(projectId && launchFacts);
   const { save } = useCopyDocuments();
 
@@ -48,8 +57,8 @@ export function AdCopyModal({ onClose, projectId, launchFacts }: AdCopyModalProp
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
           isLaunchMode
-            ? { type: "ads", projectId }
-            : { type: "ads", productName, niche, targetAudience, transformation }
+            ? { type: tipo, projectId }
+            : { type: tipo, productName, niche, targetAudience, transformation }
         ),
       });
       const data = await res.json();
@@ -62,26 +71,27 @@ export function AdCopyModal({ onClose, projectId, launchFacts }: AdCopyModalProp
     } finally {
       setLoading(false);
     }
-  }, [isLaunchMode, projectId, productName, niche, targetAudience, transformation]);
+  }, [isLaunchMode, projectId, tipo, productName, niche, targetAudience, transformation]);
 
   const handleCopy = useCallback((option: AdCopyOption, index: number) => {
-    navigator.clipboard.writeText(`${option.headline}\n${option.cta}`);
+    navigator.clipboard.writeText(optionToText(option));
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
   }, []);
 
   const handleSave = useCallback(async () => {
     if (!options) return;
-    const title = (isLaunchMode ? launchFacts?.productName : productName) || niche || "Copy de anúncios";
+    const title = (isLaunchMode ? launchFacts?.productName : productName) || niche || labels.modalTitle;
     const doc = await save({
-      title: `Anúncios — ${title}`,
+      type: tipo,
+      title: `${labels.saveTitle} — ${title}`,
       context,
       options,
       model,
       projectId: isLaunchMode ? projectId : null,
     });
     if (doc) setSaved(true);
-  }, [options, context, model, save, isLaunchMode, projectId, launchFacts, productName, niche]);
+  }, [options, context, model, save, tipo, labels, isLaunchMode, projectId, launchFacts, productName, niche]);
 
   const canGenerate = isLaunchMode || Boolean(productName.trim() || niche.trim());
 
@@ -96,7 +106,7 @@ export function AdCopyModal({ onClose, projectId, launchFacts }: AdCopyModalProp
               <div className="w-7 h-7 rounded-lg bg-purple-500/15 flex items-center justify-center">
                 <Megaphone className="w-3.5 h-3.5 text-purple-400" />
               </div>
-              <h2 className="text-[13px] font-semibold text-white">Copy de anúncios</h2>
+              <h2 className="text-[13px] font-semibold text-white">{labels.modalTitle}</h2>
             </div>
             <button onClick={onClose} className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/[0.05] transition-all cursor-pointer">
               <X className="w-4 h-4" />
@@ -142,7 +152,7 @@ export function AdCopyModal({ onClose, projectId, launchFacts }: AdCopyModalProp
               disabled={loading || !canGenerate}
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white text-[12px] font-semibold transition-colors cursor-pointer"
             >
-              {loading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Gerando...</> : <><Sparkles className="w-3.5 h-3.5" /> {options ? "Gerar de novo" : "Gerar copy"}</>}
+              {loading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Gerando...</> : <><Sparkles className="w-3.5 h-3.5" /> {options ? "Gerar de novo" : labels.button}</>}
             </button>
 
             {error && (
@@ -156,7 +166,7 @@ export function AdCopyModal({ onClose, projectId, launchFacts }: AdCopyModalProp
                 <div className="flex items-center justify-between">
                   <p className="text-[10px] uppercase tracking-[0.14em] text-white/30 font-semibold">{options.length} opções geradas</p>
                   <button
-                    onClick={() => { navigator.clipboard.writeText(optionsToText(options)); setCopiedIndex(-1); setTimeout(() => setCopiedIndex(null), 2000); }}
+                    onClick={() => { navigator.clipboard.writeText(optionsToTextFor(options)); setCopiedIndex(-1); setTimeout(() => setCopiedIndex(null), 2000); }}
                     className={cn("flex items-center gap-1.5 text-[10px] font-medium transition-colors cursor-pointer",
                       copiedIndex === -1 ? "text-emerald-300" : "text-white/40 hover:text-white/70")}
                   >
@@ -164,7 +174,7 @@ export function AdCopyModal({ onClose, projectId, launchFacts }: AdCopyModalProp
                     {copiedIndex === -1 ? "Copiadas" : "Copiar todas"}
                   </button>
                 </div>
-                {options.map((opt, i) => (
+                {options.map((opt, i) => tipo === "ads" ? (
                   <CopyOptionCard
                     key={i}
                     option={opt}
@@ -172,6 +182,8 @@ export function AdCopyModal({ onClose, projectId, launchFacts }: AdCopyModalProp
                     copied={copiedIndex === i}
                     onCopy={() => handleCopy(opt, i)}
                   />
+                ) : (
+                  <ContentOptionCard key={i} option={opt} copied={copiedIndex === i} onCopy={() => handleCopy(opt, i)} />
                 ))}
               </div>
             )}

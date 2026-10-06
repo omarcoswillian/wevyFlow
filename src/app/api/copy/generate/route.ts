@@ -3,8 +3,9 @@ import { requireLaunch, launchErrorResponse } from "@/lib/launches/server";
 import type { BrandIdentity } from "../../../lib/types-kit";
 import { parseApiError } from "../../../lib/ai-client";
 import { generateAdCopy, type AdCopyFacts } from "../../../lib/copy/generate-ads";
+import { generateKindCopy } from "../../../lib/copy/generate-copy";
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -16,7 +17,7 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
   const { type = "ads", projectId, productName, niche, targetAudience, transformation, price, provas, tone, apiKey, aiProvider, aiModel } = body;
 
-  if (type !== "ads") {
+  if (type !== "ads" && type !== "carrossel" && type !== "thumb") {
     return Response.json({ error: `Tipo de copy "${type}" ainda não implementado.` }, { status: 400 });
   }
 
@@ -56,7 +57,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { options, model } = await generateAdCopy(facts, { apiKey, aiProvider, aiModel });
+    const auth = { apiKey, aiProvider, aiModel };
+    const { options, model } = type === "ads" ? await generateAdCopy(facts, auth) : await generateKindCopy(type, facts, auth);
     return Response.json({ options, model, context: facts });
   } catch (e: unknown) {
     console.error("[copy/generate] error:", e);

@@ -1,14 +1,27 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { PenTool, Sparkles, Search, Trash2, CheckCircle2, X, Copy, Check, LayoutGrid, MonitorSmartphone } from "lucide-react";
+import { PenTool, Sparkles, Search, Trash2, CheckCircle2, X, Copy, Check, LayoutGrid, MonitorSmartphone, Megaphone, GalleryHorizontal, MonitorPlay } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useCopyDocuments, type CopyDocument } from "../lib/copy/useCopyDocuments";
+import { useCopyDocuments, type CopyDocument, type CopyType } from "../lib/copy/useCopyDocuments";
 import { AdCopyModal } from "./AdCopyModal";
 import {
-  AdPreview, CopyOptionCard, CtaPill, StatusBadge,
-  modelLabel, optionsToText, relativeDate, splitTitle,
+  AdPreview, CopyOptionCard, ContentOptionCard, CarouselPreview, ThumbPreview, CtaPill, StatusBadge,
+  modelLabel, optionToText, optionsToTextFor, relativeDate, splitTitle,
 } from "./copy/copy-ui";
+
+/** As pastas da Copy: cada tipo de peça tem a sua. */
+export const COPY_FOLDERS: { id: CopyType; label: string; hint: string; icon: typeof Megaphone }[] = [
+  { id: "ads", label: "Criativos", hint: "Headline e CTA de anúncios", icon: Megaphone },
+  { id: "carrossel", label: "Carrosséis", hint: "Texto de cada slide", icon: GalleryHorizontal },
+  { id: "thumb", label: "Thumbs", hint: "Texto de thumbnails do YouTube", icon: MonitorPlay },
+];
+
+const FOLDER_EMPTY: Record<CopyType, { title: string; body: string; cta: string }> = {
+  ads: { title: "Nenhuma copy de criativo ainda", body: "Gere headlines e CTAs para anúncios, avulso ou puxando o briefing de um Lançamento.", cta: "Criar a primeira copy" },
+  carrossel: { title: "Nenhum carrossel ainda", body: "Gere a sequência de textos dos slides, da capa até a chamada final.", cta: "Criar o primeiro carrossel" },
+  thumb: { title: "Nenhuma thumb ainda", body: "Gere textos curtos e fortes para thumbnails do YouTube, um por ângulo.", cta: "Criar os primeiros textos" },
+};
 
 type Filter = "all" | "approved" | "draft";
 
@@ -45,9 +58,11 @@ function DocumentCard({ doc, now, onOpen, onDelete }: { doc: CopyDocument; now: 
       {lead ? (
         <>
           <p className="text-[17px] leading-[1.3] font-semibold text-white tracking-[-0.015em] line-clamp-3 min-h-[66px]">{lead.headline}</p>
-          <div className="mt-3.5">
-            <CtaPill text={lead.cta} />
-          </div>
+          {lead.cta && (
+            <div className="mt-3.5">
+              <CtaPill text={lead.cta} />
+            </div>
+          )}
         </>
       ) : (
         <p className="text-[12px] text-white/30 min-h-[66px]">Sem opções nesta copy.</p>
@@ -58,6 +73,7 @@ function DocumentCard({ doc, now, onOpen, onDelete }: { doc: CopyDocument; now: 
           <p className="text-[12px] font-medium text-white/75 truncate">{name}</p>
           <p className="text-[10px] text-white/30 mt-0.5">
             {doc.options.length} {doc.options.length === 1 ? "ângulo" : "ângulos"}
+            {doc.type === "carrossel" && doc.options[0]?.slides ? ` · ${doc.options[0].slides.length + 2} slides` : ""}
             {doc.selected ? " · 1 escolhida" : ""}
           </p>
         </div>
@@ -137,7 +153,7 @@ function DocumentDrawer({ doc, now, onClose, onUpdate, onDelete }: {
           </div>
 
           <div className="mt-4 inline-flex p-0.5 rounded-xl bg-white/[0.04] border border-white/[0.06]">
-            {([["cards", "Cartões", LayoutGrid], ["ads", "Como anúncio", MonitorSmartphone]] as const).map(([id, label, Icon]) => (
+            {([["cards", "Cartões", LayoutGrid], ["ads", doc.type === "thumb" ? "Como thumb" : doc.type === "carrossel" ? "Como carrossel" : "Como anúncio", MonitorSmartphone]] as const).map(([id, label, Icon]) => (
               <button
                 key={id}
                 onClick={() => setView(id)}
@@ -153,7 +169,7 @@ function DocumentDrawer({ doc, now, onClose, onUpdate, onDelete }: {
         <div className="flex-1 overflow-y-auto px-6 py-5">
           {view === "cards" ? (
             <div className="grid gap-3 sm:grid-cols-2">
-              {doc.options.map((opt, i) => (
+              {doc.options.map((opt, i) => doc.type === "ads" ? (
                 <CopyOptionCard
                   key={i}
                   option={opt}
@@ -162,6 +178,16 @@ function DocumentDrawer({ doc, now, onClose, onUpdate, onDelete }: {
                   onCopy={() => flash(`o${i}`, `${opt.headline}\n${opt.cta}`)}
                   onSelect={() => onUpdate({ selected: isSelected(opt) ? null : { headline: opt.headline, cta: opt.cta } })}
                 />
+              ) : (
+                <div key={i} className={doc.type === "carrossel" ? "sm:col-span-2" : undefined}>
+                  <ContentOptionCard
+                    option={opt}
+                    selected={isSelected(opt)}
+                    copied={copiedKey === `o${i}`}
+                    onCopy={() => flash(`o${i}`, optionToText(opt))}
+                    onSelect={() => onUpdate({ selected: isSelected(opt) ? null : { headline: opt.headline, cta: opt.cta } })}
+                  />
+                </div>
               ))}
             </div>
           ) : (
@@ -171,7 +197,7 @@ function DocumentDrawer({ doc, now, onClose, onUpdate, onDelete }: {
                   <p className="text-[10px] uppercase tracking-[0.14em] text-white/30 font-semibold mb-2">
                     {opt.angle}{isSelected(opt) ? " · escolhida" : ""}
                   </p>
-                  <AdPreview option={opt} pageName={name} />
+                  {doc.type === "thumb" ? <ThumbPreview option={opt} /> : doc.type === "carrossel" ? <CarouselPreview option={opt} /> : <AdPreview option={opt} pageName={name} />}
                 </div>
               ))}
             </div>
@@ -196,7 +222,7 @@ function DocumentDrawer({ doc, now, onClose, onUpdate, onDelete }: {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => flash("all", optionsToText(doc.options))}
+              onClick={() => flash("all", optionsToTextFor(doc.options))}
               className={cn("flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-medium transition-colors cursor-pointer",
                 copiedKey === "all" ? "bg-emerald-500/15 text-emerald-300" : "bg-white/[0.06] text-white/70 hover:bg-white/[0.1]")}
             >
@@ -224,10 +250,26 @@ export interface CopyViewLaunch {
 
 /** Sem `launch`, é a biblioteca global de copy; com `launch`, mostra e gera só
  * as copies daquele lançamento (usado dentro da aba Copy do Hub). */
-export function CopyView({ launch }: { launch?: CopyViewLaunch } = {}) {
-  const { documents, loading, reload, update, remove } = useCopyDocuments(launch?.projectId);
-  const [generatorOpen, setGeneratorOpen] = useState(false);
+export function CopyView({ launch, tipo: tipoProp, onTipoChange }: {
+  launch?: CopyViewLaunch;
+  /** Pasta ativa controlada de fora (a URL em /copy). Sem isso, a tela guarda a própria. */
+  tipo?: CopyType;
+  onTipoChange?: (tipo: CopyType) => void;
+} = {}) {
+  const { documents: allDocuments, loading, reload, update, remove } = useCopyDocuments(launch?.projectId);
   const [openDocId, setOpenDocId] = useState<string | null>(null);
+  const [tipoState, setTipoState] = useState<CopyType>("ads");
+  const tipo = tipoProp ?? tipoState;
+  const setTipo = (t: CopyType) => { setOpenDocId(null); if (onTipoChange) onTipoChange(t); else setTipoState(t); };
+  const documents = useMemo(() => allDocuments.filter((d) => d.type === tipo), [allDocuments, tipo]);
+  const folderCounts = useMemo(() => ({
+    ads: allDocuments.filter((d) => d.type === "ads").length,
+    carrossel: allDocuments.filter((d) => d.type === "carrossel").length,
+    thumb: allDocuments.filter((d) => d.type === "thumb").length,
+  }), [allDocuments]);
+  const folder = COPY_FOLDERS.find((f) => f.id === tipo)!;
+  const empty = FOLDER_EMPTY[tipo];
+  const [generatorOpen, setGeneratorOpen] = useState(false);
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
   const [now] = useState(() => Date.now());
@@ -263,9 +305,9 @@ export function CopyView({ launch }: { launch?: CopyViewLaunch } = {}) {
             <PenTool className="w-4 h-4 text-purple-400" />
           </div>
           <div>
-            <h1 className="text-[15px] font-semibold text-white/90">{launch ? "Copy do lançamento" : "Copy"}</h1>
+            <h1 className="text-[15px] font-semibold text-white/90">{launch ? "Copy do lançamento" : "Copy"} <span className="text-white/25 mx-1">/</span> {folder.label}</h1>
             <p className="text-[11px] text-white/30">
-              {launch ? `Headlines e CTAs de ${launch.facts.productName}` : "Headlines, CTAs e roteiros — texto, separado do visual"}
+              {launch ? `${folder.hint} de ${launch.facts.productName}` : `${folder.hint}: texto, separado do visual`}
             </p>
           </div>
         </div>
@@ -273,8 +315,33 @@ export function CopyView({ launch }: { launch?: CopyViewLaunch } = {}) {
           onClick={() => setGeneratorOpen(true)}
           className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-[12px] font-semibold transition-colors cursor-pointer"
         >
-          <Sparkles className="w-3.5 h-3.5" /> Nova copy
+          <Sparkles className="w-3.5 h-3.5" /> {tipo === "ads" ? "Nova copy" : tipo === "carrossel" ? "Novo carrossel" : "Novas thumbs"}
         </button>
+      </div>
+
+      <div className="px-8 pt-5 grid gap-3 sm:grid-cols-3 shrink-0">
+        {COPY_FOLDERS.map((f) => {
+          const active = f.id === tipo;
+          return (
+            <button
+              key={f.id}
+              onClick={() => setTipo(f.id)}
+              className={cn(
+                "flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-all cursor-pointer",
+                active ? "border-purple-500/40 bg-purple-500/[0.08]" : "border-white/[0.07] bg-white/[0.02] hover:border-white/[0.14] hover:bg-white/[0.035]",
+              )}
+            >
+              <span className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", active ? "bg-purple-500/20 text-purple-300" : "bg-white/[0.05] text-white/40")}>
+                <f.icon className="w-4 h-4" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className={cn("block text-[13px] font-semibold", active ? "text-white" : "text-white/70")}>{f.label}</span>
+                <span className="block text-[10px] text-white/30 truncate">{f.hint}</span>
+              </span>
+              <span className={cn("text-[11px] tabular-nums font-semibold", active ? "text-purple-200" : "text-white/30")}>{folderCounts[f.id]}</span>
+            </button>
+          );
+        })}
       </div>
 
       {documents.length > 0 && (
@@ -312,10 +379,10 @@ export function CopyView({ launch }: { launch?: CopyViewLaunch } = {}) {
         ) : documents.length === 0 ? (
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] px-6 py-20 flex flex-col items-center gap-3 text-center">
             <PenTool className="w-8 h-8 text-white/15" />
-            <p className="text-[14px] font-medium text-white/60">Nenhuma copy ainda</p>
-            <p className="text-[12px] text-white/30 max-w-sm leading-relaxed">{launch ? "Gere headlines e CTAs para anúncios usando o briefing deste lançamento." : "Gere headlines e CTAs para anúncios, avulso ou puxando o briefing de um Lançamento."}</p>
+            <p className="text-[14px] font-medium text-white/60">{empty.title}</p>
+            <p className="text-[12px] text-white/30 max-w-sm leading-relaxed">{launch ? "Usa o briefing deste lançamento." : empty.body}</p>
             <button onClick={() => setGeneratorOpen(true)} className="mt-2 flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-[12px] font-semibold transition-colors cursor-pointer">
-              <Sparkles className="w-3.5 h-3.5" /> Criar a primeira copy
+              <Sparkles className="w-3.5 h-3.5" /> {empty.cta}
             </button>
           </div>
         ) : visible.length === 0 ? (
@@ -340,6 +407,7 @@ export function CopyView({ launch }: { launch?: CopyViewLaunch } = {}) {
 
       {generatorOpen && (
         <AdCopyModal
+          tipo={tipo}
           onClose={() => { setGeneratorOpen(false); reload(); }}
           projectId={launch?.projectId}
           launchFacts={launch?.facts}

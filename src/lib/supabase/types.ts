@@ -425,6 +425,150 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["meta_ads_daily_insights"]["Row"]>;
         Relationships: [];
       };
+      youtube_connections: {
+        Row: {
+          user_id: string;
+          refresh_token: string;
+          channel_id: string;
+          channel_title: string | null;
+          channel_picture_url: string | null;
+          uploads_playlist_id: string | null;
+          last_synced_at: string | null;
+          ctr_available: boolean | null;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          refresh_token: string;
+          channel_id: string;
+          channel_title?: string | null;
+          channel_picture_url?: string | null;
+          uploads_playlist_id?: string | null;
+          last_synced_at?: string | null;
+          ctr_available?: boolean | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["youtube_connections"]["Insert"]>;
+        Relationships: [];
+      };
+      youtube_videos: {
+        Row: {
+          user_id: string;
+          video_id: string;
+          title: string;
+          published_at: string;
+          thumbnail_url: string | null;
+          thumbnail_path: string | null;
+          duration_seconds: number;
+          view_count: number;
+          like_count: number;
+          comment_count: number;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          video_id: string;
+          title: string;
+          published_at: string;
+          thumbnail_url?: string | null;
+          thumbnail_path?: string | null;
+          duration_seconds?: number;
+          view_count?: number;
+          like_count?: number;
+          comment_count?: number;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["youtube_videos"]["Insert"]>;
+        Relationships: [];
+      };
+      youtube_video_metrics: {
+        Row: {
+          user_id: string;
+          video_id: string;
+          period_days: number;
+          views: number;
+          minutes_watched: number;
+          avg_view_duration_seconds: number;
+          avg_view_percentage: number;
+          likes: number;
+          comments: number;
+          subscribers_gained: number;
+          thumb_impressions: number | null;
+          thumb_ctr: number | null;
+          fetched_at: string;
+        };
+        Insert: {
+          user_id: string;
+          video_id: string;
+          period_days: number;
+          views?: number;
+          minutes_watched?: number;
+          avg_view_duration_seconds?: number;
+          avg_view_percentage?: number;
+          likes?: number;
+          comments?: number;
+          subscribers_gained?: number;
+          thumb_impressions?: number | null;
+          thumb_ctr?: number | null;
+          fetched_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["youtube_video_metrics"]["Insert"]>;
+        Relationships: [];
+      };
+      youtube_thumbnail_tests: {
+        Row: {
+          id: string;
+          user_id: string;
+          video_id: string;
+          hypothesis: string;
+          analysis_id: string | null;
+          variants: { label: string; criativo_id: string | null; url: string | null; watch_share: number | null }[];
+          status: "running" | "finished";
+          winner_label: string | null;
+          note: string | null;
+          started_at: string;
+          ended_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          video_id: string;
+          hypothesis: string;
+          analysis_id?: string | null;
+          variants?: { label: string; criativo_id: string | null; url: string | null; watch_share: number | null }[];
+          status?: "running" | "finished";
+          winner_label?: string | null;
+          note?: string | null;
+          started_at?: string;
+          ended_at?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["youtube_thumbnail_tests"]["Insert"]>;
+        Relationships: [];
+      };
+      youtube_studio_ctr: {
+        Row: {
+          user_id: string;
+          video_id: string;
+          period_start: string;
+          period_end: string;
+          impressions: number;
+          ctr: number;
+          imported_at: string;
+        };
+        Insert: {
+          user_id: string;
+          video_id: string;
+          period_start: string;
+          period_end: string;
+          impressions?: number;
+          ctr?: number;
+          imported_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["youtube_studio_ctr"]["Insert"]>;
+        Relationships: [];
+      };
       ad_creative_analyses: {
         Row: {
           id: string;

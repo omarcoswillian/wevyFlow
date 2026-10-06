@@ -7,10 +7,13 @@ import type { AdCopyOption } from "./generate-ads";
 
 type Row = Database["public"]["Tables"]["copy_documents"]["Row"];
 
+/** ads = Criativos; carrossel = Carrosséis; thumb = Thumbs do YouTube. */
+export type CopyType = "ads" | "carrossel" | "thumb";
+
 export interface CopyDocument {
   id: string;
   projectId: string | null;
-  type: "ads";
+  type: CopyType;
   title: string;
   status: "draft" | "approved";
   context: Record<string, unknown>;
@@ -25,7 +28,7 @@ function mapRow(row: Row): CopyDocument {
   return {
     id: row.id,
     projectId: row.project_id,
-    type: "ads",
+    type: row.type === "carrossel" || row.type === "thumb" ? row.type : "ads",
     title: row.title,
     status: row.status === "approved" ? "approved" : "draft",
     context: row.context ?? {},
@@ -73,6 +76,7 @@ export function useCopyDocuments(projectId?: string) {
   }, [load]);
 
   const save = useCallback(async (input: {
+    type?: CopyType;
     title: string;
     context: Record<string, unknown>;
     options: AdCopyOption[];
@@ -87,7 +91,7 @@ export function useCopyDocuments(projectId?: string) {
       .insert({
         user_id: user.id,
         project_id: input.projectId ?? projectId ?? null,
-        type: "ads",
+        type: input.type ?? "ads",
         title: input.title,
         context: input.context,
         options: input.options as unknown as Record<string, unknown>[],

@@ -27,6 +27,10 @@ export interface CreativeAnalysis {
 }
 
 export interface AnalysisInput {
+  /** "thumbnail": capa de vídeo do YouTube (a análise olha clique e legibilidade, não oferta). */
+  kind?: "ad" | "thumbnail";
+  /** Resumo de desempenho já formatado (usado nas thumbs, que não têm gasto/ROAS). */
+  contextLine?: string;
   mediaType: "image" | "video";
   still: { mimeType: string; data: string };
   video?: { mimeType: string; data: string } | null;
@@ -73,8 +77,29 @@ function metricsLine(m: AdMetrics | null | undefined): string {
   ].join(", ");
 }
 
+function thumbnailPrompt(input: AnalysisInput): string {
+  return `Você é um especialista em thumbnails do YouTube para canais de infoprodutos no Brasil.
+Analise esta THUMBNAIL (a imagem) do vídeo "${input.headline ?? ""}".
+Desempenho do vídeo: ${input.contextLine ?? "sem dados de desempenho"}. Classificação: ${input.verdict ?? "n/d"} (confiança ${input.confidence ?? "n/d"}).
+
+Responda SOMENTE um JSON com exatamente estas chaves (textos curtos, em português do Brasil):
+{
+ "hook": "o que atrai o olhar e a curiosidade em menos de 1 segundo",
+ "promise": "o que a thumb promete junto com o título",
+ "mechanism": "",
+ "proof": "",
+ "cta": "",
+ "visualStyle": "composição, rosto/expressão, cores, contraste, tipografia",
+ "textOnCreative": "texto visível na thumb, copiado literalmente",
+ "strengths": ["até 3 pontos fortes observáveis, incluindo legibilidade no celular"],
+ "weaknesses": ["até 3 fraquezas observáveis"],
+ "hypotheses": [ exatamente 3 objetos { "title": "nome curto", "rationale": "por que PODE aumentar o clique (diga que é hipótese)", "editInstruction": "instrução imperativa e concreta de edição VISUAL da thumb, mantendo o restante igual. Se envolver texto, escreva o texto novo exato (curto, até 5 palavras)." } ]
+}
+Regras: as 3 hipóteses testam mudanças diferentes (ex.: texto mais curto e forte, contraste, expressão/enquadramento, curiosidade). Não afirme causalidade e não sugira sensacionalismo enganoso: a thumb tem que condizer com o vídeo.`;
+}
+
 export async function analyzeCreative(client: GoogleGenAI, input: AnalysisInput): Promise<CreativeAnalysis> {
-  const prompt = `Você é um diretor de arte e estrategista de performance de anúncios no Meta (infoprodutos, Brasil).
+  const prompt = input.kind === "thumbnail" ? thumbnailPrompt(input) : `Você é um diretor de arte e estrategista de performance de anúncios no Meta (infoprodutos, Brasil).
 Analise este criativo de anúncio (${input.mediaType === "video" ? "um VÍDEO: veja os primeiros segundos e o conjunto; a imagem avulsa é a capa" : "uma IMAGEM"}).
 
 Texto do anúncio: título "${input.headline ?? ""}"; corpo "${(input.body ?? "").slice(0, 600)}".

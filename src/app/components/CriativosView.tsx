@@ -492,7 +492,7 @@ export function CriativosView() {
       try {
         const payload = JSON.parse(raw!) as {
           url?: unknown;
-          variants?: { prompt?: unknown; hypothesis?: unknown; analysisId?: unknown; sourceAdExternalId?: unknown; count?: unknown };
+          variants?: { prompt?: unknown; hypothesis?: unknown; analysisId?: unknown; sourceAdExternalId?: unknown; count?: unknown; format?: unknown };
         };
         if (typeof payload.url !== "string" || !payload.url) throw new Error("Referência inválida.");
         await addAsReference(payload.url);
@@ -502,6 +502,8 @@ export function CriativosView() {
           // a linhagem vai junto e a geração dispara sozinha (o usuário já escolheu "gerar").
           setGenPrompt(v.prompt.trim());
           setGenPromptCopy(null);
+          // Thumbs do YouTube pedem 16:9; só aceita formatos que o gerador conhece.
+          if (typeof v.format === "string" && GEN_FORMATS.some(f => f.id === v.format)) setGenFormat(v.format);
           setGenCount(typeof v.count === "number" ? Math.max(1, Math.min(8, v.count)) : 3);
           setAdLineage({
             sourceAdExternalId: typeof v.sourceAdExternalId === "string" ? v.sourceAdExternalId : null,

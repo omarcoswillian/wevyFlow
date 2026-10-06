@@ -35,6 +35,7 @@ import {
   Camera,
   GalleryHorizontalEnd,
   PenTool,
+  MonitorPlay,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ApiKeyModal } from "./ApiKeyModal";
@@ -110,7 +111,10 @@ export function HomeView({ onNavigate, onOpenSearch, contentOverride, activeNav 
   const [designExpanded, setDesignExpanded] = useState(activeNav === "criativos" || activeNav === "ensaio" || activeNav === "carrossel");
   const [anunciosExpanded, setAnunciosExpanded] = useState(activeNav === "anuncios");
   const currentVisao = searchParams.get("visao") ?? "todos";
+  const currentPlataforma = searchParams.get("plataforma") === "youtube" ? "youtube" : "facebook";
   const [emailsExpanded, setEmailsExpanded] = useState(activeNav === "emails");
+  const [copyExpanded, setCopyExpanded] = useState(activeNav === "copy");
+  const currentCopyTipo = searchParams.get("tipo") ?? "ads";
   const currentCategoria = searchParams.get("categoria") ?? "cpl";
   const [copyDocument, setCopyDocument] = useState("");
   const [copyFileName, setCopyFileName] = useState<string | null>(null);
@@ -344,7 +348,46 @@ export function HomeView({ onNavigate, onOpenSearch, contentOverride, activeNav 
           {sidebarCollapsed && <div className="pt-3" />}
 
           <SidebarItem icon={<Rocket className="w-4 h-4" />} label="Lançamentos" active={activeNav === "lancamentos"} collapsed={sidebarCollapsed} onClick={() => nav("lancamentos")} accent />
-          <SidebarItem icon={<PenTool className="w-4 h-4" />} label="Copy" active={activeNav === "copy"} collapsed={sidebarCollapsed} onClick={() => nav("copy")} />
+          {/* Copy — pastas por tipo de peça */}
+          <div>
+            <button
+              onClick={() => sidebarCollapsed ? nav("copy") : setCopyExpanded(p => !p)}
+              title={sidebarCollapsed ? "Copy" : undefined}
+              className={cn(
+                "flex items-center w-full rounded-xl transition-colors cursor-pointer",
+                sidebarCollapsed ? "justify-center p-2.5" : "gap-2.5 px-2.5 py-2 text-[12px]",
+                activeNav === "copy"
+                  ? "bg-white/[0.06] text-[#d1d1d1]"
+                  : "text-[#6b6b6b] hover:bg-white/[0.04] hover:text-[#9a9a9a]"
+              )}
+            >
+              <PenTool className="w-4 h-4 shrink-0" />
+              {!sidebarCollapsed && (
+                <>
+                  <span className="flex-1 text-left">Copy</span>
+                  <ChevronDown className={cn("w-3 h-3 text-white/20 transition-transform duration-200", copyExpanded ? "rotate-0" : "-rotate-90")} />
+                </>
+              )}
+            </button>
+            {!sidebarCollapsed && copyExpanded && (
+              <div className="ml-3 mt-0.5 border-l border-white/[0.06] pl-2 space-y-0.5 pb-1">
+                {([
+                  { label: "Criativos",  tipo: "ads" },
+                  { label: "Carrosséis", tipo: "carrossel" },
+                  { label: "Thumbs",     tipo: "thumb" },
+                ]).map((item) => {
+                  const isActive = activeNav === "copy" && currentCopyTipo === item.tipo;
+                  return (
+                    <button key={item.tipo} onClick={() => router.push(`/copy?tipo=${item.tipo}`)}
+                      className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] cursor-pointer transition-colors text-left",
+                        isActive ? "bg-white/[0.06] text-white/80" : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]")}>
+                      <span className="flex-1 truncate">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
           {/* Design — accordion */}
           <div>
             <button
@@ -437,20 +480,32 @@ export function HomeView({ onNavigate, onOpenSearch, contentOverride, activeNav 
             {!sidebarCollapsed && anunciosExpanded && (
               <div className="ml-3 mt-0.5 border-l border-white/[0.06] pl-2 space-y-0.5 pb-1">
                 {([
-                  { label: "Anúncios",           icon: <Megaphone className="w-3 h-3" />,      visao: "todos" },
-                  { label: "Melhores anúncios",  icon: <TrendingUp className="w-3 h-3" />,     visao: "melhores" },
-                  { label: "Piores anúncios",    icon: <TrendingDown className="w-3 h-3" />,   visao: "piores" },
-                ]).map((item) => {
-                  const isActive = activeNav === "anuncios" && currentVisao === item.visao;
-                  return (
-                    <button key={item.label} onClick={() => router.push(`/anuncios?visao=${item.visao}`)}
-                      className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] cursor-pointer transition-colors text-left",
-                        isActive ? "bg-white/[0.06] text-white/80" : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]")}>
-                      {item.icon}
-                      <span className="flex-1 truncate">{item.label}</span>
-                    </button>
-                  );
-                })}
+                  { plataforma: "facebook", title: "Facebook", items: [
+                    { label: "Anúncios",          icon: <Megaphone className="w-3 h-3" />,    visao: "todos" },
+                    { label: "Melhores anúncios", icon: <TrendingUp className="w-3 h-3" />,   visao: "melhores" },
+                    { label: "Piores anúncios",   icon: <TrendingDown className="w-3 h-3" />, visao: "piores" },
+                  ] },
+                  { plataforma: "youtube", title: "YouTube", items: [
+                    { label: "Vídeos",          icon: <MonitorPlay className="w-3 h-3" />,  visao: "todos" },
+                    { label: "Melhores vídeos", icon: <TrendingUp className="w-3 h-3" />,   visao: "melhores" },
+                    { label: "Piores vídeos",   icon: <TrendingDown className="w-3 h-3" />, visao: "piores" },
+                  ] },
+                ] as const).map((group) => (
+                  <div key={group.plataforma} className="pt-1">
+                    <p className="px-2 pt-1 pb-0.5 text-[9px] font-medium text-white/20 uppercase tracking-widest">{group.title}</p>
+                    {group.items.map((item) => {
+                      const isActive = activeNav === "anuncios" && currentPlataforma === group.plataforma && currentVisao === item.visao;
+                      return (
+                        <button key={`${group.plataforma}-${item.visao}`} onClick={() => router.push(`/anuncios?plataforma=${group.plataforma}&visao=${item.visao}`)}
+                          className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[11px] cursor-pointer transition-colors text-left",
+                            isActive ? "bg-white/[0.06] text-white/80" : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]")}>
+                          {item.icon}
+                          <span className="flex-1 truncate">{item.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
             )}
           </div>
