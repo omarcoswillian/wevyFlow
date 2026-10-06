@@ -5,6 +5,7 @@ import { X, Megaphone, Sparkles, Copy, Check, Loader2, AlertCircle, Save } from 
 import { cn } from "@/lib/utils";
 import { useCopyDocuments } from "../lib/copy/useCopyDocuments";
 import type { AdCopyOption } from "../lib/copy/generate-ads";
+import { CopyOptionCard, optionsToText } from "./copy/copy-ui";
 
 interface LaunchFacts {
   productName: string;
@@ -88,7 +89,7 @@ export function AdCopyModal({ onClose, projectId, launchFacts }: AdCopyModalProp
     <>
       <div className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="fixed inset-0 z-[301] flex items-center justify-center p-6 pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-[520px] rounded-2xl bg-[#18181c] border border-white/[0.08] shadow-2xl shadow-black/60 overflow-hidden max-h-[85vh] flex flex-col">
+        <div className="pointer-events-auto w-full max-w-[560px] rounded-2xl bg-[#18181c] border border-white/[0.08] shadow-2xl shadow-black/60 overflow-hidden max-h-[85vh] flex flex-col">
 
           <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] shrink-0">
             <div className="flex items-center gap-3">
@@ -151,24 +152,26 @@ export function AdCopyModal({ onClose, projectId, launchFacts }: AdCopyModalProp
             )}
 
             {options && options.length > 0 && (
-              <div className="space-y-2 pt-1">
+              <div className="space-y-2.5 pt-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-white/30 font-semibold">{options.length} opções geradas</p>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(optionsToText(options)); setCopiedIndex(-1); setTimeout(() => setCopiedIndex(null), 2000); }}
+                    className={cn("flex items-center gap-1.5 text-[10px] font-medium transition-colors cursor-pointer",
+                      copiedIndex === -1 ? "text-emerald-300" : "text-white/40 hover:text-white/70")}
+                  >
+                    {copiedIndex === -1 ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    {copiedIndex === -1 ? "Copiadas" : "Copiar todas"}
+                  </button>
+                </div>
                 {options.map((opt, i) => (
-                  <div key={i} className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-[9px] uppercase tracking-widest text-purple-400/70 font-semibold mb-1">{opt.angle}</p>
-                        <p className="text-[13px] font-semibold text-white leading-snug">{opt.headline}</p>
-                        <p className="text-[11px] text-white/40 mt-1">{opt.cta}</p>
-                      </div>
-                      <button
-                        onClick={() => handleCopy(opt, i)}
-                        className={cn("shrink-0 p-1.5 rounded-lg transition-all cursor-pointer",
-                          copiedIndex === i ? "bg-emerald-500/20 text-emerald-400" : "text-white/30 hover:text-white/60 hover:bg-white/[0.05]")}
-                      >
-                        {copiedIndex === i ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
-                  </div>
+                  <CopyOptionCard
+                    key={i}
+                    option={opt}
+                    compact
+                    copied={copiedIndex === i}
+                    onCopy={() => handleCopy(opt, i)}
+                  />
                 ))}
               </div>
             )}
