@@ -1,334 +1,120 @@
 "use client";
 
-import { useState, useRef } from "react";
-import {
-  ArrowLeft, Trash2, Clock, Loader2, CheckCircle2, AlertCircle,
-  ShoppingCart, Mail, ExternalLink,
-  RefreshCw, Zap, Globe, Smartphone, Tv, Image, LayoutGrid,
-  Link, Sparkles,
-} from "lucide-react";
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft, Trash2, CheckCircle2, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppContext } from "../(app)/_context";
-import { STRATEGY_MAP } from "../lib/launch-strategies";
-import type { LaunchKit, KitAssetInstance, StrategyAsset, CreativoFormat } from "../lib/types-kit";
+import { BRIEFING_LIMITS, toBrandInfo, type LaunchBriefing } from "../lib/launch-briefing";
 import { EmailSequencePanel } from "./EmailSequencePanel";
-import { AdCopyModal } from "./AdCopyModal";
+import { CopyView } from "./CopyView";
+import { useCopyDocuments } from "../lib/copy/useCopyDocuments";
 
-/* ── Helpers ─────────────────────────────────────────────── */
+/* O Hub controla a narrativa do lançamento (quem é o público, a promessa, o
+ * mecanismo, a oferta, as provas). Copy e Emails são frentes que consomem essa
+ * narrativa; Design/criativos ficam fora daqui, em /criativos. */
 
-function buildIdentityBlock(identity: import("../lib/types-kit").BrandIdentity): string {
-  const primary = identity.colors.find((c) => c.usage === "primary");
-  const secondary = identity.colors.find((c) => c.usage === "secondary");
-  const accent = identity.colors.find((c) => c.usage === "accent");
-  const light = identity.colors.find((c) => c.usage === "light");
-  const dark = identity.colors.find((c) => c.usage === "dark");
-  const displayFont = identity.fonts.find((f) => f.usage === "display");
-  const bodyFont = identity.fonts.find((f) => f.usage === "body");
+type HubTab = "narrativa" | "copy" | "emails";
 
-  const logo = identity.logo;
-  const logoDesc = logo.type === "wordmark-accent" && logo.accentText
-    ? `"${logo.text.replace(logo.accentText, "")}${logo.accentText}" — parte "${logo.accentText}" em estilo diferenciado (peso ${logo.accentFontWeight || logo.fontWeight}${logo.accentItalic ? ", itálico" : ""})`
-    : `"${logo.text}"`;
-
-  return [
-    "IDENTIDADE VISUAL APROVADA (use fielmente em toda a página):",
-    `Logo: ${logoDesc} | fonte: ${logo.fontFamily} | peso: ${logo.fontWeight} | letter-spacing: ${logo.letterSpacing}`,
-    primary   ? `Cor primária: ${primary.hex} (${primary.name})` : "",
-    secondary ? `Cor secundária: ${secondary.hex} (${secondary.name})` : "",
-    accent    ? `Cor de destaque/CTA: ${accent.hex} (${accent.name})` : "",
-    light     ? `Cor clara/fundo light: ${light.hex}` : "",
-    dark      ? `Cor escura/texto: ${dark.hex}` : "",
-    displayFont ? `Fonte de títulos: ${displayFont.name}` : "",
-    bodyFont    ? `Fonte de corpo: ${bodyFont.name}` : "",
-    identity.concept ? `Conceito da marca: ${identity.concept}` : "",
-    identity.words.length ? `Palavras-chave: ${identity.words.join(", ")}` : "",
-  ].filter(Boolean).join("\n");
-}
-
-function buildAssetPrompt(kit: LaunchKit, asset: StrategyAsset): string {
-  const { brandInfo: b } = kit;
-
-  const lines = [
-    `PRODUTO: ${b.productName}`,
-    `NICHO: ${b.niche}`,
-    `PÚBLICO-ALVO: ${b.targetAudience}`,
-    `TRANSFORMAÇÃO: ${b.transformation}`,
-    b.mecanismo ? `MECANISMO ÚNICO: ${b.mecanismo}` : "",
-    b.preco     ? `PREÇO + ÂNCORA: ${b.preco}` : "",
-    b.provas    ? `PROVAS E RESULTADOS: ${b.provas}` : "",
-    `COR PRIMÁRIA: ${b.primaryColor}`,
-    `COR SECUNDÁRIA: ${b.secondaryColor}`,
-    `FONTE: ${b.fontChoice}`,
-    `ESTILO: ${b.stylePreset}`,
-    kit.brandIdentity?.status === "approved" ? `\n${buildIdentityBlock(kit.brandIdentity)}` : "",
-  ].filter(Boolean).join("\n");
-
-  return `${lines}\n\nCrie um criativo visual formato ${asset.format ?? "stories"} para: ${asset.label}.`;
-}
-
-/* ── Metadata maps ───────────────────────────────────────── */
+const HUB_TABS: { id: HubTab; label: string }[] = [
+  { id: "narrativa", label: "Narrativa" },
+  { id: "copy", label: "Copy" },
+  { id: "emails", label: "Emails" },
+];
 
 const STRATEGY_LABEL: Record<string, string> = {
   classico: "Clássico", meteorico: "Meteórico", semente: "Semente",
   "pago-vsl": "Pago / VSL", perpetuo: "Perpétuo",
 };
 
-const FORMAT_META: Record<CreativoFormat, { icon: React.ElementType; dims: string; label: string }> = {
-  "thumb-yt":      { icon: Tv,     dims: "1280 × 720",  label: "Thumb YT"      },
-  "capa-yt":       { icon: Tv,     dims: "2560 × 1440", label: "Capa Canal"    },
-  "stories":       { icon: Smartphone,  dims: "1080 × 1920", label: "Stories"       },
-  "feed-quadrado": { icon: LayoutGrid,  dims: "1080 × 1080", label: "Feed Quad."    },
-  "feed-retrato":  { icon: Image,       dims: "1080 × 1350", label: "Feed Retrato"  },
-  "banner-google": { icon: Globe,       dims: "300 × 250",   label: "Banner Google" },
-  "email":         { icon: Mail,        dims: "600 px",      label: "E-mail"        },
-  "banner-checkout": { icon: ShoppingCart, dims: "1200 × 400",  label: "Banner Checkout" },
-  "pdf-ebook":        { icon: Image,        dims: "1600 × 2000", label: "Capa PDF"        },
-  "capa-formulario":  { icon: LayoutGrid,   dims: "1080 × 1350", label: "Capa Formulário" },
-};
+type NarrativeKey = "targetAudience" | "transformation" | "mecanismo" | "preco" | "provas";
 
-/* ── Status helpers ──────────────────────────────────────── */
+const NARRATIVE_FIELDS: { key: NarrativeKey; label: string; hint: string; placeholder: string; rows: number }[] = [
+  { key: "targetAudience", label: "Para quem", hint: "Quem é a pessoa e em que momento ela está.", placeholder: "Ex: mulheres de 30 a 45 anos que já tentaram várias dietas", rows: 2 },
+  { key: "transformation", label: "Promessa", hint: "A transformação que o produto entrega e em quanto tempo.", placeholder: "Ex: perder 10kg em 60 dias sem cortar carboidrato", rows: 3 },
+  { key: "mecanismo", label: "Mecanismo único", hint: "Por que isso funciona quando o resto falhou.", placeholder: "Ex: o protocolo que ajusta a insulina antes de reduzir calorias", rows: 3 },
+  { key: "preco", label: "Oferta e preço", hint: "Preço, âncora, bônus e garantia.", placeholder: "Ex: R$ 997 (de R$ 2.997), 3 bônus, garantia de 7 dias", rows: 2 },
+  { key: "provas", label: "Provas", hint: "Resultados, números e depoimentos que sustentam a promessa.", placeholder: "Ex: 1.200 alunas, média de 8kg, depoimentos da turma 3", rows: 4 },
+];
 
-function StatusBadge({ status }: { status: KitAssetInstance["status"] }) {
-  if (status === "done")
-    return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-medium">
-        <CheckCircle2 className="w-2.5 h-2.5" /> Pronto
-      </span>
-    );
-  if (status === "generating")
-    return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 text-[10px] font-medium">
-        <Loader2 className="w-2.5 h-2.5 animate-spin" /> Gerando
-      </span>
-    );
-  if (status === "error")
-    return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 text-[10px] font-medium">
-        <AlertCircle className="w-2.5 h-2.5" /> Erro
-      </span>
-    );
-  return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.04] text-white/30 text-[10px] font-medium">
-      <Clock className="w-2.5 h-2.5" /> Pendente
-    </span>
-  );
-}
-
-/* ── Creative Card ───────────────────────────────────────── */
-
-function CreativeCard({
-  asset, instance, isLocallyGenerating, onGenerate, onView,
+function NarrativeField({
+  label, hint, placeholder, rows, value, maxLength, onCommit,
 }: {
-  asset: StrategyAsset;
-  instance?: KitAssetInstance;
-  isLocallyGenerating: boolean;
-  onGenerate: (asset: StrategyAsset) => void;
-  onView: (code: string, label: string) => void;
+  label: string; hint: string; placeholder: string; rows: number;
+  value: string; maxLength: number; onCommit: (next: string) => void;
 }) {
-  const stored = instance?.status ?? "pending";
-  const status = stored === "generating" && !isLocallyGenerating ? "pending" : stored;
-  const meta = FORMAT_META[asset.format ?? "stories"];
-  const Icon = meta.icon;
-
+  const [draft, setDraft] = useState(value);
+  const filled = draft.trim().length > 0;
   return (
-    <div className={cn(
-      "flex flex-col gap-2.5 p-3 rounded-xl border transition-colors",
-      "bg-[#18181b] border-white/[0.06] hover:border-white/[0.12]",
-    )}>
-      <div className="flex items-center gap-2.5">
-        <div className="shrink-0 w-7 h-7 rounded-lg bg-white/[0.04] flex items-center justify-center">
-          <Icon className="w-3.5 h-3.5 text-white/40" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[12px] font-semibold text-white truncate leading-tight">{asset.label}</p>
-          <p className="text-[10px] text-white/30 font-mono">{meta.dims}</p>
-        </div>
+    <div className="rounded-xl bg-[#18181b] border border-white/[0.06] focus-within:border-purple-500/40 transition-colors p-4">
+      <div className="flex items-center gap-2 mb-1">
+        {filled
+          ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+          : <Circle className="w-3.5 h-3.5 text-white/20" />}
+        <label className="text-[12px] font-semibold text-white">{label}</label>
       </div>
-
-      <div className="flex items-center justify-between gap-1">
-        <StatusBadge status={status} />
-
-        {status === "pending" && (
-          <button
-            onClick={() => onGenerate(asset)}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-500/15 border border-purple-500/25 text-purple-300 text-[10px] font-medium hover:bg-purple-500/25 transition-colors cursor-pointer"
-          >
-            <Zap className="w-2.5 h-2.5" /> Gerar
-          </button>
-        )}
-        {status === "generating" && (
-          <button disabled className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/[0.04] text-white/20 text-[10px] cursor-not-allowed">
-            <Loader2 className="w-2.5 h-2.5 animate-spin" />
-          </button>
-        )}
-        {status === "done" && (
-          <button
-            onClick={() => instance?.generatedCode && onView(instance.generatedCode, asset.label)}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-medium hover:bg-emerald-500/20 transition-colors cursor-pointer"
-          >
-            <ExternalLink className="w-2.5 h-2.5" /> Abrir
-          </button>
-        )}
-        {status === "error" && (
-          <button
-            onClick={() => onGenerate(asset)}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-medium hover:bg-red-500/20 transition-colors cursor-pointer"
-          >
-            <RefreshCw className="w-2.5 h-2.5" />
-          </button>
-        )}
-      </div>
+      <p className="text-[11px] text-white/35 mb-2.5">{hint}</p>
+      <textarea
+        value={draft}
+        rows={rows}
+        maxLength={maxLength}
+        placeholder={placeholder}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => { if (draft !== value) onCommit(draft); }}
+        className="w-full resize-none bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-[13px] leading-relaxed text-white placeholder:text-white/20 focus:outline-none"
+      />
     </div>
   );
 }
 
-/* ── Main component ──────────────────────────────────────── */
-
-function patchAsset(kit: LaunchKit, assetId: string, patch: Partial<KitAssetInstance>): LaunchKit {
-  const exists = kit.assets.find((a) => a.assetId === assetId);
-  const next = exists
-    ? kit.assets.map((a) => a.assetId === assetId ? { ...a, ...patch } : a)
-    : [...kit.assets, { assetId, status: "pending" as const, ...patch }];
-  return { ...kit, assets: next };
-}
-
 export function LaunchHub() {
   const {
-    activeLaunchKit,
-    setActiveLaunchKit,
-    saveLaunchKit,
-    deleteLaunchKit,
-    openCodeInWorkspace,
-    navigate,
-    apiKey,
-    aiProvider,
-    aiModel,
-    webhookUrl,
-    setWebhookUrl,
+    activeLaunchKit, setActiveLaunchKit, saveLaunchKit, deleteLaunchKit, navigate,
   } = useAppContext();
 
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [webhookInput, setWebhookInput] = useState(webhookUrl);
-  const [webhookSaved, setWebhookSaved] = useState(false);
   const [persistError, setPersistError] = useState<string | null>(null);
-  // Tracks which asset IDs are actively generating IN THIS SESSION (not persisted)
-  const [localGenerating, setLocalGenerating] = useState<Set<string>>(new Set());
-  const [adCopyModalOpen, setAdCopyModalOpen] = useState(false);
-  // Ref-based guard to prevent double-click race — updated synchronously before setState
-  const localGeneratingRef = useRef<Set<string>>(new Set());
 
-  // Always points to the latest kit — avoids stale closure when multiple assets generate sequentially
-  const kitRef = useRef(activeLaunchKit);
-  kitRef.current = activeLaunchKit;
+  // A aba vive na URL (?aba=) pra sobreviver a reload e poder ser linkada;
+  // o projectId continua sendo a única fonte do lançamento ativo.
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const abaParam = searchParams.get("aba");
+  const tab: HubTab = HUB_TABS.some((t) => t.id === abaParam) ? (abaParam as HubTab) : "narrativa";
+  const goTab = (next: HubTab) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (next === "narrativa") params.delete("aba"); else params.set("aba", next);
+    router.replace(`/lancamentos?${params.toString()}`);
+  };
+  const { documents: copyDocs } = useCopyDocuments(activeLaunchKit?.projectId);
 
-  // LaunchHub only renders for an activated kit, and activation requires a
-  // chosen strategy (see isBriefingActivatable) — strategyId is guaranteed
-  // non-null here even though the type allows null for drafts.
+  // LaunchHub só renderiza pra um kit ativado, e ativar exige estratégia
+  // escolhida — strategyId é não-nulo aqui, mesmo que o tipo permita null.
   if (!activeLaunchKit || !activeLaunchKit.strategyId) return null;
 
   const kit = activeLaunchKit;
-  const strategy = STRATEGY_MAP[kit.strategyId!];
-  const criativos = strategy.assets.filter((a) => a.type === "criativo");
-
-  const emailSequences = kit.emailSequences ?? { cpl: [], vendas: [], recuperacao: [] };
-  const emailSequencesDone = Object.values(emailSequences).filter((seq) => seq.length > 0).length;
-
-  const totalAssets = strategy.assets.length + 3; // + 3 sequências de e-mail (CPL, vendas, recuperação)
-  const doneAssets = kit.assets.filter((a) => a.status === "done").length + emailSequencesDone;
-  const progressPct = totalAssets > 0 ? Math.round((doneAssets / totalAssets) * 100) : 0;
-
-  const getInstance = (assetId: string): KitAssetInstance | undefined =>
-    kit.assets.find((a) => a.assetId === assetId);
-
-  const hasPendingCreativos = criativos.some((c) => {
-    const s = getInstance(c.id)?.status ?? "pending";
-    return s === "pending" || s === "error";
-  });
-
-  const handleGenerateAsset = async (asset: StrategyAsset) => {
-    // Synchronous ref-guard prevents double-click before React re-renders
-    if (localGeneratingRef.current.has(asset.id)) return;
-    localGeneratingRef.current.add(asset.id);
-
-    // Read from ref so this closure always has the latest kit, even when called sequentially
-    const kitAtStart = kitRef.current!;
-
-    // Mark as locally generating (in-memory only, survives re-renders but not reloads)
-    setLocalGenerating((prev) => new Set([...prev, asset.id]));
-
-    // Persist "generating" status to kit so the badge shows correctly.
-    // setActiveLaunchKit happens immediately for a snappy UI; saveLaunchKit
-    // is awaited separately so a remote failure surfaces instead of being
-    // silently swallowed (see persistError banner below).
-    const withGenerating = patchAsset(kitAtStart, asset.id, { status: "generating", error: undefined });
-    setActiveLaunchKit(withGenerating);
-    saveLaunchKit(withGenerating).catch((e) => setPersistError(e instanceof Error ? e.message : "Erro ao salvar lançamento."));
-
-    try {
-      // If brand identity is approved, use its palette/fonts in the generation
-      const identity = kitAtStart.brandIdentity?.status === "approved" ? kitAtStart.brandIdentity : null;
-      const primaryColor = identity?.colors.find((c) => c.usage === "primary")?.hex ?? kitAtStart.brandInfo.primaryColor;
-      const secondaryColor = identity?.colors.find((c) => c.usage === "secondary")?.hex ?? kitAtStart.brandInfo.secondaryColor;
-      const fontChoice = identity?.fonts.find((f) => f.usage === "display")?.name ?? kitAtStart.brandInfo.fontChoice;
-
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: buildAssetPrompt(kitAtStart, asset),
-          platform: "html",
-          projectId: kitAtStart.projectId,
-          primaryColor,
-          secondaryColor,
-          fontChoice,
-          stylePreset: kitAtStart.brandInfo.stylePreset,
-          ...(apiKey ? { apiKey, aiProvider, aiModel } : {}),
-        }),
-        signal: AbortSignal.timeout(290_000),
-      });
-
-      if (!res.ok) {
-        const errBody = await res.json().catch(() => ({ error: "Erro desconhecido" }));
-        throw new Error(errBody.error || `HTTP ${res.status}`);
-      }
-
-      const reader = res.body?.getReader();
-      if (!reader) throw new Error("Stream indisponível");
-
-      const decoder = new TextDecoder();
-      let html = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        html += decoder.decode(value, { stream: true });
-      }
-      html += decoder.decode();
-
-      if (html.trim().length < 100) throw new Error("Resposta incompleta — tente novamente.");
-
-      // Re-read ref to get the latest kit state (other assets may have finished while we were fetching)
-      const withDone = patchAsset(kitRef.current!, asset.id, { status: "done", generatedCode: html });
-      setActiveLaunchKit(withDone);
-      saveLaunchKit(withDone).catch((e) => setPersistError(e instanceof Error ? e.message : "Erro ao salvar lançamento."));
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Erro desconhecido";
-      // Re-read ref here too so we don't overwrite other assets' results
-      const withError = patchAsset(kitRef.current!, asset.id, { status: "error", error: msg });
-      setActiveLaunchKit(withError);
-      saveLaunchKit(withError).catch((e) => setPersistError(e instanceof Error ? e.message : "Erro ao salvar lançamento."));
-    } finally {
-      localGeneratingRef.current.delete(asset.id);
-      setLocalGenerating((prev) => { const s = new Set(prev); s.delete(asset.id); return s; });
-    }
+  const b = kit.briefing;
+  const launchFacts = {
+    productName: kit.brandInfo.productName,
+    niche: kit.brandInfo.niche,
+    targetAudience: kit.brandInfo.targetAudience,
+    transformation: kit.brandInfo.transformation,
   };
 
-  const handleGenerateAll = async (assets: StrategyAsset[]) => {
-    for (const asset of assets) {
-      const s = getInstance(asset.id)?.status ?? "pending";
-      if (s === "pending" || s === "error") {
-        await handleGenerateAsset(asset);
-      }
-    }
+  const emailSequences = kit.emailSequences ?? { cpl: [], vendas: [], recuperacao: [] };
+  const emailsDone = Object.values(emailSequences).filter((seq) => seq.length > 0).length;
+  const narrativeDone = NARRATIVE_FIELDS.filter((f) => b[f.key].trim().length > 0).length;
+  const copyApproved = copyDocs.filter((d) => d.status === "approved").length;
+
+  const totalSteps = NARRATIVE_FIELDS.length + 1 + 3;
+  const doneSteps = narrativeDone + (copyApproved > 0 ? 1 : 0) + emailsDone;
+  const progressPct = Math.round((doneSteps / totalSteps) * 100);
+
+  const commitNarrative = (key: NarrativeKey, value: string) => {
+    const briefing: LaunchBriefing = { ...kit.briefing, [key]: value };
+    const updated = { ...kit, briefing, brandInfo: toBrandInfo(briefing), updatedAt: new Date().toISOString() };
+    setActiveLaunchKit(updated);
+    saveLaunchKit(updated).catch((e) => setPersistError(e instanceof Error ? e.message : "Erro ao salvar a narrativa."));
   };
 
   const handleDelete = async () => {
@@ -347,15 +133,20 @@ export function LaunchHub() {
     navigate("lancamentos");
   };
 
-  /* circumference for circular progress */
   const radius = 14;
   const circ = 2 * Math.PI * radius;
   const dash = circ * (progressPct / 100);
 
+  const fronts: { id: HubTab; label: string; value: string; hint: string }[] = [
+    { id: "narrativa", label: "Narrativa", value: `${narrativeDone}/${NARRATIVE_FIELDS.length}`, hint: "pontos definidos" },
+    { id: "copy", label: "Copy", value: `${copyApproved}/${copyDocs.length}`, hint: copyDocs.length ? "aprovadas" : "nenhuma ainda" },
+    { id: "emails", label: "Emails", value: `${emailsDone}/3`, hint: "sequências geradas" },
+  ];
+
   return (
     <div className="flex flex-col h-full bg-[#0c0c10]">
 
-      {/* ── Sticky Header ── */}
+      {/* ── Header ── */}
       <div className="sticky top-0 z-20 flex items-center gap-3 px-5 py-3 bg-[#0c0c10]/95 backdrop-blur border-b border-white/[0.05] shrink-0">
         <button
           onClick={handleBack}
@@ -367,12 +158,11 @@ export function LaunchHub() {
         <div className="flex-1 flex items-center gap-2.5 min-w-0">
           <h1 className="text-[15px] font-semibold text-white truncate">{kit.brandInfo.productName}</h1>
           <span className="shrink-0 px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[10px] font-medium">
-            {STRATEGY_LABEL[kit.strategyId!]}
+            {STRATEGY_LABEL[activeLaunchKit.strategyId ?? ""]}
           </span>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          {/* circular progress */}
           <div className="flex items-center gap-2">
             <svg width="36" height="36" viewBox="0 0 36 36" className="-rotate-90">
               <circle cx="18" cy="18" r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2.5" />
@@ -386,8 +176,8 @@ export function LaunchHub() {
               />
             </svg>
             <div className="text-right">
-              <p className="text-[13px] font-semibold text-white leading-none">{doneAssets}/{totalAssets}</p>
-              <p className="text-[9px] text-white/30 mt-0.5">entregáveis</p>
+              <p className="text-[13px] font-semibold text-white leading-none">{doneSteps}/{totalSteps}</p>
+              <p className="text-[9px] text-white/30 mt-0.5">etapas</p>
             </div>
           </div>
 
@@ -416,150 +206,83 @@ export function LaunchHub() {
         </div>
       )}
 
-      {/* ── Brief strip ── */}
-      <div className="shrink-0 flex items-center gap-2 px-5 py-2.5 border-b border-white/[0.04] overflow-x-auto no-scrollbar">
-        <div className="shrink-0 flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full border border-white/20" style={{ background: kit.brandInfo.primaryColor }} />
-          <span className="text-[11px] text-white/30">{kit.brandInfo.primaryColor}</span>
-        </div>
-        <span className="shrink-0 text-white/10">·</span>
-        {[
-          { label: "Nicho", value: kit.brandInfo.niche },
-          { label: "Público", value: kit.brandInfo.targetAudience },
-          { label: "Transformação", value: kit.brandInfo.transformation },
-        ].map(({ label, value }) => value ? (
-          <div key={label} className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.05]">
-            <span className="text-[9px] uppercase tracking-widest text-white/20 font-semibold">{label}</span>
-            <span className="text-[11px] text-white/50 max-w-[160px] truncate">{value}</span>
-          </div>
-        ) : null)}
+      {/* ── Tabs ── */}
+      <div className="shrink-0 flex items-center gap-1 px-5 border-b border-white/[0.05]">
+        {HUB_TABS.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => goTab(t.id)}
+            className={cn(
+              "relative px-3.5 py-2.5 text-[12px] font-medium transition-colors cursor-pointer",
+              tab === t.id ? "text-white" : "text-white/40 hover:text-white/70"
+            )}
+          >
+            {t.label}
+            {tab === t.id && <span className="absolute left-2 right-2 -bottom-px h-0.5 rounded-full bg-purple-400" />}
+          </button>
+        ))}
       </div>
 
-      {/* ── Scrollable content ── */}
-      <div className="flex-1 overflow-y-auto px-5 py-5 space-y-7">
+      {tab === "narrativa" && (
+        <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6">
+          <section className="grid grid-cols-3 gap-3">
+            {fronts.map((f) => (
+              <button
+                key={f.id}
+                onClick={() => goTab(f.id)}
+                className="text-left rounded-xl bg-[#18181b] border border-white/[0.06] hover:border-white/15 px-4 py-3.5 transition-colors cursor-pointer"
+              >
+                <p className="text-[10px] uppercase tracking-widest text-white/30 font-semibold">{f.label}</p>
+                <p className="text-[20px] font-semibold text-white mt-1 leading-none">{f.value}</p>
+                <p className="text-[11px] text-white/30 mt-1">{f.hint}</p>
+              </button>
+            ))}
+          </section>
 
-        {/* Creatives section */}
-        {criativos.length > 0 && (
           <section>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] uppercase tracking-widest text-white/30 font-semibold">Criativos</span>
-                <span className="px-1.5 py-0.5 rounded-full bg-white/[0.05] text-white/40 text-[10px] font-semibold">{criativos.length}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setAdCopyModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white/60 text-[11px] font-medium hover:bg-white/[0.08] transition-colors cursor-pointer"
-                >
-                  <Sparkles className="w-3 h-3" /> Copy de anúncios
-                </button>
-                {hasPendingCreativos && (
-                  <button
-                    onClick={() => handleGenerateAll(criativos)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[11px] font-medium hover:bg-purple-500/20 transition-colors cursor-pointer"
-                  >
-                    <Zap className="w-3 h-3" /> Gerar lote
-                  </button>
-                )}
-              </div>
+            <div className="mb-3">
+              <h2 className="text-[13px] font-semibold text-white">Narrativa do lançamento</h2>
+              <p className="text-[11px] text-white/35 mt-0.5">
+                Tudo que você definir aqui alimenta as copies e os emails deste lançamento. Salva ao sair do campo.
+              </p>
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              {criativos.map((asset) => (
-                <CreativeCard
-                  key={asset.id}
-                  asset={asset}
-                  instance={getInstance(asset.id)}
-                  isLocallyGenerating={localGenerating.has(asset.id)}
-                  onGenerate={handleGenerateAsset}
-                  onView={(code, label) => openCodeInWorkspace(code, label)}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+              {NARRATIVE_FIELDS.map((f) => (
+                <NarrativeField
+                  key={`${kit.projectId}-${f.key}`}
+                  label={f.label}
+                  hint={f.hint}
+                  placeholder={f.placeholder}
+                  rows={f.rows}
+                  value={b[f.key]}
+                  maxLength={BRIEFING_LIMITS[f.key]}
+                  onCommit={(v) => commitNarrative(f.key, v)}
                 />
               ))}
             </div>
           </section>
-        )}
+        </div>
+      )}
 
-        {/* Email sequences section */}
-        <section>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-[11px] uppercase tracking-widest text-white/30 font-semibold">Emails</span>
-            <span className="px-1.5 py-0.5 rounded-full bg-white/[0.05] text-white/40 text-[10px] font-semibold">{emailSequencesDone}/3</span>
-          </div>
+      {tab === "copy" && (
+        <div className="flex-1 min-h-0">
+          <CopyView launch={{ projectId: kit.projectId, facts: launchFacts }} />
+        </div>
+      )}
+
+      {tab === "emails" && (
+        <div className="flex-1 overflow-y-auto px-5 py-5">
           <EmailSequencePanel
             brandInfo={kit.brandInfo}
+            projectId={kit.projectId}
             sequences={emailSequences}
             onChange={(next) => {
-              const updated = { ...kitRef.current!, emailSequences: next, updatedAt: new Date().toISOString() };
+              const updated = { ...kit, emailSequences: next, updatedAt: new Date().toISOString() };
               setActiveLaunchKit(updated);
               saveLaunchKit(updated).catch((e) => setPersistError(e instanceof Error ? e.message : "Erro ao salvar sequência de emails."));
             }}
           />
-        </section>
-
-        {/* Webhook integration section */}
-        <section>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-[11px] uppercase tracking-widest text-white/30 font-semibold">Integração</span>
-          </div>
-          <div className="rounded-xl bg-[#18181b] border border-white/[0.06] p-4">
-            <div className="flex items-start gap-3 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center shrink-0 mt-0.5">
-                <Link className="w-4 h-4 text-white/30" />
-              </div>
-              <div>
-                <p className="text-[13px] font-semibold text-white">Webhook de leads</p>
-                <p className="text-[11px] text-white/30 mt-0.5">
-                  Cole a URL do webhook do ActiveCampaign, Mailchimp ou RD Station. Os formulários das páginas geradas vão enviar os leads automaticamente.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="url"
-                value={webhookInput}
-                onChange={(e) => { setWebhookInput(e.target.value); setWebhookSaved(false); }}
-                placeholder="https://hooks.activehosted.com/proc.php?..."
-                className="flex-1 bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-[12px] text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors"
-              />
-              <button
-                onClick={() => {
-                  setWebhookUrl(webhookInput.trim());
-                  setWebhookSaved(true);
-                  setTimeout(() => setWebhookSaved(false), 2500);
-                }}
-                disabled={webhookInput === webhookUrl}
-                className={cn(
-                  "px-3 py-2 rounded-lg text-[11px] font-semibold transition-all cursor-pointer shrink-0",
-                  webhookSaved
-                    ? "bg-emerald-500/15 border border-emerald-500/25 text-emerald-400"
-                    : webhookInput !== webhookUrl
-                    ? "bg-purple-600 hover:bg-purple-500 text-white"
-                    : "bg-white/[0.04] text-white/20 cursor-not-allowed border border-white/[0.06]"
-                )}
-              >
-                {webhookSaved ? "Salvo" : "Salvar"}
-              </button>
-            </div>
-            {webhookUrl && (
-              <p className="text-[10px] text-emerald-400/70 mt-2 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> Webhook ativo — formulários das páginas vão capturar leads
-              </p>
-            )}
-          </div>
-        </section>
-
-      </div>
-
-      {adCopyModalOpen && (
-        <AdCopyModal
-          onClose={() => setAdCopyModalOpen(false)}
-          projectId={kit.projectId}
-          launchFacts={{
-            productName: kit.brandInfo.productName,
-            niche: kit.brandInfo.niche,
-            targetAudience: kit.brandInfo.targetAudience,
-            transformation: kit.brandInfo.transformation,
-          }}
-        />
+        </div>
       )}
     </div>
   );

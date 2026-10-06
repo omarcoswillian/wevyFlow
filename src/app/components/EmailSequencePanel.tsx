@@ -21,6 +21,8 @@ const TABS: { id: SequenceType; label: string; count: number; description: strin
 
 interface Props {
   brandInfo: BrandInfo;
+  /** Com um lançamento, a API busca o briefing canônico dele no servidor. */
+  projectId?: string;
   sequences?: EmailSequences;
   onChange?: (sequences: EmailSequences) => void;
   /** Controlado externamente (ex: pela sub-aba do menu lateral em
@@ -30,7 +32,7 @@ interface Props {
   onTabChange?: (tab: SequenceType) => void;
 }
 
-export function EmailSequencePanel({ brandInfo, sequences, onChange, activeTab: controlledTab, onTabChange }: Props) {
+export function EmailSequencePanel({ brandInfo, projectId, sequences, onChange, activeTab: controlledTab, onTabChange }: Props) {
   const { apiKey, aiProvider: provider, aiModel: model } = useAppContext() as {
     apiKey: string;
     aiProvider: string;
@@ -66,6 +68,7 @@ export function EmailSequencePanel({ brandInfo, sequences, onChange, activeTab: 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           brandInfo,          // already includes mecanismo, preco, provas if filled
+          projectId,
           sequenceType: activeTab,
           apiKey: apiKey || undefined,
           aiProvider: apiKey ? provider : undefined,

@@ -217,8 +217,15 @@ function DocumentDrawer({ doc, now, onClose, onUpdate, onDelete }: {
   );
 }
 
-export function CopyView() {
-  const { documents, loading, reload, update, remove } = useCopyDocuments();
+export interface CopyViewLaunch {
+  projectId: string;
+  facts: { productName: string; niche: string; targetAudience: string; transformation: string };
+}
+
+/** Sem `launch`, é a biblioteca global de copy; com `launch`, mostra e gera só
+ * as copies daquele lançamento (usado dentro da aba Copy do Hub). */
+export function CopyView({ launch }: { launch?: CopyViewLaunch } = {}) {
+  const { documents, loading, reload, update, remove } = useCopyDocuments(launch?.projectId);
   const [generatorOpen, setGeneratorOpen] = useState(false);
   const [openDocId, setOpenDocId] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
@@ -256,8 +263,10 @@ export function CopyView() {
             <PenTool className="w-4 h-4 text-purple-400" />
           </div>
           <div>
-            <h1 className="text-[15px] font-semibold text-white/90">Copy</h1>
-            <p className="text-[11px] text-white/30">Headlines, CTAs e roteiros — texto, separado do visual</p>
+            <h1 className="text-[15px] font-semibold text-white/90">{launch ? "Copy do lançamento" : "Copy"}</h1>
+            <p className="text-[11px] text-white/30">
+              {launch ? `Headlines e CTAs de ${launch.facts.productName}` : "Headlines, CTAs e roteiros — texto, separado do visual"}
+            </p>
           </div>
         </div>
         <button
@@ -304,7 +313,7 @@ export function CopyView() {
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] px-6 py-20 flex flex-col items-center gap-3 text-center">
             <PenTool className="w-8 h-8 text-white/15" />
             <p className="text-[14px] font-medium text-white/60">Nenhuma copy ainda</p>
-            <p className="text-[12px] text-white/30 max-w-sm leading-relaxed">Gere headlines e CTAs para anúncios, avulso ou puxando o briefing de um Lançamento.</p>
+            <p className="text-[12px] text-white/30 max-w-sm leading-relaxed">{launch ? "Gere headlines e CTAs para anúncios usando o briefing deste lançamento." : "Gere headlines e CTAs para anúncios, avulso ou puxando o briefing de um Lançamento."}</p>
             <button onClick={() => setGeneratorOpen(true)} className="mt-2 flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-[12px] font-semibold transition-colors cursor-pointer">
               <Sparkles className="w-3.5 h-3.5" /> Criar a primeira copy
             </button>
@@ -330,7 +339,11 @@ export function CopyView() {
       </div>
 
       {generatorOpen && (
-        <AdCopyModal onClose={() => { setGeneratorOpen(false); reload(); }} />
+        <AdCopyModal
+          onClose={() => { setGeneratorOpen(false); reload(); }}
+          projectId={launch?.projectId}
+          launchFacts={launch?.facts}
+        />
       )}
 
       {openDoc && (
