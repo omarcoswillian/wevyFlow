@@ -53,8 +53,6 @@ export type AppView =
   | "lancamentos"
   | "copy"
   | "emails"
-  | "leads"
-  | "prospeccao"
   | "anuncios"
   | "marca"
   | "projects-all"
@@ -82,10 +80,6 @@ export function viewToPath(view: AppView, projectId?: string): string {
       return projectId ? `/marca?projectId=${projectId}` : "/marca";
     case "emails":
       return "/emails";
-    case "leads":
-      return "/leads";
-    case "prospeccao":
-      return "/prospeccao";
     case "anuncios":
       return "/anuncios";
     case "projects-all":

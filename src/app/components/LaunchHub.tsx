@@ -3,9 +3,9 @@
 import { useState, useRef } from "react";
 import {
   ArrowLeft, Trash2, Clock, Loader2, CheckCircle2, AlertCircle,
-  ShoppingCart, Mail, Users, ExternalLink,
+  ShoppingCart, Mail, ExternalLink,
   RefreshCw, Zap, Globe, Smartphone, Tv, Image, LayoutGrid,
-  ChevronRight, Link, Sparkles,
+  Link, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppContext } from "../(app)/_context";
@@ -477,30 +477,6 @@ export function LaunchHub() {
             </div>
           </section>
         )}
-
-        {/* Leads section */}
-        <section>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-[11px] uppercase tracking-widest text-white/30 font-semibold">Leads</span>
-          </div>
-          <div className="flex items-center justify-between px-4 py-3.5 rounded-xl bg-[#18181b] border border-white/[0.06]">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center">
-                <Users className="w-4 h-4 text-white/30" />
-              </div>
-              <div>
-                <p className="text-[13px] font-semibold text-white">0 leads capturados</p>
-                <p className="text-[11px] text-white/30">Publique uma página de captura para começar</p>
-              </div>
-            </div>
-            <button
-              onClick={() => navigate("leads")}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-white/40 text-[11px] font-medium hover:text-white/70 hover:border-white/15 transition-colors cursor-pointer"
-            >
-              Ver Leads <ChevronRight className="w-3 h-3" />
-            </button>
-          </div>
-        </section>
 
         {/* Email sequences section */}
         <section>

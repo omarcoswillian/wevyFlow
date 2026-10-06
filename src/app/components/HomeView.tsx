@@ -20,7 +20,6 @@ import {
   X,
   Paintbrush,
   Rocket,
-  UserCheck,
   Megaphone,
   Zap,
   Sprout,
@@ -42,7 +41,6 @@ import {
   Lock,
   Camera,
   GalleryHorizontalEnd,
-  Radar,
   PenTool,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -528,8 +526,6 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
               </div>
             )}
           </div>
-          <SidebarItem icon={<UserCheck className="w-4 h-4" />} label="Leads" active={activeNav === "leads"} collapsed={sidebarCollapsed} onClick={() => nav("leads")} />
-          <SidebarItem icon={<Radar className="w-4 h-4" />} label="Prospecção" active={activeNav === "prospeccao"} collapsed={sidebarCollapsed} onClick={() => nav("prospeccao")} />
 
           {!sidebarCollapsed && <div className="pt-3 pb-1"><span className="px-2 text-[9px] font-medium text-white/20 uppercase tracking-widest">Projetos</span></div>}
           {sidebarCollapsed && <div className="pt-3" />}
