@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { createServiceClient } from "@/lib/supabase/service";
+import { deleteAdMedia } from "@/lib/ads/media";
 
 export type MetaDeletionKind = "deletion" | "deauthorize";
 
@@ -14,7 +15,18 @@ export type MetaDeletionKind = "deletion" | "deauthorize";
  * pois a Meta exige resposta mesmo assim. */
 export async function deleteMetaUserData(metaUserId: string, kind: MetaDeletionKind) {
   const confirmationCode = randomBytes(16).toString("hex");
-  const { data, error } = await createServiceClient().rpc("delete_meta_user_data", {
+  const service = createServiceClient();
+
+  // As cópias de mídia no Storage precisam sair antes: depois da função SQL a
+  // conexão (que liga o id Meta ao usuário) já não existe. Falha aqui não
+  // impede a exclusão dos dados no banco, que é o que a Meta exige.
+  const { data: owners } = await service.from("meta_ads_connections").select("user_id").eq("meta_user_id", metaUserId);
+  for (const owner of owners ?? []) {
+    try { await deleteAdMedia(service, owner.user_id); }
+    catch (e) { console.error("[meta-ads] falha ao apagar mídia dos anúncios:", e); }
+  }
+
+  const { data, error } = await service.rpc("delete_meta_user_data", {
     p_meta_user_id: metaUserId,
     p_kind: kind,
     p_confirmation_code: confirmationCode,

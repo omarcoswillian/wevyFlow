@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { decryptToken } from "@/lib/meta-ads/crypto";
+import { deleteAdMedia } from "@/lib/ads/media";
 import { requireAuthUser, metaAdsErrorResponse, META_GRAPH_BASE } from "@/lib/meta-ads/server";
 
 export async function POST() {
@@ -27,6 +28,11 @@ export async function POST() {
       .eq("user_id", user.id)
       .eq("source", "meta_ads_api");
     if (adsErr) throw new Error(adsErr.message);
+
+    // Resultados, análises e cópias de mídia derivados dos dados da Meta também saem.
+    await service.from("meta_ads_daily_insights").delete().eq("user_id", user.id);
+    await service.from("ad_creative_analyses").delete().eq("user_id", user.id);
+    try { await deleteAdMedia(service, user.id); } catch (e) { console.error("[meta-ads] falha ao apagar mídia:", e); }
 
     // Revogar do lado da Meta é best-effort: o token pode já ter expirado ou
     // sido revogado pelo usuário, ou não decifrar (chave trocada). Em todo

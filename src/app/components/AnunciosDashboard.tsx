@@ -16,6 +16,8 @@ import { AdsTable } from "./anuncios/AdsTable";
 import { AdPreviewModal } from "./anuncios/AdPreviewModal";
 import { MetaAdsConnectionCard } from "./anuncios/MetaAdsConnectionCard";
 import { MetaProfileBadge, type MetaProfile } from "./anuncios/MetaProfileBadge";
+import { rankAds, type RankedAd } from "@/lib/ads/scoring";
+import type { CreativeHypothesis } from "@/lib/ads/creative-analysis";
 
 const AdsMetrics = dynamic(() => import("./anuncios/AdsMetrics"), {
   ssr: false,
@@ -39,7 +41,8 @@ type Row = Database["public"]["Tables"]["ad_watch_creatives"]["Row"];
  * poder fazer upsert idempotente (ver comentário lá) em vez de insert puro,
  * que duplicava as 7 linhas quando o efeito de carga rodava duas vezes
  * (Strict Mode) ou em duas abas ao mesmo tempo. */
-const MOCK_SEED: Omit<AdCreative, "daysRunning" | "isFavorite">[] = [
+type MockSeed = Omit<AdCreative, "daysRunning" | "isFavorite" | "externalId" | "mediaType" | "metrics" | "confidence" | "verdict">;
+const MOCK_SEED: MockSeed[] = [
   {
     id: "00000000-0000-4000-a000-000000000001",
     source: "mock", advertiserName: "Método Ascensão", platforms: ["facebook", "instagram"], status: "active",
@@ -111,6 +114,11 @@ function mapRow(row: Row, now: number): AdCreative {
     stoppedAt,
     daysRunning: daysBetween(startedAt, stoppedAt ?? now),
     isFavorite: row.is_favorite,
+    externalId: row.external_id,
+    mediaType: row.media_type,
+    metrics: null,
+    confidence: null,
+    verdict: null,
   };
 }
 
@@ -161,6 +169,12 @@ async function seedMockCreatives(supabase: SupabaseClient<Database>, userId: str
   return fetchAllCreatives(supabase);
 }
 
+/** AAAA-MM-DD no fuso local (não UTC: o preset "hoje" é o dia do usuário). */
+function localIsoDay(ms: number): string {
+  const d = new Date(ms);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function normalize(s: string): string {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 }
@@ -173,6 +187,13 @@ const VISAO_COPY: Record<AdsVisao, { title: string; subtitle: string }> = {
   todos: { title: "Gerenciador de Anúncios", subtitle: "Longevidade dos criativos como sinal de performance" },
   melhores: { title: "Melhores anúncios", subtitle: "Ativos há 14+ dias — sinal de que provavelmente estão vendendo" },
   piores: { title: "Piores anúncios", subtitle: "Pausados rápido — sinal de que provavelmente não performaram" },
+};
+
+/** Com resultados reais da Meta no período, o recorte e o ranking passam a ser por ROAS e confiança. */
+const VISAO_COPY_PERFORMANCE: Record<AdsVisao, { title: string; subtitle: string }> = {
+  todos: { title: "Gerenciador de Anúncios", subtitle: "Resultado real por anúncio: gasto, compras e ROAS, com nível de confiança" },
+  melhores: { title: "Melhores anúncios", subtitle: "ROAS acima da média da conta, com volume suficiente para confiar no resultado" },
+  piores: { title: "Piores anúncios", subtitle: "ROAS bem abaixo da média da conta, ou gasto relevante sem nenhuma compra" },
 };
 
 interface AnunciosDashboardProps {
@@ -205,6 +226,11 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
   const [pageSize, setPageSize] = useState(25);
 
   const [previewCreativeId, setPreviewCreativeId] = useState<string | null>(null);
+  const [rankedById, setRankedById] = useState<Map<string, RankedAd>>(new Map());
+  const [currency, setCurrency] = useState<string | null>(null);
+  const [insightsError, setInsightsError] = useState(false);
+  // Enquanto o usuário não escolhe uma coluna, a ordenação padrão acompanha a visão (por resultado, se houver).
+  const [userSorted, setUserSorted] = useState(false);
   const [referenceNotice, setReferenceNotice] = useState<string | null>(null);
   const [pendingFavoriteIds, setPendingFavoriteIds] = useState<Set<string>>(new Set());
 
@@ -257,9 +283,37 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
     load();
   }, [load]);
 
+  // Resultados do período (gasto, compras, receita, vídeo), somados no banco.
+  const fromDay = localIsoDay(range.start);
+  const toDay = localIsoDay(range.endExclusive - 86_400_000);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error: rpcErr } = await supabase.rpc("ad_metrics_summary", { p_from: fromDay, p_to: toDay });
+      if (cancelled) return;
+      if (rpcErr) { setInsightsError(true); setRankedById(new Map()); return; }
+      setInsightsError(false);
+      const rows = data ?? [];
+      setCurrency(rows.find((r) => r.currency)?.currency ?? null);
+      const { ads } = rankAds(rows.map((r) => ({ id: r.ad_external_id, totals: r })));
+      setRankedById(new Map(ads.map((a) => [a.id, a])));
+    })();
+    return () => { cancelled = true; };
+  }, [supabase, fromDay, toDay, creatives.length]);
+
+  const hasPerformance = rankedById.size > 0;
+
+  const creativesWithMetrics = useMemo(
+    () => creatives.map((c) => {
+      const r = c.externalId ? rankedById.get(c.externalId) : undefined;
+      return r ? { ...c, metrics: r.metrics, confidence: r.confidence, verdict: r.verdict } : c;
+    }),
+    [creatives, rankedById],
+  );
+
   const hasMockData = creatives.some((c) => c.source === "mock");
 
-  const periodFiltered = useMemo(() => creatives.filter((c) => isCreativeInRange(c, range)), [creatives, range]);
+  const periodFiltered = useMemo(() => creativesWithMetrics.filter((c) => isCreativeInRange(c, range)), [creativesWithMetrics, range]);
 
   const filtered = useMemo(() => {
     let list = periodFiltered;
@@ -283,10 +337,16 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
   // hoje. Os filtros manuais (busca, status, plataforma, favoritos) do
   // topo continuam se aplicando por cima, pra refinar dentro do recorte.
   const visaoFiltered = useMemo(() => {
+    // Com resultado real: vencedor/perdedor por ROAS e confiança, não por tempo no ar.
+    if (hasPerformance && visao === "melhores") return filtered.filter((c) => c.verdict === "winner");
+    if (hasPerformance && visao === "piores") return filtered.filter((c) => c.verdict === "loser");
     if (visao === "melhores") return filtered.filter((c) => c.status === "active" && c.daysRunning >= 14);
     if (visao === "piores") return filtered.filter((c) => c.status === "inactive");
     return filtered;
-  }, [filtered, visao]);
+  }, [filtered, visao, hasPerformance]);
+
+  const effKey: SortKey = userSorted ? sortKey : hasPerformance ? (visao === "melhores" ? "roas" : "spend") : sortKey;
+  const effDir: SortDirection = userSorted ? sortDirection : hasPerformance ? "desc" : sortDirection;
 
   const sorted = useMemo(() => {
     const list = [...visaoFiltered];
@@ -295,7 +355,7 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
       // qualquer data real — nunca Infinity - Infinity (NaN) quando os dois
       // lados estão em veiculação.
       let cmp = 0;
-      switch (sortKey) {
+      switch (effKey) {
         case "advertiserName": cmp = a.advertiserName.localeCompare(b.advertiserName, "pt-BR"); break;
         case "startedAt": cmp = a.startedAt - b.startedAt; break;
         case "stoppedAt":
@@ -306,15 +366,19 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
           break;
         case "daysRunning": cmp = a.daysRunning - b.daysRunning; break;
         case "status": cmp = a.status.localeCompare(b.status); break;
+        // Sem resultado (null) vai pro fim da lista em qualquer direção de "desc".
+        case "spend": cmp = (a.metrics?.spend ?? -1) - (b.metrics?.spend ?? -1); break;
+        case "purchases": cmp = (a.metrics?.purchases ?? -1) - (b.metrics?.purchases ?? -1); break;
+        case "roas": cmp = (a.metrics?.roas ?? -1) - (b.metrics?.roas ?? -1); break;
       }
       // A direção só inverte a comparação principal — o desempate (mais
       // recente primeiro) fica fixo, senão "desc" o transformava em "asc".
-      if (sortDirection === "desc") cmp = -cmp;
+      if (effDir === "desc") cmp = -cmp;
       if (cmp === 0) cmp = b.startedAt - a.startedAt;
       return cmp;
     });
     return list;
-  }, [visaoFiltered, sortKey, sortDirection]);
+  }, [visaoFiltered, effKey, effDir]);
 
   const hasActiveFilters = !!filters.search.trim() || filters.status !== "all" || filters.platform !== "all" || filters.favoritesOnly;
 
@@ -328,8 +392,10 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
   };
   const handleCustomApply = (r: DateRange) => { setCustomRange(r); setPreset("custom"); setPage(1); };
   const handleSort = (key: SortKey) => {
-    if (key === sortKey) setSortDirection((d) => (d === "asc" ? "desc" : "asc"));
+    if (userSorted && key === sortKey) setSortDirection((d) => (d === "asc" ? "desc" : "asc"));
+    else if (!userSorted && key === effKey) { setSortKey(key); setSortDirection(effDir === "asc" ? "desc" : "asc"); }
     else { setSortKey(key); setSortDirection("desc"); }
+    setUserSorted(true);
     setPage(1);
   };
   const handlePageSizeChange = (n: number) => { setPageSize(n); setPage(1); };
@@ -356,24 +422,62 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
     }
   }, [supabase, pendingFavoriteIds]);
 
-  const useAsReference = useCallback((creative: AdCreative) => {
+  /** Anúncio da Meta: o servidor guarda a imagem no nosso Storage e devolve uma URL estável
+   * (a da CDN da Meta expira e o navegador não consegue baixá-la por CORS). */
+  const resolveReferenceUrl = useCallback(async (creative: AdCreative): Promise<string> => {
+    if (creative.source === "meta_ads_api" && creative.externalId) {
+      const res = await fetch("/api/ads/media", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adExternalId: creative.externalId }),
+      });
+      const body = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!res.ok || !body.url) throw new Error(body.error || "Não foi possível preparar a imagem do anúncio.");
+      return body.url;
+    }
+    if (!creative.thumbnailUrl) throw new Error("Este anúncio não tem imagem.");
+    return creative.thumbnailUrl;
+  }, []);
+
+  const useAsReference = useCallback(async (creative: AdCreative) => {
     if (!creative.thumbnailUrl) return;
     try {
+      const url = await resolveReferenceUrl(creative);
       sessionStorage.setItem("wevyflow:pending-ad-reference", JSON.stringify({
-        url: creative.thumbnailUrl,
+        url,
         name: creative.headline || creative.advertiserName,
         adId: creative.id,
       }));
-    } catch {
-      setReferenceNotice("Não foi possível preparar a referência — tente novamente.");
+    } catch (e) {
+      setReferenceNotice(e instanceof Error ? e.message : "Não foi possível preparar a referência — tente novamente.");
       return;
     }
     router.push("/criativos?tipo=criativos");
-  }, [router]);
+  }, [router, resolveReferenceUrl]);
+
+  /** "Gerar 3 variações": abre Criativos com o anúncio como referência, a hipótese como
+   * instrução e a geração já disparada. A linhagem (anúncio, hipótese, análise) vai junto e é
+   * gravada quando a peça é salva. */
+  const generateVariants = useCallback(async (creative: AdCreative, hypothesis: CreativeHypothesis, analysisId: string) => {
+    const url = await resolveReferenceUrl(creative);
+    sessionStorage.setItem("wevyflow:pending-ad-reference", JSON.stringify({
+      url,
+      name: creative.headline || creative.advertiserName,
+      adId: creative.id,
+      variants: {
+        prompt: hypothesis.editInstruction,
+        hypothesis: hypothesis.title,
+        analysisId,
+        sourceAdExternalId: creative.externalId,
+        count: 3,
+      },
+    }));
+    router.push("/criativos?tipo=criativos");
+  }, [router, resolveReferenceUrl]);
 
   const previewCreative = useMemo(
-    () => (previewCreativeId ? creatives.find((c) => c.id === previewCreativeId) ?? null : null),
-    [creatives, previewCreativeId]
+    () => (previewCreativeId ? creativesWithMetrics.find((c) => c.id === previewCreativeId) ?? null : null),
+    [creativesWithMetrics, previewCreativeId]
   );
 
   return (
@@ -384,8 +488,8 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
             {visao === "melhores" ? <TrendingUp className="w-4 h-4 text-emerald-400" /> : visao === "piores" ? <TrendingDown className="w-4 h-4 text-red-400" /> : <Megaphone className="w-4 h-4 text-purple-400" />}
           </div>
           <div>
-            <h1 className="text-[15px] font-semibold text-white/90">{VISAO_COPY[visao].title}</h1>
-            <p className="text-[11px] text-white/30">{VISAO_COPY[visao].subtitle}</p>
+            <h1 className="text-[15px] font-semibold text-white/90">{(hasPerformance ? VISAO_COPY_PERFORMANCE : VISAO_COPY)[visao].title}</h1>
+            <p className="text-[11px] text-white/30">{(hasPerformance ? VISAO_COPY_PERFORMANCE : VISAO_COPY)[visao].subtitle}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -431,6 +535,17 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
           <Info className="w-4 h-4 text-white/30 shrink-0 mt-0.5" />
           <p className="text-[11px] text-white/45 leading-relaxed">
             Conta conectada, mas ainda sem anúncios criados nela. Campanhas em rascunho não aparecem aqui — assim que você publicar um anúncio, ele entra na próxima atualização.
+          </p>
+        </div>
+      )}
+
+      {metaConnected && !loading && creatives.length > 0 && !hasPerformance && (
+        <div className="shrink-0 mx-8 mt-4 flex items-start gap-2.5 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <Info className="w-4 h-4 text-white/30 shrink-0 mt-0.5" />
+          <p className="text-[11px] text-white/45 leading-relaxed">
+            {insightsError
+              ? "Não foi possível ler os resultados dos anúncios agora. Mostrando só o tempo no ar."
+              : "Ainda não há gasto nem compras registrados neste período. Enquanto isso, melhores e piores seguem o tempo no ar, que não representa vendas."}
           </p>
         </div>
       )}
@@ -511,9 +626,11 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
             hasAnyCreatives={creatives.length > 0}
             onClearFilters={clearFilters}
             hasActiveFilters={hasActiveFilters}
-            sortKey={sortKey}
-            sortDirection={sortDirection}
+            sortKey={effKey}
+            sortDirection={effDir}
             onSort={handleSort}
+            showPerformance={hasPerformance}
+            currency={currency}
             page={page}
             pageSize={pageSize}
             onPageChange={setPage}
@@ -544,6 +661,10 @@ export function AnunciosDashboard({ visao = "todos" }: AnunciosDashboardProps) {
           onClose={() => setPreviewCreativeId(null)}
           onToggleFavorite={toggleFavorite}
           onUseAsReference={useAsReference}
+          currency={currency}
+          from={fromDay}
+          to={toDay}
+          onGenerateVariants={(h, analysisId) => generateVariants(previewCreative, h, analysisId)}
         />
       )}
 

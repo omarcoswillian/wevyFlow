@@ -134,6 +134,9 @@ export type Database = {
           copy_headline: string | null;
           copy_cta: string | null;
           text_layer: boolean;
+          source_ad_external_id: string | null;
+          hypothesis: string | null;
+          analysis_id: string | null;
         };
         Insert: {
           id?: string;
@@ -149,6 +152,9 @@ export type Database = {
           copy_headline?: string | null;
           copy_cta?: string | null;
           text_layer?: boolean;
+          source_ad_external_id?: string | null;
+          hypothesis?: string | null;
+          analysis_id?: string | null;
         };
         Update: {
           id?: string;
@@ -164,6 +170,9 @@ export type Database = {
           copy_headline?: string | null;
           copy_cta?: string | null;
           text_layer?: boolean;
+          source_ad_external_id?: string | null;
+          hypothesis?: string | null;
+          analysis_id?: string | null;
         };
         Relationships: [];
       };
@@ -357,6 +366,12 @@ export type Database = {
           is_favorite: boolean;
           external_id: string | null;
           meta_ad_account_id: string | null;
+          media_type: "image" | "video" | "unknown";
+          creative_id: string | null;
+          video_id: string | null;
+          image_hash: string | null;
+          image_url: string | null;
+          media_path: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -375,10 +390,63 @@ export type Database = {
           is_favorite?: boolean;
           external_id?: string | null;
           meta_ad_account_id?: string | null;
+          media_type?: "image" | "video" | "unknown";
+          creative_id?: string | null;
+          video_id?: string | null;
+          image_hash?: string | null;
+          image_url?: string | null;
+          media_path?: string | null;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["ad_watch_creatives"]["Insert"]>;
+        Relationships: [];
+      };
+      meta_ads_daily_insights: {
+        Row: {
+          user_id: string;
+          ad_external_id: string;
+          meta_ad_account_id: string;
+          date: string;
+          spend: number;
+          impressions: number;
+          clicks: number;
+          purchases: number;
+          purchase_value: number;
+          video_plays: number;
+          video_thruplays: number;
+          video_p25: number;
+          video_p50: number;
+          video_p75: number;
+          video_p100: number;
+          currency: string | null;
+        };
+        Insert: Database["public"]["Tables"]["meta_ads_daily_insights"]["Row"];
+        Update: Partial<Database["public"]["Tables"]["meta_ads_daily_insights"]["Row"]>;
+        Relationships: [];
+      };
+      ad_creative_analyses: {
+        Row: {
+          id: string;
+          user_id: string;
+          ad_external_id: string;
+          media_type: string;
+          coverage: "full" | "partial";
+          analysis: Record<string, unknown>;
+          model: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          ad_external_id: string;
+          media_type: string;
+          coverage: "full" | "partial";
+          analysis: Record<string, unknown>;
+          model?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["ad_creative_analyses"]["Insert"]>;
         Relationships: [];
       };
       saved_components: {
@@ -963,6 +1031,22 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: {
+      ad_metrics_summary: {
+        Args: { p_from: string; p_to: string };
+        Returns: {
+          ad_external_id: string;
+          spend: number;
+          impressions: number;
+          clicks: number;
+          purchases: number;
+          purchase_value: number;
+          video_plays: number;
+          video_thruplays: number;
+          video_p25: number;
+          video_p100: number;
+          currency: string | null;
+        }[];
+      };
       delete_meta_user_data: {
         Args: { p_meta_user_id: string; p_kind: string; p_confirmation_code: string };
         Returns: number;

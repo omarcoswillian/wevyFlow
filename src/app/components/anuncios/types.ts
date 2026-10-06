@@ -1,3 +1,5 @@
+import type { AdMetrics, Confidence, Verdict } from "@/lib/ads/scoring";
+
 export type AdSource = "mock" | "meta_ad_library" | "foreplay" | "meta_ads_api";
 export type AdStatus = "active" | "inactive";
 
@@ -16,6 +18,13 @@ export interface AdCreative {
    * load, never during render (Date.now() is impure). */
   daysRunning: number;
   isFavorite: boolean;
+  /** ID do anúncio na Meta (só em meta_ads_api). */
+  externalId: string | null;
+  mediaType: "image" | "video" | "unknown";
+  /** Resultado no período selecionado; null sem insights (ou fonte sem eles). */
+  metrics: AdMetrics | null;
+  confidence: Confidence | null;
+  verdict: Verdict | null;
 }
 
 export type DatePreset = "30d" | "15d" | "7d" | "yesterday" | "today" | "ytd" | "custom";
@@ -28,7 +37,7 @@ export interface DateRange {
   label: string;
 }
 
-export type SortKey = "advertiserName" | "startedAt" | "stoppedAt" | "daysRunning" | "status";
+export type SortKey = "advertiserName" | "startedAt" | "stoppedAt" | "daysRunning" | "status" | "spend" | "purchases" | "roas";
 export type SortDirection = "asc" | "desc";
 
 export interface AdFilters {

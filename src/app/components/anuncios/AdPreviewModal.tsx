@@ -5,6 +5,8 @@ import { X, Megaphone, Star, Copy, Check, ImagePlus, AlertCircle } from "lucide-
 import { cn } from "@/lib/utils";
 import type { AdCreative } from "./types";
 import { formatDatePtBr } from "./date-range";
+import { AdAnalysisPanel } from "./AdAnalysisPanel";
+import type { CreativeHypothesis } from "@/lib/ads/creative-analysis";
 
 const SOURCE_LABELS: Record<AdCreative["source"], string> = {
   mock: "Demo",
@@ -18,9 +20,13 @@ interface AdPreviewModalProps {
   onClose: () => void;
   onToggleFavorite: (creative: AdCreative) => void;
   onUseAsReference: (creative: AdCreative) => void;
+  currency?: string | null;
+  from?: string;
+  to?: string;
+  onGenerateVariants?: (hypothesis: CreativeHypothesis, analysisId: string) => Promise<void>;
 }
 
-export function AdPreviewModal({ creative, onClose, onToggleFavorite, onUseAsReference }: AdPreviewModalProps) {
+export function AdPreviewModal({ creative, onClose, onToggleFavorite, onUseAsReference, currency = null, from, to, onGenerateVariants }: AdPreviewModalProps) {
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
   const [broken, setBroken] = useState(false);
@@ -79,7 +85,7 @@ export function AdPreviewModal({ creative, onClose, onToggleFavorite, onUseAsRef
         ref={panelRef}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-3xl max-h-[85vh] overflow-y-auto rounded-2xl border border-white/[0.1] bg-[#111116] shadow-2xl grid grid-cols-1 md:grid-cols-2 outline-none"
+        className="w-full max-w-4xl max-h-[88vh] overflow-y-auto rounded-2xl border border-white/[0.1] bg-[#111116] shadow-2xl grid grid-cols-1 md:grid-cols-2 outline-none"
       >
         <div className="bg-black/40 flex items-center justify-center p-6 min-h-[240px]">
           {creative.thumbnailUrl && !broken ? (
@@ -116,6 +122,10 @@ export function AdPreviewModal({ creative, onClose, onToggleFavorite, onUseAsRef
             <div><p className="text-white/25 mb-0.5">Término</p><p className="text-white/70">{creative.stoppedAt ? formatDatePtBr(creative.stoppedAt) : "Em veiculação"}</p></div>
             <div className="col-span-2"><p className="text-white/25 mb-0.5">Plataformas</p><p className="text-white/70">{creative.platforms.join(", ") || "—"}</p></div>
           </div>
+
+          {from && to && onGenerateVariants && (
+            <AdAnalysisPanel creative={creative} currency={currency} from={from} to={to} onGenerateVariants={onGenerateVariants} />
+          )}
 
           <div className="flex items-center gap-2 mt-auto pt-2">
             <button

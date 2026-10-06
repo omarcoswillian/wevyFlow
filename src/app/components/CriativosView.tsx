@@ -43,6 +43,7 @@ interface SeedItem {
 }
 interface RefCard    { id: string; label: string; dataUrl: string | null; }
 interface AvatarCard { id: string; label: string; name: string; dataUrl: string | null; }
+interface AdLineage { sourceAdExternalId: string | null; hypothesis: string; analysisId: string; prompt: string }
 interface GenResult  {
   id: string; label: string; status: "loading" | "done" | "error";
   dataUrl?: string; mimeType?: string; error?: string;
@@ -52,6 +53,8 @@ interface GenResult  {
   /** Headline/CTA aprovados aplicados em camada de texto (não desenhados pelo modelo). */
   copy?: { headline: string; cta: string };
   textLayer?: boolean;
+  /** De qual anúncio, hipótese e análise esta peça veio (variações geradas a partir de Anúncios). */
+  lineage?: AdLineage;
   /** Fundo sem texto (só em peças com camada de texto) — base pra derivar outros formatos sem gerar de novo. */
   bgDataUrl?: string;
   /** Avisos do controle de qualidade do servidor (ex.: texto residual no fundo). */
@@ -476,6 +479,8 @@ export function CriativosView() {
    * as a reference here. Removed BEFORE the await so React Strict Mode's
    * double-invoke of effects in dev can't import it twice. ── */
   const [pendingRefError, setPendingRefError] = useState<string | null>(null);
+  const [adLineage, setAdLineage] = useState<AdLineage | null>(null);
+  const [pendingAutorun, setPendingAutorun] = useState(false);
   useEffect(() => {
     let raw: string | null = null;
     try {
@@ -485,9 +490,27 @@ export function CriativosView() {
     if (!raw) return;
     (async () => {
       try {
-        const payload = JSON.parse(raw!) as { url?: unknown };
+        const payload = JSON.parse(raw!) as {
+          url?: unknown;
+          variants?: { prompt?: unknown; hypothesis?: unknown; analysisId?: unknown; sourceAdExternalId?: unknown; count?: unknown };
+        };
         if (typeof payload.url !== "string" || !payload.url) throw new Error("Referência inválida.");
         await addAsReference(payload.url);
+        const v = payload.variants;
+        if (v && typeof v.prompt === "string" && v.prompt.trim()) {
+          // Variações vindas de uma hipótese de Anúncios: a instrução entra pronta,
+          // a linhagem vai junto e a geração dispara sozinha (o usuário já escolheu "gerar").
+          setGenPrompt(v.prompt.trim());
+          setGenPromptCopy(null);
+          setGenCount(typeof v.count === "number" ? Math.max(1, Math.min(8, v.count)) : 3);
+          setAdLineage({
+            sourceAdExternalId: typeof v.sourceAdExternalId === "string" ? v.sourceAdExternalId : null,
+            hypothesis: typeof v.hypothesis === "string" ? v.hypothesis : "",
+            analysisId: typeof v.analysisId === "string" ? v.analysisId : "",
+            prompt: v.prompt.trim(),
+          });
+          setPendingAutorun(true);
+        }
       } catch (e) {
         setPendingRefError(e instanceof Error ? e.message : "Não foi possível importar a referência do anúncio.");
       }
@@ -573,6 +596,9 @@ export function CriativosView() {
     const placeholders: GenResult[] = jobs.map((job, i) => ({
       id: crypto.randomUUID(), label: `img${Date.now()}-${i + 1}`, status: "loading" as const,
       sourceText: job.copy?.headline || job.prompt,
+      // A linhagem só vale enquanto a instrução é a mesma da hipótese; se o usuário
+      // editou o prompt, a peça deixou de ser "a variação dessa hipótese".
+      lineage: adLineage && job.prompt === adLineage.prompt ? adLineage : undefined,
     }));
     setGenResults(placeholders);
     setPositions(prev => {
@@ -641,6 +667,16 @@ export function CriativosView() {
     });
     setGenRunning(false);
   };
+  // Disparo automático das variações vindas de Anúncios: espera a referência carregar.
+  useEffect(() => {
+    if (!pendingAutorun || genRunning) return;
+    if (references.some(r => r.dataUrl) && genPrompt.trim()) {
+      setPendingAutorun(false);
+      handleDesignGenerate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingAutorun, references, genPrompt, genRunning]);
+
   const removeResult = (id: string) => setGenResults(prev => prev.filter(r => r.id !== id));
 
   /* ── Refine a single result in place ──
@@ -767,6 +803,9 @@ export function CriativosView() {
         copy_headline: result.copy?.headline ?? null,
         copy_cta: result.copy?.cta ?? null,
         text_layer: Boolean(result.textLayer),
+        source_ad_external_id: result.lineage?.sourceAdExternalId ?? null,
+        hypothesis: result.lineage?.hypothesis || null,
+        analysis_id: result.lineage?.analysisId || null,
       });
       await supabase.from("creative_library").insert({ user_id: user.id, url: publicUrl, name: `${serviceLabel} — ${new Date().toLocaleDateString("pt-BR")}`, format: genFormat, tags: [serviceType] });
       await loadGallery();

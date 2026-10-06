@@ -10,6 +10,8 @@ export type GenType =
   | "image"
   | "design"
   | "design_swap"
+  | "ad_analysis"
+  | "ad_analysis_video"
   | "ensaio"
   | "logo"
   | "kv_batch"
@@ -33,6 +35,8 @@ const ACTION_COST: Record<GenType, number> = {
   // imagem; uma peça simples (geração/adaptação de referência) pesa 2, e a
   // troca de pessoa pesa 4 porque faz 3 chamadas de visão extras. Antes tudo
   // custava 6, o que tornava um criativo inviável nos planos menores.
+  ad_analysis: 1,       // análise por IA de um criativo em imagem (visão, saída curta)
+  ad_analysis_video: 2, // vídeo: mais tokens de entrada (~100-300 tokens/s)
   design: 2,
   design_swap: 4,
   ensaio: 6,        // legado — mantido pra histórico de gerações antigas

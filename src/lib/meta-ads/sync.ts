@@ -12,7 +12,10 @@ interface MetaAd {
   effective_status?: string;
   created_time?: string;
   updated_time?: string;
-  creative?: { title?: string; body?: string; thumbnail_url?: string; image_url?: string };
+  creative?: {
+    id?: string; title?: string; body?: string; thumbnail_url?: string; image_url?: string;
+    image_hash?: string; video_id?: string; object_type?: string;
+  };
   adset?: { start_time?: string; end_time?: string; targeting?: { publisher_platforms?: string[] } };
 }
 
@@ -32,6 +35,11 @@ export interface SyncedAd {
   status: "active" | "inactive";
   started_at: string;
   stopped_at: string | null;
+  media_type: "image" | "video" | "unknown";
+  creative_id: string | null;
+  video_id: string | null;
+  image_hash: string | null;
+  image_url: string | null;
 }
 
 export async function fetchMetaAds(
@@ -47,7 +55,7 @@ export async function fetchMetaAds(
     const url = new URL(`${META_GRAPH_BASE}/${adAccountId}/ads`);
     url.searchParams.set(
       "fields",
-      "id,name,effective_status,created_time,updated_time,creative{title,body,thumbnail_url,image_url},adset{start_time,end_time,targeting}",
+      "id,name,effective_status,created_time,updated_time,creative{id,title,body,thumbnail_url,image_url,image_hash,video_id,object_type},adset{start_time,end_time,targeting}",
     );
     url.searchParams.set("limit", String(PAGE_SIZE));
     if (after) url.searchParams.set("after", after);
@@ -67,12 +75,23 @@ export async function fetchMetaAds(
       const startedAt = ad.adset?.start_time ?? ad.created_time;
       if (!startedAt) continue;
       const platforms = (ad.adset?.targeting?.publisher_platforms ?? []).filter((p) => p === "facebook" || p === "instagram");
+      const c = ad.creative;
+      // Vídeo se o criativo aponta pra um video_id (ou o tipo diz VIDEO); imagem
+      // se tem arquivo de imagem; senão desconhecido (ex.: carrossel/dinâmico).
+      const mediaType: SyncedAd["media_type"] =
+        c?.video_id || c?.object_type === "VIDEO" ? "video" : c?.image_url || c?.image_hash ? "image" : "unknown";
       ads.push({
         external_id: ad.id,
         advertiser_name: accountName,
         headline: ad.creative?.title ?? ad.name ?? null,
         body: ad.creative?.body ?? null,
-        thumbnail_url: ad.creative?.thumbnail_url ?? ad.creative?.image_url ?? null,
+        // image_url é o arquivo original; thumbnail_url é uma miniatura. Prefere o original.
+        thumbnail_url: c?.image_url ?? c?.thumbnail_url ?? null,
+        media_type: mediaType,
+        creative_id: c?.id ?? null,
+        video_id: c?.video_id ?? null,
+        image_hash: c?.image_hash ?? null,
+        image_url: c?.image_url ?? null,
         platforms: platforms.length ? platforms : ["facebook", "instagram"],
         status: active ? "active" : "inactive",
         started_at: new Date(startedAt).toISOString(),

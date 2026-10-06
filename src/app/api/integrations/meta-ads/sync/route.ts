@@ -2,9 +2,18 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { decryptToken } from "@/lib/meta-ads/crypto";
 import { fetchMetaAds } from "@/lib/meta-ads/sync";
+import { fetchDailyInsights } from "@/lib/meta-ads/insights";
 import { requireAuthUser, metaAdsErrorResponse, MetaAdsApiError } from "@/lib/meta-ads/server";
 
 const COOLDOWN_MS = 60_000;
+// Primeira sincronização busca 90 dias; as seguintes só os últimos 14, porque a
+// Meta revisa conversões recentes (janela de atribuição) mas não o passado.
+const BACKFILL_DAYS = 90;
+const REFRESH_DAYS = 14;
+
+export const maxDuration = 60;
+
+const isoDay = (d: Date) => d.toISOString().slice(0, 10);
 
 /** Sincroniza os anúncios reais da conta escolhida pra ad_watch_creatives.
  * Troca os dados de demonstração pelos reais e remove o que não existe mais
@@ -45,6 +54,41 @@ export async function POST() {
       if (error) throw new Error(error.message);
     }
 
+    // Resultados diários (gasto, compras, receita, vídeo). Falha aqui não derruba
+    // a sincronização dos anúncios: a tela segue funcionando e avisa que está sem
+    // dados de performance. Token expirado (401) sobe normalmente.
+    let insightsSynced = 0;
+    let insightsFailed = false;
+    try {
+      const { count } = await service
+        .from("meta_ads_daily_insights")
+        .select("ad_external_id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("meta_ad_account_id", conn.ad_account_id);
+      const days = (count ?? 0) === 0 ? BACKFILL_DAYS : REFRESH_DAYS;
+      const until = new Date();
+      const since = new Date(Date.now() - days * 86_400_000);
+      const rows = await fetchDailyInsights(conn.ad_account_id, token, isoDay(since), isoDay(until));
+      for (let i = 0; i < rows.length; i += 500) {
+        const chunk = rows.slice(i, i + 500).map((r) => ({
+          ...r,
+          user_id: user.id,
+          meta_ad_account_id: conn.ad_account_id as string,
+        }));
+        const { error } = await service
+          .from("meta_ads_daily_insights")
+          .upsert(chunk, { onConflict: "user_id,ad_external_id,date" });
+        if (error) throw new Error(error.message);
+      }
+      insightsSynced = rows.length;
+      // Conta trocada: resultados de outra conta não podem sobrar.
+      await service.from("meta_ads_daily_insights").delete().eq("user_id", user.id).neq("meta_ad_account_id", conn.ad_account_id);
+    } catch (err) {
+      if (err instanceof MetaAdsApiError && err.status === 401) throw err;
+      console.error("[meta-ads sync] insights falharam:", err);
+      insightsFailed = true;
+    }
+
     // Remove anúncios da Meta que não vieram mais (apagados, ou de outra
     // conta) — só quando a leitura foi completa, pra um corte por limite não
     // apagar dado válido.
@@ -68,7 +112,7 @@ export async function POST() {
     if (mockErr) throw new Error(mockErr.message);
 
     await service.from("meta_ads_connections").update({ last_synced_at: new Date().toISOString() }).eq("user_id", user.id);
-    return NextResponse.json({ ok: true, synced: ads.length });
+    return NextResponse.json({ ok: true, synced: ads.length, insightsSynced, insightsFailed });
   } catch (err) {
     const { body, status } = metaAdsErrorResponse(err);
     return NextResponse.json(body, { status });

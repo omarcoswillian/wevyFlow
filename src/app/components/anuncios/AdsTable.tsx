@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Megaphone, Star, Copy, Check, ImagePlus, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, Flame, FlaskConical, Pause, AlertCircle } from "lucide-react";
+import { Video as VideoIcon, Megaphone, Star, Copy, Check, ImagePlus, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, Flame, FlaskConical, Pause, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AdCreative, SortDirection, SortKey } from "./types";
 import { formatDatePtBr } from "./date-range";
+import { CONFIDENCE_LABEL, VERDICT_LABEL, formatMoney, formatRoas } from "./format";
 
 const SOURCE_LABELS: Record<AdCreative["source"], string> = {
   mock: "Demo",
@@ -14,6 +15,22 @@ const SOURCE_LABELS: Record<AdCreative["source"], string> = {
 };
 
 const PAGE_SIZE_OPTIONS = [25, 50, 100];
+
+function VerdictPill({ creative }: { creative: AdCreative }) {
+  if (!creative.verdict) return <span className="text-white/20">—</span>;
+  const tone =
+    creative.verdict === "winner" ? "bg-emerald-500/15 text-emerald-300"
+    : creative.verdict === "loser" ? "bg-red-500/15 text-red-300"
+    : "bg-white/[0.06] text-white/45";
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap w-fit", tone)}>{VERDICT_LABEL[creative.verdict]}</span>
+      {creative.confidence && creative.verdict !== "insufficient" && (
+        <span className="text-[9px] text-white/30 whitespace-nowrap">{CONFIDENCE_LABEL[creative.confidence]}</span>
+      )}
+    </div>
+  );
+}
 
 function StatusPill({ creative }: { creative: AdCreative }) {
   if (creative.status === "inactive") {
@@ -95,12 +112,14 @@ interface AdsTableProps {
   onPreview: (creative: AdCreative) => void;
   onToggleFavorite: (creative: AdCreative) => void;
   onUseAsReference: (creative: AdCreative) => void;
+  showPerformance?: boolean;
+  currency?: string | null;
 }
 
 export function AdsTable({
   creatives, loading, error, onRetry, hasAnyCreatives, onClearFilters, hasActiveFilters,
   sortKey, sortDirection, onSort, page, pageSize, onPageChange, onPageSizeChange,
-  onPreview, onToggleFavorite, onUseAsReference,
+  onPreview, onToggleFavorite, onUseAsReference, showPerformance = false, currency = null,
 }: AdsTableProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [copyErrorId, setCopyErrorId] = useState<string | null>(null);
@@ -182,7 +201,7 @@ export function AdsTable({
     <div className="space-y-3">
       <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-[12px]" style={{ minWidth: 1240 }}>
+          <table className="w-full text-[12px]" style={{ minWidth: showPerformance ? 1560 : 1240 }}>
             <thead className="bg-[#111116] sticky top-0 z-10">
               <tr className="border-b border-white/[0.06]">
                 <th className="w-10 px-3 py-2.5" />
@@ -191,6 +210,10 @@ export function AdsTable({
                 <th className="text-left px-3 py-2.5 text-[10px] uppercase tracking-wider text-white/35 font-semibold">Texto</th>
                 <th className="text-left px-3 py-2.5 text-[10px] uppercase tracking-wider text-white/35 font-semibold">Plataformas</th>
                 <SortHeader label="Status" sortKey="status" activeKey={sortKey} direction={sortDirection} onSort={onSort} />
+                {showPerformance && <SortHeader label="Gasto" sortKey="spend" activeKey={sortKey} direction={sortDirection} onSort={onSort} />}
+                {showPerformance && <SortHeader label="Compras" sortKey="purchases" activeKey={sortKey} direction={sortDirection} onSort={onSort} />}
+                {showPerformance && <SortHeader label="ROAS" sortKey="roas" activeKey={sortKey} direction={sortDirection} onSort={onSort} />}
+                {showPerformance && <th className="text-left px-3 py-2.5 text-[10px] uppercase tracking-wider text-white/35 font-semibold">Resultado</th>}
                 <SortHeader label="Início" sortKey="startedAt" activeKey={sortKey} direction={sortDirection} onSort={onSort} />
                 <SortHeader label="Término" sortKey="stoppedAt" activeKey={sortKey} direction={sortDirection} onSort={onSort} />
                 <SortHeader label="Tempo no ar" sortKey="daysRunning" activeKey={sortKey} direction={sortDirection} onSort={onSort} />
@@ -233,7 +256,18 @@ export function AdsTable({
                       ))}
                     </div>
                   </td>
-                  <td className="px-3 py-2.5"><StatusPill creative={c} /></td>
+                  <td className="px-3 py-2.5">
+                    <div className="flex flex-col gap-1">
+                      <StatusPill creative={c} />
+                      {c.mediaType === "video" && (
+                        <span className="flex items-center gap-1 text-[9px] text-white/35"><VideoIcon className="w-3 h-3" /> Vídeo</span>
+                      )}
+                    </div>
+                  </td>
+                  {showPerformance && <td className="px-3 py-2.5 text-white/70 whitespace-nowrap">{c.metrics ? formatMoney(c.metrics.spend, currency) : "—"}</td>}
+                  {showPerformance && <td className="px-3 py-2.5 text-white/70">{c.metrics ? c.metrics.purchases : "—"}</td>}
+                  {showPerformance && <td className="px-3 py-2.5 text-white/80 font-medium whitespace-nowrap">{c.metrics ? formatRoas(c.metrics.roas) : "—"}</td>}
+                  {showPerformance && <td className="px-3 py-2.5"><VerdictPill creative={c} /></td>}
                   <td className="px-3 py-2.5 text-white/45 whitespace-nowrap">{formatDatePtBr(c.startedAt)}</td>
                   <td className="px-3 py-2.5 text-white/45 whitespace-nowrap">{c.stoppedAt ? formatDatePtBr(c.stoppedAt) : "—"}</td>
                   <td className="px-3 py-2.5 text-white/70 font-medium whitespace-nowrap">{c.daysRunning}d</td>
