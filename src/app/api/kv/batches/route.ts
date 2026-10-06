@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
     // de criativos". Falha aqui nunca bloqueia o lote — generateMockupCandidate
     // cai de volta pro texto qualitativo se isto vier `null`.
     const mockupLayoutSpec = applicationPhotos[0] && validated.referenceImages[0]
-      ? await analyzeMockupLayoutForReference(validated.referenceImages[0], apiKey).catch((err) => {
+      ? await analyzeMockupLayoutForReference(validated.referenceImages[0], validated.imageProvider === "gemini" ? apiKey : null).catch((err) => {
           console.error("[kv/batches] analyzeMockupLayoutForReference failed (non-fatal):", err);
           return null;
         })

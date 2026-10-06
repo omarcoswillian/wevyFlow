@@ -37,7 +37,7 @@ interface ApiKeyModalProps {
 }
 
 const TEXT_PROVIDERS: AIProvider[] = ["anthropic", "openai", "openrouter"];
-const IMAGE_PROVIDERS: ImageProvider[] = ["gemini", "openai", "fal"];
+const IMAGE_PROVIDERS: ImageProvider[] = ["openai", "gemini", "fal"];
 
 const MASK = "••••••••••••••••••••••••••";
 
@@ -45,7 +45,7 @@ export function ApiKeyModal({
   open,
   currentKey, currentProvider, currentModel,
   onSave, onClear,
-  currentImageKey = "", currentImageProvider = "gemini", currentImageModel = "gemini-3-pro-image-preview",
+  currentImageKey = "", currentImageProvider = "openai", currentImageModel = DEFAULT_IMAGE_MODELS.openai,
   onSaveImage, onClearImage,
   onClose,
   defaultSection = "text",

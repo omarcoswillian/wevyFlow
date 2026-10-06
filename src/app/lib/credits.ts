@@ -25,7 +25,7 @@ const ACTION_COST: Record<GenType, number> = {
   email_sequence: 1,
   criativo_html: 3, // creative/ad image — openai/fal/gemini, mid-tier cost
   image: 3,         // generic image gen — same tier as criativo
-  logo: 4,          // defaults to Nano Banana Pro
+  logo: 4,          // defaults to gpt-image-2 (high quality)
   kv_batch: 4,      // same per-image tier as logo — one KV batch candidate
   ensaio: 6,        // Nano Banana Pro + 2 extra vision/analysis calls per image
   other: 1,

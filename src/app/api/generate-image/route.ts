@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     };
 
     const byok = apiKey && apiKey.length > 10 ? apiKey : null;
-    const key = byok ?? (imageProvider === "gemini" ? (process.env.GOOGLE_AI_API_KEY ?? null) : null);
+    const key = byok ?? (imageProvider === "gemini" ? (process.env.GOOGLE_AI_API_KEY ?? null) : imageProvider === "openai" ? (process.env.OPENAI_API_KEY ?? null) : null);
 
     // ── Gemini 3 Pro Image (Nano Banana) path ────────────────────
     if (imageProvider === "gemini") {

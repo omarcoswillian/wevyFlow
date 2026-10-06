@@ -17,11 +17,11 @@ function getImageConfig(): { apiKey?: string; imageProvider: string; imageModel?
   try {
     return {
       apiKey: localStorage.getItem("wf_img_key") || undefined,
-      imageProvider: localStorage.getItem("wf_img_provider") || "gemini",
+      imageProvider: localStorage.getItem("wf_img_provider") || "openai",
       imageModel: localStorage.getItem("wf_img_model") || undefined,
     };
   } catch {
-    return { imageProvider: "gemini" };
+    return { imageProvider: "openai" };
   }
 }
 

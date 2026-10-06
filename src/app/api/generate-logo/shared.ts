@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { GoogleGenAI } from "@google/genai";
+import { generateOpenAIImage } from "../../lib/openai-image";
 import { BRIEFING_LIMITS } from "@/app/lib/launch-briefing";
 
 export interface BrandDNA {
@@ -225,7 +226,7 @@ function validateBrandDNA(dna: unknown): BrandDNA {
 export const LOGO_PROMPT_VERSION = "v5";
 
 const LOGO_DEFAULT_MODELS: Record<"openai" | "gemini" | "fal", string> = {
-  openai: "gpt-image-1",
+  openai: "gpt-image-2",
   gemini: "gemini-3-pro-image-preview",
   fal: "fal-ai/flux-pro/v1.1",
 };
@@ -256,7 +257,7 @@ export interface GenerateLogoCandidateResult {
   mimeType: string;
   prompt: string;
   /** True only when reference images were actually attached to the request
-   * sent to the provider — false for openai/fal (unsupported for this
+   * sent to the provider — false for fal (unsupported for this
    * operation) even when referenceImages was non-empty, so a caller doesn't
    * silently assume they were used. */
   referencesUsed: boolean;
@@ -350,6 +351,8 @@ export function validateGenerateLogoInput(raw: RawGenerateLogoInput): ValidatedL
   return { dna, imageProvider, direction, referenceImages };
 }
 
+const REFERENCE_FIDELITY_NOTE = "  CRITICAL: The attached images define this brand's actual visual DNA — extract their real color palette, background tone, material/texture (paper, foil, gradient, etc.) and overall composition style, and replicate them as closely and faithfully as possible in the new mark. Where any earlier instruction about color, background or style conflicts with what these images show, the images win — treat close visual fidelity to the reference as the goal, not just loose inspiration. The brand name and logo type given above are the only fixed constraints: render THIS brand's own name/initials (not the reference's), in the logo type already specified — everything else (palette, texture, layout, typographic feel, ornamentation, mood) should closely match the reference.";
+
 async function generateWithGemini(
   key: string,
   prompt: string,
@@ -369,9 +372,7 @@ async function generateWithGemini(
     // deliberado: um hex/fundo específico dito só uma vez, longe das
     // imagens, historicamente vencia uma nota vaga de "reproduza a
     // estética" (achado do dono, ver comentário em buildLogoPrompt).
-    const referenceNote = referenceParts.length > 0
-      ? " CRITICAL: The attached images define this brand's actual visual DNA — extract their real color palette, background tone, material/texture (paper, foil, gradient, etc.) and overall composition style, and replicate them as closely and faithfully as possible in the new mark. Where any earlier instruction about color, background or style conflicts with what these images show, the images win — treat close visual fidelity to the reference as the goal, not just loose inspiration. The brand name and logo type given above are the only fixed constraints: render THIS brand's own name/initials (not the reference's), in the logo type already specified — everything else (palette, texture, layout, typographic feel, ornamentation, mood) should closely match the reference."
-      : "";
+    const referenceNote = referenceParts.length > 0 ? REFERENCE_FIDELITY_NOTE : "";
 
     const result = await client.models.generateContent({
       model,
@@ -464,8 +465,23 @@ async function generateWithFal(
 async function generateWithOpenAI(
   key: string,
   prompt: string,
-  imageModel: string | undefined
+  imageModel: string | undefined,
+  referenceImages: string[]
 ): Promise<GenerateLogoCandidateResult> {
+  // With brand references the request becomes an image edit (multi-image
+  // input) so the mark can follow the reference's real palette/texture, same
+  // as the Gemini path — plain generation can't see them.
+  if (referenceImages.length > 0) {
+    const { b64, mimeType } = await generateOpenAIImage({
+      apiKey: key,
+      prompt: `${prompt}${REFERENCE_FIDELITY_NOTE}`,
+      references: referenceImages,
+      aspect: 1,
+      model: resolveLogoImageModel("openai", imageModel),
+    });
+    return { b64, mimeType, prompt, referencesUsed: true };
+  }
+
   const openai = new OpenAI({ apiKey: key });
   const response = await openai.images.generate({
     model: resolveLogoImageModel("openai", imageModel),
@@ -504,7 +520,7 @@ async function generateWithOpenAI(
  * candidates that would otherwise all fail on the same missing-key error. */
 export function resolveLogoApiKey(imageProvider: "openai" | "gemini" | "fal", apiKey?: string | null): string | null {
   const byok = apiKey && apiKey.length > 10 ? apiKey : null;
-  return byok ?? (imageProvider === "gemini" ? (process.env.GOOGLE_AI_API_KEY ?? null) : null);
+  return byok ?? (imageProvider === "gemini" ? (process.env.GOOGLE_AI_API_KEY ?? null) : imageProvider === "openai" ? (process.env.OPENAI_API_KEY ?? null) : null);
 }
 
 /** Dispatcha pra o provedor certo + normaliza qualquer erro pra um
@@ -533,10 +549,10 @@ async function dispatchImageGeneration(
       return await generateWithFal(key, prompt, imageModel);
     }
 
-    // OpenAI path — requires explicit BYOK, never falls back to a server key
-    // for image generation.
+    // OpenAI path — BYOK when the user saved one, otherwise WevyFlow's own
+    // OPENAI_API_KEY (see resolveLogoApiKey).
     if (!key) throw new LogoGenerationError("Chave OpenAI não configurada. Adicione em Configurações > IA de Imagem.", 400);
-    return await generateWithOpenAI(key, prompt, imageModel);
+    return await generateWithOpenAI(key, prompt, imageModel, referenceImages);
   } catch (e: unknown) {
     if (e instanceof LogoGenerationError) throw e;
     const msg = String((e as Error)?.message ?? "");
@@ -559,11 +575,11 @@ async function dispatchImageGeneration(
 
 export async function generateLogoCandidate(input: GenerateLogoCandidateInput): Promise<GenerateLogoCandidateResult> {
   const { dna, imageProvider, direction, referenceImages } = validateGenerateLogoInput(input);
-  // Só o caminho Gemini realmente anexa as imagens de referência (ver
-  // GenerateLogoCandidateResult.referencesUsed) — só ele deve amolecer a
-  // instrução de cor/fundo; OpenAI/Fal nunca recebem as imagens, então
-  // continuam com a cor exata que pediram.
-  const prompt = buildLogoPrompt(dna, direction, imageProvider === "gemini" && referenceImages.length > 0);
+  // Só Gemini e OpenAI realmente anexam as imagens de referência (ver
+  // GenerateLogoCandidateResult.referencesUsed) — só eles devem amolecer a
+  // instrução de cor/fundo; Fal nunca recebe as imagens, então continua com
+  // a cor exata que pediu.
+  const prompt = buildLogoPrompt(dna, direction, (imageProvider === "gemini" || imageProvider === "openai") && referenceImages.length > 0);
   return dispatchImageGeneration(imageProvider, prompt, input.imageModel, input.apiKey, referenceImages);
 }
 
@@ -780,18 +796,26 @@ export async function analyzeMockupLayoutForReference(referenceDataUrl: string, 
  * template ao redor dela é que deve seguir a referência). Por isso este é
  * o único gerador do arquivo com seu próprio texto de instrução e sua
  * própria chamada ao Gemini em vez de passar por dispatchImageGeneration.
- * Só existe caminho Gemini — nenhum outro provedor aqui aceita múltiplas
- * imagens de entrada com papéis diferentes (estilo vs. sujeito real). */
+ * Gemini e OpenAI aceitam múltiplas imagens de entrada com papéis diferentes
+ * (estilo vs. sujeito real); Fal não. A análise de layout (analyzeMockupLayout)
+ * é sempre visão do Gemini, com a chave do servidor quando o provedor é OpenAI. */
 export async function generateMockupCandidate(input: GenerateMockupCandidateInput): Promise<GenerateLogoCandidateResult> {
-  if (input.imageProvider !== "gemini") {
-    throw new LogoGenerationError("O mockup de aplicação com foto real só está disponível com o provedor Gemini.", 400);
+  if (input.imageProvider === "fal") {
+    throw new LogoGenerationError("O mockup de aplicação com foto real só está disponível com os provedores OpenAI e Gemini.", 400);
   }
-  const key = resolveLogoApiKey("gemini", input.apiKey);
-  if (!key) throw new LogoGenerationError("Chave Google AI Studio não configurada. Adicione em Configurações > IA de Imagem.", 400);
+  const key = resolveLogoApiKey(input.imageProvider, input.apiKey);
+  if (!key) {
+    throw new LogoGenerationError(
+      input.imageProvider === "openai"
+        ? "Chave OpenAI não configurada. Adicione em Configurações > IA de Imagem."
+        : "Chave Google AI Studio não configurada. Adicione em Configurações > IA de Imagem.",
+      400
+    );
+  }
 
   try {
-    const client = new GoogleGenAI({ apiKey: key });
-    const model = resolveLogoImageModel("gemini", input.imageModel);
+    const geminiKey = input.imageProvider === "gemini" ? key : resolveLogoApiKey("gemini", null);
+    const model = resolveLogoImageModel(input.imageProvider, input.imageModel);
 
     // Só a PRIMEIRA referência é anexada à geração final — mandar várias
     // fazia o modelo tratá-las com peso igual e diluir qual delas define o
@@ -812,7 +836,7 @@ export async function generateMockupCandidate(input: GenerateMockupCandidateInpu
     // qualitativo de sempre — nunca bloqueia a geração.
     const layoutSpec = input.layoutSpec !== undefined
       ? input.layoutSpec
-      : (primaryStylePart ? await analyzeMockupLayout(client, input.styleReferenceImages[0]) : null);
+      : (primaryStylePart && geminiKey ? await analyzeMockupLayout(new GoogleGenAI({ apiKey: geminiKey }), input.styleReferenceImages[0]) : null);
     const pct = (v: number) => `${Math.round(v / 10)}%`;
     const describeBox = (b: MockupLayoutBox) =>
       `left=${pct(b.left)} top=${pct(b.top)} right=${pct(b.right)} bottom=${pct(b.bottom)} (width=${pct(b.right - b.left)}, height=${pct(b.bottom - b.top)})`;
@@ -879,6 +903,25 @@ export async function generateMockupCandidate(input: GenerateMockupCandidateInpu
         : `CTA: only if the STYLE REFERENCE shows a CTA button, add one matching its size, position and corner treatment, filled with the TARGET BRAND accent or primary color, with a short label in the same case (uppercase/title case) as the reference's button.`,
       `OUTPUT: one flat final Instagram creative${layoutSpec ? ` at aspect ratio ${layoutSpec.aspectRatio}` : ", matching the STYLE REFERENCE's own aspect ratio (portrait or square)"}. Do not output a collage, moodboard, contact sheet, multiple alternatives, device frame, circular portrait, extra logo, or watermark. Visual fidelity to the reference layout and literal preservation of the source photo take priority over creative interpretation.`,
     ].filter(Boolean).join(" ");
+
+    if (input.imageProvider === "openai") {
+      const [aw, ah] = (layoutSpec?.aspectRatio ?? "4:5").split(":").map(Number);
+      const styleRef = input.styleReferenceImages[0];
+      const imageRoles = [
+        styleRef ? "IMAGE 1 — STYLE REFERENCE: layout/structure only, never its own colors/content." : "",
+        `IMAGE ${styleRef ? 2 : 1} — SOURCE PHOTO: literal content that must appear in the output.`,
+      ].filter(Boolean).join("\n");
+      const { b64, mimeType } = await generateOpenAIImage({
+        apiKey: key,
+        prompt: `${text}\n\n${imageRoles}`,
+        references: [...(styleRef ? [styleRef] : []), input.photoDataUrl],
+        aspect: aw / ah,
+        model,
+      });
+      return { b64, mimeType, prompt: text, referencesUsed: primaryStylePart !== null };
+    }
+
+    const client = new GoogleGenAI({ apiKey: key });
 
     // Partes rotuladas explicitamente em vez de só texto + imagens soltas —
     // achado de revisão do Codex: sem rótulo intercalado, o modelo tinha só

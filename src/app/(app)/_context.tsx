@@ -474,9 +474,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // BYOK — image AI
   const [imageApiKey, setImageApiKeyState] = useState<string>("");
   const [imageProvider, setImageProviderState] =
-    useState<ImageProvider>("gemini");
+    useState<ImageProvider>("openai");
   const [imageModel, setImageModelState] = useState<string>(
-    "gemini-3-pro-image-preview",
+    DEFAULT_IMAGE_MODELS.openai,
   );
 
   useEffect(() => {
@@ -490,10 +490,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setImageApiKeyState(localStorage.getItem(IMAGE_STORAGE_KEY) ?? "");
     setImageProviderState(
       (localStorage.getItem(IMAGE_STORAGE_PROVIDER) as ImageProvider) ??
-        "gemini",
+        "openai",
     );
     setImageModelState(
-      localStorage.getItem(IMAGE_STORAGE_MODEL) ?? "gemini-3-pro-image-preview",
+      localStorage.getItem(IMAGE_STORAGE_MODEL) ?? DEFAULT_IMAGE_MODELS.openai,
     );
   }, []);
 
@@ -541,8 +541,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem(IMAGE_STORAGE_PROVIDER);
     localStorage.removeItem(IMAGE_STORAGE_MODEL);
     setImageApiKeyState("");
-    setImageProviderState("gemini");
-    setImageModelState("gemini-3-pro-image-preview");
+    setImageProviderState("openai");
+    setImageModelState(DEFAULT_IMAGE_MODELS.openai);
   }, []);
 
   const { addEntry } = useHistory();
