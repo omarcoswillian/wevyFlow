@@ -130,6 +130,10 @@ export function HomeView({ onNavigate, onOpenSearch, contentOverride, activeNav 
   const [preco, setPreco] = useState("");
   const [provas, setProvas] = useState("");
   const [tipoLancamento, setTipoLancamento] = useState("Perpétuo");
+  // Fluxo "descreva livremente": a IA lê o texto, preenche o painel e o cliente revisa antes de criar.
+  const [extracting, setExtracting] = useState(false);
+  const [extracted, setExtracted] = useState(false);
+  const [extractNotice, setExtractNotice] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
 
@@ -226,7 +230,49 @@ export function HomeView({ onNavigate, onOpenSearch, contentOverride, activeNav 
     }
   };
 
+  const KEY_FIELDS = [produto, nicho, publicoAlvo, promessa, mecanismo, preco, provas];
+  const filledCount = KEY_FIELDS.filter((v) => v.trim()).length;
+  const requiredOk = [produto, nicho, publicoAlvo, promessa].every((v) => v.trim());
+  const reqStyle = (v: string): React.CSSProperties | undefined => (extracted && !v.trim() ? { borderColor: "rgba(248,113,113,0.45)" } : undefined);
+
+  /** Lê o texto livre (e o documento, se houver) com IA e preenche o painel de briefing. */
+  const handleExtract = async () => {
+    setExtracting(true);
+    setSubmitError(null);
+    setExtractNotice(null);
+    try {
+      const res = await fetch("/api/briefing/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: prompt.trim(), document: copyDocument.trim() || undefined }),
+      });
+      const json = (await res.json().catch(() => ({}))) as { briefing?: Record<string, string>; error?: string };
+      if (!res.ok || !json.briefing) throw new Error(json.error || "Não foi possível ler o seu texto agora.");
+      const b = json.briefing;
+      // Só preenche o que o cliente ainda não digitou no painel.
+      if (!produto.trim() && b.productName) setProduto(b.productName);
+      if (!nicho.trim() && b.niche) setNicho(b.niche);
+      if (!publicoAlvo.trim() && b.targetAudience) setPublicoAlvo(b.targetAudience);
+      if (!promessa.trim() && b.transformation) setPromessa(b.transformation);
+      if (!mecanismo.trim() && b.mecanismo) setMecanismo(b.mecanismo);
+      if (!preco.trim() && b.preco) setPreco(b.preco);
+      if (!provas.trim() && b.provas) setProvas(b.provas);
+      if (b.launchType) setTipoLancamento(b.launchType);
+      setExtracted(true);
+      setShowConfig(true);
+    } catch (err) {
+      // Sem a IA, o cliente ainda pode preencher o painel à mão: nada do que digitou se perde.
+      setExtractNotice(err instanceof Error ? err.message : "Não foi possível ler o seu texto agora.");
+      setExtracted(true);
+      setShowConfig(true);
+    } finally {
+      setExtracting(false);
+    }
+  };
+
   const handleSubmit = async () => {
+    // Texto livre ainda não lido: primeiro a IA organiza o briefing, o cliente revisa e só então cria.
+    if (!extracted && (prompt.trim() || copyDocument.trim())) { await handleExtract(); return; }
     const hasAnyInput = prompt.trim() || produto.trim() || nicho.trim() || publicoAlvo.trim() || promessa.trim() || images.length > 0 || copyDocument.trim();
     if (!hasAnyInput || submitting) return;
 
@@ -263,6 +309,8 @@ export function HomeView({ onNavigate, onOpenSearch, contentOverride, activeNav 
       setMecanismo(""); setPreco(""); setProvas(""); setImages([]);
       setReferenceUrl(""); clearCopyDocument();
       setShowConfig(false);
+      setExtracted(false);
+      setExtractNotice(null);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Erro ao salvar seu lançamento. Tente novamente.");
     } finally {
@@ -669,16 +717,32 @@ export function HomeView({ onNavigate, onOpenSearch, contentOverride, activeNav 
 
                   {/* ── Seção 1: Briefing do produto ── */}
                   <div className="p-4 space-y-3">
+                    {extracted && (
+                      <div className="rounded-xl bg-purple-500/10 border border-purple-500/20 px-3 py-2.5 space-y-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-[11px] font-medium text-purple-200">
+                            {extractNotice ? "Preencha o briefing abaixo" : `Entendemos ${filledCount} de ${KEY_FIELDS.length} informações do seu texto`}
+                          </p>
+                          <span className="text-[10px] text-white/40 tabular-nums">{filledCount}/{KEY_FIELDS.length}</span>
+                        </div>
+                        <div className="h-1 rounded-full bg-white/[0.08] overflow-hidden">
+                          <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all" style={{ width: `${Math.round((filledCount / KEY_FIELDS.length) * 100)}%` }} />
+                        </div>
+                        <p className="text-[10px] text-white/45 leading-snug">
+                          {extractNotice ?? "Revise e complete o que faltar. Os campos com * são obrigatórios; mecanismo, preço e provas deixam a copy bem mais específica."}
+                        </p>
+                      </div>
+                    )}
                     <p className="text-[9px] uppercase tracking-widest text-white/20 font-semibold">Sobre o produto</p>
 
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Nome do produto</label>
-                        <input value={produto} onChange={(e) => setProduto(e.target.value)} placeholder="Ex: Método Alpha" className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors" />
+                        <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Nome do produto *</label>
+                        <input value={produto} style={reqStyle(produto)} onChange={(e) => setProduto(e.target.value)} placeholder="Ex: Método Alpha" className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors" />
                       </div>
                       <div>
-                        <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Nicho</label>
-                        <input value={nicho} onChange={(e) => setNicho(e.target.value)} placeholder="Ex: Fitness, finanças, desenvolvimento pessoal..." className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors" />
+                        <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Nicho *</label>
+                        <input value={nicho} style={reqStyle(nicho)} onChange={(e) => setNicho(e.target.value)} placeholder="Ex: Fitness, finanças, desenvolvimento pessoal..." className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors" />
                       </div>
                     </div>
 
@@ -695,13 +759,13 @@ export function HomeView({ onNavigate, onOpenSearch, contentOverride, activeNav 
                     </div>
 
                     <div>
-                      <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Público-alvo</label>
-                      <input value={publicoAlvo} onChange={(e) => setPublicoAlvo(e.target.value)} placeholder="Ex: Empreendedores iniciantes que querem viver de infoprodutos" className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors" />
+                      <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Público-alvo *</label>
+                      <input value={publicoAlvo} style={reqStyle(publicoAlvo)} onChange={(e) => setPublicoAlvo(e.target.value)} placeholder="Ex: Empreendedores iniciantes que querem viver de infoprodutos" className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors" />
                     </div>
 
                     <div>
-                      <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Transformação prometida</label>
-                      <textarea value={promessa} onChange={(e) => setPromessa(e.target.value)} rows={2} placeholder="Ex: Do zero ao primeiro R$ 10k em 60 dias" className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors resize-none" />
+                      <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Transformação prometida *</label>
+                      <textarea value={promessa} style={reqStyle(promessa)} onChange={(e) => setPromessa(e.target.value)} rows={2} placeholder="Ex: Do zero ao primeiro R$ 10k em 60 dias" className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors resize-none" />
                     </div>
                   </div>
 
@@ -836,6 +900,19 @@ export function HomeView({ onNavigate, onOpenSearch, contentOverride, activeNav 
                     <input ref={docInputRef} type="file" accept=".docx,.pdf" onChange={handleDocFileInput} className="hidden" />
                   </div>
 
+                  <div className="sticky bottom-0 px-4 py-3 border-t border-white/[0.06] bg-[#18181b]">
+                    <button
+                      onClick={handleSubmit}
+                      disabled={submitting || !requiredOk}
+                      className={cn("w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-semibold transition-all cursor-pointer",
+                        submitting || !requiredOk ? "bg-white/[0.05] text-white/25 cursor-not-allowed" : "bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-purple-500/30")}
+                    >
+                      {submitting ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Criando...</> : <>Criar lançamento <ArrowRight className="w-3.5 h-3.5" /></>}
+                    </button>
+                    {!requiredOk && <p className="mt-1.5 text-center text-[10px] text-white/30">Preencha nome, nicho, público e promessa para continuar.</p>}
+                    {submitError && <p className="mt-1.5 text-center text-[10px] text-red-400">{submitError}</p>}
+                  </div>
+
                   </div>
                 </div>
               )}
@@ -860,14 +937,35 @@ export function HomeView({ onNavigate, onOpenSearch, contentOverride, activeNav 
                     <Rocket className="w-3 h-3 text-purple-400" />
                     <span className="text-[11px] text-purple-300 font-medium">Lançamento</span>
                   </div>
-                  <button onClick={handleSubmit} disabled={submitting || (!prompt.trim() && !produto.trim() && !nicho.trim() && !publicoAlvo.trim() && !promessa.trim() && !copyDocument.trim() && images.length === 0)}
+                  <button onClick={handleSubmit} disabled={submitting || extracting || (!prompt.trim() && !produto.trim() && !nicho.trim() && !publicoAlvo.trim() && !promessa.trim() && !copyDocument.trim() && images.length === 0)}
                     className={cn("shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer", (submitting || (!prompt.trim() && !produto.trim() && !nicho.trim() && !publicoAlvo.trim() && !promessa.trim() && !copyDocument.trim() && images.length === 0)) ? "bg-white/[0.05] text-white/15 cursor-not-allowed" : "bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-purple-500/30 hover:scale-105 active:scale-95")}>
-                    {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
+                    {submitting || extracting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
                   </button>
                 </div>
                 {submitError && (
                   <p className="mt-2 text-[11px] text-red-400 text-center">{submitError}</p>
                 )}
+
+                {/* Orientação: o que contar para a WevyFlow entender o lançamento. Cada chip começa a frase. */}
+                <div className="mt-4 text-center">
+                  <p className="text-[11px] text-white/35">Conte do seu jeito: quanto mais detalhe, melhor a copy e as peças.</p>
+                  <div className="mt-2 flex items-center justify-center gap-1.5 flex-wrap">
+                    {([
+                      ["Para quem", "Meu público é "],
+                      ["O que vende e preço", "Eu vendo "],
+                      ["Promessa", "A promessa é "],
+                      ["Provas", "Já tenho resultados como "],
+                    ] as const).map(([label, starter]) => (
+                      <button
+                        key={label}
+                        onClick={() => setPrompt((p) => (p.trim() ? `${p.trim()}. ${starter}` : starter))}
+                        className="px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.07] text-[10px] text-white/45 hover:text-white/80 hover:bg-white/[0.08] transition-colors cursor-pointer"
+                      >
+                        + {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>{/* end hero */}
 
