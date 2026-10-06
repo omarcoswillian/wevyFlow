@@ -132,7 +132,7 @@ export async function POST(req: Request) {
   }
   const generationId = creditResult.generationId;
 
-  const aiConfig = resolveConfig(undefined, undefined, undefined);
+  const aiConfig = resolveConfig(undefined, undefined, undefined, "html");
 
   const system = buildSystem(dims.w, dims.h);
   const userMsg = buildPrompt(

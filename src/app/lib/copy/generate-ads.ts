@@ -83,7 +83,7 @@ export async function generateAdCopy(
   facts: AdCopyFacts,
   auth?: { apiKey?: string; aiProvider?: string; aiModel?: string },
 ): Promise<{ options: AdCopyOption[]; model: string }> {
-  const aiConfig: AICallConfig = resolveConfig(auth?.apiKey, auth?.aiProvider, auth?.aiModel);
+  const aiConfig: AICallConfig = resolveConfig(auth?.apiKey, auth?.aiProvider, auth?.aiModel, "copy");
   const raw = await callOnce(aiConfig, buildSystem(facts), buildUserMessage(facts), 1024);
   const jsonMatch = raw.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error("Resposta inválida do modelo.");

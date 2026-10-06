@@ -6,6 +6,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { AIProvider, DEFAULT_MODELS } from "./ai-provider";
+import { textModelFor, type TextTask } from "./ai-routing";
 
 const _serverAnthropic = new Anthropic(); // uses ANTHROPIC_API_KEY env
 
@@ -29,8 +30,9 @@ export interface AICallConfig {
   model?: string;
 }
 
-/** Resolve config: use user key if provided, else fall back to server Anthropic key */
-export function resolveConfig(apiKey?: string, provider?: string, model?: string): AICallConfig {
+/** Resolve config: use user key if provided, else fall back to server Anthropic key.
+ * Sem chave do usuário, o modelo vem da rota da TAREFA (ver ai-routing.ts). */
+export function resolveConfig(apiKey?: string, provider?: string, model?: string, task: TextTask = "html"): AICallConfig {
   if (apiKey && apiKey.length > 20) {
     const p = (provider as AIProvider) || "anthropic";
     return { provider: p, apiKey, model: model || DEFAULT_MODELS[p] };
@@ -38,7 +40,7 @@ export function resolveConfig(apiKey?: string, provider?: string, model?: string
   return {
     provider: "anthropic",
     apiKey: process.env.ANTHROPIC_API_KEY || "",
-    model: "claude-sonnet-4-6",
+    model: textModelFor(task),
   };
 }
 

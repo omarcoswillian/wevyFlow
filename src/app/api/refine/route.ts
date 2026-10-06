@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     }
 
     const { originalCode, refinementRequest, platform, images, designContext, apiKey, aiProvider, aiModel } = await request.json();
-    const aiConfig = resolveConfig(apiKey, aiProvider, aiModel);
+    const aiConfig = resolveConfig(apiKey, aiProvider, aiModel, "html");
 
     if (!originalCode || !refinementRequest) {
       return Response.json(

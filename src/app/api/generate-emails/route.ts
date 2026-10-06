@@ -236,7 +236,7 @@ export async function POST(request: Request) {
   }
   const generationId = creditResult.generationId;
 
-  const aiConfig = resolveConfig(undefined, undefined, undefined);
+  const aiConfig = resolveConfig(undefined, undefined, undefined, "copy");
 
   const copyLines = [
     brandInfo.mecanismo ? `— Mecanismo único: ${brandInfo.mecanismo}` : "",

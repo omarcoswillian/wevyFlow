@@ -269,7 +269,7 @@ export async function POST(request: Request) {
   }
   const generationId = creditResult.generationId;
 
-  const aiConfig = resolveConfig(undefined, undefined, undefined);
+  const aiConfig = resolveConfig(undefined, undefined, undefined, "brand");
 
   // Analisar referências visuais se fornecidas
   let visualBrief: string | undefined;

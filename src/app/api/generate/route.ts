@@ -381,7 +381,7 @@ export async function POST(request: Request) {
   }
   const generationId = creditResult.generationId;
 
-  const aiConfig = resolveConfig(undefined, undefined, undefined);
+  const aiConfig = resolveConfig(undefined, undefined, undefined, "html");
 
   // Fetch reference URL — browser service (full JS render) or fallback
   let referenceContext = "";

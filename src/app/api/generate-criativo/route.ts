@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { toFile } from "openai/uploads";
 import { GoogleGenAI } from "@google/genai";
+import { imageRouteFor } from "../../lib/ai-routing";
 import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
 import { requireLaunch, launchErrorResponse, resolveLaunchStyle } from "@/lib/launches/server";
 
@@ -88,6 +89,53 @@ function buildPrompt(
   return parts.filter(Boolean).join(" ");
 }
 
+// A OpenAI (gpt-image-2, qualidade high) levou 77-113s por imagem no teste
+// cego de 2026-10-05; sem isso a plataforma pode cortar a requisição antes.
+export const maxDuration = 150;
+
+/** A tela manda a "qualidade" como tier 1K/2K/4K (conceito do Gemini); a OpenAI
+ * só aceita low/medium/high/auto e recusa "2K" com 400. Padrão = medium: no
+ * teste cego de 2026-10-05 (8 casos) medium e high empataram em texto e
+ * qualidade geral (4x4) e high ficou só 5x3 em rosto, com medium ~3x mais
+ * rápido (36s vs 100s). 4K continua pedindo high (qualidade máxima). */
+function openAIQuality(q: string | undefined): "low" | "medium" | "high" {
+  if (q === "low" || q === "medium" || q === "high") return q;
+  return q === "4K" ? "high" : "medium";
+}
+
+/** Com imagem de referência o pedido é de EDIÇÃO fiel, não de criar um criativo
+ * novo: o prompt de "criar" + as instruções do formato faziam a IA recompor
+ * layout, cores e rosto (teste de 2026-10-05: referência e resultado muito
+ * distantes). Pedindo mudança mínima só no texto, o resultado fica quase
+ * idêntico à referência (layout, cores, tipografia, pose e rosto). */
+function buildFaithfulPrompt(headline: string, cta: string, chatInstruction?: string): string {
+  const changes = [
+    headline?.trim() ? `Replace the main headline text with exactly: "${headline.trim()}".` : "",
+    cta?.trim() ? `Replace the call-to-action text with exactly: "${cta.trim()}".` : "",
+    chatInstruction?.trim() ? `Additional change requested by the user: ${chatInstruction.trim()}` : "",
+  ].filter(Boolean);
+  return [
+    "Edit this image with minimal changes. Keep EXACTLY the same composition, layout, colors, typography style, lighting, background and the same person (face, skin, hair, expression, pose, clothing). Do not redraw or restyle anything.",
+    changes.length > 0 ? changes.join(" ") : "Make no visible changes to the content.",
+    "Keep every other element and all other text exactly as they are. Text must stay sharp and legible, with correct Portuguese accents.",
+  ].join(" ");
+}
+
+/** Canvas da OpenAI mais próximo do aspecto da referência. Forçar o tamanho do
+ * formato escolhido numa referência de outro aspecto obriga a recompor a peça. */
+async function openAISizeForReference(dataUrl: string): Promise<"1024x1024" | "1536x1024" | "1024x1536" | null> {
+  try {
+    const sharp = (await import("sharp")).default;
+    const data = String(dataUrl).split(",")[1] ?? String(dataUrl);
+    const meta = await sharp(Buffer.from(data, "base64")).metadata();
+    if (!meta.width || !meta.height) return null;
+    const ratio = meta.width / meta.height;
+    return ratio > 1.2 ? "1536x1024" : ratio < 0.85 ? "1024x1536" : "1024x1024";
+  } catch {
+    return null;
+  }
+}
+
 async function runGeneration(params: {
   imageProvider: string;
   imageModel?: string;
@@ -116,21 +164,50 @@ async function runGeneration(params: {
     const aspectRatio = aspectMap[format] ?? "1:1";
     const promptWithAspect = `${prompt} Aspect ratio: ${aspectRatio}.`;
 
-    const interaction = await client.interactions.create({
-      model,
-      input: promptWithAspect,
-      response_modalities: ["image"],
-      stream: false,
-    });
-
     let b64 = "";
     let mimeType = "image/png";
-    const outputs = (interaction as { outputs?: { type: string; data?: string; mime_type?: string }[] })?.outputs ?? [];
-    for (const out of outputs) {
-      if (out.type === "image" && out.data) {
-        b64 = out.data;
-        mimeType = out.mime_type ?? "image/png";
-        break;
+
+    if (referenceBase64) {
+      // Rosto/pessoa de referência: a imagem vai junto no pedido e o modelo é
+      // instruído a preservar a identidade (mesmo padrão do Carrossel e do
+      // gerador de logo). Sem isso o Gemini nunca via a referência.
+      const [meta, data] = String(referenceBase64).split(",");
+      const refMime = (meta.match(/:(.*?);/) || [])[1] || "image/png";
+      const result = await client.models.generateContent({
+        model,
+        contents: [{
+          role: "user",
+          parts: [
+            { text: `${promptWithAspect} Use the attached image as the visual reference: keep the person's face, identity, skin tone and hairstyle exactly the same as in the reference. Do not alter or invent facial features.` },
+            { inlineData: { mimeType: refMime, data: data ?? String(referenceBase64) } },
+          ],
+        }],
+        config: { responseModalities: ["IMAGE"] },
+      });
+      for (const candidate of result.candidates ?? []) {
+        for (const part of candidate.content?.parts ?? []) {
+          if (part.inlineData?.data) {
+            b64 = part.inlineData.data;
+            mimeType = part.inlineData.mimeType ?? "image/png";
+            break;
+          }
+        }
+        if (b64) break;
+      }
+    } else {
+      const interaction = await client.interactions.create({
+        model,
+        input: promptWithAspect,
+        response_modalities: ["image"],
+        stream: false,
+      });
+      const outputs = (interaction as { outputs?: { type: string; data?: string; mime_type?: string }[] })?.outputs ?? [];
+      for (const out of outputs) {
+        if (out.type === "image" && out.data) {
+          b64 = out.data;
+          mimeType = out.mime_type ?? "image/png";
+          break;
+        }
       }
     }
 
@@ -186,22 +263,22 @@ async function runGeneration(params: {
     const imageFile = await toFile(imageBuffer, `reference.${ext}`, { type: mimeType });
 
     const response = await openai.images.edit({
-      model: imageModel || "gpt-image-1",
+      model: imageModel || "gpt-image-2",
       image: imageFile,
       prompt,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       size: config.sizeOpenAI as any,
-      quality: quality as "high" | "medium" | "low",
+      quality: openAIQuality(quality),
       n: 1,
     });
     b64 = response.data?.[0]?.b64_json;
   } else {
     const response = await openai.images.generate({
-      model: imageModel || "gpt-image-1",
+      model: imageModel || "gpt-image-2",
       prompt,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       size: config.sizeOpenAI as any,
-      quality: quality as "high" | "medium" | "low",
+      quality: openAIQuality(quality),
       n: 1,
     });
     b64 = response.data?.[0]?.b64_json;
@@ -220,12 +297,12 @@ export async function POST(req: NextRequest) {
     cor = "",
     estilo = "bold",
     fase = "lancamento",
-    quality = "high",
+    quality = "medium",
     apiKey,
     referenceBase64,
     chatInstruction,
-    imageProvider = "openai",
-    imageModel,
+    imageProvider: requestedProvider = "openai",
+    imageModel: requestedModel,
     projectId,
   } = await req.json();
 
@@ -268,10 +345,24 @@ export async function POST(req: NextRequest) {
   const { generationId } = creditResult;
 
   const byok = apiKey && apiKey.length > 10 ? apiKey : null;
-  const key = byok ?? (imageProvider === "gemini" ? (process.env.GOOGLE_AI_API_KEY ?? null) : null);
+  // Roteamento por tarefa (ai-routing.ts): com imagem de referência (rosto/
+  // pessoa) o servidor usa o provedor da rota "face" (Gemini). A chave própria
+  // do usuário (BYOK) pertence ao provedor que ele escolheu, então vence a rota.
+  const faceRoute = referenceBase64 && !byok ? imageRouteFor("face") : null;
+  const imageProvider: string = faceRoute ? faceRoute.provider : requestedProvider;
+  const imageModel: string | undefined = faceRoute ? (faceRoute.model || undefined) : requestedModel;
+  const key = byok ?? (imageProvider === "gemini" ? (process.env.GOOGLE_AI_API_KEY ?? null) : imageProvider === "openai" ? (process.env.OPENAI_API_KEY ?? null) : null);
   const criativoFormat = format as CriativoFormat;
-  const config = FORMAT_CONFIG[criativoFormat];
-  const prompt = buildPrompt(criativoFormat, canonicalProduto, headline, cta, canonicalCor, estilo, fase, chatInstruction);
+  let config = FORMAT_CONFIG[criativoFormat];
+  // Com referência: edição fiel (só o texto muda) no aspecto da própria referência.
+  let prompt: string;
+  if (referenceBase64) {
+    prompt = buildFaithfulPrompt(headline, cta, chatInstruction);
+    const refSize = await openAISizeForReference(referenceBase64);
+    if (refSize) config = { ...config, sizeOpenAI: refSize };
+  } else {
+    prompt = buildPrompt(criativoFormat, canonicalProduto, headline, cta, canonicalCor, estilo, fase, chatInstruction);
+  }
 
   try {
     const { b64, mimeType } = await runGeneration({

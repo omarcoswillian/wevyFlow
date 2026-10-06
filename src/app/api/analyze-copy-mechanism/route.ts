@@ -142,7 +142,7 @@ export async function POST(request: Request) {
       .map(s => `SLIDE ${s.slideNumber}:\n${s.text}`)
       .join("\n\n");
 
-    const config = resolveConfig();
+    const config = resolveConfig(undefined, undefined, undefined, "copy");
     const raw = await callOnce(config, SYSTEM_PROMPT, userMsg, 1_500);
     const analysis = parseAnalysis(raw, validSlideNumbers);
     if (!analysis) {
