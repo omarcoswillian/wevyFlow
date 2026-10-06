@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Avatar obrigatório para geração conjunta de slides." }, { status: 400 });
     }
 
-    const creditResult = await checkAndDeductCredit("ensaio", prompt.trim());
+    const creditResult = await checkAndDeductCredit("design_swap", prompt.trim());
     if (isCreditError(creditResult)) {
       return NextResponse.json({ error: creditResult.error }, { status: creditResult.status });
     }

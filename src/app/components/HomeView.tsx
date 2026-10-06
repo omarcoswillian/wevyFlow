@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { PLANS } from "../lib/plans";
 import {
   ArrowRight,
   Plus,
@@ -518,7 +519,7 @@ export function HomeView({ onNavigate, onOpenSearch, contentOverride, activeNav 
                 </div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[10px] text-white/50">
-                    {usage.creditsUsed} / {usage.creditsLimit} gerações
+                    {usage.creditsUsed} / {usage.creditsLimit} créditos
                   </span>
                   <span className={cn("text-[9px] font-medium", atLimit ? "text-red-400" : nearLimit ? "text-orange-400" : "text-white/25")}>
                     {atLimit ? "Limite atingido" : nearLimit ? `${usage.creditsLimit - usage.creditsUsed} restantes` : `${usage.creditsLimit - usage.creditsUsed} restantes`}
@@ -918,9 +919,9 @@ function KitsRow({ kits, onNew, onNavigate, busy }: { kits: LaunchKit[]; onNew: 
 }
 
 const UPGRADE_PLANS = [
-  { id: "starter", label: "Starter", price: "R$ 97", credits: 20, highlight: false, desc: "Ideal para começar" },
-  { id: "pro",     label: "Pro",     price: "R$ 197", credits: 60, highlight: true,  desc: "Melhor custo-benefício" },
-  { id: "scale",   label: "Scale",   price: "R$ 397", credits: 150, highlight: false, desc: "Para alto volume" },
+  { id: "starter", label: "Starter", price: "R$ 97", credits: PLANS.starter.credits, highlight: false, desc: "Ideal para começar" },
+  { id: "pro",     label: "Pro",     price: "R$ 197", credits: PLANS.pro.credits, highlight: true,  desc: "Melhor custo-benefício" },
+  { id: "scale",   label: "Scale",   price: "R$ 397", credits: PLANS.scale.credits, highlight: false, desc: "Para alto volume" },
 ] as const;
 
 function UpgradeModal({ usage, onClose }: { usage: { creditsUsed: number; creditsLimit: number; planLabel: string; plan: string } | null; onClose: () => void }) {
@@ -964,7 +965,7 @@ function UpgradeModal({ usage, onClose }: { usage: { creditsUsed: number; credit
                   <span className="text-sm font-semibold text-white">{plan.label}</span>
                   <span className="text-[10px] text-white/30">{plan.desc}</span>
                 </div>
-                <span className="text-[11px] text-white/40">{plan.credits} gerações / mês</span>
+                <span className="text-[11px] text-white/40">{plan.credits} créditos / mês</span>
               </div>
               <div className="text-right">
                 <div className="text-base font-bold text-white">{plan.price}</div>

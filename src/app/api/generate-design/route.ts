@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
+import { loadBrandSystem, TEXT_LAYER_RULE } from "@/lib/launches/brand-system";
 import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGeneration } from "../../lib/credits";
 import {
   ASPECT_MAP, stripDataUrl, resizeIfNeeded, normalizeCarouselContext,
@@ -25,6 +26,8 @@ export async function POST(req: NextRequest) {
       targetWidth,
       targetHeight,
       carouselContext,
+      projectId,
+      textLayer,
     } = await req.json() as {
       prompt: string;
       // Approved headline+CTA from the Copy picker — when present alongside
@@ -41,6 +44,11 @@ export async function POST(req: NextRequest) {
       targetWidth?: number;
       targetHeight?: number;
       carouselContext?: unknown;
+      // Lançamento de origem: quando existe e é do usuário, a geração sem
+      // referência herda o Brand System dele (cores, fonte, estilo, regras, logo).
+      projectId?: string;
+      // true = o texto da peça será aplicado depois em camada separada.
+      textLayer?: boolean;
     };
 
     if (!prompt?.trim()) {
@@ -50,7 +58,11 @@ export async function POST(req: NextRequest) {
     // This route always uses WevyFlow's own server key (no BYOK option) and
     // previously had no auth or quota check — anyone who found the URL could
     // trigger unlimited Nano Banana Pro generations for free.
-    const creditResult = await checkAndDeductCredit("ensaio", prompt.trim());
+    // Custo pelo modo real da geração (inferido do corpo, nunca de um campo
+    // que o cliente possa mandar pra pagar menos): usar avatar dispara as
+    // chamadas de visão extras da troca de pessoa.
+    const hasAvatarInput = (avatarImages ?? []).some((u) => u?.startsWith("data:"));
+    const creditResult = await checkAndDeductCredit(hasAvatarInput ? "design_swap" : "design", prompt.trim());
     if (isCreditError(creditResult)) {
       return NextResponse.json({ error: creditResult.error }, { status: creditResult.status });
     }
@@ -207,8 +219,20 @@ High quality, photorealistic. Aspect ratio: ${aspectRatio}.`;
           avParts.push({ inlineData: { mimeType, data } });
         }
 
+        // Só a geração do zero herda o Brand System: com referência, é a
+        // referência que manda no visual e a fidelidade a ela não pode ser
+        // sobrescrita por regras de marca.
+        const brand = await loadBrandSystem(projectId);
+        const promptText = [
+          brand?.block,
+          textLayer ? TEXT_LAYER_RULE : "",
+          prompt.trim(),
+          `Aspect ratio: ${aspectRatio}.`,
+        ].filter(Boolean).join("\n\n");
+
         parts = [
-          { text: `${prompt.trim()} Aspect ratio: ${aspectRatio}.` },
+          { text: promptText },
+          ...(brand?.logo ? [{ text: "LOGO OFICIAL (reproduzir exatamente, sem alterar):" }, { inlineData: brand.logo }] : []),
           ...avParts,
         ];
       }

@@ -46,6 +46,9 @@ export interface LaunchBriefing {
    * array that can desync. */
   referenceImageSources: string[];
   referenceBrands: string;
+  /** Regras visuais da marca em texto livre (estilo de foto, o que evitar,
+   * clima). Entra como regra obrigatória nas gerações de imagem. */
+  brandRules: string;
   logoUrl: string;
   /** Fotos reais (da pessoa/produto), enviadas por upload — NUNCA geradas
    * por IA. Diferente de referenceImages (que são só influência de estilo
@@ -73,6 +76,7 @@ export const BRIEFING_LIMITS = {
   referenceUrl: 2000,
   copyDocument: 20000,
   referenceBrands: 400,
+  brandRules: 1500,
   logoUrl: 2000,
   primaryColor: 32,
   secondaryColor: 32,
@@ -122,6 +126,7 @@ export function emptyBriefing(): LaunchBriefing {
     referenceImages: [],
     referenceImageSources: [],
     referenceBrands: "",
+    brandRules: "",
     logoUrl: "",
     applicationPhotos: [],
   };
@@ -144,7 +149,7 @@ export interface BriefingValidationError {
 const STRING_FIELDS = [
   "description", "productName", "niche", "targetAudience", "transformation",
   "mecanismo", "preco", "provas", "launchType", "referenceUrl", "copyDocument",
-  "referenceBrands", "logoUrl", "primaryColor", "secondaryColor", "fontChoice",
+  "referenceBrands", "brandRules", "logoUrl", "primaryColor", "secondaryColor", "fontChoice",
   "stylePreset",
 ] as const satisfies readonly (keyof LaunchBriefing)[];
 

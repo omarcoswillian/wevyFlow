@@ -129,6 +129,11 @@ export type Database = {
           produto: string | null;
           prompt: string | null;
           created_at: string;
+          project_id: string | null;
+          status: string;
+          copy_headline: string | null;
+          copy_cta: string | null;
+          text_layer: boolean;
         };
         Insert: {
           id?: string;
@@ -139,6 +144,11 @@ export type Database = {
           produto?: string | null;
           prompt?: string | null;
           created_at?: string;
+          project_id?: string | null;
+          status?: string;
+          copy_headline?: string | null;
+          copy_cta?: string | null;
+          text_layer?: boolean;
         };
         Update: {
           id?: string;
@@ -149,6 +159,11 @@ export type Database = {
           produto?: string | null;
           prompt?: string | null;
           created_at?: string;
+          project_id?: string | null;
+          status?: string;
+          copy_headline?: string | null;
+          copy_cta?: string | null;
+          text_layer?: boolean;
         };
         Relationships: [];
       };

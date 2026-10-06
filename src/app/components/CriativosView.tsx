@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { composeTextLayer } from "../lib/text-overlay";
 import { createClient } from "@/lib/supabase/client";
 import {
   Sparkles, Download, Trash2, Loader2, AlertCircle, Check, RefreshCw,
@@ -31,6 +32,7 @@ const DESIGN_SERVICE_KEYS = Object.keys(DESIGN_SERVICE_LABELS);
 interface SavedCriativo {
   id: string; format: string; url: string;
   headline: string | null; produto: string | null; created_at: string;
+  status?: string; project_id?: string | null;
 }
 interface LibraryItem {
   id: string; url: string; name: string | null;
@@ -47,6 +49,9 @@ interface GenResult  {
   /** The headline/instruction that produced this result — used to build a
    * readable download filename instead of "design-<timestamp>.png". */
   sourceText?: string;
+  /** Headline/CTA aprovados aplicados em camada de texto (não desenhados pelo modelo). */
+  copy?: { headline: string; cta: string };
+  textLayer?: boolean;
 }
 interface CardPos { x: number; y: number; }
 interface Viewport { x: number; y: number; scale: number; }
@@ -224,6 +229,7 @@ export function CriativosView() {
   // abria Criativos pelo menu, mesmo já com um lançamento aberto em outra
   // aba/página desta mesma sessão.
   const { activeLaunchKit } = useAppContext();
+  const launchProjectId = activeLaunchKit?.projectId ?? null;
   const supabase = createClient();
   const searchParams = useSearchParams();
   const serviceType  = searchParams.get("tipo") ?? "criativos";
@@ -271,6 +277,8 @@ export function CriativosView() {
   /* gallery / library */
   const [gallery,             setGallery]             = useState<SavedCriativo[]>([]);
   const [activeGalleryFormat, setActiveGalleryFormat] = useState("all");
+  // Dentro de um lançamento ativo, a galeria mostra só as peças dele; "all" mostra tudo.
+  const [galleryScope, setGalleryScope] = useState<"launch" | "all">("launch");
   const [library,             setLibrary]             = useState<LibraryItem[]>([]);
   const [libraryUploading,    setLibraryUploading]    = useState(false);
   const [libraryDragOver,     setLibraryDragOver]     = useState(false);
@@ -319,13 +327,15 @@ export function CriativosView() {
 
   /* load gallery — scoped to current service type */
   const loadGallery = useCallback(async () => {
-    const { data } = await supabase
+    let query = supabase
       .from("criativos")
-      .select("id,format,url,headline,produto,created_at")
+      .select("id,format,url,headline,produto,created_at,status,project_id")
       .or(`produto.eq.${serviceType},produto.is.null`)
       .order("created_at", { ascending: false });
+    if (galleryScope === "launch" && launchProjectId) query = query.eq("project_id", launchProjectId);
+    const { data } = await query;
     if (data) setGallery(data as SavedCriativo[]);
-  }, [supabase, serviceType]);
+  }, [supabase, serviceType, galleryScope, launchProjectId]);
   useEffect(() => { loadGallery(); }, [loadGallery]);
 
   /* load library */
@@ -517,7 +527,7 @@ export function CriativosView() {
           .filter(inst => inst.text.length > 0)
       : [{ text: genPrompt.trim(), copy: genPromptCopy }];
 
-    type Job = { prompt: string; copy: { headline: string; cta: string } | null; refImage?: string };
+    type Job = { prompt: string; copy: { headline: string; cta: string } | null; refImage?: string; textLayer?: boolean };
     let jobs: Job[] = refImages.length > 0
       ? instructions.flatMap(instruction =>
           refImages.flatMap(ref =>
@@ -525,6 +535,34 @@ export function CriativosView() {
       : instructions.flatMap(instruction =>
           Array.from({ length: variations }, () => ({ prompt: instruction.text, copy: instruction.copy })));
     if (jobs.length > MAX_BATCH_JOBS) jobs = jobs.slice(0, MAX_BATCH_JOBS);
+
+    // Texto como camada: geração do zero + headline/CTA aprovados + lançamento
+    // ativo (precisa da fonte/cor da marca) = o modelo gera só o fundo e o
+    // texto entra exato pelo canvas. Com referência, o modelo continua
+    // adaptando o texto da própria referência (fidelidade a ela).
+    jobs = jobs.map(job => ({ ...job, textLayer: Boolean(!job.refImage && job.copy && activeLaunchKit) }));
+
+    // Pré-checagem de créditos do lote: evita disparar dezenas de gerações
+    // que vão falhar no meio por falta de saldo.
+    const costPerJob = avImages.length > 0 ? 4 : 2;
+    try {
+      const usageRes = await fetch("/api/usage");
+      if (usageRes.ok) {
+        const usage = await usageRes.json() as { remaining?: number };
+        if (typeof usage.remaining === "number") {
+          const affordable = Math.floor(usage.remaining / costPerJob);
+          if (affordable <= 0) {
+            setPendingRefError(`Créditos insuficientes: cada peça custa ${costPerJob} créditos e você tem ${usage.remaining}.`);
+            setGenRunning(false);
+            return;
+          }
+          if (jobs.length > affordable) {
+            setPendingRefError(`Gerando ${affordable} de ${jobs.length} peças: seus créditos restantes (${usage.remaining}) cobrem só isso (${costPerJob} créditos por peça).`);
+            jobs = jobs.slice(0, affordable);
+          }
+        }
+      }
+    } catch { /* sem a checagem o servidor ainda barra por crédito */ }
 
     const placeholders: GenResult[] = jobs.map((job, i) => ({
       id: crypto.randomUUID(), label: `img${Date.now()}-${i + 1}`, status: "loading" as const,
@@ -539,13 +577,22 @@ export function CriativosView() {
       });
       return next;
     });
-    await Promise.all(placeholders.map(async (ph, i) => {
+    // No máximo 4 gerações simultâneas: um lote de 24 não vira 24 chamadas
+    // paralelas (estoura rate limit do provedor e dispara custo de uma vez).
+    const runPool = async <T,>(items: T[], limit: number, worker: (item: T, index: number) => Promise<void>) => {
+      let next = 0;
+      await Promise.all(Array.from({ length: Math.min(limit, items.length) }, async () => {
+        while (next < items.length) { const idx = next++; await worker(items[idx], idx); }
+      }));
+    };
+    await runPool(placeholders, 4, async (ph, i) => {
       const job = jobs[i];
       try {
         const res = await fetchWithDevAuth("/api/generate-design", {
           projectId: activeLaunchKit?.projectId,
           prompt: job.prompt,
           copy: job.copy ?? undefined,
+          textLayer: job.textLayer || undefined,
           referenceImages: job.refImage ? [job.refImage] : [],
           avatarImages: avImages,
           format: genFormat,
@@ -556,13 +603,33 @@ export function CriativosView() {
         const json = await res.json() as { error?: string; b64?: string; mimeType?: string };
         if (!res.ok) throw new Error(json.error || "Erro ao gerar.");
         if (!json.b64 || !json.mimeType) throw new Error("Imagem não retornada.");
-        const dataUrl = `data:${json.mimeType};base64,${json.b64}`;
-        setGenResults(prev => prev.map(r => r.id === ph.id ? { ...r, status: "done", dataUrl, mimeType: json.mimeType } : r));
+        let dataUrl = `data:${json.mimeType};base64,${json.b64}`;
+        let mimeType = json.mimeType;
+        let textLayerApplied = false;
+        if (job.textLayer && job.copy && activeLaunchKit) {
+          const b = activeLaunchKit.briefing;
+          const composed = await composeTextLayer({
+            imageUrl: dataUrl,
+            headline: job.copy.headline,
+            cta: job.copy.cta,
+            fontChoice: b.fontChoice,
+            primaryColor: b.primaryColor,
+            light: b.stylePreset === "light-clean",
+            safeVertical: genFormat === "9:16",
+          });
+          dataUrl = composed.dataUrl;
+          mimeType = composed.mimeType;
+          textLayerApplied = true;
+        }
+        setGenResults(prev => prev.map(r => r.id === ph.id ? {
+          ...r, status: "done", dataUrl, mimeType,
+          copy: job.copy ?? undefined, textLayer: textLayerApplied,
+        } : r));
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Erro.";
         setGenResults(prev => prev.map(r => r.id === ph.id ? { ...r, status: "error", error: msg } : r));
       }
-    }));
+    });
     setGenRunning(false);
   };
   const removeResult = (id: string) => setGenResults(prev => prev.filter(r => r.id !== id));
@@ -591,7 +658,7 @@ export function CriativosView() {
       if (!res.ok) throw new Error(json.error || "Erro ao ajustar.");
       if (!json.b64 || !json.mimeType) throw new Error("Imagem não retornada.");
       const dataUrl = `data:${json.mimeType};base64,${json.b64}`;
-      setGenResults(prev => prev.map(r => r.id === result.id ? { ...r, status: "done", dataUrl, mimeType: json.mimeType } : r));
+      setGenResults(prev => prev.map(r => r.id === result.id ? { ...r, status: "done", dataUrl, mimeType: json.mimeType, textLayer: false } : r));
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erro.";
       setGenResults(prev => prev.map(r => r.id === result.id ? { ...r, status: "error", error: msg } : r));
@@ -638,12 +705,20 @@ export function CriativosView() {
       const { error: storErr } = await supabase.storage.from("ai-images").upload(path, blob, { upsert: false });
       if (storErr) return;
       const { data: { publicUrl } } = supabase.storage.from("ai-images").getPublicUrl(path);
-      await supabase.from("criativos").insert({ user_id: user.id, url: publicUrl, format: genFormat, headline: genPrompt.slice(0, 200) || null, produto: serviceType });
+      await supabase.from("criativos").insert({
+        user_id: user.id, url: publicUrl, format: genFormat,
+        headline: (result.copy?.headline ?? genPrompt).slice(0, 200) || null,
+        produto: serviceType,
+        project_id: launchProjectId,
+        copy_headline: result.copy?.headline ?? null,
+        copy_cta: result.copy?.cta ?? null,
+        text_layer: Boolean(result.textLayer),
+      });
       await supabase.from("creative_library").insert({ user_id: user.id, url: publicUrl, name: `${serviceLabel} — ${new Date().toLocaleDateString("pt-BR")}`, format: genFormat, tags: [serviceType] });
       await loadGallery();
       await loadLibrary();
     } catch { /* silently fail */ }
-  }, [supabase, serviceType, serviceLabel, genFormat, genPrompt, loadGallery, loadLibrary]);
+  }, [supabase, serviceType, serviceLabel, genFormat, genPrompt, launchProjectId, loadGallery, loadLibrary]);
 
   const filteredGallery = activeGalleryFormat === "all" ? gallery : gallery.filter(c => c.format === activeGalleryFormat);
   const hasGerarCard = !!positions["gerar"];
@@ -671,7 +746,20 @@ export function CriativosView() {
 
       {/* ─── Tab bar ─────────────────────────── */}
       <div className="px-8 pt-6 pb-4 shrink-0 flex items-center justify-between">
-        <h2 className="text-[15px] font-semibold text-white/70 tracking-tight">{serviceLabel}</h2>
+        <div className="flex items-center gap-3 min-w-0">
+          <h2 className="text-[15px] font-semibold text-white/70 tracking-tight">{serviceLabel}</h2>
+          {launchProjectId && (
+            <div className="flex items-center gap-0.5 bg-white/[0.03] border border-white/[0.07] rounded-lg p-0.5">
+              {([["launch", activeLaunchKit?.brandInfo.productName || "Este lançamento"], ["all", "Todos"]] as const).map(([id, label]) => (
+                <button key={id} onClick={() => setGalleryScope(id)}
+                  className={cn("px-2.5 py-1 rounded-md text-[10px] font-semibold max-w-[160px] truncate cursor-pointer transition-all",
+                    galleryScope === id ? "bg-white/[0.1] text-white" : "text-white/35 hover:text-white/60")}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <div className="flex items-center gap-1 bg-white/[0.03] border border-white/[0.07] rounded-xl p-1">
           {([
             { id: "biblioteca", label: "Biblioteca", icon: <Library className="w-3.5 h-3.5" />, badge: library.length },

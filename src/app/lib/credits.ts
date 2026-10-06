@@ -8,6 +8,8 @@ export type GenType =
   | "email_sequence"
   | "criativo_html"
   | "image"
+  | "design"
+  | "design_swap"
   | "ensaio"
   | "logo"
   | "kv_batch"
@@ -27,7 +29,13 @@ const ACTION_COST: Record<GenType, number> = {
   image: 3,         // generic image gen — same tier as criativo
   logo: 4,          // defaults to gpt-image-2 (high quality)
   kv_batch: 4,      // same per-image tier as logo — one KV batch candidate
-  ensaio: 6,        // Nano Banana Pro + 2 extra vision/analysis calls per image
+  // Imagem de design (Nano Banana Pro). O custo real é ~US$0,13-0,24 por
+  // imagem; uma peça simples (geração/adaptação de referência) pesa 2, e a
+  // troca de pessoa pesa 4 porque faz 3 chamadas de visão extras. Antes tudo
+  // custava 6, o que tornava um criativo inviável nos planos menores.
+  design: 2,
+  design_swap: 4,
+  ensaio: 6,        // legado — mantido pra histórico de gerações antigas
   other: 1,
 };
 

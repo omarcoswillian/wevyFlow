@@ -1,24 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Trash2, CheckCircle2, Circle } from "lucide-react";
+import { ArrowLeft, Trash2, CheckCircle2, Circle, Upload, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppContext } from "../(app)/_context";
 import { BRIEFING_LIMITS, toBrandInfo, type LaunchBriefing } from "../lib/launch-briefing";
 import { EmailSequencePanel } from "./EmailSequencePanel";
 import { CopyView } from "./CopyView";
 import { useCopyDocuments } from "../lib/copy/useCopyDocuments";
+import { createClient } from "@/lib/supabase/client";
+
+const FONT_OPTIONS = [
+  { id: "sora", label: "Sora" }, { id: "inter", label: "Inter" },
+  { id: "poppins", label: "Poppins" }, { id: "montserrat", label: "Montserrat" },
+  { id: "playfair", label: "Playfair" }, { id: "space-grotesk", label: "Space Grotesk" },
+];
+
+const STYLE_OPTIONS = [
+  { id: "dark-premium", label: "Escuro premium" }, { id: "light-clean", label: "Claro e limpo" },
+  { id: "glassmorphism", label: "Vidro fosco" }, { id: "neon-tech", label: "Neon tech" },
+  { id: "luxury", label: "Luxo" }, { id: "brutalist", label: "Brutalista" },
+];
 
 /* O Hub controla a narrativa do lançamento (quem é o público, a promessa, o
  * mecanismo, a oferta, as provas). Copy e Emails são frentes que consomem essa
  * narrativa; Design/criativos ficam fora daqui, em /criativos. */
 
-type HubTab = "narrativa" | "copy" | "emails";
+type HubTab = "narrativa" | "marca" | "copy" | "pecas" | "emails";
 
 const HUB_TABS: { id: HubTab; label: string }[] = [
   { id: "narrativa", label: "Narrativa" },
+  { id: "marca", label: "Marca" },
   { id: "copy", label: "Copy" },
+  { id: "pecas", label: "Peças" },
   { id: "emails", label: "Emails" },
 ];
 
@@ -36,6 +51,102 @@ const NARRATIVE_FIELDS: { key: NarrativeKey; label: string; hint: string; placeh
   { key: "preco", label: "Oferta e preço", hint: "Preço, âncora, bônus e garantia.", placeholder: "Ex: R$ 997 (de R$ 2.997), 3 bônus, garantia de 7 dias", rows: 2 },
   { key: "provas", label: "Provas", hint: "Resultados, números e depoimentos que sustentam a promessa.", placeholder: "Ex: 1.200 alunas, média de 8kg, depoimentos da turma 3", rows: 4 },
 ];
+
+interface Piece {
+  id: string; url: string; format: string; status: string;
+  copy_headline: string | null; copy_cta: string | null; text_layer: boolean; created_at: string;
+}
+
+/** Quadro de peças do lançamento: o Hub não gera design, mas controla o que
+ * foi gerado pra ele e o que está aprovado. */
+function PiecesBoard({ projectId, onOpenDesign }: { projectId: string; onOpenDesign: () => void }) {
+  const [pieces, setPieces] = useState<Piece[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    const { data, error: err } = await createClient()
+      .from("criativos")
+      .select("id,url,format,status,copy_headline,copy_cta,text_layer,created_at")
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false });
+    if (err) { setError(err.message); setPieces([]); return; }
+    setError(null);
+    setPieces((data ?? []) as Piece[]);
+  }, [projectId]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    load();
+  }, [load]);
+
+  const toggle = async (piece: Piece) => {
+    const next = piece.status === "approved" ? "draft" : "approved";
+    const { error: err } = await createClient().from("criativos").update({ status: next }).eq("id", piece.id);
+    if (err) { setError(err.message); return; }
+    setPieces((prev) => prev?.map((p) => (p.id === piece.id ? { ...p, status: next } : p)) ?? prev);
+  };
+
+  const approved = pieces?.filter((p) => p.status === "approved").length ?? 0;
+
+  return (
+    <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-[13px] font-semibold text-white">Peças do lançamento</h2>
+          <p className="text-[11px] text-white/35 mt-0.5">
+            {pieces && pieces.length > 0 ? `${approved} de ${pieces.length} aprovadas` : "As peças geradas em Criativos para este lançamento aparecem aqui."}
+          </p>
+        </div>
+        <button
+          onClick={onOpenDesign}
+          className="px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-white/70 text-[11px] font-medium transition-colors cursor-pointer"
+        >
+          Abrir Criativos
+        </button>
+      </div>
+
+      {error && <p className="text-[11px] text-red-400">Erro ao carregar peças: {error}</p>}
+
+      {pieces === null ? (
+        <div className="flex justify-center py-16"><Loader2 className="w-5 h-5 text-purple-400 animate-spin" /></div>
+      ) : pieces.length === 0 ? (
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-6 py-14 text-center">
+          <p className="text-[13px] font-medium text-white/60">Nenhuma peça ainda</p>
+          <p className="text-[11px] text-white/30 mt-1 max-w-sm mx-auto">
+            Gere uma peça em Criativos com este lançamento aberto e clique em Usar: ela entra aqui para você aprovar.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+          {pieces.map((piece) => (
+            <div key={piece.id} className="rounded-xl bg-[#18181b] border border-white/[0.06] overflow-hidden">
+              <div className="aspect-[4/5] bg-black/30 flex items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={piece.url} alt={piece.copy_headline ?? "Peça"} className="w-full h-full object-cover" />
+              </div>
+              <div className="p-3 space-y-2">
+                <p className="text-[11px] text-white/70 line-clamp-2 min-h-[28px]">{piece.copy_headline || "Sem headline vinculada"}</p>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] text-white/30">{piece.format}{piece.text_layer ? " · texto exato" : ""}</span>
+                  <button
+                    onClick={() => toggle(piece)}
+                    className={cn(
+                      "px-2.5 py-1 rounded-md text-[10px] font-semibold transition-colors cursor-pointer",
+                      piece.status === "approved"
+                        ? "bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25"
+                        : "bg-white/[0.06] text-white/60 hover:bg-white/[0.1]"
+                    )}
+                  >
+                    {piece.status === "approved" ? "Aprovada" : "Aprovar"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function NarrativeField({
   label, hint, placeholder, rows, value, maxLength, onCommit,
@@ -74,6 +185,7 @@ export function LaunchHub() {
 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [persistError, setPersistError] = useState<string | null>(null);
+  const [logoUploading, setLogoUploading] = useState(false);
 
   // A aba vive na URL (?aba=) pra sobreviver a reload e poder ser linkada;
   // o projectId continua sendo a única fonte do lançamento ativo.
@@ -110,11 +222,32 @@ export function LaunchHub() {
   const doneSteps = narrativeDone + (copyApproved > 0 ? 1 : 0) + emailsDone;
   const progressPct = Math.round((doneSteps / totalSteps) * 100);
 
-  const commitNarrative = (key: NarrativeKey, value: string) => {
-    const briefing: LaunchBriefing = { ...kit.briefing, [key]: value };
+  const commitBriefing = (patch: Partial<LaunchBriefing>) => {
+    const briefing: LaunchBriefing = { ...kit.briefing, ...patch };
     const updated = { ...kit, briefing, brandInfo: toBrandInfo(briefing), updatedAt: new Date().toISOString() };
     setActiveLaunchKit(updated);
-    saveLaunchKit(updated).catch((e) => setPersistError(e instanceof Error ? e.message : "Erro ao salvar a narrativa."));
+    saveLaunchKit(updated).catch((e) => setPersistError(e instanceof Error ? e.message : "Erro ao salvar o lançamento."));
+  };
+  const commitNarrative = (key: NarrativeKey, value: string) => commitBriefing({ [key]: value });
+
+  const handleLogoUpload = async (file: File) => {
+    setLogoUploading(true);
+    try {
+      if (!file.type.startsWith("image/") || file.size > 2_000_000) throw new Error("Use uma imagem de até 2 MB (PNG, SVG ou JPG).");
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Faça login para enviar o logo.");
+      const ext = (file.name.split(".").pop() ?? "png").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const path = `${user.id}/logos/${kit.projectId}-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("ai-images").upload(path, file, { upsert: false });
+      if (error) throw new Error(error.message);
+      const { data: { publicUrl } } = supabase.storage.from("ai-images").getPublicUrl(path);
+      commitBriefing({ logoUrl: publicUrl });
+    } catch (e) {
+      setPersistError(e instanceof Error ? e.message : "Erro ao enviar o logo.");
+    } finally {
+      setLogoUploading(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -264,10 +397,122 @@ export function LaunchHub() {
         </div>
       )}
 
+      {tab === "marca" && (
+        <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6">
+          <div>
+            <h2 className="text-[13px] font-semibold text-white">Brand System</h2>
+            <p className="text-[11px] text-white/35 mt-0.5">
+              Estas regras valem para toda imagem gerada neste lançamento a partir do zero. Em adaptações de referência, a referência continua mandando no visual.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+            <div className="rounded-xl bg-[#18181b] border border-white/[0.06] p-4">
+              <p className="text-[12px] font-semibold text-white mb-3">Cores</p>
+              <div className="flex gap-4">
+                {([["primaryColor", "Primária"], ["secondaryColor", "Secundária"]] as const).map(([key, label]) => (
+                  <label key={key} className="flex items-center gap-2.5 cursor-pointer">
+                    <input
+                      type="color"
+                      value={/^#[0-9a-fA-F]{6}$/.test(b[key]) ? b[key] : "#a78bfa"}
+                      onChange={(e) => commitBriefing({ [key]: e.target.value })}
+                      className="w-10 h-10 rounded-lg bg-transparent border border-white/[0.1] cursor-pointer"
+                    />
+                    <span>
+                      <span className="block text-[11px] text-white/60">{label}</span>
+                      <span className="block text-[11px] text-white/30 tabular-nums">{b[key]}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-[#18181b] border border-white/[0.06] p-4">
+              <p className="text-[12px] font-semibold text-white mb-3">Logo</p>
+              <div className="flex items-center gap-3">
+                <div className="w-16 h-16 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center overflow-hidden shrink-0">
+                  {b.logoUrl
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={b.logoUrl} alt="Logo" className="max-w-full max-h-full object-contain" />
+                    : <span className="text-[10px] text-white/25">sem logo</span>}
+                </div>
+                <label className={cn("flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-white/70 text-[11px] font-medium transition-colors", logoUploading ? "opacity-60" : "cursor-pointer")}>
+                  {logoUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                  {b.logoUrl ? "Trocar logo" : "Enviar logo"}
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    disabled={logoUploading}
+                    className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleLogoUpload(f); e.target.value = ""; }}
+                  />
+                </label>
+                {b.logoUrl && (
+                  <button onClick={() => commitBriefing({ logoUrl: "" })} className="text-[11px] text-white/30 hover:text-red-400 cursor-pointer">Remover</button>
+                )}
+              </div>
+              <p className="text-[11px] text-white/30 mt-3">O logo vai como imagem de entrada e é reproduzido sem ser redesenhado.</p>
+            </div>
+
+            <div className="rounded-xl bg-[#18181b] border border-white/[0.06] p-4">
+              <p className="text-[12px] font-semibold text-white mb-3">Tipografia e estilo</p>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block">
+                  <span className="block text-[10px] uppercase tracking-widest text-white/30 mb-1">Fonte</span>
+                  <select
+                    value={b.fontChoice}
+                    onChange={(e) => commitBriefing({ fontChoice: e.target.value })}
+                    className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-[12px] text-white focus:outline-none cursor-pointer"
+                  >
+                    {FONT_OPTIONS.map((f) => <option key={f.id} value={f.id} className="bg-[#18181b]">{f.label}</option>)}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="block text-[10px] uppercase tracking-widest text-white/30 mb-1">Estilo</span>
+                  <select
+                    value={b.stylePreset}
+                    onChange={(e) => commitBriefing({ stylePreset: e.target.value })}
+                    className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-[12px] text-white focus:outline-none cursor-pointer"
+                  >
+                    {STYLE_OPTIONS.map((s) => <option key={s.id} value={s.id} className="bg-[#18181b]">{s.label}</option>)}
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            <NarrativeField
+              key={`${kit.projectId}-referenceBrands`}
+              label="Marcas de referência"
+              hint="Marcas cuja linguagem visual você admira."
+              placeholder="Ex: Nike, Apple, Headspace"
+              rows={2}
+              value={b.referenceBrands ?? ""}
+              maxLength={BRIEFING_LIMITS.referenceBrands}
+              onCommit={(v) => commitBriefing({ referenceBrands: v })}
+            />
+          </div>
+
+          <NarrativeField
+            key={`${kit.projectId}-brandRules`}
+            label="Regras da marca"
+            hint="Estilo de foto, clima, o que sempre fazer e o que evitar nas peças."
+            placeholder="Ex: fotos com luz natural, sem stock genérico; nunca usar vermelho; sempre muito respiro"
+            rows={4}
+            value={b.brandRules ?? ""}
+            maxLength={BRIEFING_LIMITS.brandRules}
+            onCommit={(v) => commitBriefing({ brandRules: v })}
+          />
+        </div>
+      )}
+
       {tab === "copy" && (
         <div className="flex-1 min-h-0">
           <CopyView launch={{ projectId: kit.projectId, facts: launchFacts }} />
         </div>
+      )}
+
+      {tab === "pecas" && (
+        <PiecesBoard projectId={kit.projectId} onOpenDesign={() => navigate("criativos")} />
       )}
 
       {tab === "emails" && (
