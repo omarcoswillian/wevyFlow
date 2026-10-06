@@ -52,6 +52,12 @@ interface GenResult  {
   /** Headline/CTA aprovados aplicados em camada de texto (não desenhados pelo modelo). */
   copy?: { headline: string; cta: string };
   textLayer?: boolean;
+  /** Fundo sem texto (só em peças com camada de texto) — base pra derivar outros formatos sem gerar de novo. */
+  bgDataUrl?: string;
+  /** Avisos do controle de qualidade do servidor (ex.: texto residual no fundo). */
+  warning?: string;
+  /** Formato próprio da peça (derivadas diferem do formato selecionado no gerador). */
+  format?: string;
 }
 interface CardPos { x: number; y: number; }
 interface Viewport { x: number; y: number; scale: number; }
@@ -600,12 +606,13 @@ export function CriativosView() {
           targetWidth: fmt.pxW,
           targetHeight: fmt.pxH,
         });
-        const json = await res.json() as { error?: string; b64?: string; mimeType?: string };
+        const json = await res.json() as { error?: string; b64?: string; mimeType?: string; qualityWarnings?: string[] };
         if (!res.ok) throw new Error(json.error || "Erro ao gerar.");
         if (!json.b64 || !json.mimeType) throw new Error("Imagem não retornada.");
         let dataUrl = `data:${json.mimeType};base64,${json.b64}`;
         let mimeType = json.mimeType;
         let textLayerApplied = false;
+        let bgDataUrl: string | undefined;
         if (job.textLayer && job.copy && activeLaunchKit) {
           const b = activeLaunchKit.briefing;
           const composed = await composeTextLayer({
@@ -617,13 +624,15 @@ export function CriativosView() {
             light: b.stylePreset === "light-clean",
             safeVertical: genFormat === "9:16",
           });
+          bgDataUrl = dataUrl;
           dataUrl = composed.dataUrl;
           mimeType = composed.mimeType;
           textLayerApplied = true;
         }
         setGenResults(prev => prev.map(r => r.id === ph.id ? {
           ...r, status: "done", dataUrl, mimeType,
-          copy: job.copy ?? undefined, textLayer: textLayerApplied,
+          copy: job.copy ?? undefined, textLayer: textLayerApplied, bgDataUrl, format: genFormat,
+          warning: json.qualityWarnings?.[0],
         } : r));
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Erro.";
@@ -693,6 +702,51 @@ export function CriativosView() {
     setGallery(prev => prev.filter(x => x.id !== c.id));
   }
 
+  /* ── Derivar formatos ──
+   * A partir de um master com camada de texto, gera os outros formatos sem
+   * chamar a IA (zero crédito): recorta o fundo sem texto e recompõe a
+   * headline/CTA exatas. */
+  const handleDeriveFormats = useCallback(async (result: GenResult) => {
+    if (!result.bgDataUrl || !result.copy || !activeLaunchKit) return;
+    const b = activeLaunchKit.briefing;
+    const baseFormat = result.format ?? genFormat;
+    const targets = GEN_FORMATS.filter(f => f.id !== baseFormat);
+    const created: GenResult[] = [];
+    for (const f of targets) {
+      try {
+        const composed = await composeTextLayer({
+          imageUrl: result.bgDataUrl,
+          headline: result.copy.headline,
+          cta: result.copy.cta,
+          fontChoice: b.fontChoice,
+          primaryColor: b.primaryColor,
+          light: b.stylePreset === "light-clean",
+          safeVertical: f.pxH / f.pxW > 1.5,
+          targetWidth: f.pxW,
+          targetHeight: f.pxH,
+        });
+        created.push({
+          id: crypto.randomUUID(), label: `${result.label.slice(0, 8)}-${f.id.replace(":", "x")}`,
+          status: "done", dataUrl: composed.dataUrl, mimeType: composed.mimeType,
+          sourceText: result.sourceText, copy: result.copy, textLayer: true,
+          bgDataUrl: result.bgDataUrl, format: f.id,
+        });
+      } catch { /* formato que falhar simplesmente não entra */ }
+    }
+    if (created.length === 0) return;
+    setGenResults(prev => [...prev, ...created]);
+    setPositions(prev => {
+      const next = { ...prev };
+      const gPos = positionsRef.current["gerar"] || { x: 0, y: 0 };
+      const offset = genResults.length;
+      created.forEach((c, i) => {
+        const idx = offset + i;
+        next[c.id] = { x: gPos.x + 430 + (idx % 2) * 260, y: gPos.y + Math.floor(idx / 2) * 290 };
+      });
+      return next;
+    });
+  }, [activeLaunchKit, genFormat, genResults.length]);
+
   const handleUsarResult = useCallback(async (result: GenResult) => {
     if (!result.dataUrl || result.status !== "done") return;
     const { data: { user } } = await supabase.auth.getUser();
@@ -706,7 +760,7 @@ export function CriativosView() {
       if (storErr) return;
       const { data: { publicUrl } } = supabase.storage.from("ai-images").getPublicUrl(path);
       await supabase.from("criativos").insert({
-        user_id: user.id, url: publicUrl, format: genFormat,
+        user_id: user.id, url: publicUrl, format: result.format ?? genFormat,
         headline: (result.copy?.headline ?? genPrompt).slice(0, 200) || null,
         produto: serviceType,
         project_id: launchProjectId,
@@ -891,7 +945,7 @@ export function CriativosView() {
                     zIndex: draggingId === result.id ? 200 : 10,
                     cursor: draggingId === result.id ? "grabbing" : "grab",
                   }} onMouseDown={e => startDrag(result.id, e)}>
-                    <NodeResultCard result={result} format={genFormat} onDelete={() => removeResult(result.id)} onUsar={() => handleUsarResult(result)} onRefine={instruction => handleRefineResult(result, instruction)} />
+                    <NodeResultCard result={result} format={result.format ?? genFormat} onDerive={result.bgDataUrl && result.copy ? () => handleDeriveFormats(result) : undefined} onDelete={() => removeResult(result.id)} onUsar={() => handleUsarResult(result)} onRefine={instruction => handleRefineResult(result, instruction)} />
                   </div>
                 );
               })}
@@ -1482,8 +1536,8 @@ function BatchCopyList({ copies, onChange, copiesStructured, onChangeStructured 
   );
 }
 
-function NodeResultCard({ result, format, onDelete, onUsar, onRefine }: {
-  result: GenResult; format: string; onDelete: () => void; onUsar: () => void; onRefine: (instruction: string) => void;
+function NodeResultCard({ result, format, onDerive, onDelete, onUsar, onRefine }: {
+  result: GenResult; format: string; onDerive?: () => void; onDelete: () => void; onUsar: () => void; onRefine: (instruction: string) => void;
 }) {
   const [adjusting, setAdjusting] = useState(false);
   const [adjustText, setAdjustText] = useState("");
@@ -1524,6 +1578,9 @@ function NodeResultCard({ result, format, onDelete, onUsar, onRefine }: {
         <div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={result.dataUrl} alt="" style={{ width: "100%", display: "block", maxHeight: 320, objectFit: "cover" }} />
+          {result.warning && (
+            <p style={{ margin: 0, padding: "6px 10px", fontSize: 10, lineHeight: 1.4, color: "rgba(251,191,36,.85)", background: "rgba(251,191,36,.08)" }}>{result.warning}</p>
+          )}
           {adjusting ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: 8 }} onMouseDown={e => e.stopPropagation()}>
               <textarea
@@ -1562,6 +1619,14 @@ function NodeResultCard({ result, format, onDelete, onUsar, onRefine }: {
                 className="hover:text-white hover:bg-white/[0.07] transition-colors">
                 <Pencil style={{ width: 11, height: 11 }} /> Ajustar
               </button>
+              {onDerive && (
+                <button onClick={onDerive}
+                  title="Gera os outros formatos a partir desta peça, sem gastar créditos"
+                  style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "6px 0", borderRadius: 7, background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)", color: "rgba(255,255,255,.55)", fontSize: 10, cursor: "pointer" }}
+                  className="hover:text-white hover:bg-white/[0.07] transition-colors">
+                  <ImagePlus style={{ width: 11, height: 11 }} /> Formatos
+                </button>
+              )}
               <button onClick={onUsar} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "6px 0", borderRadius: 7, background: "rgba(124,58,237,.08)", border: "1px solid rgba(124,58,237,.2)", color: "rgba(167,139,250,.7)", fontSize: 10, cursor: "pointer" }}
                 className="hover:bg-purple-500/15 hover:text-purple-300 transition-colors">
                 <Check style={{ width: 12, height: 12 }} /> Usar

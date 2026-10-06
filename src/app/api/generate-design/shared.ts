@@ -212,6 +212,29 @@ Be exhaustive and precise — every character of text matters.`
  * model treat each one as a checklist item instead of guessing which parts
  * "the new copy" refers to.
  */
+/** Controle de qualidade da camada de texto: o fundo gerado não pode trazer
+ * palavras, letras ou números legíveis, porque o texto final entra depois por
+ * cima. Falha segura: se a checagem em si falhar, não bloqueia a peça. */
+export async function detectStrayText(client: GoogleGenAI, dataUrl: string): Promise<boolean> {
+  try {
+    const { mimeType, data } = stripDataUrl(dataUrl);
+    const result = await client.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [{
+        role: "user",
+        parts: [
+          { text: "Does this image contain any legible words, letters, numbers, fake logos or watermarks (ignore tiny incidental marks that cannot be read)? Answer with exactly one word: SIM or NAO." },
+          { inlineData: { mimeType, data } },
+        ],
+      }],
+    });
+    const parts = (result.candidates?.[0]?.content?.parts ?? []) as Part[];
+    return /^\s*SIM/i.test(parts.map(p => p.text ?? "").join(" "));
+  } catch {
+    return false;
+  }
+}
+
 export async function analyzeTextOverlays(client: GoogleGenAI, refDataUrl: string): Promise<string> {
   const { mimeType, data } = stripDataUrl(refDataUrl);
 

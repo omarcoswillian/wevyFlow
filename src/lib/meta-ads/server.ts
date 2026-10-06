@@ -20,8 +20,8 @@ export function isMetaAdsConfigured(): boolean {
 }
 
 export function getMetaAppCredentials(): { appId: string; appSecret: string } {
-  const appId = process.env.META_APP_ID;
-  const appSecret = process.env.META_APP_SECRET;
+  const appId = process.env.META_APP_ID?.trim();
+  const appSecret = process.env.META_APP_SECRET?.trim();
   if (!appId || !appSecret) {
     throw new MetaAdsApiError("Integração com Meta Ads não configurada — faltam META_APP_ID/META_APP_SECRET.", 503);
   }
@@ -33,7 +33,11 @@ export function getMetaAppCredentials(): { appId: string; appSecret: string } {
  * (works in any environment, including local dev and preview deploys).
  * Same fallback pattern used by export-webflow/publish routes. */
 export function resolveAppOrigin(requestUrl: string): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+  // `vercel env pull`/cadastro manual podem deixar um "\n" no fim do valor; ele
+  // virava %0A no redirect_uri e a Meta recusava o domínio ("não está incluído
+  // nos domínios do app"). Limpa espaços e barra final antes de usar.
+  const configured = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/+$/, "");
+  if (configured) return configured;
   return new URL(requestUrl).origin;
 }
 

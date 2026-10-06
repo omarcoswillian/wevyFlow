@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Zap, Loader2, Copy, Check, ChevronDown, ChevronUp, Download } from "lucide-react";
+import { Mail, Zap, Loader2, Copy, Check, ChevronDown, ChevronUp, Download, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppContext } from "../(app)/_context";
+import { renderEmailHtml } from "../lib/email-html";
 import type { BrandInfo, EmailItem, EmailSequenceType, EmailSequences } from "../lib/types-kit";
 
 type SequenceType = EmailSequenceType;
@@ -234,6 +235,7 @@ export function EmailSequencePanel({ brandInfo, projectId, sequences, onChange, 
               <EmailCard
                 key={idx}
                 email={email}
+                brand={brandInfo}
                 index={idx}
                 expanded={expanded === idx}
                 onToggle={() => setExpanded(expanded === idx ? null : idx)}
@@ -286,15 +288,23 @@ function VariantRow({ label, values }: { label: string; values: (string | undefi
 }
 
 function EmailCard({
-  email, index, expanded, onToggle, onCopy, copied,
+  email, brand, index, expanded, onToggle, onCopy, copied,
 }: {
   email: EmailItem;
+  brand: BrandInfo;
   index: number;
   expanded: boolean;
   onToggle: () => void;
   onCopy: () => void;
   copied: boolean;
 }) {
+  const [preview, setPreview] = useState(false);
+  const [htmlCopied, setHtmlCopied] = useState(false);
+  const copyHtml = async () => {
+    await navigator.clipboard.writeText(renderEmailHtml(email, brand));
+    setHtmlCopied(true);
+    setTimeout(() => setHtmlCopied(false), 2000);
+  };
   return (
     <div className={cn(
       "rounded-xl border transition-colors",
@@ -324,14 +334,44 @@ function EmailCard({
               <VariantRow label="Assunto" values={[email.subject, email.subject_b, email.subject_c]} />
               <VariantRow label="Pré-header" values={[email.preview, email.preview_b]} />
             </div>
-            <button
-              onClick={onCopy}
-              className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-white/40 text-[10px] font-medium hover:text-white/70 hover:border-white/15 transition-colors cursor-pointer"
-            >
-              {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-              {copied ? "Copiado" : "Copiar"}
-            </button>
+            <div className="shrink-0 flex items-center gap-1.5">
+              <button
+                onClick={() => setPreview((v) => !v)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-white/40 text-[10px] font-medium hover:text-white/70 hover:border-white/15 transition-colors cursor-pointer"
+              >
+                <Eye className="w-3 h-3" />
+                {preview ? "Ocultar visual" : "Ver visual"}
+              </button>
+              <button
+                onClick={copyHtml}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-white/40 text-[10px] font-medium hover:text-white/70 hover:border-white/15 transition-colors cursor-pointer"
+              >
+                {htmlCopied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                {htmlCopied ? "HTML copiado" : "Copiar HTML"}
+              </button>
+              <button
+                onClick={onCopy}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-white/40 text-[10px] font-medium hover:text-white/70 hover:border-white/15 transition-colors cursor-pointer"
+              >
+                {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                {copied ? "Copiado" : "Copiar"}
+              </button>
+            </div>
           </div>
+
+          {preview && (
+            <div className="mb-3 rounded-lg overflow-hidden border border-white/[0.06]">
+              <iframe
+                title={`Email ${index + 1}`}
+                sandbox=""
+                srcDoc={renderEmailHtml(email, brand)}
+                className="w-full h-[560px] bg-white"
+              />
+              <p className="px-3 py-2 text-[10px] text-white/30 bg-black/20">
+                No HTML, o botão aponta para {"{{link}}"}: troque pelo link do checkout na sua plataforma de email.
+              </p>
+            </div>
+          )}
 
           <div className="mb-3">
             <span className="text-[9px] uppercase tracking-widest text-white/20 font-semibold block mb-2">Corpo do email</span>

@@ -14,6 +14,10 @@ export interface TextOverlayInput {
   light: boolean;
   /** Stories/9:16 pedem margem maior (zona segura das plataformas). */
   safeVertical: boolean;
+  /** Tamanho final em pixels: o fundo é recortado (cover, centralizado) pra
+   * caber. Sem isso, usa o tamanho natural da imagem. */
+  targetWidth?: number;
+  targetHeight?: number;
 }
 
 const GOOGLE_FONT: Record<string, string> = {
@@ -86,15 +90,19 @@ export async function composeTextLayer(input: TextOverlayInput): Promise<{ dataU
   const family = GOOGLE_FONT[input.fontChoice] ?? "Sora";
   await ensureFont(family);
   const img = await loadImage(input.imageUrl);
-  const W = img.naturalWidth;
-  const H = img.naturalHeight;
+  const W = input.targetWidth ?? img.naturalWidth;
+  const H = input.targetHeight ?? img.naturalHeight;
 
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas indisponível neste navegador.");
-  ctx.drawImage(img, 0, 0, W, H);
+  // Recorte "cover" centralizado: preenche o quadro sem distorcer.
+  const scale = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+  const drawW = img.naturalWidth * scale;
+  const drawH = img.naturalHeight * scale;
+  ctx.drawImage(img, (W - drawW) / 2, (H - drawH) / 2, drawW, drawH);
 
   const base = Math.min(W, H);
   const marginX = Math.round(W * 0.08);

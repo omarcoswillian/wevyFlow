@@ -5,7 +5,7 @@ import { checkAndDeductCredit, isCreditError, limitReachedResponse, finalizeGene
 import {
   ASPECT_MAP, stripDataUrl, resizeIfNeeded, normalizeCarouselContext,
   analyzeSceneForSwap, analyzeTextOverlays, analyzeTextOverlayGroups, cropToPersonForIdentityRef,
-  analyzeAvatarDetails, withRetry, extractImage, buildPersonSwapPrompt,
+  analyzeAvatarDetails, withRetry, extractImage, buildPersonSwapPrompt, detectStrayText,
   buildAdaptReferencePrompt,
   type Part,
 } from "./shared";
@@ -92,6 +92,8 @@ export async function POST(req: NextRequest) {
 
     let workingB64 = "";
     let workingMime = "";
+    let pureGenParts: Part[] | null = null;
+    const qualityWarnings: string[] = [];
 
     // ── PERSON SWAP: direct full-image generation ─────────────────────────
     // No local crop, no pixel mask, no post-generation geometry validation.
@@ -230,11 +232,12 @@ High quality, photorealistic. Aspect ratio: ${aspectRatio}.`;
           `Aspect ratio: ${aspectRatio}.`,
         ].filter(Boolean).join("\n\n");
 
-        parts = [
+        pureGenParts = [
           { text: promptText },
           ...(brand?.logo ? [{ text: "LOGO OFICIAL (reproduzir exatamente, sem alterar):" }, { inlineData: brand.logo }] : []),
           ...avParts,
         ];
+        parts = pureGenParts;
       }
 
       const generation = await withRetry(() => client.models.generateContent({
@@ -255,6 +258,36 @@ High quality, photorealistic. Aspect ratio: ${aspectRatio}.`;
       }
       workingB64 = generated.b64;
       workingMime = generated.mimeType;
+    }
+
+    // Quality gate da camada de texto: o fundo não pode trazer texto. Se
+    // trouxer, refaz UMA vez, só esse requisito, com a regra reforçada; se
+    // insistir, a peça segue com um aviso pra o usuário revisar.
+    if (textLayer && pureGenParts) {
+      const stray = await detectStrayText(client, `data:${workingMime};base64,${workingB64}`);
+      if (stray) {
+        try {
+          const retryParts: Part[] = [
+            { text: "ATENÇÃO: a tentativa anterior saiu com texto escrito na imagem. Gere de novo SEM NENHUMA palavra, letra, número ou logotipo falso." },
+            ...pureGenParts,
+          ];
+          const again = await withRetry(() => client.models.generateContent({
+            model,
+            contents: [{ role: "user", parts: retryParts }],
+            config: { responseModalities: ["TEXT", "IMAGE"], imageConfig: { aspectRatio, imageSize: quality ?? "2K" } },
+          }));
+          const second = extractImage(again.candidates);
+          if (second.b64) {
+            workingB64 = second.b64;
+            workingMime = second.mimeType;
+          }
+        } catch (retryErr) {
+          console.error("[generate-design] retry sem texto falhou:", retryErr);
+        }
+        if (await detectStrayText(client, `data:${workingMime};base64,${workingB64}`)) {
+          qualityWarnings.push("O fundo ainda tem texto residual: revise antes de usar.");
+        }
+      }
     }
 
     // Gemini honors aspect ratio but not an exact pixel size — when the
@@ -278,7 +311,7 @@ High quality, photorealistic. Aspect ratio: ${aspectRatio}.`;
     }
 
     await finalizeGeneration(generationId, true);
-    return NextResponse.json({ b64: finalB64, mimeType: finalMime });
+    return NextResponse.json({ b64: finalB64, mimeType: finalMime, qualityWarnings });
 
   } catch (e: unknown) {
     const err = e as Error;
