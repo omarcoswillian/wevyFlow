@@ -12,7 +12,6 @@ import { useAppContext } from "../(app)/_context";
 import { STRATEGY_MAP } from "../lib/launch-strategies";
 import type { LaunchKit, KitAssetInstance, StrategyAsset, CreativoFormat } from "../lib/types-kit";
 import { EmailSequencePanel } from "./EmailSequencePanel";
-import { BrandIdentityStudio } from "./BrandIdentityStudio";
 import { AdCopyModal } from "./AdCopyModal";
 
 /* ── Helpers ─────────────────────────────────────────────── */
@@ -438,27 +437,6 @@ export function LaunchHub() {
 
       {/* ── Scrollable content ── */}
       <div className="flex-1 overflow-y-auto px-5 py-5 space-y-7">
-
-        {/* Brand Identity section (structured identity: concept/colors/fonts/
-            logo) — a different concept from the KV raster image above. */}
-        <section>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-[11px] uppercase tracking-widest text-white/30 font-semibold">Identidade estruturada</span>
-            {kit.brandIdentity?.status === "approved" && (
-              <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[9px] font-semibold uppercase tracking-wide">Aprovada</span>
-            )}
-          </div>
-          <BrandIdentityStudio
-            kit={kit}
-            onUpdate={(updated) => {
-              setActiveLaunchKit(updated);
-              saveLaunchKit(updated).catch((e) => setPersistError(e instanceof Error ? e.message : "Erro ao salvar identidade visual."));
-            }}
-            apiKey={apiKey}
-            aiProvider={aiProvider}
-            aiModel={aiModel}
-          />
-        </section>
 
         {/* Creatives section */}
         {criativos.length > 0 && (
