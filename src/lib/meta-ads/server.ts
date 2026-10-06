@@ -28,17 +28,21 @@ export function getMetaAppCredentials(): { appId: string; appSecret: string } {
   return { appId, appSecret };
 }
 
-/** Absolute app origin for building the OAuth redirect_uri — prefers the
- * configured production URL, falls back to the current request's own host
- * (works in any environment, including local dev and preview deploys).
- * Same fallback pattern used by export-webflow/publish routes. */
+/** Absolute app origin for building the OAuth redirect_uri. Usa o próprio host
+ * da requisição (o domínio que o usuário realmente acessa, ex.
+ * https://www.wevyflow.com.br): o callback do OAuth precisa voltar pro MESMO
+ * host onde a sessão (cookies) vive, e um NEXT_PUBLIC_APP_URL desatualizado
+ * (a Vercel ainda guarda o endereço antigo *.vercel.app) quebrava o login.
+ * A variável só entra como reserva quando a URL da requisição não é absoluta. */
 export function resolveAppOrigin(requestUrl: string): string {
-  // `vercel env pull`/cadastro manual podem deixar um "\n" no fim do valor; ele
-  // virava %0A no redirect_uri e a Meta recusava o domínio ("não está incluído
-  // nos domínios do app"). Limpa espaços e barra final antes de usar.
-  const configured = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/+$/, "");
-  if (configured) return configured;
-  return new URL(requestUrl).origin;
+  try {
+    return new URL(requestUrl).origin;
+  } catch {
+    // `vercel env pull`/cadastro manual podem deixar um "\n" no fim do valor.
+    const configured = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/+$/, "");
+    if (configured) return configured;
+    throw new MetaAdsApiError("Não foi possível determinar o endereço do app.", 500);
+  }
 }
 
 export class MetaAdsApiError extends Error {
