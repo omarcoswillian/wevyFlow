@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_TEXT_CHARS = 20_000;
@@ -39,6 +40,15 @@ function stripHtmlToText(html: string): string {
    2. application/json     { url: string }              → fetch Google Docs / URL
 */
 export async function POST(request: NextRequest) {
+  // Exige sessão: a rota baixa URLs arbitrárias e processa arquivos no servidor.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return Response.json({ error: "Faça login para continuar." }, { status: 401 });
+  }
+
   const contentType = request.headers.get("content-type") ?? "";
 
   /* ── Branch: URL ── */

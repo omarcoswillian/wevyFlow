@@ -6,14 +6,12 @@ import { AnunciosDashboard, type AdsVisao } from "../../components/AnunciosDashb
 import { useAppContext } from "../_context";
 
 export default function Page() {
-  const { handleGenerate, isLoading, navigate, setCommandPaletteOpen } = useAppContext();
+  const { navigate, setCommandPaletteOpen } = useAppContext();
   const searchParams = useSearchParams();
   const visao = (searchParams.get("visao") ?? "todos") as AdsVisao;
 
   return (
     <HomeView
-      onGenerate={handleGenerate}
-      isLoading={isLoading}
       onNavigate={navigate}
       onOpenSearch={() => setCommandPaletteOpen(true)}
       activeNav="anuncios"

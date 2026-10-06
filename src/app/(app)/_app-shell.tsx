@@ -10,20 +10,14 @@ function GlobalPalette() {
   const {
     commandPaletteOpen,
     setCommandPaletteOpen,
-    projects,
     navigate,
-    handleOpenProject,
-    handleCreateProject,
   } = useAppContext();
 
   return (
     <CommandPalette
       open={commandPaletteOpen}
       onClose={() => setCommandPaletteOpen(false)}
-      projects={projects}
       onNavigate={navigate}
-      onOpenProject={handleOpenProject}
-      onCreateProject={handleCreateProject}
     />
   );
 }

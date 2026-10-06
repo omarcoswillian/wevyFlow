@@ -10,7 +10,7 @@ import { useAppContext } from "../_context";
 
 function LancamentosContent() {
   const {
-    handleGenerate, isLoading, navigate, setCommandPaletteOpen,
+    navigate, setCommandPaletteOpen,
     activeLaunchKit, openLaunchByProjectId, resumeLaunchWizard,
   } = useAppContext();
   const searchParams = useSearchParams();
@@ -92,8 +92,6 @@ function LancamentosContent() {
 
   return (
     <HomeView
-      onGenerate={handleGenerate}
-      isLoading={isLoading}
       onNavigate={navigate}
       onOpenSearch={() => setCommandPaletteOpen(true)}
       activeNav="lancamentos"

@@ -7,14 +7,12 @@ import { useAppContext } from "../_context";
 import type { EmailSequenceType } from "../../lib/types-kit";
 
 export default function Page() {
-  const { handleGenerate, isLoading, navigate, setCommandPaletteOpen } = useAppContext();
+  const { navigate, setCommandPaletteOpen } = useAppContext();
   const searchParams = useSearchParams();
   const categoria = (searchParams.get("categoria") ?? "cpl") as EmailSequenceType;
 
   return (
     <HomeView
-      onGenerate={handleGenerate}
-      isLoading={isLoading}
       onNavigate={navigate}
       onOpenSearch={() => setCommandPaletteOpen(true)}
       activeNav="emails"

@@ -72,7 +72,7 @@ export default function LoginPage() {
             </h1>
 
             <p className="wf-hero-sub">
-              A plataforma de geração de landing pages com IA para
+              A plataforma de lançamentos com IA para
               infoprodutores, agências e criadores.
             </p>
 

@@ -7,19 +7,9 @@ import {
   useEffect,
   useMemo,
   useRef,
-  startTransition,
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
-import { Platform } from "../lib/types";
-import { useHistory } from "../lib/history";
-import { useProjects, Project, ProjectPage } from "../lib/projects";
-import {
-  compactStorage,
-  aggressiveCleanup,
-  formatBytes,
-} from "../lib/storage-compact";
-import { GenerateData } from "../components/HomeView";
 import {
   AIProvider,
   DEFAULT_MODELS,
@@ -34,12 +24,8 @@ import {
   IMAGE_STORAGE_PROVIDER,
   IMAGE_STORAGE_MODEL,
 } from "../lib/image-ai-provider";
-import { NewProjectModal } from "../components/NewProjectModal";
 import type { LaunchKit } from "../lib/types-kit";
 import { emptyBriefing, mergeBriefing, type LaunchBriefing } from "../lib/launch-briefing";
-import { optimizeHtml } from "../lib/html-optimizer";
-import { useWorkspaceDrafts } from "../lib/workspace-drafts";
-import { useWebhookUrl } from "../lib/webhook-url";
 
 /* ───────────────────────────────────────────────────────────
    View / Path mapping
@@ -54,13 +40,7 @@ export type AppView =
   | "copy"
   | "emails"
   | "anuncios"
-  | "marca"
-  | "projects-all"
-  | "projects-starred"
-  | "projects-mine"
-  | "projects-shared"
-  | "project-detail"
-  | "workspace";
+  | "marca";
 
 export function viewToPath(view: AppView, projectId?: string): string {
   switch (view) {
@@ -82,65 +62,13 @@ export function viewToPath(view: AppView, projectId?: string): string {
       return "/emails";
     case "anuncios":
       return "/anuncios";
-    case "projects-all":
-      return "/projects";
-    case "projects-starred":
-      return "/projects/starred";
-    case "projects-mine":
-      return "/projects/mine";
-    case "projects-shared":
-      return "/projects/shared";
-    case "project-detail":
-      return projectId ? `/projects/${projectId}` : "/projects";
-    case "workspace":
-      return "/workspace";
   }
 }
 
 /* ───────────────────────────────────────────────────────────
    Context
    ─────────────────────────────────────────────────────────── */
-type DesignContext = {
-  primaryColor?: string;
-  secondaryColor?: string;
-  fontChoice?: string;
-  stylePreset?: string;
-} | null;
-
 interface AppContextValue {
-  // projects (from useProjects hook)
-  projects: Project[];
-  saveError: string | null;
-  createProject: (name: string, client: string) => Promise<Project>;
-  addPageToProject: (
-    projectId: string,
-    page: Omit<ProjectPage, "id" | "createdAt" | "updatedAt">,
-  ) => void;
-  updatePageCode: (projectId: string, pageId: string, code: string) => void;
-  toggleStar: (projectId: string) => void;
-  deleteProject: (projectId: string) => void;
-  deletePageFromProject: (projectId: string, pageId: string) => void;
-  updateCoverImage: (projectId: string, file: File) => Promise<void>;
-  updateProjectSettings: (
-    projectId: string,
-    patch: Partial<Pick<Project, "domain" | "description" | "favicon">>,
-  ) => Promise<void>;
-  updateProjectSeo: (
-    projectId: string,
-    patch: Partial<Pick<Project, "seoTitle" | "seoDescription" | "seoOgImage" | "seoNoIndex">>,
-  ) => Promise<void>;
-
-  // generation state
-  generatedCode: string;
-  isLoading: boolean;
-  isRefining: boolean;
-  error: string;
-  limitReached: boolean;
-  clearLimitReached: () => void;
-  currentPlatform: Platform;
-  currentPrompt: string;
-  activePageId: string | null;
-
   // BYOK — text AI
   apiKey: string;
   aiProvider: AIProvider;
@@ -190,23 +118,7 @@ interface AppContextValue {
     status: "draft" | "active";
   }) => Promise<LaunchKit>;
 
-  // integrations
-  webhookUrl: string;
-  setWebhookUrl: (url: string) => void;
-
-  // actions
   navigate: (view: AppView, projectId?: string) => void;
-  handleGenerate: (data: GenerateData) => Promise<void>;
-  handleRefine: (
-    refinementRequest: string,
-    images?: { name: string; base64: string }[],
-  ) => Promise<void>;
-  handleBack: () => void;
-  handleOpenProject: (project: Project) => void;
-  handleOpenPage: (page: ProjectPage) => void;
-  handleCreateProject: () => void;
-  handleCreatePage: () => void;
-  openCodeInWorkspace: (code: string, prompt?: string) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -223,43 +135,12 @@ export function useAppContext(): AppContextValue {
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
-  const [generatedCode, setGeneratedCode] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isRefining, setIsRefining] = useState(false);
-  const [error, setError] = useState("");
-  const [limitReached, setLimitReached] = useState(false);
-  const clearLimitReached = useCallback(() => setLimitReached(false), []);
-  const [currentPlatform, setCurrentPlatform] = useState<Platform>("html");
-  const [currentPrompt, setCurrentPrompt] = useState("");
-  const [currentDesignContext, setCurrentDesignContext] =
-    useState<DesignContext>(null);
-  const [activePageId, setActivePageId] = useState<string | null>(null);
-  const [storageToast, setStorageToast] = useState<string | null>(null);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
-  const [newProjectModalOpen, setNewProjectModalOpen] = useState(false);
-
-  // integrations
-  const { webhookUrl, setWebhookUrl } = useWebhookUrl();
 
   // launch kits — persisted server-side (projects + launch_kits in Supabase,
   // see src/lib/launches/server.ts). The legacy "wf_launch_kits" localStorage
   // key is intentionally left untouched on disk (never read as source of
   // truth, never migrated) — see project P0 scope notes.
-  const {
-    projects,
-    saveError,
-    loadProjects,
-    createProject,
-    addPageToProject,
-    updatePageCode,
-    toggleStar,
-    deleteProject,
-    deletePageFromProject,
-    updateCoverImage,
-    updateProjectSettings,
-    updateProjectSeo,
-  } = useProjects();
-
   const [launchKits, setLaunchKits] = useState<LaunchKit[]>([]);
   const [launchKitsLoading, setLaunchKitsLoading] = useState(true);
   const [launchKitsError, setLaunchKitsError] = useState<string | null>(null);
@@ -425,11 +306,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
     const { launch } = await res.json();
     upsertLaunchKit(launch);
-    // A new projectId means save_launch just created the project half of
-    // the pair — refresh the projects list so it shows up without a reload.
-    if (!input.projectId) loadProjects();
     return launch as LaunchKit;
-  }, [upsertLaunchKit, loadProjects]);
+  }, [upsertLaunchKit]);
 
   /** Persists a draft before opening the wizard — the wizard is scoped to a
    * real, already-persisted projectId from the moment it opens, never to
@@ -539,23 +417,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setImageModelState(DEFAULT_IMAGE_MODELS.openai);
   }, []);
 
-  const { addEntry } = useHistory();
-  const { deleteDraft } = useWorkspaceDrafts();
-
-  /* storage error toast */
-  useEffect(() => {
-    if (saveError) {
-      setStorageToast(saveError);
-      const timer = setTimeout(() => setStorageToast(null), 8000);
-      return () => clearTimeout(timer);
-    }
-  }, [saveError]);
-
   /* Local dev only — the fixed dev session (see /api/dev/auto-signin) expires
    * hourly like any real Supabase session, and there's no working login form
    * in dev to re-trigger it (src/app/login/page.tsx bounces straight to "/").
    * Patching window.fetch here — once, for the whole app — means every API
-   * call anywhere (Criativos, exports, landing pages, emails, etc.) recovers
+   * call anywhere (Criativos, exports, emails, etc.) recovers
    * from an expired session automatically instead of only whichever single
    * call site happens to have its own retry wrapper. Never runs outside
    * NODE_ENV=development, so production sessions are handled normally. */
@@ -591,18 +457,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => { window.fetch = originalFetch; };
   }, []);
 
-  /* silent auto-compaction on mount */
-  useEffect(() => {
-    const result = compactStorage();
-    const saved = result.bytesBefore - result.bytesAfter;
-    if (saved > 50 * 1024) {
-      setStorageToast(
-        `Espaço liberado: ${formatBytes(saved)} (${result.keysShrunk} entradas otimizadas)`,
-      );
-      setTimeout(() => setStorageToast(null), 5000);
-    }
-  }, []);
-
   /* Cmd+K — toggle palette */
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -618,303 +472,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   /* navigation helper */
   const navigate = useCallback(
     (view: AppView, projectId?: string) => {
-      if (view === "home") {
-        setGeneratedCode("");
-        setError("");
-      }
       router.push(viewToPath(view, projectId));
     },
     [router],
   );
 
-  /* streaming helper */
-  const streamFromAPI = useCallback(
-    async (url: string, body: object): Promise<string> => {
-      setError("");
-      setGeneratedCode("");
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-        signal: AbortSignal.timeout(290000), // 290s — just under server maxDuration=300
-      });
-      if (!res.ok) {
-        let msg = "Erro ao processar";
-        let limitReached = false;
-        try {
-          const data = await res.json();
-          msg = data.error || msg;
-          limitReached = !!data.limitReached;
-        } catch {}
-        const err = new Error(msg);
-        if (limitReached)
-          (err as Error & { limitReached: boolean }).limitReached = true;
-        throw err;
-      }
-      const reader = res.body?.getReader();
-      if (!reader) throw new Error("Streaming não suportado");
-      const decoder = new TextDecoder();
-      let fullCode = "";
-      let lastUpdate = 0;
-      const UPDATE_INTERVAL = 80;
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          fullCode += decoder.decode(value, { stream: true });
-          const now = Date.now();
-          if (now - lastUpdate >= UPDATE_INTERVAL) {
-            lastUpdate = now;
-            const snapshot = fullCode;
-            startTransition(() => setGeneratedCode(snapshot));
-          }
-        }
-      } catch {
-        // Stream aborted mid-way — if meaningful content was generated, use it
-        if (fullCode.length > 500) {
-          startTransition(() => setGeneratedCode(fullCode));
-          setError(
-            "Geração parcial — a IA demorou mais que o esperado. O conteúdo foi salvo. Refine via chat ou regenere.",
-          );
-          return fullCode;
-        }
-        throw new Error(
-          "A geração falhou antes de produzir conteúdo suficiente. Tente novamente.",
-        );
-      }
-      // Final flush
-      startTransition(() => setGeneratedCode(fullCode));
-      return fullCode;
-    },
-    [],
-  );
-
-  /* active project is derived from URL in the detail route — but for
-     addPageToProject on generate, we'd need to know which project is active.
-     Keep a local ref to the most recently opened project id for that. */
-  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
-
-  const handleGenerate = useCallback(
-    async (data: GenerateData) => {
-      if (isLoading) return;
-      setIsLoading(true);
-      setCurrentPlatform(data.platform);
-      setCurrentPrompt(data.prompt);
-      setCurrentDesignContext({
-        primaryColor: data.primaryColor,
-        secondaryColor: data.secondaryColor,
-        fontChoice: data.fontChoice,
-        stylePreset: data.stylePreset,
-      });
-      router.push("/workspace");
-
-      try {
-        const rawCode = await streamFromAPI("/api/generate", {
-          ...data,
-          copyDocument: data.copyDocument || undefined,
-        });
-        // rawCode may be partial (stream aborted but content was salvaged)
-        if (rawCode && rawCode.length > 100) {
-          const code = optimizeHtml(rawCode, {
-            webhookUrl: webhookUrl || undefined,
-          });
-          if (code !== rawCode) startTransition(() => setGeneratedCode(code));
-          addEntry({
-            id: crypto.randomUUID(),
-            prompt: data.prompt,
-            platform: data.platform,
-            code,
-            createdAt: Date.now(),
-          });
-          if (activeProjectId) {
-            addPageToProject(activeProjectId, {
-              name: data.prompt.slice(0, 50),
-              code,
-              platform: data.platform,
-            });
-          }
-        }
-      } catch (err) {
-        const e = err as Error & { limitReached?: boolean };
-        if (e.limitReached) {
-          setLimitReached(true);
-          setError(e.message || "Limite atingido");
-        } else {
-          setError(e.message || "Erro desconhecido");
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      isLoading,
-      streamFromAPI,
-      addEntry,
-      activeProjectId,
-      addPageToProject,
-      router,
-    ],
-  );
-
-  const handleRefine = useCallback(
-    async (
-      refinementRequest: string,
-      images?: { name: string; base64: string }[],
-    ) => {
-      if (!generatedCode || isRefining) return;
-      setIsRefining(true);
-      try {
-        const rawCode = await streamFromAPI("/api/refine", {
-          originalCode: generatedCode,
-          refinementRequest,
-          platform: currentPlatform,
-          images: images || [],
-          designContext: currentDesignContext,
-        });
-        if (rawCode) {
-          const code = optimizeHtml(rawCode, {
-            webhookUrl: webhookUrl || undefined,
-          });
-          if (code !== rawCode) startTransition(() => setGeneratedCode(code));
-          addEntry({
-            id: crypto.randomUUID(),
-            prompt: `Refinamento: ${refinementRequest}`,
-            platform: currentPlatform,
-            code,
-            createdAt: Date.now(),
-          });
-          if (activeProjectId && activePageId) {
-            updatePageCode(activeProjectId, activePageId, code);
-          }
-        }
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : "Erro desconhecido";
-        setError(
-          msg === "Failed to fetch"
-            ? "Erro de conexao com a IA. O template pode ser muito grande — tente um pedido mais simples."
-            : msg,
-        );
-      } finally {
-        setIsRefining(false);
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      generatedCode,
-      isRefining,
-      currentPlatform,
-      currentDesignContext,
-      streamFromAPI,
-      addEntry,
-      activeProjectId,
-      activePageId,
-      updatePageCode,
-    ],
-  );
-
-  const handleBack = useCallback(() => {
-    setGeneratedCode("");
-    setError("");
-    setActivePageId(null);
-    router.push("/");
-  }, [router]);
-
-  const handleOpenProject = useCallback(
-    (project: Project) => {
-      setActiveProjectId(project.id);
-      router.push(`/projects/${project.id}`);
-    },
-    [router],
-  );
-
-  const handleOpenPage = useCallback(
-    (page: ProjectPage) => {
-      setGeneratedCode(page.code);
-      setCurrentPlatform(page.platform);
-      setCurrentPrompt(page.name);
-      setActivePageId(page.id);
-      router.push("/workspace");
-    },
-    [router],
-  );
-
-  const handleCreateProject = useCallback(() => {
-    setNewProjectModalOpen(true);
-  }, []);
-
-  const handleCreateProjectConfirm = useCallback(
-    async (name: string, client: string) => {
-      const project = await createProject(name, client);
-      setActiveProjectId(project.id);
-      router.push(`/projects/${project.id}`);
-    },
-    [createProject, router],
-  );
-
-  const handleCreatePage = useCallback(() => {
-    router.push("/");
-  }, [router]);
-
-  const openCodeInWorkspace = useCallback(
-    (code: string, prompt?: string) => {
-      setGeneratedCode(code);
-      setCurrentPrompt(prompt || "");
-      setCurrentPlatform("html");
-      router.push("/workspace");
-    },
-    [router],
-  );
-
-  /* Manual compact — exposed via StorageToast */
-  const handleManualCompact = useCallback(() => {
-    const compact = compactStorage();
-    const compacted = compact.bytesBefore - compact.bytesAfter;
-    if (compacted < 100 * 1024) {
-      const ok = window.confirm(
-        "A limpeza leve liberou pouco espaço. Quer apagar o histórico de gerações e drafts antigos?\n\n" +
-          "Seus projetos, componentes salvos e o draft atual ficam intactos.",
-      );
-      if (!ok) {
-        setStorageToast(`${formatBytes(compacted)} liberados.`);
-        setTimeout(() => setStorageToast(null), 4000);
-        return;
-      }
-      const aggressive = aggressiveCleanup(null);
-      setStorageToast(
-        `${formatBytes(compacted + aggressive.bytesFreed)} liberados (${aggressive.itemsRemoved} itens removidos).`,
-      );
-      setTimeout(() => setStorageToast(null), 5000);
-      return;
-    }
-    setStorageToast(
-      `${formatBytes(compacted)} liberados em ${compact.keysShrunk} entradas.`,
-    );
-    setTimeout(() => setStorageToast(null), 5000);
-  }, []);
-
   const value = useMemo<AppContextValue>(
     () => ({
-      projects,
-      saveError,
-      createProject,
-      addPageToProject,
-      updatePageCode,
-      toggleStar,
-      deleteProject,
-      deletePageFromProject,
-      updateCoverImage,
-      updateProjectSettings,
-      updateProjectSeo,
-      generatedCode,
-      isLoading,
-      isRefining,
-      error,
-      limitReached,
-      clearLimitReached,
-      currentPlatform,
-      currentPrompt,
-      activePageId,
       apiKey,
       aiProvider,
       aiModel,
@@ -942,39 +506,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       openLaunchWizardForDraft,
       resumeLaunchWizard,
       persistLaunch,
-      webhookUrl,
-      setWebhookUrl,
       navigate,
-      handleGenerate,
-      handleRefine,
-      handleBack,
-      handleOpenProject,
-      handleOpenPage,
-      handleCreateProject,
-      handleCreatePage,
-      openCodeInWorkspace,
     }),
     [
-      projects,
-      saveError,
-      createProject,
-      addPageToProject,
-      updatePageCode,
-      toggleStar,
-      deleteProject,
-      deletePageFromProject,
-      updateCoverImage,
-      updateProjectSettings,
-      updateProjectSeo,
-      generatedCode,
-      isLoading,
-      isRefining,
-      error,
-      limitReached,
-      clearLimitReached,
-      currentPlatform,
-      currentPrompt,
-      activePageId,
       apiKey,
       aiProvider,
       aiModel,
@@ -986,67 +520,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       saveImageApiKey,
       clearImageApiKey,
       commandPaletteOpen,
-      setCommandPaletteOpen,
       launchKits,
       launchKitsLoading,
       launchKitsError,
       reloadLaunchKits,
       activeLaunchKit,
       showLaunchWizard,
-      setShowLaunchWizard,
-      setActiveLaunchKit,
+      launchWizardProjectId,
       openLaunchByProjectId,
       saveLaunchKit,
       deleteLaunchKit,
-      launchWizardProjectId,
       openLaunchWizardForDraft,
       resumeLaunchWizard,
       persistLaunch,
-      webhookUrl,
-      setWebhookUrl,
       navigate,
-      handleGenerate,
-      handleRefine,
-      handleBack,
-      handleOpenProject,
-      handleOpenPage,
-      handleCreateProject,
-      handleCreatePage,
-      openCodeInWorkspace,
     ],
   );
 
-  const storageToastIsError =
-    storageToast?.toLowerCase().includes("cheio") ||
-    storageToast?.toLowerCase().includes("erro");
-
-  return (
-    <AppContext.Provider value={value}>
-      {children}
-      <NewProjectModal
-        open={newProjectModalOpen}
-        onClose={() => setNewProjectModalOpen(false)}
-        onConfirm={handleCreateProjectConfirm}
-      />
-      {storageToast && (
-        <div
-          className={`fixed bottom-4 left-1/2 -translate-x-1/2 z-[200] px-4 py-3 rounded-xl border text-[12px] font-medium backdrop-blur-xl shadow-2xl animate-fade-in-delay max-w-md text-center flex items-center gap-3 ${
-            storageToastIsError
-              ? "bg-red-500/15 border-red-500/25 text-red-400"
-              : "bg-emerald-500/15 border-emerald-500/25 text-emerald-400"
-          }`}
-        >
-          <span>{storageToast}</span>
-          {storageToastIsError && (
-            <button
-              onClick={handleManualCompact}
-              className="px-2.5 py-1 rounded-md bg-red-500/20 hover:bg-red-500/30 text-red-300 text-[11px] font-semibold cursor-pointer whitespace-nowrap"
-            >
-              Liberar espaço
-            </button>
-          )}
-        </div>
-      )}
-    </AppContext.Provider>
-  );
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

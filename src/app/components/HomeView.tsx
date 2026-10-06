@@ -9,14 +9,8 @@ import {
   Loader2,
   Home,
   Search,
-  Layout,
-  FolderOpen,
-  Star,
-  Users,
-  Share2,
   PanelLeft,
   FileText,
-  Activity,
   X,
   Paintbrush,
   Rocket,
@@ -28,7 +22,6 @@ import {
   ChevronRight,
   ChevronDown,
   Mail,
-  Globe,
   TrendingUp,
   TrendingDown,
   LogOut,
@@ -38,43 +31,22 @@ import {
   MessageCircle,
   ClipboardList,
   Tv2,
-  Lock,
   Camera,
   GalleryHorizontalEnd,
   PenTool,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { Platform } from "../lib/types";
 import { ApiKeyModal } from "./ApiKeyModal";
 import { useAppContext } from "../(app)/_context";
 import type { LaunchKit, StrategyId } from "../lib/types-kit";
 import { briefingFromBrandInfoPatch } from "../lib/launch-briefing";
-import type { Project } from "../lib/projects";
-
-export interface GenerateData {
-  prompt: string;
-  platform: Platform;
-  referenceUrl: string;
-  brandReference: string;
-  expectations: string;
-  primaryColor: string;
-  secondaryColor: string;
-  fontChoice: string;
-  stylePreset: string;
-  images: { name: string; base64: string }[];
-  copyDocument?: string;
-}
 
 interface HomeViewProps {
-  onGenerate: (data: GenerateData) => void;
-  isLoading: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onNavigate?: (view: any) => void;
   onOpenSearch?: () => void;
   contentOverride?: React.ReactNode;
   activeNav?: string;
-  upgradeOpen?: boolean;
-  onUpgradeClose?: () => void;
 }
 
 const LAUNCH_TYPES = [
@@ -115,18 +87,17 @@ const STRATEGY_LABELS: Record<StrategyId, string> = {
   perpetuo: "Perpétuo",
 };
 
-export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNavigate, onOpenSearch, contentOverride, activeNav, upgradeOpen: upgradeOpenProp, onUpgradeClose }: HomeViewProps) {
+export function HomeView({ onNavigate, onOpenSearch, contentOverride, activeNav }: HomeViewProps) {
   const nav = onNavigate || (() => {});
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentTipo = searchParams.get("tipo") ?? "criativos";
-  const { apiKey, aiProvider, aiModel, saveApiKey, clearApiKey, imageApiKey, imageProvider, imageModel, saveImageApiKey, clearImageApiKey, openLaunchWizardForDraft, launchKits, projects, webhookUrl, setWebhookUrl } = useAppContext();
+  const { apiKey, aiProvider, aiModel, saveApiKey, clearApiKey, imageApiKey, imageProvider, imageModel, saveImageApiKey, clearImageApiKey, openLaunchWizardForDraft, launchKits } = useAppContext();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [creatingKit, setCreatingKit] = useState(false);
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
-  const [_platform, _setPlatform] = useState<Platform>("html");
   const [referenceUrl, setReferenceUrl] = useState("");
   const [primaryColor, setPrimaryColor] = useState("#a78bfa");
   const [secondaryColor, setSecondaryColor] = useState("#6366f1");
@@ -146,7 +117,6 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
   const [copyError, setCopyError] = useState<string | null>(null);
   const [copyTab, setCopyTab] = useState<"upload" | "url">("upload");
   const [copyUrl, setCopyUrl] = useState("");
-  const [bottomTab, setBottomTab] = useState<"kits" | "projetos">("kits");
   const [produto, setProduto] = useState("");
   const [nicho, setNicho] = useState("");
   const [publicoAlvo, setPublicoAlvo] = useState("");
@@ -310,8 +280,6 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
     });
     if (fileInputRef.current) fileInputRef.current.value = "";
   }, []);
-
-  const recentProjects = projects.slice(0, 6);
 
   // Usage data (only relevant when not using BYOK)
   const [usage, setUsage] = useState<{ creditsUsed: number; creditsLimit: number; planLabel: string; plan: string; month: string } | null>(null);
@@ -527,13 +495,6 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
             )}
           </div>
 
-          {!sidebarCollapsed && <div className="pt-3 pb-1"><span className="px-2 text-[9px] font-medium text-white/20 uppercase tracking-widest">Projetos</span></div>}
-          {sidebarCollapsed && <div className="pt-3" />}
-
-          <SidebarItem icon={<FolderOpen className="w-4 h-4" />} label="Todos" active={activeNav === "projects-all"} collapsed={sidebarCollapsed} onClick={() => nav("projects-all")} />
-          <SidebarItem icon={<Star className="w-4 h-4" />} label="Favoritos" active={activeNav === "projects-starred"} collapsed={sidebarCollapsed} onClick={() => nav("projects-starred")} />
-          <SidebarItem icon={<Users className="w-4 h-4" />} label="Criados por mim" active={activeNav === "projects-mine"} collapsed={sidebarCollapsed} onClick={() => nav("projects-mine")} />
-          <SidebarItem icon={<Share2 className="w-4 h-4" />} label="Compartilhados" active={activeNav === "projects-shared"} collapsed={sidebarCollapsed} onClick={() => nav("projects-shared")} />
         </nav>
 
         {/* Bottom — Usage + User */}
@@ -617,8 +578,8 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
       </aside>
 
       {/* Upgrade modal */}
-      {(upgradeOpen || upgradeOpenProp) && (
-        <UpgradeModal usage={usage} onClose={() => { setUpgradeOpen(false); onUpgradeClose?.(); }} />
+      {upgradeOpen && (
+        <UpgradeModal usage={usage} onClose={() => setUpgradeOpen(false)} />
       )}
 
       {/* ─── Main Area ─── */}
@@ -819,19 +780,6 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
                     <input ref={docInputRef} type="file" accept=".docx,.pdf" onChange={handleDocFileInput} className="hidden" />
                   </div>
 
-                  {/* ── Seção 4: Integrações ── */}
-                  <div className="px-4 pb-4 pt-1 border-t border-white/[0.05]">
-                    <p className="text-[9px] uppercase tracking-widest text-white/20 font-semibold pt-3 mb-2">Integrações</p>
-                    <label className="text-[9px] uppercase tracking-widest text-white/25 font-medium mb-1 block">Webhook de leads</label>
-                    <input
-                      type="url"
-                      value={webhookUrl}
-                      onChange={(e) => setWebhookUrl(e.target.value)}
-                      placeholder="https://hooks.activehosted.com/proc.php?..."
-                      className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/40 transition-colors"
-                    />
-                    <p className="text-[9px] text-white/20 mt-1">ActiveCampaign, Mailchimp, RD Station. Formulários capturarão leads automaticamente.</p>
-                  </div>
                   </div>
                 </div>
               )}
@@ -872,23 +820,14 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
               <div className="rounded-2xl bg-[#18181b] border border-white/[0.06] overflow-hidden">
                 {/* tabs row */}
                 <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-white/[0.04]">
-                  <div className="flex items-center gap-1">
-                    {([
-                      { id: "kits", label: "Meus Kits" },
-                      { id: "projetos", label: "Projetos" },
-                    ] as const).map((t) => (
-                      <button key={t.id} onClick={() => setBottomTab(t.id)}
-                        className={cn("px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors cursor-pointer",
-                          bottomTab === t.id ? "bg-white/[0.08] text-white/80" : "text-white/30 hover:text-white/50")}>
-                        {t.label}
-                        {t.id === "kits" && launchKits.length > 0 && (
-                          <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[9px]">{launchKits.length}</span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
+                  <span className="px-3 py-1.5 rounded-lg bg-white/[0.08] text-[11px] font-medium text-white/80">
+                    Meus Kits
+                    {launchKits.length > 0 && (
+                      <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[9px]">{launchKits.length}</span>
+                    )}
+                  </span>
                   <button
-                    onClick={() => bottomTab === "kits" ? nav("lancamentos") : nav("projects-all")}
+                    onClick={() => nav("lancamentos")}
                     className="flex items-center gap-1 text-[11px] text-white/30 hover:text-white/60 transition-colors cursor-pointer">
                     Ver todos <ChevronRight className="w-3 h-3" />
                   </button>
@@ -896,11 +835,7 @@ export function HomeView({ onGenerate: _onGenerate, isLoading: _isLoading, onNav
 
                 {/* content */}
                 <div className="px-3 py-3">
-                  {bottomTab === "kits" ? (
-                    <KitsRow kits={launchKits} onNew={handleNewKit} busy={creatingKit} onNavigate={() => nav("lancamentos")} />
-                  ) : (
-                    <ProjectsRow projects={recentProjects} onNew={() => nav("home")} onNavigate={() => nav("projects-all")} />
-                  )}
+                  <KitsRow kits={launchKits} onNew={handleNewKit} busy={creatingKit} onNavigate={() => nav("lancamentos")} />
                 </div>
               </div>
             </div>
@@ -978,55 +913,6 @@ function KitsRow({ kits, onNew, onNavigate, busy }: { kits: LaunchKit[]; onNew: 
           </button>
         );
       })}
-    </div>
-  );
-}
-
-/* ── Projects Row ────────────────────────────────────────── */
-function ProjectsRow({ projects, onNew, onNavigate }: { projects: Project[]; onNew: () => void; onNavigate: () => void }) {
-  if (projects.length === 0) {
-    return (
-      <div className="flex items-center gap-4">
-        <button onClick={onNew}
-          className="flex flex-col items-center justify-center gap-2 w-[160px] h-[88px] shrink-0 rounded-xl border border-dashed border-white/[0.08] hover:border-purple-500/30 hover:bg-purple-500/[0.04] transition-all cursor-pointer group">
-          <div className="w-8 h-8 rounded-full bg-white/[0.04] group-hover:bg-purple-500/10 flex items-center justify-center transition-colors">
-            <Plus className="w-4 h-4 text-white/20 group-hover:text-purple-400" />
-          </div>
-          <span className="text-[11px] text-white/25 group-hover:text-white/50">Novo Projeto</span>
-        </button>
-        <div>
-          <p className="text-[12px] font-medium text-white/40 mb-0.5">Nenhum projeto ainda</p>
-          <p className="text-[11px] text-white/25">Gere uma landing page e salve em um projeto para acessar aqui.</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex items-start gap-2 overflow-x-auto scrollbar-none pb-1">
-      <button onClick={onNew}
-        className="flex flex-col items-center justify-center gap-1.5 w-[130px] h-[88px] shrink-0 rounded-xl border border-dashed border-white/[0.06] hover:border-purple-500/30 hover:bg-purple-500/[0.04] transition-all cursor-pointer group">
-        <div className="w-7 h-7 rounded-full bg-white/[0.03] group-hover:bg-purple-500/10 flex items-center justify-center">
-          <Plus className="w-3.5 h-3.5 text-white/20 group-hover:text-purple-400" />
-        </div>
-        <span className="text-[10px] text-white/25 group-hover:text-white/50">Novo</span>
-      </button>
-
-      {projects.slice(0, 5).map((project) => (
-        <button key={project.id} onClick={onNavigate}
-          className="group relative flex flex-col justify-between w-[160px] h-[88px] shrink-0 rounded-xl overflow-hidden border border-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer text-left bg-white/[0.02]">
-          {project.thumbnail ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={project.thumbnail} alt={project.name} className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity" />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent" />
-          )}
-          <div className="relative z-10 p-3 flex-1 flex flex-col justify-end">
-            <p className="text-[11px] font-semibold text-white/80 truncate">{project.name}</p>
-            {project.client && <p className="text-[9px] text-white/30 truncate">{project.client}</p>}
-          </div>
-        </button>
-      ))}
     </div>
   );
 }

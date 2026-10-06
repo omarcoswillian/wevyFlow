@@ -279,7 +279,7 @@ function StepBrand({ brand, setBrand }: { brand: Partial<LaunchBriefing>; setBra
     <div className="space-y-4">
       <div>
         <h3 className="text-[13px] font-semibold text-white mb-0.5">Sobre o Produto</h3>
-        <p className="text-[11px] text-white/40">Essas informações serão usadas em todos os criativos e páginas do kit.</p>
+        <p className="text-[11px] text-white/40">Essas informações serão usadas em todos os criativos, copys e emails do kit.</p>
       </div>
 
       <Field label="Nome do Produto *">

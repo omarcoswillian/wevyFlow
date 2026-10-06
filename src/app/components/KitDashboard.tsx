@@ -147,7 +147,7 @@ function EmptyState({ onNew }: { onNew: () => void }) {
         </div>
         <h2 className="text-[16px] font-bold text-white mb-2">Nenhum kit ainda</h2>
         <p className="text-[12px] text-white/40 leading-relaxed mb-6">
-          Crie seu primeiro kit de lançamento. O sistema monta automaticamente todos os ativos — páginas, thumbs, stories e banners — baseados na sua estratégia.
+          Crie seu primeiro kit de lançamento. O sistema monta automaticamente todos os ativos — criativos, carrosséis, emails e copy — baseados na sua estratégia.
         </p>
         <button
           onClick={onNew}

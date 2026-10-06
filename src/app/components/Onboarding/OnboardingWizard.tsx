@@ -86,13 +86,13 @@ function StepWelcome({ userName }: { userName: string | null }) {
           {userName ? `Bem-vindo, ${userName.split(" ")[0]}` : "Bem-vindo ao WevyFlow"}
         </h2>
         <p className="text-[13px] text-white/45 max-w-sm leading-relaxed">
-          Em menos de 2 minutos vamos configurar seu primeiro kit de lancamento — com todas as
-          paginas, criativos e emails prontos para gerar.
+          Em menos de 2 minutos vamos configurar seu primeiro kit de lancamento — com todos os
+          criativos, copys e emails prontos para gerar.
         </p>
       </div>
       <div className="flex flex-col gap-2 w-full max-w-xs">
         {[
-          "Landing pages de alta conversao",
+          "Copys de alta conversao",
           "Criativos para redes sociais",
           "Sequencia de emails automatizada",
           "Identidade visual consistente",

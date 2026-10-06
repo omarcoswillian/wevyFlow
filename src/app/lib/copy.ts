@@ -9,16 +9,14 @@ export const COPY = {
     hero: {
       headline: "Seu proximo lancamento, do briefing a publicacao.",
       subheadline:
-        "Crie paginas, emails, criativos e kits completos de lancamento com a mesma estrutura que agencias cobram R$15.000 por projeto.",
+        "Crie copys, emails, criativos e kits completos de lancamento com a mesma estrutura que agencias cobram R$15.000 por projeto.",
       cta_primary: "Criar meu lancamento",
       cta_secondary: "Ver exemplos",
     },
     quickActions: {
       title: "O que voce quer criar?",
       items: [
-        { label: "Kit completo de lancamento", description: "LP + emails + criativos em um fluxo" },
-        { label: "Pagina de captura", description: "Converte visitante em lead" },
-        { label: "Pagina de vendas", description: "VSL, longa ou minimalista" },
+        { label: "Kit completo de lancamento", description: "Copy + emails + criativos em um fluxo" },
         { label: "Sequencia de emails", description: "Pre-lancamento, carrinho, pos-venda" },
       ],
     },
@@ -26,11 +24,8 @@ export const COPY = {
   navigation: {
     home: "Inicio",
     launches: "Meus Lancamentos",
-    pages: "Paginas",
     emails: "Emails",
     creatives: "Criativos",
-    leads: "Leads",
-    projects: "Projetos",
   },
   onboarding: {
     welcome_headline: "Bem-vindo ao WevyFlow",
@@ -70,11 +65,7 @@ export const COPY = {
   },
   empty_states: {
     launches: "Voce ainda nao tem lancamentos. Crie o primeiro agora.",
-    pages: "Nenhuma pagina criada. Gere uma com IA em segundos.",
     emails:
       "Nenhuma sequencia criada. Adicione emails ao seu kit de lancamento.",
-    leads:
-      "Nenhum lead ainda. Publique sua pagina de captura para comecar a capturar.",
-    projects: "Nenhum projeto ainda. Gere uma landing page e salve aqui.",
   },
 } as const;

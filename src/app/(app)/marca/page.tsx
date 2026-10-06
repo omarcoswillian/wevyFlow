@@ -12,12 +12,10 @@ import { useAppContext } from "../_context";
  * gerador e o schema no Supabase (launch_assets, kv_candidates) permanecem
  * no repositório, só sem nenhum ponto de entrada na UI. */
 function MarcaContent() {
-  const { handleGenerate, isLoading, navigate, setCommandPaletteOpen } = useAppContext();
+  const { navigate, setCommandPaletteOpen } = useAppContext();
 
   return (
     <HomeView
-      onGenerate={handleGenerate}
-      isLoading={isLoading}
       onNavigate={navigate}
       onOpenSearch={() => setCommandPaletteOpen(true)}
       activeNav="marca"

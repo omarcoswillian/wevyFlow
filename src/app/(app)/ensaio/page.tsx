@@ -6,12 +6,10 @@ import { EnsaioView } from "../../components/EnsaioView";
 import { useAppContext } from "../_context";
 
 function EnsaioPage() {
-  const { handleGenerate, isLoading, navigate, setCommandPaletteOpen } = useAppContext();
+  const { navigate, setCommandPaletteOpen } = useAppContext();
 
   return (
     <HomeView
-      onGenerate={handleGenerate}
-      isLoading={isLoading}
       onNavigate={navigate}
       onOpenSearch={() => setCommandPaletteOpen(true)}
       activeNav="ensaio"
